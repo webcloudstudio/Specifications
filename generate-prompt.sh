@@ -1,20 +1,28 @@
 #!/bin/bash
-# Generate a complete build prompt from STACK.yaml and all referenced files.
+# Generate a complete build prompt from a project's STACK.yaml and all referenced files.
 #
 # Reads STACK.yaml, collects all technology files and spec files,
 # and concatenates them into a single prompt suitable for an AI agent.
 #
 # Usage:
-#   bash PROJECT/generate-prompt.sh                  # Print to stdout
-#   bash PROJECT/generate-prompt.sh > build-prompt.md  # Save to file
+#   bash generate-prompt.sh <project-name>                  # Print to stdout
+#   bash generate-prompt.sh <project-name> > build-prompt.md  # Save to file
+#
+# Example:
+#   bash generate-prompt.sh GAME
 
 set -euo pipefail
 
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the repository root (where this script lives)
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Get project name from argument
+PROJECT_NAME="${1:?Usage: bash generate-prompt.sh <project-name>}"
+PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 STACK_FILE="$PROJECT_DIR/STACK.yaml"
 
 if [ ! -f "$STACK_FILE" ]; then
-    echo "ERROR: STACK.yaml not found in $PROJECT_DIR" >&2
+    echo "ERROR: STACK.yaml not found at $STACK_FILE" >&2
     exit 1
 fi
 
@@ -78,26 +86,26 @@ emit_file() {
     fi
 }
 
-emit_file "$PROJECT_DIR/stack/common.md" "Common Practices (stack/common.md)"
+emit_file "$REPO_DIR/stack/common.md" "Common Practices (stack/common.md)"
 
 # Language
-if [ -n "$LANGUAGE" ] && [ -f "$PROJECT_DIR/stack/${LANGUAGE}.md" ]; then
-    emit_file "$PROJECT_DIR/stack/${LANGUAGE}.md" "Language: ${LANGUAGE} (stack/${LANGUAGE}.md)"
+if [ -n "$LANGUAGE" ] && [ -f "$REPO_DIR/stack/${LANGUAGE}.md" ]; then
+    emit_file "$REPO_DIR/stack/${LANGUAGE}.md" "Language: ${LANGUAGE} (stack/${LANGUAGE}.md)"
 fi
 
 # Framework
-if [ -n "$FRAMEWORK" ] && [ -f "$PROJECT_DIR/stack/${FRAMEWORK}.md" ]; then
-    emit_file "$PROJECT_DIR/stack/${FRAMEWORK}.md" "Framework: ${FRAMEWORK} (stack/${FRAMEWORK}.md)"
+if [ -n "$FRAMEWORK" ] && [ -f "$REPO_DIR/stack/${FRAMEWORK}.md" ]; then
+    emit_file "$REPO_DIR/stack/${FRAMEWORK}.md" "Framework: ${FRAMEWORK} (stack/${FRAMEWORK}.md)"
 fi
 
 # Database
-if [ -n "$DATABASE" ] && [ -f "$PROJECT_DIR/stack/${DATABASE}.md" ]; then
-    emit_file "$PROJECT_DIR/stack/${DATABASE}.md" "Database: ${DATABASE} (stack/${DATABASE}.md)"
+if [ -n "$DATABASE" ] && [ -f "$REPO_DIR/stack/${DATABASE}.md" ]; then
+    emit_file "$REPO_DIR/stack/${DATABASE}.md" "Database: ${DATABASE} (stack/${DATABASE}.md)"
 fi
 
 # Frontend
-if [ -n "$FRONTEND" ] && [ -f "$PROJECT_DIR/stack/${FRONTEND}.md" ]; then
-    emit_file "$PROJECT_DIR/stack/${FRONTEND}.md" "Frontend: ${FRONTEND} (stack/${FRONTEND}.md)"
+if [ -n "$FRONTEND" ] && [ -f "$REPO_DIR/stack/${FRONTEND}.md" ]; then
+    emit_file "$REPO_DIR/stack/${FRONTEND}.md" "Frontend: ${FRONTEND} (stack/${FRONTEND}.md)"
 fi
 
 # --- STACK.yaml itself ---

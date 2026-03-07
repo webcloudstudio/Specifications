@@ -1,62 +1,50 @@
-# Command Center — Complete Project Specification System
+# GAME - Generic AI Management Environment
 
-This  **two-tier specification system** specification will rebuild AiManagmentstudio from scratch
+## Complete System Specification
 
-Specification Files are prefixed with a numeric - the remaining files specify implemntation.
+This **two-tier specification system** is a repository for managing multiple projects from unified specifications.
+
+* **Shared**: Reusable technology files (language, framework, database, frontend patterns)
+* **Project-specific**: Each project in its own directory with STACK.yaml and numbered spec files
 
 ## Overview
 
-The spec system separates **what to build** (project-specific) from **how to build it** 
+The spec system separates **what to build** (project-specific) from **how to build it** (technology patterns):
 
 ```
-STACK.yaml  ← Declares your stack selections
-    ↓
-stack/          ← Technology files (reusable, don't change per project)
-├── common.md    (always included)
-├── python.md    (if language: python)
-├── flask.md     (if framework: flask)
-├── django.md    (if framework: django)
-├── sqlite.md    (if database: sqlite)
-├── postgres.md  (if database: postgres)
-└── bootstrap5.md (if frontend: bootstrap5)
-    ↓
-01-OVERVIEW.md ... 11-STARTUP.md  ← Spec files (project-specific)
-    ↓
-generate-prompt.sh  ← Creates a complete build prompt
+GAME_Spec/                           ← Repository root
+├── stack/                           ← Technology files (shared, reusable)
+│   ├── common.md
+│   ├── python.md
+│   ├── flask.md
+│   ├── django.md
+│   ├── sqlite.md
+│   ├── postgres.md
+│   └── bootstrap5.md
+├── validate.sh                      ← Generic validation tool
+├── generate-prompt.sh               ← Generic prompt generator
+├── README.md
+└── GAME/                            ← First project
+    ├── STACK.yaml                   ← Declares your stack selections
+    ├── 01-OVERVIEW.md
+    ├── 02-DATABASE.md
+    ├── ... through ...
+    └── 11-STARTUP.md                ← Spec files (project-specific)
+```
+
+Additional projects would follow the same pattern:
+```
+├── OTHER_PROJECT/
+│   ├── STACK.yaml
+│   ├── 01-*.md
+│   └── ... more spec files ...
 ```
 
 ## Key Files
 
-### STACK.yaml — The Manifest
+### Repository Root
 
-Declares technology selections and project configuration:
-
-```yaml
-language: python       # → stack/python.md
-framework: flask       # → stack/flask.md
-database: sqlite       # → stack/sqlite.md
-frontend: bootstrap5   # → stack/bootstrap5.md
-
-project:
-  name: commandcenter
-  port: 5001
-  output_dir: ..
-
-directories:
-  data: data
-  logs: data/logs
-  tests: tests
-
-env:
-  required:
-    - PROJECTS_DIR
-  optional:
-    - SECRET_KEY
-```
-
-**Key insight**: The `language`, `framework`, `database`, and `frontend` values map directly to **filenames in stack/**. This is the mapping system — no lookup table needed.
-
-### stack/ — Technology Reference Files
+**stack/** — Technology Reference Files
 
 Reusable best practices that **never change between projects**. Each one is prescriptive, with concrete code examples.
 
@@ -76,34 +64,70 @@ Each technology file follows a consistent structure:
 - **Why**: Brief rationale
 - **Summary Checklist**: Items to verify
 
-### Numbered Spec Files (01-11) — Project Specification
+### Project Directory (e.g., GAME/)
+
+**STACK.yaml** — The Manifest
+
+Declares technology selections and project configuration:
+
+```yaml
+language: python       # → ../stack/python.md
+framework: flask       # → ../stack/flask.md
+database: sqlite       # → ../stack/sqlite.md
+frontend: bootstrap5   # → ../stack/bootstrap5.md
+
+project:
+  name: commandcenter
+  port: 5001
+  output_dir: ../..
+
+directories:
+  data: data
+  logs: data/logs
+  tests: tests
+
+env:
+  required:
+    - PROJECTS_DIR
+  optional:
+    - SECRET_KEY
+```
+
+**Key insight**: The `language`, `framework`, `database`, and `frontend` values map directly to **filenames in ../stack/**. This is the mapping system — no lookup table needed.
+
+**Numbered Spec Files (01-11)** — Project Specification
 
 Project-specific descriptions of **what to build**. These reference technology files for implementation details.
 
 | # | File | Covers |
 |---|------|--------|
-| 01 | [OVERVIEW](01-OVERVIEW.md) | Purpose, tech stack, dependencies, directory layout, navigation |
-| 02 | [DATABASE](02-DATABASE.md) | SQLite schema, tables, extra JSON column, migrations, data access |
-| 03 | [SCANNER](03-SCANNER.md) | Project discovery, tech stack detection, git operations, metadata parsing |
-| 04 | [OPERATIONS](04-OPERATIONS.md) | ops.py server/one-shot execution, spawn.py generic process service |
-| 05 | [ROUTES-API](05-ROUTES-API.md) | All Flask routes, HTMX API endpoints, request/response patterns |
-| 06 | [UI-TEMPLATES](06-UI-TEMPLATES.md) | Template hierarchy, page layouts, component structure |
-| 07 | [STYLING](07-STYLING.md) | CSS custom properties, component classes, design system |
-| 08 | [PUBLISHER](08-PUBLISHER.md) | GitHub Pages pipeline, card rendering, Astro generation |
-| 09 | [PROCESSES](09-PROCESSES.md) | Process monitor, bin/ scripts, ETL, scheduling |
-| 10 | [CONVENTIONS](10-CONVENTIONS.md) | CLAUDE.md standard, project types, workflow states, metadata files |
-| 11 | [STARTUP](11-STARTUP.md) | App factory, startup sequence, configuration, debug mode |
+| 01 | [OVERVIEW](GAME/01-OVERVIEW.md) | Purpose, tech stack, dependencies, directory layout, navigation |
+| 02 | [DATABASE](GAME/02-DATABASE.md) | SQLite schema, tables, extra JSON column, migrations, data access |
+| 03 | [SCANNER](GAME/03-SCANNER.md) | Project discovery, tech stack detection, git operations, metadata parsing |
+| 04 | [OPERATIONS](GAME/04-OPERATIONS.md) | ops.py server/one-shot execution, spawn.py generic process service |
+| 05 | [ROUTES-API](GAME/05-ROUTES-API.md) | All Flask routes, HTMX API endpoints, request/response patterns |
+| 06 | [UI-TEMPLATES](GAME/06-UI-TEMPLATES.md) | Template hierarchy, page layouts, component structure |
+| 07 | [STYLING](GAME/07-STYLING.md) | CSS custom properties, component classes, design system |
+| 08 | [PUBLISHER](GAME/08-PUBLISHER.md) | GitHub Pages pipeline, card rendering, Astro generation |
+| 09 | [PROCESSES](GAME/09-PROCESSES.md) | Process monitor, bin/ scripts, ETL, scheduling |
+| 10 | [CONVENTIONS](GAME/10-CONVENTIONS.md) | CLAUDE.md standard, project types, workflow states, metadata files |
+| 11 | [STARTUP](GAME/11-STARTUP.md) | App factory, startup sequence, configuration, debug mode |
 
-These files will differ between projects. They describe **this specific project's** features and behavior.
+These files differ between projects. They describe **each project's** unique features and behavior.
 
 ## Tooling
 
 ### validate.sh — Verify Completeness
 
-Checks that all files referenced in STACK.yaml actually exist.
+Checks that all files referenced in a project's STACK.yaml actually exist.
 
 ```bash
-bash PROJECT/validate.sh
+bash validate.sh <project-name>
+```
+
+Example:
+```bash
+bash validate.sh GAME
 ```
 
 Output:
@@ -114,6 +138,10 @@ Output:
 Example run:
 ```
 === PROJECT Specification Validator ===
+Repository: /c/Users/barlo/projects/GAME_Spec
+Project: GAME
+Directory: /c/Users/barlo/projects/GAME_Spec/GAME
+
 Stack: language=python framework=flask database=sqlite frontend=bootstrap5
 
 --- Technology Files (stack/) ---
@@ -144,10 +172,15 @@ Concatenates all technology files and spec files into a single complete prompt f
 
 ```bash
 # Print to stdout
-bash PROJECT/generate-prompt.sh
+bash generate-prompt.sh <project-name>
 
 # Save to file
-bash PROJECT/generate-prompt.sh > build-prompt.md
+bash generate-prompt.sh <project-name> > build-prompt.md
+```
+
+Example:
+```bash
+bash generate-prompt.sh GAME > build-prompt.md
 ```
 
 Output structure:
@@ -168,30 +201,39 @@ Total: ~2972 lines — complete, self-contained build specification.
 
 ### Building a New Project
 
-1. Create `PROJECT/` directory with:
-   - Copy of `STACK.yaml` (edit to declare your stack)
-   - Copy of `stack/` directory (shared between projects)
-   - Your numbered spec files (`01-*.md` through `NN-*.md`)
-   - `validate.sh` and `generate-prompt.sh` scripts
+1. Create a new directory at the repo root:
+   ```bash
+   mkdir GAME_Spec/NEW_PROJECT
+   ```
 
-2. Edit `STACK.yaml` with your selections:
+2. Create `NEW_PROJECT/STACK.yaml` with your stack selections:
    ```yaml
    language: python
    framework: flask      # or django
    database: sqlite      # or postgres
    frontend: bootstrap5
+
+   project:
+     name: myproject
+     port: 5000
+     output_dir: ../..
+
+   specs:
+     - 01-OVERVIEW.md
+     - 02-DATABASE.md
+     # ... etc
    ```
 
-3. Write numbered spec files describing your project features
+3. Write numbered spec files describing your project features (in `NEW_PROJECT/`)
 
 4. Validate:
    ```bash
-   bash PROJECT/validate.sh
+   bash validate.sh NEW_PROJECT
    ```
 
 5. Generate the build prompt:
    ```bash
-   bash PROJECT/generate-prompt.sh > build-prompt.md
+   bash generate-prompt.sh NEW_PROJECT > build-prompt.md
    ```
 
 6. Feed `build-prompt.md` to an AI agent to build from scratch
@@ -199,18 +241,18 @@ Total: ~2972 lines — complete, self-contained build specification.
 ### Process To Reverse-Engineer an Existing Project
 
 1. Have an AI agent read the codebase
-2. Generate numbered spec files describing current behavior. Rules 
+2. Generate numbered spec files describing current behavior
 3. Create STACK.yaml with the detected stack
-4. Run `validate.sh` to check completeness
-5. Use `generate-prompt.sh` to create a rebuild prompt
+4. Run `validate.sh PROJECT` to check completeness
+5. Use `generate-prompt.sh PROJECT` to create a rebuild prompt
 
 ### Switching Stacks
 
 To rebuild the same project in a different framework:
 
-1. Change `framework: flask` to `framework: django` in STACK.yaml
+1. Change `framework: flask` to `framework: django` in `PROJECT/STACK.yaml`
 2. Update spec files where framework-specific details appear
-3. Run `validate.sh` and `generate-prompt.sh`
+3. Run `validate.sh PROJECT` and `generate-prompt.sh PROJECT`
 4. Technology files handle the implementation patterns automatically
 
 ## Design Principles
@@ -218,9 +260,9 @@ To rebuild the same project in a different framework:
 ### 1. Filename = Convention
 
 Technology selections in STACK.yaml directly map to filenames:
-- `language: python` → `stack/python.md`
-- `framework: flask` → `stack/flask.md`
-- `database: sqlite` → `stack/sqlite.md`
+- `language: python` → `../stack/python.md`
+- `framework: flask` → `../stack/flask.md`
+- `database: sqlite` → `../stack/sqlite.md`
 
 No lookup tables. The naming IS the configuration.
 
@@ -242,11 +284,11 @@ Technology files are **prescriptive** — they tell you exactly how to do things
 
 ### 4. Project-Specific Specs
 
-Numbered spec files describe **this project's** unique features. They reference technology files for implementation details, not duplicating them.
+Numbered spec files describe **each project's** unique features. They reference technology files for implementation details, not duplicating them.
 
 ### 5. Tooling is Generic
 
-`validate.sh` and `generate-prompt.sh` don't know about Command Center specifically. They work with any STACK.yaml and any set of spec files. You can reuse them for all your projects.
+`validate.sh` and `generate-prompt.sh` don't know about any specific project. They work with any project directory and any set of spec files. You can reuse them for all your projects.
 
 ## Adding New Technologies
 
@@ -260,7 +302,7 @@ To support a new language/framework/database/frontend:
 Example: adding Django support
 - Add `stack/django.md` ✓ (already exists)
 - Change STACK.yaml: `framework: django`
-- Run `validate.sh` and `generate-prompt.sh`
+- Run `validate.sh PROJECT` and `generate-prompt.sh PROJECT`
 
 ## SPEC_STANDARD.md
 
@@ -273,7 +315,9 @@ This document covers:
 - Tooling details
 - Workflows for different use cases
 
-## Current Stack (Command Center)
+## Current Projects
+
+### GAME (Command Center)
 
 | Layer | Selection | File |
 |-------|-----------|------|
@@ -282,11 +326,17 @@ This document covers:
 | Framework | Flask | `stack/flask.md` |
 | Database | SQLite | `stack/sqlite.md` |
 | Frontend | Bootstrap 5 | `stack/bootstrap5.md` |
-| Port | 5001 | `STACK.yaml` |
+| Port | 5001 | `GAME/STACK.yaml` |
 
-## Build Order
+To rebuild this project:
+```bash
+bash validate.sh GAME
+bash generate-prompt.sh GAME > build-prompt.md
+```
 
-To rebuild from this specification:
+## Build Order for GAME
+
+To rebuild the Command Center from this specification:
 
 1. **Database** (02) — Create schema and helpers
 2. **Models** (10) — Project type registry
@@ -305,10 +355,10 @@ To rebuild from this specification:
 
 ```bash
 # Validate all referenced files exist
-bash PROJECT/validate.sh
+bash validate.sh GAME
 
 # Generate a complete build prompt
-bash PROJECT/generate-prompt.sh > build-prompt.md
+bash generate-prompt.sh GAME > build-prompt.md
 
 # Feed the prompt to an AI agent
 # (or use it as reference when rebuilding manually)

@@ -29,7 +29,7 @@ project:
   port: 5001
 
   # Where generated code should be written
-  output_dir: ..
+  output_dir: ../..
 
   # Python virtual environment
   venv: true

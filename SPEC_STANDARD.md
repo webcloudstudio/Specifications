@@ -95,10 +95,11 @@ The `language`, `framework`, `database`, and `frontend` values must exactly matc
 
 ## File Organization
 
+The spec system lives in a repository root that hosts multiple projects:
+
 ```
-PROJECT/
-├── STACK.yaml              # Manifest: declares stack + config
-├── stack/                  # Technology files (reusable, immutable)
+GAME_Spec/                  ← Repository root
+├── stack/                  # Technology files (shared, reusable)
 │   ├── common.md           # Always included
 │   ├── python.md           # language: python
 │   ├── flask.md            # framework: flask
@@ -106,15 +107,28 @@ PROJECT/
 │   ├── sqlite.md           # database: sqlite
 │   ├── postgres.md         # database: postgres
 │   └── bootstrap5.md       # frontend: bootstrap5
-├── 01-OVERVIEW.md          # Spec files (project-specific)
-├── 02-DATABASE.md
-├── ...
-├── 11-STARTUP.md
-├── validate.sh             # Validates all files exist
-├── generate-prompt.sh      # Generates the build prompt
+├── validate.sh             # Generic validation tool (takes project name)
+├── generate-prompt.sh      # Generic prompt generator (takes project name)
+├── README.md               # Repository overview
 ├── SPEC_STANDARD.md        # This document
-└── README.md               # Project-specific overview
+│
+└── GAME/                   ← First project (PROJECT_NAME)
+    ├── STACK.yaml          # Manifest: declares stack + config
+    ├── 01-OVERVIEW.md      # Spec files (project-specific)
+    ├── 02-DATABASE.md
+    ├── ...
+    └── 11-STARTUP.md
+
+└── OTHER_PROJECT/         ← Another project (same structure)
+    ├── STACK.yaml
+    ├── 01-*.md
+    └── ... more specs ...
 ```
+
+Each project directory (`GAME/`, `OTHER_PROJECT/`, etc.) contains:
+- One `STACK.yaml` manifest
+- Numbered spec files (`01-*.md` through `11-*.md` or more)
+- No local copies of scripts or stack files (these are shared at the repo root)
 
 ---
 
@@ -144,12 +158,19 @@ Rules:
 
 ## Tooling
 
+Scripts live at the repository root and take a project name as an argument.
+
 ### validate.sh
 
-Checks that all files referenced in STACK.yaml actually exist.
+Checks that all files referenced in a project's STACK.yaml actually exist.
 
 ```bash
-bash PROJECT/validate.sh
+bash validate.sh <project-name>
+```
+
+Example:
+```bash
+bash validate.sh GAME
 ```
 
 Output:
@@ -160,14 +181,19 @@ Output:
 
 ### generate-prompt.sh
 
-Concatenates all technology files and spec files into a single build prompt.
+Concatenates technology files and a project's spec files into a single build prompt.
 
 ```bash
 # Print to stdout
-bash PROJECT/generate-prompt.sh
+bash generate-prompt.sh <project-name>
 
 # Save to file
-bash PROJECT/generate-prompt.sh > build-prompt.md
+bash generate-prompt.sh <project-name> > build-prompt.md
+```
+
+Example:
+```bash
+bash generate-prompt.sh GAME > build-prompt.md
 ```
 
 The generated prompt includes:
@@ -184,28 +210,30 @@ Feed this prompt to an AI agent to build the project from scratch.
 
 ### Building a New Project
 
-1. Create `PROJECT/` directory with `STACK.yaml`
-2. Copy `stack/` directory (or symlink from a shared location)
-3. Set technology selections in STACK.yaml
-4. Write numbered spec files for your features
-5. Run `validate.sh` to check completeness
-6. Run `generate-prompt.sh > build-prompt.md` to create the prompt
+1. Create a new project directory at the repo root: `mkdir PROJECT_NAME`
+2. Create `PROJECT_NAME/STACK.yaml` with your technology selections
+3. Set `output_dir: ../..` to output code to the repo parent directory
+4. Write numbered spec files (`01-*.md`, `02-*.md`, etc.) describing your features
+5. Run `bash validate.sh PROJECT_NAME` to check completeness
+6. Run `bash generate-prompt.sh PROJECT_NAME > build-prompt.md` to create the prompt
 7. Feed `build-prompt.md` to an AI agent
 
 ### Reverse-Engineering an Existing Project
 
 1. Have an AI agent read the codebase
 2. Generate numbered spec files describing current behavior
-3. Create STACK.yaml with the detected stack
-4. Validate, then use `generate-prompt.sh` to create a rebuild prompt
-5. Build into the same or different stack by swapping technology files
+3. Create `PROJECT_NAME/STACK.yaml` with the detected stack
+4. Run `bash validate.sh PROJECT_NAME` to verify completeness
+5. Use `bash generate-prompt.sh PROJECT_NAME > build-prompt.md` to create a rebuild prompt
+6. Build into the same or different stack by swapping technology files
 
 ### Switching Stacks
 
 To rebuild the same project in a different framework:
-1. Change `framework: flask` to `framework: django` in STACK.yaml
+1. Change `framework: flask` to `framework: django` in `PROJECT_NAME/STACK.yaml`
 2. Update spec files where framework-specific details appear (routes, templates)
-3. Technology files handle the implementation patterns automatically
+3. Run `bash validate.sh PROJECT_NAME` and `bash generate-prompt.sh PROJECT_NAME`
+4. Technology files handle the implementation patterns automatically
 
 ---
 

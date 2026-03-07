@@ -1,23 +1,31 @@
 #!/bin/bash
-# Validate that all specification files referenced in STACK.yaml exist
-# and that the PROJECT/ directory is complete and consistent.
+# Validate that all specification files referenced in a project's STACK.yaml exist
+# and that the project directory is complete and consistent.
 #
-# Usage: bash PROJECT/validate.sh
+# Usage: bash validate.sh <project-name>
+#   e.g. bash validate.sh GAME
 
 set -euo pipefail
 
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the repository root (where this script lives)
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Get project name from argument
+PROJECT_NAME="${1:?Usage: bash validate.sh <project-name>}"
+PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 STACK_FILE="$PROJECT_DIR/STACK.yaml"
 ERRORS=0
 WARNINGS=0
 
 echo "=== PROJECT Specification Validator ==="
+echo "Repository: $REPO_DIR"
+echo "Project: $PROJECT_NAME"
 echo "Directory: $PROJECT_DIR"
 echo ""
 
 # --- Check STACK.yaml exists ---
 if [ ! -f "$STACK_FILE" ]; then
-    echo "FAIL: STACK.yaml not found"
+    echo "FAIL: STACK.yaml not found at $STACK_FILE"
     exit 1
 fi
 echo "OK: STACK.yaml found"
@@ -36,11 +44,11 @@ echo ""
 echo "Stack: language=$LANGUAGE framework=$FRAMEWORK database=$DATABASE frontend=$FRONTEND"
 echo ""
 
-# --- Validate stack/ technology files ---
+# --- Validate stack/ technology files (at repo root) ---
 echo "--- Technology Files (stack/) ---"
 
 # common.md is always required
-if [ -f "$PROJECT_DIR/stack/common.md" ]; then
+if [ -f "$REPO_DIR/stack/common.md" ]; then
     echo "  OK: stack/common.md"
 else
     echo "  FAIL: stack/common.md (always required)"
@@ -52,7 +60,7 @@ for TECH in "$LANGUAGE" "$FRAMEWORK" "$DATABASE" "$FRONTEND"; do
     if [ -z "$TECH" ]; then
         continue
     fi
-    TECH_FILE="$PROJECT_DIR/stack/${TECH}.md"
+    TECH_FILE="$REPO_DIR/stack/${TECH}.md"
     if [ -f "$TECH_FILE" ]; then
         echo "  OK: stack/${TECH}.md"
     else
@@ -61,7 +69,7 @@ for TECH in "$LANGUAGE" "$FRAMEWORK" "$DATABASE" "$FRONTEND"; do
     fi
 done
 
-# --- Validate numbered spec files ---
+# --- Validate numbered spec files (in project directory) ---
 echo ""
 echo "--- Specification Files ---"
 
@@ -87,7 +95,7 @@ echo ""
 echo "--- Orphan Check ---"
 
 DECLARED_TECHS="common $LANGUAGE $FRAMEWORK $DATABASE $FRONTEND"
-for STACK_MD in "$PROJECT_DIR"/stack/*.md; do
+for STACK_MD in "$REPO_DIR"/stack/*.md; do
     if [ ! -f "$STACK_MD" ]; then
         continue
     fi
@@ -104,12 +112,12 @@ for STACK_MD in "$PROJECT_DIR"/stack/*.md; do
     fi
 done
 
-# --- Check supporting files ---
+# --- Check supporting files (at repo root) ---
 echo ""
-echo "--- Supporting Files ---"
+echo "--- Supporting Files (repo root) ---"
 
 for SUPPORT_FILE in README.md SPEC_STANDARD.md; do
-    if [ -f "$PROJECT_DIR/$SUPPORT_FILE" ]; then
+    if [ -f "$REPO_DIR/$SUPPORT_FILE" ]; then
         echo "  OK: $SUPPORT_FILE"
     else
         echo "  WARN: $SUPPORT_FILE missing"
