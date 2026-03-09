@@ -1,12 +1,25 @@
-# Command Center — Project Specification
+# GAME — Generic Agent Management Environment
+## Project Specification v2  ·  Updated 2026-03-09
+
+> Visual architecture diagrams: `GAME/project_specifications/spec_v2/*.excalidraw`
+> v1 spec preserved in `Version 1/` in this directory.
 
 ## Purpose
 
-Command Center is a personal workflow management tool for managing ~15 projects of mixed types (software and books) from a single web dashboard. It auto-discovers projects from the filesystem, provides one-click server start/stop and git operations, monitors background processes, and publishes a GitHub Pages portfolio homepage.
+GAME is a personal AI-assisted workflow management platform for managing ~15 projects (software, books, tools) from a single web dashboard. It auto-discovers projects from the filesystem, provides one-click operations via bash scripts with standard `CommandCenter Operation` headers, monitors background processes, enforces stack governance, and publishes a GitHub Pages portfolio.
+
+GAME is also an **Agent Assist platform**: it manages its own specification, categorizes projects, generates per-project Claude configurations via `config_engine/`, and guides feature development through a structured prompt-driven lifecycle (Idea → Checklist → Proposal → Iteration → Agent Developed → Testing → Done).
 
 ## Scope
 
-This specification covers the **Minimal Viable Product** — all features present in the running web server **except** the "Your Claude" tab (environment/config management). The "Your Claude" section and its supporting `config_engine` module are out of scope.
+This specification covers the full system:
+- Project discovery and metadata (filesystem-driven via CLAUDE.md, Links.md, git_homepage.md, bin/ headers)
+- Operations engine (bin/ auto-registration → UI buttons → spawn.py → log capture)
+- Process management and observability (heartbeats, alerts, process logs)
+- GitHub Pages publishing pipeline (publisher.py + Astro + My_Github repo)
+- Config engine (YAML profiles → staged Claude configs → ~/.claude/)
+- Feature workflow (Idea → Done with Agent Assist at each stage)
+- External skill integration (Excalidraw, daily summary, etc.)
 
 ## Tech Stack
 

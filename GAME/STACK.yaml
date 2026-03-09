@@ -21,18 +21,30 @@ frontend: bootstrap5
 # --- Project Configuration ---
 
 project:
-  name: commandcenter
-  title: Command Center
-  description: Personal workflow tool for managing projects across multiple types
+  name: GAME
+  title: "GAME — Generic Agent Management Environment"
+  description: "AI-assisted workflow management platform. Governs a portfolio of projects via filesystem discovery, one-click operations, observability, and GitHub Pages publishing."
 
   # Port for the dev server
   port: 5001
 
-  # Where generated code should be written
-  output_dir: ../..
-
   # Python virtual environment
   venv: true
+
+# --- Custom Stack Rules ---
+# These rules are enforced by scanner.py and config_engine/ on every project.
+# Example rules per the StackSpec diagram (git, bash scripts, python logging, etc.)
+
+stack_rules:
+  require_git: true
+  require_bin_scripts:
+    - start.sh                 # Must have start script with CommandCenter header
+    - stop.sh                  # Must have stop script
+  require_claude_md: true      # CLAUDE.md must exist with standard sections
+  require_git_homepage_md: true  # git_homepage.md must exist for portfolio cards
+  logging:
+    style: python              # Use Python logging module, not print()
+    output: data/logs/
 
 # --- Standard Directories ---
 # These are created by the project scaffolding.
