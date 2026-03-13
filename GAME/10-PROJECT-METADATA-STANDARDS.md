@@ -1,168 +1,117 @@
-# Feature: Project Metadata Standards
+# Project Metadata Standards
 
-**spec_v3 · 2026-03-10**
+**spec_v5 · 2026-03-13**
 
 ---
 
 ## Purpose
 
-Project Metadata Standards define the plain text file contracts that projects use to
-describe themselves to GAME and to the AI development environment. These files are the
-primary interface between a project and the platform — no central database registration
-required.
+Defines the single file a project uses to describe itself to the platform and to the AI development environment. All project identity, portfolio card, service links, and discovery metadata live in one place.
 
 ---
 
-## User Interactions
+## The Consolidated Contract: METADATA.md
 
-- Project maintainers edit plain text files in their project directories
-- GAME reads these files on each scan with no additional steps
-- The UI reflects the content of these files (endpoints, links, card metadata)
-- Missing or malformed files are reported as compliance warnings in CONTROL-PANEL
+**Location:** Project root (`METADATA.md`)
+**Replaces:** `git_homepage.md`, `Links.md`, `STACK.yaml` (those files are deprecated)
+
+```
+name: MyProject
+title: My Project — Short Tagline
+description: One to two sentence description of what this project does.
+port: 8000
+status: ACTIVE
+version: 1.0
+updated: 2026-03-13
+stack: Python/Flask/SQLite
+image: images/myproject.webp
+health: /health
+show_on_homepage: true
+tags: web, tool, api
+links:
+    Production  | https://myproject.example.com | Live site
+    Docs        | https://docs.example.com       | API documentation
+    Staging     | https://staging.example.com    | Pre-production
+```
 
 ---
 
-## UI Screens
+## Field Reference
 
-No dedicated UI screen — this is a contract specification.
-
-Metadata is surfaced through CONTROL-PANEL (links, bookmarks, type-specific info)
-and GITHUB-PUBLISHER (portfolio cards).
+| Field | Required At | Purpose |
+|-------|------------|---------|
+| `name` | All statuses | Machine name (no spaces) |
+| `status` | All statuses | Lifecycle stage: IDEA, PROTOTYPE, ACTIVE, PRODUCTION, ARCHIVED |
+| `title` | PROTOTYPE+ | Display name with short tagline |
+| `description` | PROTOTYPE+ | One to two sentences for portfolio card and dashboard |
+| `port` | ACTIVE+ | Primary port the service listens on |
+| `stack` | ACTIVE+ | Short technology summary (e.g. `Python/Flask/SQLite`) |
+| `version` | ACTIVE+ | Semantic version |
+| `updated` | ACTIVE+ | ISO date of last meaningful change |
+| `tags` | ACTIVE+ | Comma-separated tags for dashboard filtering and portfolio badges |
+| `show_on_homepage` | ACTIVE+ | `true` = include in published portfolio |
+| `image` | Optional | Relative path to portfolio card image |
+| `health` | PRODUCTION | Health check endpoint path (e.g. `/health`) |
+| `links` | Optional | Pipe-separated table: `Name | URL | Notes` |
 
 ---
 
-## Inputs & Outputs
+## Status Values
 
-- **Inputs:**
-  - File contents from project directories
-- **Outputs:**
-  - Project metadata consumed by CONTROL-PANEL, GITHUB-PUBLISHER, and GIT-INTEGRATION
+| Status | Meaning |
+|--------|---------|
+| `IDEA` | Concept only — no code expected |
+| `PROTOTYPE` | Proof of concept — not stable |
+| `ACTIVE` | Actively developed and in use |
+| `PRODUCTION` | Stable, deployed, monitored |
+| `ARCHIVED` | No longer maintained |
+
+The compliance verifier (`verify.py`) uses status to determine which rules to enforce. IDEA projects are not penalized for missing bin/ scripts or CLAUDE.md. PRODUCTION projects are checked for health endpoints, git compliance, and clean environment handling.
+
+---
+
+## CLAUDE.md — AI Context File
+
+**Location:** Project root (`CLAUDE.md`)
+**Required at:** PROTOTYPE and above
+
+Provides working context to the AI assistant. Standard sections parsed by the platform:
+
+```markdown
+# Project Title
+One paragraph description.
+
+## Dev Commands
+- Start: `./bin/start.sh`
+- Test: `./bin/test.sh`
+
+## Service Endpoints
+- Local: http://localhost:8000
+
+## Bookmarks
+### Useful Links
+- [Production](https://...)
+```
+
+Sections `## Dev Commands`, `## Service Endpoints`, and `## Bookmarks` are required at ACTIVE and above.
+
+---
+
+## Deprecated Files
+
+These files were used in earlier versions of the platform. Their fields have been merged into `METADATA.md`. Do not create them for new projects. Migrate existing projects and delete the originals.
+
+| Deprecated File | Replaced By |
+|----------------|-------------|
+| `git_homepage.md` | `title`, `description`, `tags`, `image`, `show_on_homepage` in METADATA.md |
+| `Links.md` | `links:` block in METADATA.md |
+| `STACK.yaml` | `stack:` field in METADATA.md |
 
 ---
 
 ## Interfaces With
 
-- PROJECT-DISCOVERY: reads all metadata files during scan
-- CONTROL-PANEL: displays endpoints, bookmarks, and links from metadata
-- GITHUB-PUBLISHER: reads git_homepage.md and git_site_config.md for portfolio
-- CONFIGURATION-MANAGEMENT: reads CLAUDE.md structure for AI config generation
-
----
-
-## Contracts
-
-### CLAUDE.md — AI Context File
-
-**Location:** Project root (`CLAUDE.md`)
-**Purpose:** Provides context to the AI assistant about this project.
-**Authority:** Primary source for stack info, commands, endpoints, bookmarks.
-
-Standard sections (parsed by GAME):
-
-```markdown
-# [Project Title]
-[One or two paragraph description]
-
-## Dev Commands
-[Commands to start, stop, test, build — fenced code block or bullet list]
-
-## Service Endpoints
-[URLs where the service runs locally]
-- Local: http://localhost:PORT
-
-## Bookmarks
-### [Category]
-- [Link Name](URL)
-
-## Architecture
-[Free-form description of the project structure]
-```
-
-Variant section headings are normalized to standard names on read.
-Sections missing from a project's CLAUDE.md are noted as compliance gaps.
-GAME can generate a stub CLAUDE.md for projects that don't have one.
-
----
-
-### git_homepage.md — Portfolio Card File
-
-**Location:** Project root (`git_homepage.md`)
-**Purpose:** Defines the project's card on the GitHub Pages portfolio.
-**Format:** YAML frontmatter; body is unused.
-
-```yaml
----
-Title: Project Display Name
-Description: One to two sentence description of what the project does.
-Tags: tag1, tag2, tag3
-Image: images/project-name.webp
-Show on Homepage: true
----
-```
-
-| Field | Required | Notes |
-|-------|----------|-------|
-| Title | Yes | Display name on portfolio card |
-| Description | Yes | Shown under the title on the card |
-| Tags | No | Comma-separated; shown as badges on the card |
-| Image | No | Relative path to image in portfolio static directory |
-| Show on Homepage | Yes | `true` = include in published portfolio |
-
----
-
-### Links.md — Project URL Directory
-
-**Location:** Project root (`Links.md`)
-**Purpose:** A curated list of URLs related to the project (production, staging, docs, etc.)
-**Format:** Markdown table
-
-```markdown
-| Name | URL | Notes |
-|------|-----|-------|
-| Production | https://... | Live site |
-| Staging | https://... | For testing |
-| Docs | https://... | API documentation |
-```
-
-All rows are surfaced as quick links in the CONTROL-PANEL project detail view.
-
----
-
-### git_site_config.md — Portfolio Site Branding
-
-**Location:** GAME project root (`git_site_config.md`)
-**Purpose:** Controls site-wide branding for the GitHub Pages portfolio.
-**Format:** YAML frontmatter + markdown body (home page content).
-
-```yaml
----
-site_name: "Your Name"
-site_tagline: "One-line tagline"
-github_url: "https://github.com/yourname"
-theme: "dark"
----
-
-# Welcome
-
-Home page body content in markdown.
-```
-
-Full field reference: see GITHUB-PUBLISHER.
-
----
-
-## File Precedence
-
-When the same information exists in multiple places, precedence is:
-
-1. git_homepage.md frontmatter (for portfolio card fields)
-2. CLAUDE.md sections (for endpoints, bookmarks, stack info)
-3. PROJECT-DISCOVERY computed values (directory name → display title)
-
----
-
-## Out of Scope
-
-- bin/ script headers → SERVICE-SCRIPT-STANDARDS
-- Tag colors → TAG-MANAGEMENT
-- AI configuration profiles → CONFIGURATION-MANAGEMENT
+- **PROJECT-DISCOVERY**: reads METADATA.md on every scan
+- **CONTROL-PANEL**: displays title, status, tags, links from METADATA.md
+- **GITHUB-PUBLISHER**: reads `show_on_homepage`, `title`, `description`, `tags`, `image` for portfolio cards
+- **COMPLIANCE-VERIFICATION** (`verify.py`): checks field presence and value validity per status level
