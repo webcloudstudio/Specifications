@@ -6,54 +6,63 @@ Ideas and tasks collected during specification review (2026-03-13).
 
 ## High Priority
 
-- [ ] **Project Scaffolding** — Highest-leverage gap. New projects start non-compliant without it. Template library (web service, CLI tool, data pipeline) that generates METADATA.md, CLAUDE.md, bin/ scripts with headers, .env.example. Feature 3 in FEATURES.md.
+- [ ] **Project Scaffolding** — Highest-leverage gap. Template library that generates METADATA.md, AGENTS.md, CLAUDE.md (pointer), bin/common.sh, bin/start.sh, .env.example, .gitignore. One-shot project creation. Feature 3.
 
-- [ ] **Scheduling & Cron** — `# Schedule:` header in bin/ scripts. Platform runs operations at declared times. Daily/weekly/cron expressions. Missed-run catch-up. Feature 6.
+- [ ] **Update GAME code to read METADATA.md** — GAME still reads `git_homepage.md` and `Links.md`. Scanner, publisher, and dashboard need updating. Also update to read AGENTS.md instead of CLAUDE.md for bookmarks/endpoints.
 
-- [ ] **Update GAME code to read METADATA.md** — GAME still reads `git_homepage.md` and `Links.md` in places. Publisher needs to read from METADATA.md. scanner.py needs update.
+- [ ] **Implement bin/common.sh standard** — Create a reference common.sh with get_metadata(), PORT, PROJECT_NAME. Test it across existing projects. This is the foundation for all script integration.
 
-- [ ] **Environment Management tooling** — .env.example convention is defined in CLAUDE_RULES but no tooling exists to detect drift, missing vars, or committed secrets. Feature 13.
+- [ ] **Secrets file convention** — Create `$PROJECTS_DIR/.secrets` file. Update common.sh to source it. Document in CLAUDE_RULES (done). Implement in GAME and other projects.
+
+- [ ] **Update verify.py** — Add checks for: AGENTS.md presence, .env.example when .env exists, bin/common.sh, display_name derivation, version format (YYYY-MM-DD.N), git initialized for ACTIVE+.
 
 ## Medium Priority
 
-- [ ] **Job Pipelines** — Multi-step workflows (YAML-defined). Fan-out/fan-in, retry policy, pipeline status in dashboard. Inspired by Airflow DAGs but much simpler. Feature 7.
+- [ ] **Scheduling & Cron** — Platform reads `# Schedule:` from bin/ headers. Runs operations at declared times. Missed-run catch-up on startup. Feature 6.
 
-- [ ] **Event Log** — Centralized timeline of all platform events (state transitions, operations, health changes, deployments). Filterable, exportable. Feature 10.
+- [ ] **Monitoring & Health Checks** — SCREEN-MONITORING. Poll services for `port:` + `health:` from METADATA.md. UP/DOWN/UNKNOWN states. Alert on transition. Feature 8.
 
-- [ ] **Resource Limits** — `# MaxMemory:` and `# Timeout:` in bin/ headers. Enforce via ulimit/cgroups. Kill runaway processes. Feature 20.
+- [ ] **Environment Management tooling** — Detect .env/.env.example drift, warn on committed .env, compare vars across projects. Feature 13.
 
-- [ ] **Secrets Management** — Encrypted secrets store, runtime injection via env vars, rotation tracking, access audit. Feature 19.
+- [ ] **Event Log** — Centralized timeline. Parse `[$PROJECT_NAME] Event:` lines from logs. Filterable, exportable. Feature 10.
 
-- [ ] **Monitoring & Health Checks** — Service health polling with liveness/readiness checks. Alert on failure. Uptime tracking. Feature 8.
+- [ ] **Compliance Verification expansion** — verify.py at 70%. Add: health endpoint responding, AGENTS.md required sections, date format validation, namespace/desired_state field validation.
 
-- [ ] **Compliance Verification gaps** — verify.py exists but doesn't cover all CLAUDE_RULES yet. Add checks for: .env.example presence, health endpoint declaration, CLAUDE.md required sections. Feature 11 at 70%.
+- [ ] **Documentation generation** — Standard bin/build_documentation.sh that generates doc/index.html from METADATA.md + AGENTS.md + markdown files. Template-based. Feature 15.
 
 ## Low Priority
 
-- [ ] **Desired State Reconciliation** — Kubernetes-inspired. `desired_state:` in METADATA.md. Reconciliation loop restarts crashed services, stops idle ones. Feature 21.
+- [ ] **Job Pipelines** — Multi-step workflows (YAML-defined). Fan-out/fan-in, retry. Feature 7.
 
-- [ ] **Rolling Restarts** — Stop/start one instance at a time. Health check before proceeding. Rollback on failure. Feature 22.
+- [ ] **Resource Limits** — `# Timeout:` and `# MaxMemory:` enforcement. Feature 20.
 
-- [ ] **Namespace Isolation** — Logical environments (dev, staging, prod). Config overrides per namespace. Port range partitioning. Feature 23.
+- [ ] **Desired State Reconciliation** — `desired_state: running` triggers auto-restart. Feature 21.
 
-- [ ] **Service Discovery & Routing** — Projects find each other by name (`@project-name/api`). Platform resolves to host:port. Feature 24.
+- [ ] **Namespace Isolation** — Filter and config overrides by namespace. Feature 23.
 
-- [ ] **Workflow States UI** — Data model is designed but UI is not built. Kanban board, ticket detail, AI transaction log viewer. Feature 12.
+- [ ] **Workflow States UI** — Kanban board, ticket detail, AI transaction log viewer. Feature 12.
 
-## Decisions Needed
+- [ ] **Rolling Restarts** — Health-gated restart cycle. Feature 22.
 
-- [ ] **Stack directory** — Contains technology reference files (flask.md, sqlite.md, etc.) used by `generate-prompt.sh`. Useful for building new projects from scratch, but not part of the specification hierarchy. Keep as reference material or move to archive? Currently kept.
+## Decisions Made
 
-- [ ] **Template HTML files** — `_root_index_template.html` and `_project_index_template.html` drive the documentation viewer. The markdown-to-HTML converter is very basic (no code block rendering, no proper list nesting). Consider upgrading to a proper markdown library or accepting the limitations.
-
-- [ ] **generate-prompt.sh and validate.sh** — These tools reference the old STACK.yaml pattern. Should they be updated to work with METADATA.md `stack:` field, or kept as-is since they serve a different purpose (full AI build prompts)?
+- [x] **METADATA.md format** — Line-based key: value in a markdown file. Not YAML. Parsed with grep/cut.
+- [x] **AGENTS.md replaces CLAUDE.md** — CLAUDE.md becomes a pointer (`@AGENTS.md`). Vendor-neutral.
+- [x] **Service discovery** — Just read METADATA.md. No `@project-name` syntax. The metadata file IS the registry.
+- [x] **Version format** — `YYYY-MM-DD.N` (e.g., 2026-03-13.3). Minor increments per commit.
+- [x] **Date format** — Always `yyyymmdd` or `yyyymmdd_hhmmss` for file sorting.
+- [x] **Desired state values** — `running` (stays up) or `on-demand` (manual start/stop).
+- [x] **Namespace values** — `development`, `qa`, `production`, or custom name.
+- [x] **GAME specs by screen** — Removed duplicate standards, organized by UI screen.
+- [x] **Git integration simplified** — Just a Push button when unpushed commits exist. Async scan.
+- [x] **Stack directory** — Keep as reference for generate-prompt.sh. Not part of spec hierarchy.
 
 ## Ideas From Archive
 
-- [ ] **Three-layer methodology** (from archive/METHODOLOGY.md) — Layer 1: what the product does (features), Layer 2: contracts (binding layer), Layer 3: how it's built (tech spec). This is a good mental model. Currently implicit in FEATURES→CLAUDE_RULES→GAME. Could be made explicit in README.
+- [ ] **Three-layer methodology** (archive/METHODOLOGY.md) — Layer 1: features, Layer 2: contracts, Layer 3: tech spec. Good mental model. Currently implicit in FEATURES→CLAUDE_RULES→GAME.
 
-- [ ] **Contract-earns-capability pattern** (from archive/THE-CONTRACT.md) — "A project adds the file; the platform discovers the capability." This design principle should be preserved. Currently embedded in CLAUDE_RULES and PROJECT-DISCOVERY but worth calling out as a first principle.
+- [ ] **Contract-earns-capability** (archive/THE-CONTRACT.md) — "Add the file; platform discovers the capability." First principle worth calling out.
 
-- [ ] **Audio/image attachments on tickets** (from WORKFLOW-STATES) — Useful for capturing voice notes or screenshots during ideation. Low priority but good UX for solo practitioners.
+- [ ] **Audio/image attachments on tickets** — Voice notes and screenshots during ideation. Good UX for solo practitioners.
 
-- [ ] **Per-ticket cost attribution** (from USAGE-ANALYTICS) — Link AI session costs to specific workflow tickets. Requires integration between USAGE-ANALYTICS and WORKFLOW-STATES.
+- [ ] **Per-ticket cost attribution** — Link AI session costs to workflow tickets.

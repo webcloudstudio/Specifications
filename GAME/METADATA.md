@@ -1,7 +1,19 @@
+# GAME
+
+Project management dashboard for AI-assisted development.
+
 name: GAME
-title: GAME — Project Management Dashboard
-description: Discovers local projects via filesystem contracts, provides a control panel for operations, process monitoring, portfolio publishing, and AI workflow management.
+display_name: GAME
+title: GAME — Generic AI Management Environment
+git_repo: GAME
+short_description: Dashboard for managing local AI-assisted projects
 port: 5001
-status: active
-version: 4.0
-updated: 2026-03-13
+status: ACTIVE
+version: 2026-03-13.2
+updated: 20260313
+stack: Python/Flask/SQLite
+health: /health
+show_on_homepage: true
+tags: dashboard, tool, platform
+desired_state: on-demand
+namespace: development

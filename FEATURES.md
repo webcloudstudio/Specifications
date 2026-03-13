@@ -132,22 +132,22 @@ Per-operation memory and CPU time limits declared in bin/ headers (`# MaxMemory:
 
 ### Feature 21: Desired State Reconciliation
 **Declare what should be running; platform makes it so.**
-Each project declares its desired state in METADATA.md (`desired_state: running`). A reconciliation loop compares desired vs actual state and takes corrective action (restart crashed services, stop services that should be idle). Inspired by Kubernetes controllers.
+Each project declares `desired_state:` in METADATA.md. Values: `running` (service stays up, restart if crashed) or `on-demand` (started manually, stops when done). A reconciliation loop compares desired vs actual state and takes corrective action. Default: `on-demand`.
 **Status:** Not built | **Complete:** 0%
 
 ### Feature 22: Rolling Restarts
 **Restart services without downtime.**
-When a project has multiple instances or a restart is requested, the platform stops and starts one instance at a time. Health check must pass before proceeding to the next. Rollback if the new version fails health checks.
+When a restart is requested, the platform stops and starts the service with a health check gate. Rollback if the new version fails health checks.
 **Status:** Not built | **Complete:** 0%
 
 ### Feature 23: Namespace Isolation
 **Group projects into logical environments.**
-Namespaces (dev, staging, prod) partition projects. Each namespace can have its own config overrides, port ranges, and access rules. A project belongs to one namespace at a time but can be promoted between them.
+Values: `development` (default), `qa`, `production`, or custom name. Each namespace can have config overrides and port ranges. A project belongs to one namespace, can be promoted between them. Dashboard filterable by namespace.
 **Status:** Not built | **Complete:** 0%
 
-### Feature 24: Service Discovery & Routing
-**Projects find each other by name, not port.**
-Register service endpoints in METADATA.md. Other projects reference them by name (`@project-name/api`). Platform resolves to actual host:port. Enables loose coupling between projects.
+### Feature 24: Service Discovery
+**Projects find each other by reading METADATA.md.**
+The platform indexes all projects' `name`, `port`, and `health` fields from METADATA.md. Scripts needing to reach another service read the port from the project index or directly from `../OtherProject/METADATA.md`. No special syntax — the metadata is the registry.
 **Status:** Not built | **Complete:** 0%
 
 ---
@@ -179,6 +179,6 @@ Register service endpoints in METADATA.md. Other projects reference them by name
 | 21 | Desired State Reconciliation | Orchestration | Not built | 0% |
 | 22 | Rolling Restarts | Orchestration | Not built | 0% |
 | 23 | Namespace Isolation | Orchestration | Not built | 0% |
-| 24 | Service Discovery & Routing | Orchestration | Not built | 0% |
+| 24 | Service Discovery | Orchestration | Not built | 0% |
 
 **Built:** 10 features | **Partial:** 1 | **Not built:** 13

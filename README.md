@@ -1,54 +1,62 @@
 # Specifications
 
-Specification repository for AI-orchestrated projects. Defines platform capabilities, integration rules, and per-project specifications that an AI agent can build from.
+Project integration standards and specifications for AI-orchestrated development. Defines how projects participate in the platform, what the platform does, and how GAME implements it.
 
 ## Structure
 
 ```
 Specifications/
-  FEATURES.md              Platform capabilities (what the system does)
-  CLAUDE_RULES.md          Integration rules (how projects participate)
+  CLAUDE_RULES.md          Integration standard (baseline CLAUDE.md for every project)
+  FEATURES.md              Platform capabilities with status and completeness
+  TODO.md                  Prioritized backlog
   verify.py                Compliance scanner
   rebuild_index.sh         Generate browsable documentation
-  GAME/                    GAME project specification
-  AlexaPrototypeOne/       Alexa project specification
+  GAME/                    GAME dashboard specification (by screen)
+  AlexaPrototypeOne/       Alexa prototype specification
+  stack/                   Technology reference files (for generate-prompt.sh)
   archive/                 Superseded documents
 ```
 
-## Foundation Documents
+## How It Works
 
-**FEATURES.md** — All 24 platform features with status and completeness scores. Covers core platform, operations, observability, governance, publishing, configuration, and orchestration (Kubernetes-inspired).
+```
+CLAUDE_RULES.md    Rules every project follows (scripts, metadata, secrets, docs)
+       |
+       |           "Conform project X to CLAUDE_RULES.md" → agent builds it
+       |
+FEATURES.md        What the platform does (24 features, 10 built)
+       |
+GAME/              How the dashboard implements those features (7 screens)
+```
 
-**CLAUDE_RULES.md** — Concrete rules a project must follow to be discovered and integrated. Script headers, METADATA.md format, governance. If a project follows these rules, it works with the platform automatically.
+**CLAUDE_RULES.md** is the baseline. It defines bin/ script standards, METADATA.md format, AGENTS.md context files, secrets convention, documentation generation, and governance rules. Any AI agent reading this file can build, operate, and maintain a conforming project.
 
-## Projects
+**FEATURES.md** lists all 24 platform capabilities with status and completeness scores.
 
-**GAME/** — Generic AI Management Environment. A Flask/SQLite dashboard that discovers local projects and provides operations, monitoring, publishing, and AI workflow management. This is the primary implementation of the features described in FEATURES.md.
+**GAME/** contains one spec per UI screen: Dashboard, Processes, Publisher, Configuration, Usage, Monitoring, Workflow.
 
-**AlexaPrototypeOne/** — Alexa voice skill prototype. Separate specification, not currently editable.
-
-## Usage
+## Quick Start
 
 ```bash
-# Generate browsable documentation
-bash rebuild_index.sh
-# Open index.html in browser
+# Browse documentation
+bash rebuild_index.sh && open index.html
 
 # Validate project compliance
-python3 verify.py --projects /path/to/projects
+python3 verify.py --projects ~/projects
 
-# Generate a build prompt for AI agent
+# Generate a build prompt for an AI agent
 bash generate-prompt.sh GAME > build-prompt.md
+
+# Conform a new project to standards
+# → Give the agent CLAUDE_RULES.md and let it go
 ```
 
-## Relationship Between Documents
+## Key Conventions
 
-```
-FEATURES.md          What the platform should do (24 features)
-    |
-CLAUDE_RULES.md      Rules that make features work (scripts, metadata, governance)
-    |
-GAME/                How GAME implements the features (per-feature specs)
-```
-
-FEATURES defines capabilities. CLAUDE_RULES defines the contracts projects must follow. GAME specs describe how one specific application (the dashboard) implements those capabilities.
+- **METADATA.md** — Line-based `key: value` format (not YAML). Single source of project identity.
+- **AGENTS.md** — AI context file. CLAUDE.md is a pointer to it (`@AGENTS.md`).
+- **bin/common.sh** — Shared functions. Reads PORT, PROJECT_NAME from METADATA.md.
+- **$PROJECTS_DIR/.secrets** — Global API keys. Per-project overrides in `.env`.
+- **doc/** — Generated documentation. Built by `bin/build_documentation.sh`.
+- **Version format** — `YYYY-MM-DD.N` (e.g., `2026-03-13.2`).
+- **Date format** — Always `yyyymmdd` or `yyyymmdd_hhmmss` for sorting.
