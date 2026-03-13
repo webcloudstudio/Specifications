@@ -20,11 +20,8 @@ def generate_root_index():
 
     # Read foundation docs
     foundation_files = [
-        'METHODOLOGY.md',
-        'THE-CONTRACT.md',
-        'PERSISTENCE.md',
-        'OPERATIONS.md',
-        'LOGGING.md',
+        'CLAUDE_RULES.md',
+        'FEATURES.md',
     ]
 
     foundation_docs = {}

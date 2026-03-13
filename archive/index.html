@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive Specification</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0d1117; color: #c9d1d9;
+  display: flex; height: 100vh; overflow: hidden;
+}
+#sidebar {
+  width: 260px; min-width: 260px; background: #161b22;
+  border-right: 1px solid #21262d; overflow-y: auto; display: flex; flex-direction: column;
+}
+#sidebar header { padding: 20px 16px 12px; border-bottom: 1px solid #21262d; }
+#sidebar header h1 { font-size: 15px; font-weight: 600; color: #f0f6fc; }
+#sidebar header p { font-size: 11px; color: #6e7681; margin-top: 4px; }
+#sidebar header a { color: #58a6ff; text-decoration: none; font-size: 11px; margin-top: 8px; display: inline-block; }
+#sidebar header a:hover { text-decoration: underline; }
+.nav-section { padding: 16px 0 8px; }
+.nav-section-title {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: #6e7681; padding: 0 16px 6px;
+}
+.nav-item {
+  display: block; padding: 7px 16px; font-size: 13px; color: #8b949e;
+  cursor: pointer; border-left: 3px solid transparent;
+  transition: color .1s, border-color .1s, background .1s; text-decoration: none;
+}
+.nav-item:hover { color: #c9d1d9; background: #1f2428; }
+.nav-item.active { color: #58a6ff; border-left-color: #58a6ff; background: rgba(88,166,255,.06); }
+#content { flex: 1; overflow-y: auto; }
+#home-panel { padding: 40px 48px; max-width: 860px; }
+#doc-panel { padding: 40px 48px; max-width: 860px; display: none; }
+#home-panel h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin: 24px 0 12px; }
+.section-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: #6e7681; margin-top: 16px; margin-bottom: 12px; letter-spacing: .08em; }
+.file-list { list-style: none; }
+.file-list li { padding: 6px 0; }
+.file-list a { color: #58a6ff; text-decoration: none; cursor: pointer; }
+.file-list a:hover { text-decoration: underline; }
+.doc-content h1 { font-size: 24px; font-weight: 700; margin: 24px 0 16px; color: #f0f6fc; }
+.doc-content h2 { font-size: 20px; font-weight: 600; margin: 20px 0 12px; color: #f0f6fc; }
+.doc-content h3 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; color: #c9d1d9; }
+.doc-content h4 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; color: #c9d1d9; }
+.doc-content p { margin: 12px 0; line-height: 1.6; }
+.doc-content ul, .doc-content ol { margin: 12px 0 12px 20px; line-height: 1.6; }
+.doc-content li { margin: 6px 0; }
+.doc-content pre {
+  background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 12px;
+  overflow-x: auto; margin: 12px 0; font-size: 12px; line-height: 1.4;
+}
+.doc-content code {
+  background: #161b22; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 12px; color: #79c0ff;
+}
+.doc-content pre code { background: none; padding: 0; }
+.doc-content table { border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.doc-content table th, .doc-content table td { padding: 8px 12px; border: 1px solid #21262d; text-align: left; }
+.doc-content table th { background: #161b22; font-weight: 600; }
+.doc-content blockquote { border-left: 4px solid #58a6ff; padding-left: 16px; margin: 12px 0; color: #8b949e; font-style: italic; }
+.doc-content hr { border: none; border-top: 1px solid #21262d; margin: 24px 0; }
+.subtitle { font-size: 13px; color: #8b949e; margin: 8px 0 16px; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <header>
+    <h1>Archive</h1>
+    <p>Specification</p>
+    <a href="../index.html">← Back to Foundation</a>
+  </header>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-section-title">Documents</div>
+      <ul class="file-list" id="doc-list"></ul>
+    </div>
+  </nav>
+</div>
+
+<div id="content">
+  <div id="home-panel">
+    <h1>Archive</h1>
+    <p class="subtitle">Click a document in the left sidebar to begin.</p>
+  </div>
+
+  <div id="doc-panel">
+    <div id="doc-content" class="doc-content"></div>
+  </div>
+</div>
+
+<script>
+const DOCS = {
+  "LOGGING": "# Logging\n\n**spec_v4 \u00b7 2026-03-11**\n\n---\n\n## What Logging Is For\n\nLogging lets the platform display what an operation did, what went wrong, and how long\nthings took \u2014 without running the operation again or reading the source code.\n\nA log file is the operation's permanent record. It outlasts the process. The platform\nstores it; the user can read it days later.\n\n---\n\n## What the Platform Expects\n\nThe platform looks for log files in a predictable location with a predictable name.\nWhen it finds them, it displays them in the log viewer.\n\n**Location:** A `logs/` directory within the project (e.g., `data/logs/`)\n**Naming:** `{OperationName}_{YYYYMMDD_HHMMSS}.log`\n\nIf the file exists and matches this pattern, the platform displays it. The script is\nresponsible for writing to this location. The platform never writes log files itself.\n\n---\n\n## What Goes in a Log\n\nA log file should contain everything the operation printed to the terminal \u2014 both normal\noutput and error output, interleaved in the order it was produced.\n\nThe platform displays log files as-is. No special format is required inside the file.\nTimestamps on individual lines are helpful but not required.\n\n---\n\n## The [GAME] Line Protocol\n\nWithin the log output, lines prefixed with `[GAME]` are parsed by the platform for\nstatus information. These lines should appear in the log file the same as any other output.\n\n| Line | Platform Action |\n|------|----------------|\n| `[GAME] Service Starting: <name>` | Sets status to STARTING |\n| `[GAME] Service Started: <name>` | Sets status to RUNNING |\n| `[GAME] Service Stopped: <name>` | Sets status to STOPPED |\n\nAll other `[GAME]` lines are ignored by the platform but preserved in the log.\n\nThese lines do not replace normal log output. They are a signal layer on top of it.\n\n---\n\n## Log Retention\n\nLog files accumulate over time. The platform displays the most recent runs by default.\n\nA `bin/clean-logs.sh` operation can be provided to prune old files. No automatic\ncleanup is performed by the platform unless explicitly configured.\n\n---\n\n## What This Means for Feature Specifications\n\nFeatures that involve running operations (anything that calls a script) depend on this\nlogging contract being honored. Feature specs should state:\n\n- Whether the feature requires log output to function (e.g., the log viewer reads logs)\n- Whether the feature emits `[GAME]` status lines (e.g., an operation that starts a service)\n\nFeatures that do not run scripts have no logging requirements.\n",
+  "METHODOLOGY": "# The Specification Methodology\n\n**spec_v4 \u00b7 2026-03-11**\n\n---\n\n## What This Is\n\nThis is a way of writing specifications so that an AI agent can build or rebuild a\nproject from them \u2014 without the original developer present, without prior context, and\nwithout guessing.\n\nThe key insight is that most project specs mix up two separate things:\n\n- **What the product does** \u2014 the features, the user experience, what gets stored, what\n  gets displayed\n- **How it is built** \u2014 the language, the database, the framework, the deployment model\n\nWhen these are mixed, the spec becomes outdated the moment a technology choice changes.\nAn AI session that reads it cannot tell whether a detail is a business requirement or an\nimplementation decision from two years ago.\n\nThis methodology keeps them separate.\n\n---\n\n## The Three Layers\n\n### Layer 1: What the Product Does\n\nThis is the feature specification. Each feature gets its own document. The document\ndescribes:\n\n- What problem it solves\n- What the user can do\n- What data flows in and out\n- Which other features it connects to\n- What the project must provide to enable this feature (the contract)\n\nNo technology words. No framework names. No database schemas. A feature spec written\ntoday should still describe the same product if the stack is replaced tomorrow.\n\n### Layer 2: The Contract\n\nThis is the binding layer between what the product does and how it is built.\n\nA contract is a plain text file that a project provides. The platform reads it. The\nplatform gains information about the project \u2014 what operations it supports, what its\nmetadata is, where it runs \u2014 without being told directly.\n\nContracts are files like `CLAUDE.md`, `git_homepage.md`, and the headers inside `bin/`\nscripts. They are committed to git alongside the code they describe. An AI agent reading\na contract file can derive everything it needs to interact with that project correctly.\n\nSee **THE-CONTRACT.md** for the full list of contracts with examples.\n\n### Layer 3: How It Is Built\n\nThis is the technical specification: stack choice, module structure, data models,\ninfrastructure. It answers \"how\" only. It must satisfy every contract declared in Layer 2.\n\nWhen an AI builds the project, it reads Layer 1 to understand what to build, Layer 2 to\nknow what artifacts to produce, and uses Layer 3 as the implementation guide.\n\n---\n\n## Why AI Needs This Structure\n\nAn AI agent working on a project without this structure must infer intent from code.\nThat works for isolated changes. It breaks for anything that requires understanding *why*\na design decision was made, *what* the intended user experience is, or *which features\nare not yet built*.\n\nWith this structure:\n\n- **Feature specs** tell the agent what to build and what the user expects\n- **Contracts** tell the agent what artifacts to produce (scripts, files, headers)\n- **Technical specs** tell the agent which tools and patterns to use\n\nAn agent can be dropped into any feature ticket, read three documents, and produce\ncorrect, consistent, platform-aware output.\n\n---\n\n## How Projects Earn Platform Capabilities\n\nThe platform (GAME) does not have a registration UI. Projects do not fill out forms.\nInstead, a project earns capabilities by implementing contracts.\n\n| A project provides... | The platform gives it... |\n|----------------------|--------------------------|\n| A `bin/start.sh` with a Name header | A \"Start\" button in the dashboard |\n| A `git_homepage.md` with Show: true | A card on the portfolio site |\n| A `CLAUDE.md` with endpoints | Clickable service links in the UI |\n| A declared port in a bin/ header | Automatic health monitoring |\n| Structured status messages in scripts | Live state tracking in the process monitor |\n\nNothing in this list requires changing the platform. A project adds the file; the\nplatform discovers the capability on the next scan.\n\n---\n\n## What the Specification Does Not Prescribe\n\n- Which programming language is used\n- Which database stores the data\n- Which framework serves the UI\n- Which cloud provider hosts the product\n- Which AI model implements the features\n\nThese are Layer 3 decisions. They belong in the technical spec, not here.\n\n---\n\n## The Purpose of This Document Set\n\nEvery document in this spec_v4 directory answers exactly one question:\n\n| Document | Question |\n|----------|---------|\n| METHODOLOGY.md (this file) | How does this specification work? |\n| THE-CONTRACT.md | What must a project provide? |\n| PERSISTENCE.md | How does a project store its own data? |\n| OPERATIONS.md | What must operational scripts expose? |\n| LOGGING.md | How do scripts produce observable output? |\n| features/*.md | What does each platform feature do? |\n\nAn AI agent building any part of the platform should read METHODOLOGY.md first, then the\nfeature spec for the feature being built, then the contracts relevant to that feature.\n",
+  "OPERATIONS": "# Operations\n\n**spec_v4 \u00b7 2026-03-11**\n\n---\n\n## What Is an Operation?\n\nAn operation is a script in a project's `bin/` directory. The platform discovers it,\ngives it a button in the dashboard, runs it on demand, and monitors it while it runs.\n\nOperations can be written in any language \u2014 bash, Python, Node, or anything the host\nmachine can execute. The only requirement is the declaration block described in\n**THE-CONTRACT.md**.\n\n---\n\n## To Enable Platform Discovery\n\nAdd the declaration block to your script. See THE-CONTRACT.md, Contract 1.\n\n```\n# CommandCenter Operation\n# Name: Service Start\n# Port: 3000\n```\n\nWithout this block, the script is not visible to the platform. It still runs normally\nwhen invoked directly.\n\n---\n\n## To Enable Logging\n\nWrite all output (standard output and errors) to a file in addition to the terminal.\nName the file consistently so the platform can find and display it.\n\n**What to produce:**\n- A log file per run\n- Named with the operation name and a timestamp\n- Stored in a logs directory within the project\n\nThe platform reads these files to populate the log viewer. The exact mechanism (shell\nredirection, Python logging, etc.) is the script's choice \u2014 the platform looks for\nfiles matching the naming pattern.\n\n---\n\n## To Enable Status Tracking\n\nAnnounce when the operation starts and when it stops. Use a consistent prefix so the\nplatform can parse state transitions without interpreting arbitrary output.\n\n**What to produce:**\n- A \"starting\" message when the script begins\n- A \"started\" message when the service or process is ready\n- A \"stopped\" message when the script exits (by any means)\n\nThe prefix `[GAME]` is reserved for these messages. Other output can say anything.\n\nExample of what the messages communicate (not prescribing exact wording):\n```\n[GAME] Service Starting: Service Start\n[GAME] Service Started: Service Start on port 3000\n[GAME] Service Stopped: Service Start\n```\n\nThe platform watches for `[GAME]` prefixed lines to update the status badge without\nguessing from exit codes alone.\n\n---\n\n## To Enable Health Monitoring\n\nDeclare the port your service listens on in the operation header. The platform will\npoll that port periodically and show UP / DOWN status in the dashboard.\n\n```\n# Port: 3000\n```\n\nIf your service uses a non-root health endpoint (e.g., `/health` instead of `/`),\ndeclare it:\n\n```\n# Health: /health\n```\n\nIf no port is declared, health monitoring is not available for this operation.\n\n---\n\n## To Enable Clean Shutdown\n\nWhen your operation is stopped from the platform (via the Stop button), it receives a\ntermination signal. The script should:\n\n- Catch the signal\n- Emit a `[GAME] Service Stopped` message\n- Exit cleanly\n\nScripts that do not handle this will still be terminated \u2014 the `[GAME] Service Stopped`\nmessage will be absent, and the platform will mark the run as STOPPED rather than\nDONE.\n\n---\n\n## Naming Conventions\n\nThese names are not required but are recognized by the platform for default behaviors:\n\n| Script | Expected Purpose |\n|--------|----------------|\n| `bin/start.sh` | Start the development server |\n| `bin/stop.sh` | Stop the development server |\n| `bin/build.sh` | Run the build pipeline |\n| `bin/test.sh` | Run the test suite |\n| `bin/deploy.sh` | Deploy to production |\n\n---\n\n## Summary: What a Well-Formed Operation Provides\n\n| Capability | How |\n|-----------|-----|\n| Appears as a dashboard button | Declaration block with Name: |\n| Logs are viewable in platform | Write to log file with consistent naming |\n| Status badge updates live | Emit [GAME] prefixed status messages |\n| Health monitoring | Declare Port: in header |\n| Custom health check | Declare Health: path in header |\n| Clean shutdown | Handle termination signal; emit stopped message |\n\nAn operation that provides all of these is fully integrated with the platform. An\noperation that provides only the declaration block is still useful \u2014 it just has fewer\ncapabilities surfaced.\n",
+  "PERSISTENCE": "# Project Metadata Persistence\n\n**spec_v4 \u00b7 2026-03-11**\n\n---\n\n## The Principle\n\nA project stores its own metadata in plain text files that live inside its repository.\nThe platform reads these files. The platform never owns the source of truth for a\nproject's description, settings, or state.\n\nThis means:\n- Project metadata travels with the project in git\n- An AI agent can read and update project metadata without a running platform\n- Metadata survives platform reinstalls, migrations, or stack changes\n- Humans can read and edit metadata in any text editor\n\n---\n\n## Where Data Lives\n\n### Data the Project Owns\n\nStored in files committed to the project's git repository.\n\n| What | Where | Format |\n|------|-------|--------|\n| AI working context | `CLAUDE.md` | Markdown with standard sections |\n| Portfolio card | `git_homepage.md` | YAML frontmatter |\n| Project links | `Links.md` | Markdown table |\n| Technology stack | `STACK.yaml` | YAML |\n| Operation scripts | `bin/*.sh` | Shell script with header |\n\nAn AI agent updating any of these files is updating persistent project state. No\ndatabase call needed. The change is immediately readable by the platform on the next\nscan.\n\n### Data the Platform Owns\n\nStored in the platform's own runtime database. This is derived data \u2014 it can be\nregenerated from the project files at any time.\n\n| What | Derived From |\n|------|-------------|\n| Project list | Filesystem scan |\n| Operation buttons | bin/ headers |\n| Endpoint links | CLAUDE.md sections |\n| Stack badges | STACK.yaml |\n| Portfolio card data | git_homepage.md |\n\nIf the platform database is deleted, a full scan restores all derived data from the\nsource files. Nothing is lost.\n\n### Data the Platform Adds\n\nSome data is added by the user through the platform UI and stored in the platform's\nown config files (also committed to git, but in the platform's repo):\n\n| What | Stored In |\n|------|-----------|\n| Tag colors | `data/tag_colors.json` (platform repo) |\n| Tag assignments | Platform database (derived from tags in git_homepage.md when possible) |\n| AI config profiles | `config_engine/profiles/` (platform repo) |\n\n---\n\n## How an AI Agent Persists Data\n\nWhen an AI agent needs to record something about a project \u2014 a decision, a setting, a\ncompleted feature \u2014 it edits the appropriate file in the project directory.\n\n**Example: Recording that a feature was completed**\n\nThe agent adds a line to `CLAUDE.md` under a `## Completed Features` section:\n\n```markdown\n## Completed Features\n- User authentication (2026-03-10)\n- Portfolio publishing (2026-02-28)\n```\n\nThe platform surfaces this on the next scan. The information is in git history. No\ndatabase update needed.\n\n**Example: Updating the portfolio card description**\n\nThe agent edits `git_homepage.md`:\n\n```yaml\n---\nTitle: My Project\nDescription: Updated description reflecting new capabilities.\nTags: web, tool\nShow on Homepage: true\n---\n```\n\nThe change is reflected in the portfolio on the next publish run. The agent does not\nneed access to the platform to make this change.\n\n---\n\n## What This Means for Feature Specifications\n\nEach feature spec that produces or consumes persistent data should state:\n\n- What data it needs to store\n- Which file it stores it in\n- What the format looks like (a brief example)\n\nThe spec does not need to describe a database schema. It describes a file section or\nYAML field that an AI agent can write and a human can read.\n",
+  "THE-CONTRACT": "# The Contract\n\n**spec_v4 \u00b7 2026-03-11**\n\n---\n\n## What Is a Contract?\n\nA contract is a file a project provides. It has a defined format. The platform reads it.\nIn exchange, the project gains a platform capability.\n\nNo code change to the platform is needed. The project adds the file; the platform\ndiscovers it on the next scan.\n\nContracts are committed to git. They are readable by humans and AI agents. They do not\ndepend on the platform being running.\n\n---\n\n## Contract 1: The Operations Contract\n\n**File:** `bin/<name>.sh` (or any script in the `bin/` directory)\n**What you get:** A clickable button in the dashboard that runs the script\n\nThe script must contain a declaration block in its first 20 lines:\n\n```\n# CommandCenter Operation\n# Name: Service Start\n# Port: 3000\n```\n\n- `Name` is required. It becomes the button label.\n- `Port` is optional. Declaring it enables health monitoring for that port.\n\nA project can have any number of scripts in `bin/`. Each one that has this block\nbecomes a separate button. See **OPERATIONS.md** for what else scripts should expose.\n\n---\n\n## Contract 2: The Portfolio Contract\n\n**File:** `git_homepage.md` at the project root\n**What you get:** A card on the published portfolio site\n\n```yaml\n---\nTitle: My Project\nDescription: What this project does in one or two sentences.\nTags: web, tool, open-source\nImage: images/my-project.webp\nShow on Homepage: true\n---\n```\n\n- `Show on Homepage: false` hides the project from the portfolio without removing the file.\n- Tags appear as badges on the card.\n- Image is optional; a default is used if omitted.\n\n---\n\n## Contract 3: The AI Context Contract\n\n**File:** `CLAUDE.md` at the project root\n**What you get:** Populated links and endpoints in the dashboard; correct AI behavior in sessions\n\n```markdown\n# My Project\nOne paragraph description of what this project is.\n\n## Dev Commands\nHow to start, stop, test, build.\n\n## Service Endpoints\n- Local: http://localhost:3000\n\n## Bookmarks\n### Useful Links\n- [Production Site](https://...)\n```\n\nThe platform reads the `Service Endpoints` and `Bookmarks` sections and surfaces them\nas quick links. The AI agent reads the whole file as its working context for this project.\n\nSee **PERSISTENCE.md** for how `CLAUDE.md` is also used to store project metadata.\n\n---\n\n## Contract 4: The Stack Contract\n\n**File:** `STACK.yaml` at the project root\n**What you get:** Stack badges in the dashboard; governance rule checking\n\n```yaml\nlanguage: Python\nframework: Flask\nrequires:\n  - git\n  - venv\n```\n\nThe platform reads `language` and `framework` for display. The `requires` list is\nchecked on scan \u2014 missing items are flagged as compliance gaps.\n\n---\n\n## Contract 5: The Links Contract\n\n**File:** `Links.md` at the project root\n**What you get:** A quick-links panel in the project detail view\n\n```markdown\n| Name | URL | Notes |\n|------|-----|-------|\n| Production | https://... | Live site |\n| Docs | https://... | API docs |\n```\n\nEvery row in the table becomes a link in the UI. No additional setup.\n\n---\n\n## The Full Picture\n\nA project that implements all five contracts is fully governed:\n\n| Capability | Requires |\n|-----------|---------|\n| Operation buttons in dashboard | Contract 1 (bin/ header) |\n| Portfolio card published | Contract 2 (git_homepage.md) |\n| Endpoint links in dashboard | Contract 3 (CLAUDE.md) |\n| AI agent working context | Contract 3 (CLAUDE.md) |\n| Stack compliance checking | Contract 4 (STACK.yaml) |\n| Quick-links panel | Contract 5 (Links.md) |\n| Health monitoring | Contract 1 + Port declared |\n\nA project missing a contract is not broken. It simply does not have that capability in\nthe platform. The dashboard reports what is missing.\n\n---\n\n## Contracts Are Not Required by the Platform\n\nA project with no contracts at all will still appear in the dashboard \u2014 just as a name\nwith no buttons, no links, and a list of compliance gaps. The developer adds contracts\nwhen they want the capability. The platform never blocks a project for non-compliance.\n",
+};
+
+// Build the document list in the sidebar
+function buildDocList() {
+  const list = document.getElementById('doc-list');
+  Object.keys(DOCS).sort().forEach(key => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.textContent = key.replace(/-/g, ' ');
+    a.onclick = () => showDoc(key);
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+}
+
+function showDoc(key) {
+  if (!DOCS[key]) {
+    console.warn('Document not found:', key);
+    return;
+  }
+  document.getElementById('home-panel').style.display = 'none';
+  document.getElementById('doc-panel').style.display = 'block';
+
+  const content = DOCS[key];
+  const html = markdownToHtml(content);
+  document.getElementById('doc-content').innerHTML = html;
+
+  // Update active nav item
+  document.querySelectorAll('.file-list a').forEach(el => el.classList.remove('active'));
+  const activeLink = Array.from(document.querySelectorAll('.file-list a')).find(a => a.textContent.replace(/ /g, '-') === key);
+  if (activeLink) activeLink.classList.add('active');
+}
+
+function markdownToHtml(md) {
+  // Simple markdown to HTML converter
+  let html = md
+    .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
+    .replace(/^- (.*?)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n\n+/g, '</p><p>')
+    .replace(/^(?!<[^>]+>)/gm, '<p>');
+  return '<p>' + html + '</p>';
+}
+
+buildDocList();
+</script>
+
+</body>
+</html>
