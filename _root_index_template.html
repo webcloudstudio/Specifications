@@ -129,8 +129,11 @@ body {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 const DOCS = {};
+
+marked.setOptions({ gfm: true, breaks: false });
 
 function showDoc(key) {
   if (!DOCS[key]) {
@@ -140,11 +143,8 @@ function showDoc(key) {
   document.getElementById('home-panel').style.display = 'none';
   document.getElementById('doc-panel').style.display = 'block';
 
-  const content = DOCS[key];
-  const html = markdownToHtml(content);
-  document.getElementById('doc-content').innerHTML = html;
+  document.getElementById('doc-content').innerHTML = marked.parse(DOCS[key]);
 
-  // Update active nav item
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.querySelector(`.nav-item[onclick="showDoc('${key}')"]`)?.classList.add('active');
 }
@@ -153,22 +153,6 @@ function showHome() {
   document.getElementById('home-panel').style.display = 'block';
   document.getElementById('doc-panel').style.display = 'none';
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-}
-
-function markdownToHtml(md) {
-  // Simple markdown to HTML converter
-  let html = md
-    .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
-    .replace(/^- (.*?)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\n\n+/g, '</p><p>')
-    .replace(/^(?!<[^>]+>)/gm, '<p>');
-  return '<p>' + html + '</p>';
 }
 </script>
 

@@ -246,7 +246,7 @@ namespace: development
 
 | Field | Description |
 |-------|-------------|
-| `port` | Primary port the service listens on. Read by `bin/common.sh`. |
+| `port` | Primary port the service listens on. Read by `bin/common.sh`. The single source of truth for port assignment. To change a project's port, edit METADATA.md — all scripts pick it up via `common.sh`. The platform dashboard may provide a UI for editing this field directly. |
 | `stack` | Technology summary. Example: `Python/Flask/SQLite`. |
 | `health` | Health check endpoint path. Default: `/health`. |
 | `desired_state` | What should be running. Values: `running` (service stays up), `on-demand` (started manually, stops when done). Default: `on-demand`. |
