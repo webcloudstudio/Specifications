@@ -89,11 +89,8 @@ body {
   <nav>
     <div class="nav-section">
       <div class="nav-section-title">Foundation</div>
-      <a class="nav-item" onclick="showDoc('METHODOLOGY')">Methodology</a>
-      <a class="nav-item" onclick="showDoc('THE-CONTRACT')">The Contract</a>
-      <a class="nav-item" onclick="showDoc('PERSISTENCE')">Persistence</a>
-      <a class="nav-item" onclick="showDoc('OPERATIONS')">Operations</a>
-      <a class="nav-item" onclick="showDoc('LOGGING')">Logging</a>
+      <a class="nav-item" onclick="showDoc('FEATURES')">Features</a>
+      <a class="nav-item" onclick="showDoc('CLAUDE_RULES')">Claude Rules</a>
     </div>
     <div class="nav-section-divider"></div>
     <div class="nav-section">
@@ -106,43 +103,28 @@ body {
 <div id="content">
   <div id="home-panel">
     <h1>Specifications</h1>
-    <p class="subtitle">Foundation documents and project specifications. Start with Foundation, then explore specific projects.</p>
+    <p class="subtitle">Platform capabilities and integration rules. Start with Foundation, then explore project specifications.</p>
 
     <div class="section-label">Foundation Documents</div>
     <div class="card-grid">
-      <div class="card" onclick="showDoc('METHODOLOGY')" style="cursor: pointer;">
-        <h3>Methodology</h3>
-        <p>How this specification system works. The three-layer model. Why structure matters.</p>
+      <div class="card" onclick="showDoc('FEATURES')" style="cursor: pointer;">
+        <h3>Features</h3>
+        <p>All platform capabilities with status and completeness scores.</p>
         <span class="tag foundation">Start here</span>
       </div>
-      <div class="card" onclick="showDoc('THE-CONTRACT')" style="cursor: pointer;">
-        <h3>The Contract</h3>
-        <p>What every project must provide to participate in the platform.</p>
-        <span class="tag foundation">Foundation</span>
-      </div>
-      <div class="card" onclick="showDoc('PERSISTENCE')" style="cursor: pointer;">
-        <h3>Persistence</h3>
-        <p>How projects store their metadata in plain text files.</p>
-        <span class="tag foundation">Foundation</span>
-      </div>
-      <div class="card" onclick="showDoc('OPERATIONS')" style="cursor: pointer;">
-        <h3>Operations</h3>
-        <p>What bin/ scripts must expose: discovery, logging, status tracking.</p>
-        <span class="tag foundation">Foundation</span>
-      </div>
-      <div class="card" onclick="showDoc('LOGGING')" style="cursor: pointer;">
-        <h3>Logging</h3>
-        <p>How operations produce observable output and status events.</p>
+      <div class="card" onclick="showDoc('CLAUDE_RULES')" style="cursor: pointer;">
+        <h3>Claude Rules</h3>
+        <p>Integration rules for projects. Scripts, metadata, governance.</p>
         <span class="tag foundation">Foundation</span>
       </div>
     </div>
 
     <div class="section-label">Project Specifications</div>
-    <p>Click a project link in the left sidebar to view its specification.</p>
+    <p style="font-size: 13px; color: #8b949e;">Click a project below or in the left sidebar.</p>
   </div>
 
   <div id="doc-panel">
-    <a href="javascript:showHome()" style="color: #58a6ff; text-decoration: none; font-size: 12px;">← Back</a>
+    <a href="javascript:showHome()" style="color: #58a6ff; text-decoration: none; font-size: 12px;">&#8592; Back</a>
     <div id="doc-content" class="doc-content"></div>
   </div>
 </div>

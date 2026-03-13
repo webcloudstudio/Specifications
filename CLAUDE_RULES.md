@@ -1,45 +1,41 @@
 # CLAUDE_RULES — Integration Rules for Projects
 
-Every rule here is a concrete requirement. If a project follows these rules, the platform orchestrator discovers and integrates it automatically.
+Every rule here is a concrete requirement. If a project follows these rules, the platform discovers and integrates it automatically. Rules are grouped by domain with completeness scores.
 
 ---
 
-## Script Rules
+## Script Rules (90% complete)
 
-**SCRIPT USAGE**: The `bin/` subdirectory contains scripts. Scripts can be bash (`.sh`) or Python (`.py`). Both formats use the same `# CommandCenter Operation` header convention.
+**SCRIPT LOCATION**: All executable scripts live in `bin/`. Bash (`.sh`) or Python (`.py`).
 
-**SCRIPT REGISTRATION**: Any bin/ script intended to be run by users must have a `# CommandCenter Operation` marker and a `# Name:` field within the first 20 lines. This is how the orchestration layer discovers it.
+**SCRIPT REGISTRATION**: Scripts intended for user execution must have a `# CommandCenter Operation` marker and `# Name:` field within the first 20 lines. This is how the platform discovers operations.
 
-Bash example:
 ```bash
 #!/bin/bash
 # CommandCenter Operation
 # Name: Service Start
 # Port: 8000
 # Health: /health
+# Schedule: daily 02:00
+# MaxMemory: 512M
+# Timeout: 300
 ```
 
-Python example:
-```python
-#!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Run Pipeline
-# Category: build
-```
+Optional headers: `Port` (enables health monitoring), `Health` (custom health path), `Category` (grouping), `Schedule` (cron), `MaxMemory` (resource limit), `Timeout` (max seconds).
 
-**STANDARD SCRIPT NAMES**: Not enforced, but the orchestrator recognizes these names for default behaviors (service lifecycle, CI triggers, scheduled jobs):
+**STANDARD SCRIPTS**: Not enforced, but recognized for default behaviors:
 
 | Script | Purpose | Idempotent? |
 |--------|---------|------------|
-| `bin/start.sh` | Start the project's services | No — side effects |
-| `bin/stop.sh` | Stop the project's services | Yes |
+| `bin/start.sh` | Start services | No |
+| `bin/stop.sh` | Stop services | Yes |
 | `bin/build.sh` | Build / compile / package | Yes |
-| `bin/test.sh` | Run the test suite | Yes |
-| `bin/deploy.sh` | Deploy to a higher environment | No — side effects |
-| `bin/daily.sh` | Daily maintenance tasks | Yes — must be safe to re-run |
-| `bin/weekly.sh` | Weekly maintenance tasks | Yes — must be safe to re-run |
+| `bin/test.sh` | Run tests | Yes |
+| `bin/deploy.sh` | Deploy to environment | No |
+| `bin/daily.sh` | Daily maintenance | Yes |
+| `bin/weekly.sh` | Weekly maintenance | Yes |
 
-**SCRIPT PREAMBLE**: All executable scripts must begin with:
+**SCRIPT PREAMBLE**: All bash scripts must begin with:
 
 ```bash
 set -euo pipefail
@@ -47,8 +43,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_DIR"
 ```
-
-Rationale: `set -euo pipefail` catches silent failures. `PROJECT_DIR` ensures paths resolve correctly regardless of where the script is invoked from.
 
 **SCRIPT LOGGING**: All operations log to `logs/{OperationName}_{YYYYMMDD_HHMMSS}.log`:
 
@@ -59,42 +53,38 @@ mkdir -p logs
 exec > >(tee -a "$LOG_FILE") 2>&1
 ```
 
-**STATUS MESSAGES**: Emit `[GAME]` lines so the orchestrator tracks state transitions. These are parsed from log output — they require no other mechanism:
+**STATUS MESSAGES**: Emit `[GAME]` lines for state tracking. Parsed from log output:
 
 ```
 [GAME] Service Starting: <name>
 [GAME] Service Started: <name>
 [GAME] Service Stopped: <name>
+[GAME] Error: <name>: <message>
 ```
 
-**EXIT CODES**: 0 = success, non-0 = failure. Long-running services must trap SIGTERM and emit the Stopped message before exiting:
+**EXIT CODES**: 0 = success, non-0 = failure. Long-running services trap SIGTERM:
 
 ```bash
 cleanup() { echo "[GAME] Service Stopped: Service Start"; exit 0; }
 trap cleanup SIGTERM SIGINT
 ```
 
-**IDEMPOTENCY**: `bin/daily.sh` and `bin/weekly.sh` must be safe to run multiple times. They should check state before acting (e.g. skip if already done today). Never assume a clean slate.
+**IDEMPOTENCY**: `daily.sh` and `weekly.sh` must be safe to re-run. Check state before acting.
 
-**ENVIRONMENT VARIABLES**: If the project requires environment variables, provide a `.env.example` file at the project root listing every required variable with a placeholder value and a comment explaining each one. Never commit a populated `.env` file.
+**PERMISSIONS**: `chmod +x bin/*.sh`. Permission errors are not retried.
 
-```bash
-# .env.example
-DATABASE_URL=sqlite:///./data/app.db   # Path to the SQLite database
-SECRET_KEY=change-me                    # Flask session encryption key
-PORT=8000                               # Port the service listens on
-```
+**WORKING DIRECTORY**: Scripts run from project root. The preamble enforces this.
 
 ---
 
-## Metadata File Rules
+## Metadata Rules (85% complete)
 
-**PROJECT METADATA FILE**: Every project has `METADATA.md` at its root. This is the single source of truth for project identity, portfolio card, service links, and discovery metadata. `git_homepage.md` and `Links.md` are superseded by this file.
+**METADATA.md**: Every project has `METADATA.md` at its root. Single source of truth for identity, portfolio, links, and discovery.
 
-```
+```yaml
 name: MyProject
 title: My Project — Short Tagline
-description: One to two sentence description of what this project does.
+description: One to two sentence description.
 port: 8000
 status: ACTIVE
 version: 1.0
@@ -104,38 +94,63 @@ image: images/myproject.webp
 health: /health
 show_on_homepage: true
 tags: web, tool, api
+desired_state: running
+namespace: production
 links:
     Production | https://myproject.example.com | Live site
     Docs       | https://docs.example.com       | API documentation
-    Staging    | https://staging.example.com    | Pre-production
 ```
 
-**STATUS VALUES**: Use one of these exact values. The compliance verifier uses status to determine which rules to enforce:
+**STATUS VALUES**: Determines which rules are enforced:
 
-| Status | Meaning | Compliance Level |
-|--------|---------|-----------------|
-| `IDEA` | Concept only — may have no code | Minimal: METADATA.md name + status |
-| `PROTOTYPE` | Proof of concept — not stable | METADATA.md complete + CLAUDE.md stub |
-| `ACTIVE` | Actively developed and used | Full script + metadata compliance |
-| `PRODUCTION` | Stable, deployed, monitored | All rules including health + git + env |
+| Status | Meaning | Required Rules |
+|--------|---------|---------------|
+| `IDEA` | Concept only | METADATA.md: name + status |
+| `PROTOTYPE` | Proof of concept | METADATA.md complete + CLAUDE.md stub |
+| `ACTIVE` | Developed and used | Full script + metadata compliance |
+| `PRODUCTION` | Stable, deployed | All rules including health + git + env |
 | `ARCHIVED` | No longer maintained | METADATA.md only |
 
-**METADATA REQUIRED FIELDS** (all statuses): `name`, `status`
+**REQUIRED FIELDS** (all statuses): `name`, `status`
 
-**METADATA FULL FIELDS** (ACTIVE and above): `name`, `title`, `description`, `port`, `status`, `version`, `updated`, `stack`, `show_on_homepage`, `tags`
+**FULL FIELDS** (ACTIVE+): `name`, `title`, `description`, `port`, `status`, `version`, `updated`, `stack`, `show_on_homepage`, `tags`
 
-**CLAUDE.MD SECTIONS**: Every project at ACTIVE or above must have `CLAUDE.md` with at minimum: `## Dev Commands`, `## Service Endpoints`, `## Bookmarks`. The orchestrator parses these sections for dashboard links and AI context.
+**CLAUDE.md**: Every ACTIVE+ project must have `CLAUDE.md` with at minimum: `## Dev Commands`, `## Service Endpoints`, `## Bookmarks`.
+
+**ENVIRONMENT**: If the project requires env vars, provide `.env.example` at the project root with every required variable, placeholder value, and comment. Never commit a populated `.env`.
+
+```bash
+# .env.example
+DATABASE_URL=sqlite:///./data/app.db   # Path to the SQLite database
+SECRET_KEY=change-me                    # Flask session encryption key
+PORT=8000                               # Port the service listens on
+```
+
+**NO LEGACY FILES**: `git_homepage.md`, `Links.md`, and `STACK.yaml` are replaced by `METADATA.md`. New projects must not create these files.
 
 ---
 
-## Governance
+## Governance Rules (65% complete)
 
-**HEALTH ENDPOINT**: Declare `# Port:` in a bin/ header to enable health monitoring. Add `# Health: /path` if the health route is not `/`. Also declare `health:` in `METADATA.md` for the same purpose.
+**HEALTH ENDPOINT**: Declare `# Port:` in bin/ header and `health:` in METADATA.md. Default path is `/health`.
 
-**GIT COMPLIANCE** (PRODUCTION only): Git must be initialized, a remote must be configured, working tree should not be persistently dirty. Advisory warnings, not blockers.
+**GIT COMPLIANCE** (PRODUCTION only): Git initialized, remote configured, working tree not persistently dirty. Advisory, not blocking.
 
-**SCRIPTS MUST BE EXECUTABLE**: `chmod +x bin/*.sh`. The orchestrator runs scripts directly — permission errors surface in the process log and are not retried.
+**COMPLIANCE VERIFICATION**: `verify.py` scans all projects and reports per-project pass/fail calibrated to declared status. Run: `python3 verify.py --projects /path/to/projects`.
 
-**SCRIPTS RUN FROM PROJECT ROOT**: The orchestrator executes bin/ scripts with the project root as the working directory. The preamble enforces this explicitly.
+---
 
-**NO LEGACY CONTRACT FILES**: `git_homepage.md`, `Links.md`, and `STACK.yaml` are replaced by `METADATA.md`. New projects should not create these files. Existing projects should migrate fields to `METADATA.md` and delete the originals.
+## Roadmap
+
+Features not yet covered by rules but planned:
+
+| Feature | Rule Needed | Priority |
+|---------|------------|----------|
+| Scheduling | `# Schedule:` header parsing | High |
+| Job Pipelines | Pipeline YAML format definition | Medium |
+| Resource Limits | `# MaxMemory:` / `# Timeout:` enforcement | Medium |
+| Secrets Management | Secrets store contract | Medium |
+| Desired State | `desired_state:` in METADATA.md | Low |
+| Namespace Isolation | `namespace:` in METADATA.md | Low |
+| Service Discovery | `@project-name/api` resolution | Low |
+| Event Log | Event format and retention rules | Low |

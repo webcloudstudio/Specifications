@@ -1,79 +1,43 @@
-# Feature: Project Discovery
+# Project Discovery
 
-**spec_v4 · 2026-03-11**
-
----
-
-## Purpose
-
-Finds all projects on the filesystem and registers their capabilities with the platform.
-No manual setup. A project that follows the contracts is automatically discovered and
-surfaced in the dashboard.
+**Auto-registration via filesystem scan.** Finds all projects, reads their contracts, registers capabilities. No manual setup.
 
 ---
 
-## What the User Can Do
+## Capabilities
 
-- Projects appear automatically after a scan
-- Trigger a manual rescan at any time
-- See which contracts each project has implemented (compliance summary)
-- See when the last scan ran
+- Scan a root directory for project subdirectories
+- Read METADATA.md for identity, status, tags, links
+- Read CLAUDE.md for endpoints and bookmarks
+- Read bin/ scripts for CommandCenter Operation headers
+- Read git status per project
+- Upsert project records and capabilities
+- Mark removed projects as inactive (not deleted)
 
----
+## How It Works
 
-## How Discovery Works
+1. Scan root directory — every subdirectory is a candidate
+2. Derive display name from directory name (CamelCase → spaced words)
+3. Read METADATA.md if present
+4. Read CLAUDE.md if present
+5. Read bin/ headers for registered operations
+6. Read git status
+7. Upsert project record
 
-The platform scans a single root directory. Every subdirectory is a candidate project.
+Missing contract files produce compliance gaps, not errors.
 
-For each project directory:
-1. Derive the display name from the directory name (CamelCase → spaced words)
-2. Read each contract file if present — CLAUDE.md, git_homepage.md, Links.md, STACK.yaml
-3. Read all bin/ scripts for CommandCenter headers
-4. Read git status
-5. Upsert the project record and its capabilities
+## Scan Triggers
 
-A missing contract file is not an error — it produces a compliance gap, shown in the dashboard.
-
-### Name Derivation
-
-| Directory Name | Display Title |
-|---------------|--------------|
-| `MyProject` | My Project |
-| `GAME` | GAME |
-| `my-tool` | my tool |
-| `conquer_2026` | Conquer 2026 |
-
-### Scan Triggers
-
-- On platform startup
-- On user request (Rescan button)
-
-Projects no longer found on disk are marked inactive — not deleted.
-
----
+- Platform startup
+- User request (Rescan button)
 
 ## Data Produced
 
 | Data | Consumed By |
 |------|-------------|
 | Project records | CONTROL-PANEL |
-| Operation registry (from bin/ headers) | OPERATIONS-ENGINE, CONTROL-PANEL |
-| Endpoints and bookmarks (from CLAUDE.md) | CONTROL-PANEL |
-| Card metadata (from git_homepage.md) | GITHUB-PUBLISHER |
-| Links (from Links.md) | CONTROL-PANEL |
+| Operation registry (bin/ headers) | OPERATIONS-ENGINE, CONTROL-PANEL |
+| Endpoints and bookmarks (CLAUDE.md) | CONTROL-PANEL |
+| Portfolio metadata (METADATA.md) | GITHUB-PUBLISHER |
 | Git status | CONTROL-PANEL, GIT-INTEGRATION |
 | Compliance flags | CONTROL-PANEL |
-
----
-
-## Contracts Read
-
-All five contracts defined in THE-CONTRACT.md are read during discovery.
-
----
-
-## Out of Scope
-
-- Displaying projects → CONTROL-PANEL
-- Executing operations → OPERATIONS-ENGINE
-- Publishing portfolio → GITHUB-PUBLISHER

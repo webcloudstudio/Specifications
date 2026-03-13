@@ -39,7 +39,7 @@ def generate_root_index():
         if os.path.isdir(fpath) and not entry.startswith('.'):
             # Only include dirs that have .md files
             md_files = [f for f in os.listdir(fpath) if f.endswith('.md')]
-            if md_files and entry not in ['__pycache__', '.git', 'venv']:
+            if md_files and entry not in ['__pycache__', '.git', 'venv', 'archive', 'stack']:
                 projects.append({
                     'name': entry,
                     'display_name': entry.replace('_', ' ').title(),

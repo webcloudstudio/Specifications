@@ -1,125 +1,50 @@
-# Feature: Service Script Standards (bin/ Contract)
+# Service Script Standards
 
-**spec_v3 · 2026-03-10**
-
----
-
-## Purpose
-
-The Service Script Standards define the contract that project shell scripts must follow
-to be automatically discovered and registered as operations in GAME. Any script that
-follows the contract becomes a clickable button with zero additional configuration.
+**The bin/ script contract.** How scripts register as platform operations.
 
 ---
 
-## User Interactions
+## The Header
 
-- Project maintainers write bin/ scripts with standard headers
-- GAME discovers and registers them automatically on scan (no UI needed)
-- Registered operations appear as buttons in the CONTROL-PANEL
-- Users can see operation name, category, and declared port in the UI
+Any script in `bin/` with a `CommandCenter Operation` marker in the first 20 lines becomes a registered operation.
 
----
-
-## UI Screens
-
-No dedicated UI screen — this is a contract specification, not a UI feature.
-
-Discovery results are surfaced through CONTROL-PANEL (buttons) and PROJECT-DISCOVERY
-(compliance indicators).
-
----
-
-## Inputs & Outputs
-
-- **Inputs:**
-  - Shell script files located in `bin/` within any project directory
-- **Outputs:**
-  - Operation registry entries (name, category, command path, declared port)
-  - Consumed by OPERATIONS-ENGINE and CONTROL-PANEL
-
----
-
-## Interfaces With
-
-- PROJECT-DISCOVERY: reads bin/ headers during scan; produces operation registry
-- OPERATIONS-ENGINE: uses registered command path to execute the operation
-- CONTROL-PANEL: displays operation buttons derived from the registry
-- MONITORING-HEARTBEATS: uses declared port for health checks
-
----
-
-## Contracts
-
-### The CommandCenter Operation Header
-
-Any bash script in a project's `bin/` directory that includes a `CommandCenter Operation`
-marker in the first 20 lines is registered as an operation.
-
-**Required fields:**
-```bash
-#!/bin/bash
-# CommandCenter Operation
-# Name: [Human-readable operation name]
-```
-
-**Optional fields:**
-```bash
-# Port: [integer]        ← declared service port; used for health checks and display
-# Category: [local|remote]  ← defaults to "local" if omitted
-```
-
-**Complete example:**
 ```bash
 #!/bin/bash
 # CommandCenter Operation
 # Name: Service Start
 # Port: 8000
 # Category: local
-
-source venv/bin/activate
-./run_server.sh --port 8000
+# Health: /health
+# Schedule: daily 02:00
+# MaxMemory: 512M
+# Timeout: 300
 ```
 
-### Rules
+**Required:** `CommandCenter Operation` marker + `Name:`
+**Optional:** `Port`, `Category`, `Health`, `Schedule`, `MaxMemory`, `Timeout`
 
-1. The `CommandCenter Operation` marker must appear within the first 20 lines.
-2. `Name:` is required. Scripts without a Name: are ignored.
-3. All other fields are optional.
-4. The script is run from the project's root directory (not from `bin/`).
-5. Scripts without the marker are valid shell scripts but are not registered with GAME.
-6. A project may have any number of registered operations.
-7. The command path registered is relative to the project root (e.g., `bin/start.sh`).
+## Rules
 
-### Naming Conventions (recommended, not enforced)
+1. Marker must appear within first 20 lines
+2. `Name:` is required — scripts without it are ignored
+3. Script runs from project root (not from `bin/`)
+4. Scripts must be executable (`chmod +x`)
+5. A project can have any number of registered operations
+6. Bash and Python scripts supported
 
-| Script name | Typical purpose |
-|-------------|----------------|
-| `bin/start.sh` | Start development server |
-| `bin/stop.sh` | Stop development server |
-| `bin/build.sh` | Run build pipeline |
-| `bin/test.sh` | Run test suite |
-| `bin/deploy.sh` | Deploy to production |
+## Standard Names (recommended)
 
-### Platform Notes
+| Script | Purpose |
+|--------|---------|
+| `bin/start.sh` | Start services |
+| `bin/stop.sh` | Stop services |
+| `bin/build.sh` | Build / compile |
+| `bin/test.sh` | Run tests |
+| `bin/deploy.sh` | Deploy |
 
-Scripts must be valid bash scripts (WSL/Linux bash). Windows `.bat` or PowerShell
-scripts are not currently supported.
+## Interfaces
 
-Scripts should be executable (`chmod +x`). GAME will attempt to run them directly;
-permission errors are surfaced in the process log.
-
----
-
-## State Machine
-
-Not applicable — this is a static contract, not a stateful process.
-
----
-
-## Out of Scope
-
-- Executing scripts → OPERATIONS-ENGINE
-- Displaying buttons → CONTROL-PANEL
-- Health checking using declared ports → MONITORING-HEARTBEATS
-- Non-bash script types → not planned
+- **PROJECT-DISCOVERY:** reads headers during scan
+- **OPERATIONS-ENGINE:** uses registered path to execute
+- **CONTROL-PANEL:** renders operation buttons
+- **MONITORING-HEARTBEATS:** uses declared port for health checks

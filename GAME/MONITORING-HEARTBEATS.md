@@ -1,71 +1,32 @@
-# Feature: Monitoring & Heartbeats
+# Monitoring & Health Checks [ROADMAP]
 
-**spec_v4 · 2026-03-11 · [ROADMAP]**
-
----
-
-## Purpose
-
-Polls running services and tells the user when something goes down. Closes the loop
-between "I started the server" and "the server is actually healthy."
+**Service health polling and alerting.** Polls running services, alerts on failure, tracks uptime.
 
 ---
 
-## What the User Can Do
+## Capabilities
 
-- See health status (UP / DOWN / UNKNOWN) per service in the dashboard
-- Get notified when a service goes down or comes back up
-- View health history: uptime %, recent incidents
-- Silence alerts temporarily for a project
-
----
-
-## Screens
-
-### Health Indicators (inline, Control Panel)
-
-Per-project: health badge (UP green / DOWN red / UNKNOWN gray), last checked time,
-response time.
-
-### Monitoring Dashboard
-
-Table of all monitored services: project, endpoint, status, last checked, response time,
-uptime %. Incident log below.
-
-### Alert Notification (in-UI)
-
-Banner or toast when a service changes state. Links to the project and its log.
-
----
+- Health polling via declared Port and health endpoint
+- Liveness check: is the service responding?
+- Readiness check: is it ready for traffic?
+- States: UNKNOWN → UP → DOWN → SNOOZED
+- In-UI alerts on state transitions
+- Uptime history and incident log
+- Silence alerts temporarily per project
 
 ## How It Works
 
-The platform polls each service that has declared a port in its bin/ header. A
-successful HTTP response to the declared endpoint = UP. Connection refused, timeout,
-or error response = DOWN.
+Polls each service that declares a port in bin/ headers or METADATA.md. HTTP response to health endpoint = UP. Connection refused/timeout/error = DOWN.
 
-Port and health path come from the Operations Contract (THE-CONTRACT.md §1).
+## Screens
 
----
+**Health Indicators (inline):** Per-project badge (UP/DOWN/UNKNOWN), last checked, response time.
 
-## Alert Channels
+**Monitoring Dashboard:** All monitored services table. Incident log below.
 
-Initial: in-UI notification only.
-Future: webhook, email, OS notification. [TBD]
+**Alerts:** Banner or toast on state change.
 
----
+## Future
 
-## States
-
-```
-UNKNOWN → UP → DOWN → UP  (with alert on each transition)
-                    → SNOOZED (alerts suppressed; still polled)
-```
-
----
-
-## Out of Scope
-
-- Automatic restart on failure → possible future integration with OPERATIONS-ENGINE
-- External (cloud-hosted) service monitoring → not planned
-- Performance benchmarking → out of scope
+- Webhook/email/OS notifications
+- Auto-restart on failure (integration with OPERATIONS-ENGINE)

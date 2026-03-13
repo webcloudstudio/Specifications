@@ -1,69 +1,24 @@
-# Feature: Git Integration
+# Git Integration
 
-**spec_v4 · 2026-03-11**
-
----
-
-## Purpose
-
-Surfaces each project's git status in the dashboard and flags projects that are not
-following git conventions. The platform reads git state — it never modifies it.
+**Read-only git status display.** Surfaces each project's git state in the dashboard. Never modifies git.
 
 ---
 
-## What the User Can Do
+## Capabilities
 
-- See at a glance which projects have uncommitted changes
-- See which projects have unpushed commits
-- See current branch per project
-- See whether git is initialized at all
-- See governance compliance (git rules pass/fail)
+- Per-project: branch, uncommitted changes count, unpushed commits count, last commit message
+- Governance checklist: initialized, remote configured, not persistently dirty
+- Status read during each discovery scan
 
----
+## Governance Rules (advisory, not blocking)
 
-## Screens
-
-### Git Status (inline, Control Panel)
-
-Per-project row:
-- Git initialized: yes / no
-- Current branch
-- Uncommitted changes count
-- Unpushed commits count
-- Last commit message (truncated) and time
-
-### Governance Checklist (within Project Detail)
-
-Pass/fail list of git governance rules:
-- Git initialized
-- Remote configured
-- No long-lived uncommitted changes
-- Has pushed recently
-
----
-
-## How It Works
-
-Git status is read during each discovery scan by running standard git commands in each
-project directory. The platform does not modify any project's git state.
-
----
-
-## Governance Rules
-
-Rules are advisory — they show warnings, they do not block anything.
-
-Standard rules:
 - Git must be initialized
 - A remote must be configured
-- Working tree should not be dirty for an extended period
+- Working tree should not be dirty for extended periods
 
-Custom rules per project: [TBD] — may be declared in STACK.yaml.
+## Data Flow
 
----
-
-## Out of Scope
-
-- Performing git operations (commit, push, merge) on behalf of the user → not planned
-- Branch management UI → not planned
-- CI/CD pipeline integration → not planned
+| Reads From | Writes To |
+|------------|-----------|
+| Filesystem git state | CONTROL-PANEL (git status display) |
+| | PROJECT-DISCOVERY (compliance flags) |

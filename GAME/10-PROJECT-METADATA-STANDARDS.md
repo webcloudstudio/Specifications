@@ -1,24 +1,17 @@
 # Project Metadata Standards
 
-**spec_v5 · 2026-03-13**
+**The METADATA.md contract.** Single file for project identity, portfolio, links, and discovery.
 
 ---
 
-## Purpose
+## METADATA.md
 
-Defines the single file a project uses to describe itself to the platform and to the AI development environment. All project identity, portfolio card, service links, and discovery metadata live in one place.
+**Location:** Project root. **Replaces:** `git_homepage.md`, `Links.md`, `STACK.yaml`.
 
----
-
-## The Consolidated Contract: METADATA.md
-
-**Location:** Project root (`METADATA.md`)
-**Replaces:** `git_homepage.md`, `Links.md`, `STACK.yaml` (those files are deprecated)
-
-```
+```yaml
 name: MyProject
 title: My Project — Short Tagline
-description: One to two sentence description of what this project does.
+description: One to two sentence description.
 port: 8000
 status: ACTIVE
 version: 1.0
@@ -28,90 +21,48 @@ image: images/myproject.webp
 health: /health
 show_on_homepage: true
 tags: web, tool, api
+desired_state: running
+namespace: production
 links:
-    Production  | https://myproject.example.com | Live site
-    Docs        | https://docs.example.com       | API documentation
-    Staging     | https://staging.example.com    | Pre-production
+    Production | https://myproject.example.com | Live site
+    Docs       | https://docs.example.com       | API documentation
 ```
 
----
-
-## Field Reference
+## Fields
 
 | Field | Required At | Purpose |
 |-------|------------|---------|
-| `name` | All statuses | Machine name (no spaces) |
-| `status` | All statuses | Lifecycle stage: IDEA, PROTOTYPE, ACTIVE, PRODUCTION, ARCHIVED |
-| `title` | PROTOTYPE+ | Display name with short tagline |
-| `description` | PROTOTYPE+ | One to two sentences for portfolio card and dashboard |
-| `port` | ACTIVE+ | Primary port the service listens on |
-| `stack` | ACTIVE+ | Short technology summary (e.g. `Python/Flask/SQLite`) |
+| `name` | All | Machine name (no spaces) |
+| `status` | All | IDEA, PROTOTYPE, ACTIVE, PRODUCTION, ARCHIVED |
+| `title` | PROTOTYPE+ | Display name with tagline |
+| `description` | PROTOTYPE+ | One to two sentences |
+| `port` | ACTIVE+ | Primary service port |
+| `stack` | ACTIVE+ | Technology summary |
 | `version` | ACTIVE+ | Semantic version |
-| `updated` | ACTIVE+ | ISO date of last meaningful change |
-| `tags` | ACTIVE+ | Comma-separated tags for dashboard filtering and portfolio badges |
-| `show_on_homepage` | ACTIVE+ | `true` = include in published portfolio |
-| `image` | Optional | Relative path to portfolio card image |
-| `health` | PRODUCTION | Health check endpoint path (e.g. `/health`) |
-| `links` | Optional | Pipe-separated table: `Name | URL | Notes` |
+| `updated` | ACTIVE+ | ISO date |
+| `tags` | ACTIVE+ | Comma-separated |
+| `show_on_homepage` | ACTIVE+ | Include in portfolio |
+| `image` | Optional | Portfolio card image path |
+| `health` | PRODUCTION | Health check path |
+| `links` | Optional | Pipe-separated: Name | URL | Notes |
 
----
+## Status Levels
 
-## Status Values
+| Status | Compliance Level |
+|--------|-----------------|
+| IDEA | name + status only |
+| PROTOTYPE | METADATA.md complete + CLAUDE.md stub |
+| ACTIVE | Full script + metadata compliance |
+| PRODUCTION | All rules including health + git + env |
+| ARCHIVED | METADATA.md only |
 
-| Status | Meaning |
-|--------|---------|
-| `IDEA` | Concept only — no code expected |
-| `PROTOTYPE` | Proof of concept — not stable |
-| `ACTIVE` | Actively developed and in use |
-| `PRODUCTION` | Stable, deployed, monitored |
-| `ARCHIVED` | No longer maintained |
+## CLAUDE.md
 
-The compliance verifier (`verify.py`) uses status to determine which rules to enforce. IDEA projects are not penalized for missing bin/ scripts or CLAUDE.md. PRODUCTION projects are checked for health endpoints, git compliance, and clean environment handling.
+**Required at:** PROTOTYPE+. Provides AI working context. Must have `## Dev Commands`, `## Service Endpoints`, `## Bookmarks` at ACTIVE+.
 
----
+## Interfaces
 
-## CLAUDE.md — AI Context File
-
-**Location:** Project root (`CLAUDE.md`)
-**Required at:** PROTOTYPE and above
-
-Provides working context to the AI assistant. Standard sections parsed by the platform:
-
-```markdown
-# Project Title
-One paragraph description.
-
-## Dev Commands
-- Start: `./bin/start.sh`
-- Test: `./bin/test.sh`
-
-## Service Endpoints
-- Local: http://localhost:8000
-
-## Bookmarks
-### Useful Links
-- [Production](https://...)
-```
-
-Sections `## Dev Commands`, `## Service Endpoints`, and `## Bookmarks` are required at ACTIVE and above.
-
----
-
-## Deprecated Files
-
-These files were used in earlier versions of the platform. Their fields have been merged into `METADATA.md`. Do not create them for new projects. Migrate existing projects and delete the originals.
-
-| Deprecated File | Replaced By |
-|----------------|-------------|
-| `git_homepage.md` | `title`, `description`, `tags`, `image`, `show_on_homepage` in METADATA.md |
-| `Links.md` | `links:` block in METADATA.md |
-| `STACK.yaml` | `stack:` field in METADATA.md |
-
----
-
-## Interfaces With
-
-- **PROJECT-DISCOVERY**: reads METADATA.md on every scan
-- **CONTROL-PANEL**: displays title, status, tags, links from METADATA.md
-- **GITHUB-PUBLISHER**: reads `show_on_homepage`, `title`, `description`, `tags`, `image` for portfolio cards
-- **COMPLIANCE-VERIFICATION** (`verify.py`): checks field presence and value validity per status level
+- **PROJECT-DISCOVERY:** reads METADATA.md on every scan
+- **CONTROL-PANEL:** displays title, status, tags, links
+- **GITHUB-PUBLISHER:** reads portfolio fields
+- **COMPLIANCE-VERIFICATION:** checks field presence per status
