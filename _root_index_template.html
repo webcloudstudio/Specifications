@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Specifications — Foundation & Projects</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0d1117; color: #c9d1d9;
+  display: flex; height: 100vh; overflow: hidden;
+}
+#sidebar {
+  width: 260px; min-width: 260px; background: #161b22;
+  border-right: 1px solid #21262d; overflow-y: auto; display: flex; flex-direction: column;
+}
+#sidebar header { padding: 20px 16px 12px; border-bottom: 1px solid #21262d; }
+#sidebar header h1 { font-size: 15px; font-weight: 600; color: #f0f6fc; }
+#sidebar header p { font-size: 11px; color: #6e7681; margin-top: 4px; }
+.nav-section { padding: 16px 0 8px; }
+.nav-section-title {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: #6e7681; padding: 0 16px 6px;
+}
+.nav-item {
+  display: block; padding: 7px 16px; font-size: 13px; color: #8b949e;
+  cursor: pointer; border-left: 3px solid transparent;
+  transition: color .1s, border-color .1s, background .1s; text-decoration: none;
+}
+.nav-item:hover { color: #c9d1d9; background: #1f2428; }
+.nav-item.active { color: #58a6ff; border-left-color: #58a6ff; background: rgba(88,166,255,.06); }
+.nav-section-divider { height: 1px; background: #21262d; margin: 8px 0; }
+#content { flex: 1; overflow-y: auto; }
+#home-panel { padding: 40px 48px; max-width: 860px; }
+#doc-panel { padding: 40px 48px; max-width: 860px; display: none; }
+#home-panel h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin: 32px 0 16px; }
+.section-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: #6e7681; margin-top: 24px; margin-bottom: 12px; letter-spacing: .08em; }
+.card-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px;
+}
+.card {
+  background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 16px;
+  cursor: pointer; transition: border-color .2s, background .2s;
+}
+.card:hover { border-color: #58a6ff; background: rgba(88,166,255,.06); }
+.card h3 { font-size: 14px; font-weight: 600; color: #f0f6fc; margin-bottom: 8px; }
+.card p { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 12px; }
+.tag { font-size: 10px; display: inline-block; padding: 2px 6px; border-radius: 12px; font-weight: 500; }
+.tag.foundation { background: #1f3a1f; color: #56d364; }
+.tag.feature { background: #1f3a49; color: #58a6ff; }
+.project-link {
+  display: inline-block; margin: 8px 0; padding: 8px 16px; background: #161b22; border: 1px solid #21262d; border-radius: 6px;
+  color: #58a6ff; text-decoration: none; font-size: 13px; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.project-link:hover { border-color: #58a6ff; background: rgba(88,166,255,.06); }
+.doc-content h1 { font-size: 24px; font-weight: 700; margin: 24px 0 16px; color: #f0f6fc; }
+.doc-content h2 { font-size: 20px; font-weight: 600; margin: 20px 0 12px; color: #f0f6fc; }
+.doc-content h3 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; color: #c9d1d9; }
+.doc-content h4 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; color: #c9d1d9; }
+.doc-content p { margin: 12px 0; line-height: 1.6; }
+.doc-content ul, .doc-content ol { margin: 12px 0 12px 20px; line-height: 1.6; }
+.doc-content li { margin: 6px 0; }
+.doc-content pre {
+  background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 12px;
+  overflow-x: auto; margin: 12px 0; font-size: 12px; line-height: 1.4;
+}
+.doc-content code {
+  background: #161b22; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 12px; color: #79c0ff;
+}
+.doc-content pre code { background: none; padding: 0; }
+.doc-content table { border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.doc-content table th, .doc-content table td { padding: 8px 12px; border: 1px solid #21262d; text-align: left; }
+.doc-content table th { background: #161b22; font-weight: 600; }
+.doc-content blockquote { border-left: 4px solid #58a6ff; padding-left: 16px; margin: 12px 0; color: #8b949e; font-style: italic; }
+.doc-content hr { border: none; border-top: 1px solid #21262d; margin: 24px 0; }
+.subtitle { font-size: 14px; color: #8b949e; margin: 8px 0 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <header>
+    <h1>Specifications</h1>
+    <p>FOUNDATION & PROJECTS</p>
+  </header>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-section-title">Foundation</div>
+      <a class="nav-item" onclick="showDoc('METHODOLOGY')">Methodology</a>
+      <a class="nav-item" onclick="showDoc('THE-CONTRACT')">The Contract</a>
+      <a class="nav-item" onclick="showDoc('PERSISTENCE')">Persistence</a>
+      <a class="nav-item" onclick="showDoc('OPERATIONS')">Operations</a>
+      <a class="nav-item" onclick="showDoc('LOGGING')">Logging</a>
+    </div>
+    <div class="nav-section-divider"></div>
+    <div class="nav-section">
+      <div class="nav-section-title">Projects</div>
+      <!-- PROJECT_LINKS -->
+    </div>
+  </nav>
+</div>
+
+<div id="content">
+  <div id="home-panel">
+    <h1>Specifications</h1>
+    <p class="subtitle">Foundation documents and project specifications. Start with Foundation, then explore specific projects.</p>
+
+    <div class="section-label">Foundation Documents</div>
+    <div class="card-grid">
+      <div class="card" onclick="showDoc('METHODOLOGY')" style="cursor: pointer;">
+        <h3>Methodology</h3>
+        <p>How this specification system works. The three-layer model. Why structure matters.</p>
+        <span class="tag foundation">Start here</span>
+      </div>
+      <div class="card" onclick="showDoc('THE-CONTRACT')" style="cursor: pointer;">
+        <h3>The Contract</h3>
+        <p>What every project must provide to participate in the platform.</p>
+        <span class="tag foundation">Foundation</span>
+      </div>
+      <div class="card" onclick="showDoc('PERSISTENCE')" style="cursor: pointer;">
+        <h3>Persistence</h3>
+        <p>How projects store their metadata in plain text files.</p>
+        <span class="tag foundation">Foundation</span>
+      </div>
+      <div class="card" onclick="showDoc('OPERATIONS')" style="cursor: pointer;">
+        <h3>Operations</h3>
+        <p>What bin/ scripts must expose: discovery, logging, status tracking.</p>
+        <span class="tag foundation">Foundation</span>
+      </div>
+      <div class="card" onclick="showDoc('LOGGING')" style="cursor: pointer;">
+        <h3>Logging</h3>
+        <p>How operations produce observable output and status events.</p>
+        <span class="tag foundation">Foundation</span>
+      </div>
+    </div>
+
+    <div class="section-label">Project Specifications</div>
+    <p>Click a project link in the left sidebar to view its specification.</p>
+  </div>
+
+  <div id="doc-panel">
+    <a href="javascript:showHome()" style="color: #58a6ff; text-decoration: none; font-size: 12px;">← Back</a>
+    <div id="doc-content" class="doc-content"></div>
+  </div>
+</div>
+
+<script>
+const DOCS = {};
+
+function showDoc(key) {
+  if (!DOCS[key]) {
+    console.warn('Document not found:', key);
+    return;
+  }
+  document.getElementById('home-panel').style.display = 'none';
+  document.getElementById('doc-panel').style.display = 'block';
+
+  const content = DOCS[key];
+  const html = markdownToHtml(content);
+  document.getElementById('doc-content').innerHTML = html;
+
+  // Update active nav item
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.nav-item[onclick="showDoc('${key}')"]`)?.classList.add('active');
+}
+
+function showHome() {
+  document.getElementById('home-panel').style.display = 'block';
+  document.getElementById('doc-panel').style.display = 'none';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+}
+
+function markdownToHtml(md) {
+  // Simple markdown to HTML converter
+  let html = md
+    .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
+    .replace(/^- (.*?)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n\n+/g, '</p><p>')
+    .replace(/^(?!<[^>]+>)/gm, '<p>');
+  return '<p>' + html + '</p>';
+}
+</script>
+
+</body>
+</html>
