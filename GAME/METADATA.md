@@ -11,7 +11,7 @@ port: 5001
 status: ACTIVE
 version: 2026-03-13.2
 updated: 20260313
-stack: Python/Flask/SQLite
+stack: Python/Flask/SQLite/Bootstrap5
 health: /health
 show_on_homepage: true
 tags: dashboard, tool, platform

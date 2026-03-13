@@ -1,74 +1,84 @@
 #!/bin/bash
-# Generate a complete build prompt from a project's STACK.yaml and all referenced files.
+# Generate a complete build prompt from a project's METADATA.md, stack files, and spec files.
 #
-# Reads STACK.yaml, collects all technology files and spec files,
-# and concatenates them into a single prompt suitable for an AI agent.
+# Reads METADATA.md for stack components, collects technology files from stack/,
+# collects all .md spec files from the project directory, and concatenates them
+# into a single prompt suitable for an AI agent.
+#
+# Also prepends CLAUDE_RULES.md as the integration standard.
 #
 # Usage:
-#   bash generate-prompt.sh <project-name>                  # Print to stdout
+#   bash generate-prompt.sh <project-name>                    # Print to stdout
 #   bash generate-prompt.sh <project-name> > build-prompt.md  # Save to file
 #
 # Example:
-#   bash generate-prompt.sh GAME
+#   bash generate-prompt.sh GAME > build-prompt.md
 
 set -euo pipefail
 
-# Get the repository root (where this script lives)
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Get project name from argument
 PROJECT_NAME="${1:?Usage: bash generate-prompt.sh <project-name>}"
 PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
-STACK_FILE="$PROJECT_DIR/STACK.yaml"
+METADATA_FILE="$PROJECT_DIR/METADATA.md"
 
-if [ ! -f "$STACK_FILE" ]; then
-    echo "ERROR: STACK.yaml not found at $STACK_FILE" >&2
+if [ ! -f "$METADATA_FILE" ]; then
+    echo "ERROR: METADATA.md not found at $METADATA_FILE" >&2
     exit 1
 fi
 
-# --- Parse STACK.yaml ---
-get_yaml_value() {
-    grep "^${1}:" "$STACK_FILE" | head -1 | sed 's/^[^:]*: *//' | tr -d '"' | tr -d "'" | tr -d '\r'
+# --- Parse METADATA.md (line-based key: value) ---
+get_metadata() {
+    grep "^${1}:" "$METADATA_FILE" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//" | tr -d '\r'
 }
 
-LANGUAGE=$(get_yaml_value "language")
-FRAMEWORK=$(get_yaml_value "framework")
-DATABASE=$(get_yaml_value "database")
-FRONTEND=$(get_yaml_value "frontend")
+STACK=$(get_metadata "stack")
+PORT=$(get_metadata "port")
+DISPLAY_NAME=$(get_metadata "display_name")
+DESCRIPTION=$(get_metadata "short_description")
 
-PROJECT_NAME=$(grep '^\s*name:' "$STACK_FILE" | head -1 | sed 's/^[^:]*: *//' | tr -d '"' | tr -d "'" | tr -d '\r')
-PROJECT_DESC=$(grep '^\s*description:' "$STACK_FILE" | head -1 | sed 's/^[^:]*: *//' | tr -d '"' | tr -d "'" | tr -d '\r')
-PROJECT_PORT=$(grep '^\s*port:' "$STACK_FILE" | head -1 | sed 's/^[^:]*: *//' | tr -d '"' | tr -d "'" | tr -d '\r')
-OUTPUT_DIR=$(grep '^\s*output_dir:' "$STACK_FILE" | head -1 | sed 's/^[^:]*: *//' | tr -d '"' | tr -d "'" | tr -d '\r')
+if [ -z "$STACK" ]; then
+    echo "ERROR: No 'stack:' field in METADATA.md" >&2
+    exit 1
+fi
+
+# Parse stack components (slash-separated, case-insensitive file match)
+IFS='/' read -ra COMPONENTS <<< "$STACK"
 
 # --- Header ---
 cat <<HEADER
 # Build Prompt: $PROJECT_NAME
 
-You are building a project called **$PROJECT_NAME** — $PROJECT_DESC.
+You are building a project called **${DISPLAY_NAME:-$PROJECT_NAME}** — ${DESCRIPTION:-"(no description)"}.
 
 ## Stack
-- Language: $LANGUAGE
-- Framework: $FRAMEWORK
-- Database: $DATABASE
-- Frontend: $FRONTEND
-- Port: $PROJECT_PORT
-
-## Output Directory
-Write all generated code to: \`$OUTPUT_DIR\` (relative to this spec directory)
+$(for comp in "${COMPONENTS[@]}"; do echo "- $comp"; done)
+- Port: $PORT
 
 ## Instructions
-1. Read ALL technology reference files below — they define HOW to implement
-2. Read ALL specification files below — they define WHAT to implement
-3. Follow the technology patterns exactly (they are prescriptive standards)
-4. Build in the order specified in the specification files
+1. Read the CLAUDE_RULES section below — it defines project integration standards
+2. Read ALL technology reference files — they define HOW to implement
+3. Read ALL specification files — they define WHAT to implement
+4. Follow the technology patterns exactly (they are prescriptive standards)
+5. Build in the order implied by the specification files
 
 ---
 
 HEADER
 
+# --- CLAUDE_RULES.md ---
+if [ -f "$REPO_DIR/CLAUDE_RULES.md" ]; then
+    echo "# PROJECT INTEGRATION STANDARD"
+    echo ""
+    echo "---"
+    echo ""
+    echo "## CLAUDE_RULES.md"
+    echo ""
+    cat "$REPO_DIR/CLAUDE_RULES.md"
+    echo ""
+    echo ""
+fi
+
 # --- Technology Files ---
-# Always include common.md first
 echo "# TECHNOLOGY REFERENCES"
 echo ""
 
@@ -86,35 +96,29 @@ emit_file() {
     fi
 }
 
+# Always include common.md first
 emit_file "$REPO_DIR/stack/common.md" "Common Practices (stack/common.md)"
 
-# Language
-if [ -n "$LANGUAGE" ] && [ -f "$REPO_DIR/stack/${LANGUAGE}.md" ]; then
-    emit_file "$REPO_DIR/stack/${LANGUAGE}.md" "Language: ${LANGUAGE} (stack/${LANGUAGE}.md)"
-fi
+# Emit each stack component's reference file
+for comp in "${COMPONENTS[@]}"; do
+    comp_clean="$(echo "$comp" | tr -d ' ')"
+    comp_lower="$(echo "$comp_clean" | tr '[:upper:]' '[:lower:]')"
+    stack_file="$REPO_DIR/stack/${comp_lower}.md"
+    if [ -f "$stack_file" ]; then
+        emit_file "$stack_file" "$comp (stack/${comp_lower}.md)"
+    else
+        echo "<!-- WARNING: No stack file for '$comp' (expected stack/${comp_lower}.md) -->"
+        echo ""
+    fi
+done
 
-# Framework
-if [ -n "$FRAMEWORK" ] && [ -f "$REPO_DIR/stack/${FRAMEWORK}.md" ]; then
-    emit_file "$REPO_DIR/stack/${FRAMEWORK}.md" "Framework: ${FRAMEWORK} (stack/${FRAMEWORK}.md)"
-fi
-
-# Database
-if [ -n "$DATABASE" ] && [ -f "$REPO_DIR/stack/${DATABASE}.md" ]; then
-    emit_file "$REPO_DIR/stack/${DATABASE}.md" "Database: ${DATABASE} (stack/${DATABASE}.md)"
-fi
-
-# Frontend
-if [ -n "$FRONTEND" ] && [ -f "$REPO_DIR/stack/${FRONTEND}.md" ]; then
-    emit_file "$REPO_DIR/stack/${FRONTEND}.md" "Frontend: ${FRONTEND} (stack/${FRONTEND}.md)"
-fi
-
-# --- STACK.yaml itself ---
+# --- METADATA.md ---
 echo "---"
 echo ""
-echo "## Project Configuration (STACK.yaml)"
+echo "## Project Configuration (METADATA.md)"
 echo ""
-echo '```yaml'
-cat "$STACK_FILE"
+echo '```'
+cat "$METADATA_FILE"
 echo '```'
 echo ""
 
@@ -123,19 +127,11 @@ echo ""
 echo "# PROJECT SPECIFICATION"
 echo ""
 
-SPECS=$(grep '^\s*- [0-9]' "$STACK_FILE" | sed 's/^\s*- //' | tr -d '\r')
-
-if [ -n "$SPECS" ]; then
-    while IFS= read -r SPEC; do
-        SPEC_PATH="$PROJECT_DIR/$SPEC"
-        if [ -f "$SPEC_PATH" ]; then
-            emit_file "$SPEC_PATH" "Spec: $SPEC"
-        else
-            echo "<!-- WARNING: $SPEC listed in STACK.yaml but file not found -->"
-            echo ""
-        fi
-    done <<< "$SPECS"
-fi
+# Emit all .md files in the project directory (sorted, excluding METADATA.md)
+for spec_file in $(find "$PROJECT_DIR" -maxdepth 1 -name '*.md' ! -name 'METADATA.md' | sort); do
+    fname="$(basename "$spec_file")"
+    emit_file "$spec_file" "Spec: $fname"
+done
 
 # --- Footer ---
 cat <<FOOTER
@@ -143,6 +139,6 @@ cat <<FOOTER
 
 # END OF BUILD PROMPT
 
-Build this project following the technology references above for implementation patterns
-and the specification files for the specific features and behavior.
+Build this project following the integration standard, technology references, and specification files above.
+All patterns in the technology references are prescriptive — use them exactly as shown.
 FOOTER

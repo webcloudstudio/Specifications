@@ -46,6 +46,7 @@ RULES_BY_LEVEL = {
     "ACTIVE": [
         "metadata_has_port",
         "metadata_has_stack",
+        "stack_components_have_files",
         "metadata_has_tags",
         "has_bin_dir",
         "has_start_script",
@@ -258,6 +259,27 @@ def check(rule: str, project_path: str, metadata: dict, scripts: list, registere
         ok = bool(metadata.get("stack"))
         return CheckResult(rule, ok, "" if ok else "METADATA.md missing 'stack' field")
 
+    if rule == "stack_components_have_files":
+        stack_val = metadata.get("stack", "")
+        if not stack_val:
+            return CheckResult(rule, False, "No stack field to validate")
+        # Find the Specifications/stack/ directory relative to this script
+        spec_root = os.path.dirname(os.path.abspath(__file__))
+        # Also check relative to project (in case verify.py is elsewhere)
+        stack_dir = os.path.join(spec_root, "stack")
+        if not os.path.isdir(stack_dir):
+            # Try finding it relative to project's parent
+            stack_dir = os.path.join(os.path.dirname(project_path), "Specifications", "stack")
+        components = [c.strip() for c in stack_val.split("/") if c.strip()]
+        missing = []
+        for comp in components:
+            # Case-insensitive match: "Bootstrap5" -> "bootstrap5.md"
+            stack_file = os.path.join(stack_dir, comp.lower() + ".md")
+            if not os.path.isfile(stack_file):
+                missing.append(f"{comp} (expected stack/{comp.lower()}.md)")
+        ok = not missing
+        return CheckResult(rule, ok, "" if ok else f"Stack components without stack files: {', '.join(missing)}")
+
     if rule == "metadata_has_tags":
         ok = bool(metadata.get("tags"))
         return CheckResult(rule, ok, "" if ok else "METADATA.md missing 'tags' field")
@@ -289,10 +311,11 @@ def check(rule: str, project_path: str, metadata: dict, scripts: list, registere
         missing = []
         for s in registered:
             content = read_file(s) or ""
-            if "[GAME] Service" not in content:
+            # Accept [$PROJECT_NAME], [GAME], or any [$name] pattern
+            if not re.search(r'\[[\w$_]+\]\s*(Starting|Started|Stopped|Error|Service)', content):
                 missing.append(os.path.basename(s))
         ok = not missing
-        return CheckResult(rule, ok, "" if ok else f"No [GAME] status messages in: {', '.join(missing)}")
+        return CheckResult(rule, ok, "" if ok else f"No status messages ([$PROJECT_NAME] Starting/Stopped) in: {', '.join(missing)}")
 
     if rule == "scripts_have_logging":
         missing = []

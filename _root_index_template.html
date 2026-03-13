@@ -89,8 +89,7 @@ body {
   <nav>
     <div class="nav-section">
       <div class="nav-section-title">Foundation</div>
-      <a class="nav-item" onclick="showDoc('FEATURES')">Features</a>
-      <a class="nav-item" onclick="showDoc('CLAUDE_RULES')">Claude Rules</a>
+      <!-- FOUNDATION_NAV -->
     </div>
     <div class="nav-section-divider"></div>
     <div class="nav-section">
@@ -107,20 +106,13 @@ body {
 
     <div class="section-label">Foundation Documents</div>
     <div class="card-grid">
-      <div class="card" onclick="showDoc('FEATURES')" style="cursor: pointer;">
-        <h3>Features</h3>
-        <p>All platform capabilities with status and completeness scores.</p>
-        <span class="tag foundation">Start here</span>
-      </div>
-      <div class="card" onclick="showDoc('CLAUDE_RULES')" style="cursor: pointer;">
-        <h3>Claude Rules</h3>
-        <p>Integration rules for projects. Scripts, metadata, governance.</p>
-        <span class="tag foundation">Foundation</span>
-      </div>
+      <!-- FOUNDATION_CARDS -->
     </div>
 
     <div class="section-label">Project Specifications</div>
-    <p style="font-size: 13px; color: #8b949e;">Click a project below or in the left sidebar.</p>
+    <div class="card-grid">
+      <!-- PROJECT_CARDS -->
+    </div>
   </div>
 
   <div id="doc-panel">

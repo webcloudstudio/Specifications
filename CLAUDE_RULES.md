@@ -1,6 +1,11 @@
+<!-- CLAUDE_RULES_START v2026-03-13.4 -->
 # CLAUDE_RULES — Project Integration Standard
 
-This file is the baseline CLAUDE.md for every project. An AI agent conforming to these rules can build, operate, and maintain any project in the ecosystem. A project that follows these rules is automatically discovered and integrated by the platform.
+**Version:** 2026-03-13.4
+
+This file is appended to each project's CLAUDE.md (or AGENTS.md). To update, copy the content between the `CLAUDE_RULES_START` and `CLAUDE_RULES_END` markers from `Specifications/CLAUDE_RULES.md` into `~/.claude/CLAUDE.md` or the project's CLAUDE.md. The canonical source is always `Specifications/CLAUDE_RULES.md`.
+
+An AI agent conforming to these rules can build, operate, and maintain any project in the ecosystem. A project that follows these rules is automatically discovered and integrated by the platform.
 
 ---
 
@@ -257,8 +262,12 @@ namespace: development
 
 | Field | Description |
 |-------|-------------|
-| `version` | Format: `YYYY-MM-DD.N` where N increments per commit on that date. Example: `2026-03-13.3` means third commit on March 13. Updated automatically by commit hooks or manually. |
+| `version` | Format: `YYYY-MM-DD.N` where N increments per commit on that date. Example: `2026-03-13.3` means third commit on March 13. Updated automatically by commit hooks or manually. This versioning format applies to all versioned markdown files in the ecosystem, not just METADATA.md. |
 | `updated` | Timestamp of last meaningful change. Format: `yyyymmdd_hhmmss`. Example: `20260313_142530`. |
+
+**VERSIONING RULE**: All markdown files that carry a version use the `YYYY-MM-DD.N` format. This includes CLAUDE_RULES.md itself, FEATURES.md, and any specification file with a version field. The `.N` suffix increments per change on that calendar date. This ensures versions sort lexicographically and are globally unambiguous.
+
+**STACK FIELD**: The `stack:` field lists technology components separated by `/`. Each component must correspond to a file in the `stack/` directory of the Specifications repository. Example: `Python/Flask/SQLite/Bootstrap5` maps to `stack/python.md`, `stack/flask.md`, `stack/sqlite.md`, `stack/bootstrap5.md`. Component names are case-insensitive for matching. `verify.py` checks that each component has a corresponding stack file.
 
 **Portfolio fields** (optional):
 
@@ -413,3 +422,4 @@ Features defined in FEATURES.md but not yet covered by rules:
 | Rolling Restarts | Not defined |
 | Workflow States (Kanban) | Data model defined, UI not built |
 | Event Log retention/query | Format defined, storage not built |
+<!-- CLAUDE_RULES_END -->
