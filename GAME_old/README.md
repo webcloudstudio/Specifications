@@ -21,7 +21,7 @@ AI-assisted workflow management platform that governs a portfolio of projects (~
 | `09-PROCESSES.md` | Background process management, heartbeat monitoring, process log capture, alert system |
 | `10-CONVENTIONS.md` | File naming, git hygiene, directory layout, CLAUDE.md standard sections, bin/ script headers |
 | `11-STARTUP.md` | Application startup validation, database initialization, scanner verification, health checks |
-| `STACK.yaml` | Technology selections, project config, stack rules, directories, environment variables |
+| `METADATA.md` | Technology selections, project config, stack rules, directories, environment variables |
 
 ---
 

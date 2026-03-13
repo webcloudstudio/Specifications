@@ -21,7 +21,7 @@ Routes Alexa voice commands through AWS Lambda + SQS to a local Python daemon th
 | `09-API.md` | REST API endpoints for programmatic rule management, integrations |
 | `10-AWS-SETUP.md` | Step-by-step AWS account setup, Lambda deployment, SQS queue creation, IAM policies |
 | `11-STARTUP.md` | Application startup validation, environment checks, initialization sequence |
-| `STACK.yaml` | Technology selections, project config, environment variables, database/Lambda/SQS configuration |
+| `METADATA.md` | Technology selections, project config, environment variables, database/Lambda/SQS configuration |
 
 ---
 

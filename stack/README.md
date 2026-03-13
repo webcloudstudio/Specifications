@@ -137,7 +137,7 @@ Prerequisites: stack/common.md, stack/python.md
 
 # Using Stack Files in Your Project
 
-### Step 1: Create STACK.yaml
+### Step 1: Create METADATA.md
 
 ```yaml
 language: python

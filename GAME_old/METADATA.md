@@ -1,5 +1,5 @@
 # Stack Configuration for Command Center
-#
+
 # This file declares which technology stack files to include when building
 # or reviewing this project. Each key maps to a file in PROJECT/stack/.
 #
