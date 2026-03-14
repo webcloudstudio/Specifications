@@ -212,8 +212,16 @@ def git_status(project_path: str) -> dict:
 # Individual rule checks
 # ---------------------------------------------------------------------------
 
-def check(rule: str, project_path: str, metadata: dict, scripts: list, registered: list) -> CheckResult:
+def get_agent_context(project_path: str) -> str:
+    """Read CLAUDE.md; if it's an @AGENTS.md pointer, read AGENTS.md instead."""
     claude_md = read_file(os.path.join(project_path, "CLAUDE.md")) or ""
+    if claude_md.strip() == "@AGENTS.md":
+        return read_file(os.path.join(project_path, "AGENTS.md")) or ""
+    return claude_md
+
+
+def check(rule: str, project_path: str, metadata: dict, scripts: list, registered: list) -> CheckResult:
+    claude_md = get_agent_context(project_path)
 
     # -- IDEA level --
     if rule == "has_metadata":
@@ -248,7 +256,7 @@ def check(rule: str, project_path: str, metadata: dict, scripts: list, registere
 
     if rule == "claude_md_has_dev_commands":
         ok = bool(re.search(r'^## Dev Commands', claude_md, re.MULTILINE | re.IGNORECASE))
-        return CheckResult(rule, ok, "" if ok else "CLAUDE.md missing '## Dev Commands' section")
+        return CheckResult(rule, ok, "" if ok else "AGENTS.md (or CLAUDE.md) missing '## Dev Commands' section")
 
     # -- ACTIVE level --
     if rule == "metadata_has_port":
@@ -328,11 +336,11 @@ def check(rule: str, project_path: str, metadata: dict, scripts: list, registere
 
     if rule == "claude_md_has_endpoints":
         ok = bool(re.search(r'^## Service Endpoints', claude_md, re.MULTILINE | re.IGNORECASE))
-        return CheckResult(rule, ok, "" if ok else "CLAUDE.md missing '## Service Endpoints' section")
+        return CheckResult(rule, ok, "" if ok else "AGENTS.md (or CLAUDE.md) missing '## Service Endpoints' section")
 
     if rule == "claude_md_has_bookmarks":
         ok = bool(re.search(r'^## Bookmarks', claude_md, re.MULTILINE | re.IGNORECASE))
-        return CheckResult(rule, ok, "" if ok else "CLAUDE.md missing '## Bookmarks' section")
+        return CheckResult(rule, ok, "" if ok else "AGENTS.md (or CLAUDE.md) missing '## Bookmarks' section")
 
     # -- PRODUCTION level --
     if rule == "has_env_example_or_no_env_needed":
