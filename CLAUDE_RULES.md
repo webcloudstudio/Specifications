@@ -63,11 +63,11 @@ All scripts live in `bin/` — bash (`.sh`) or Python (`.py`). The `# CommandCen
 # Category: service
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
-export FLASK_DEBUG=1
-flask run --port "$PORT"
+# your start command — use $PORT for the service port
+# e.g. Flask: export FLASK_DEBUG=1 && flask run --port "$PORT"
 ```
 
-`common.sh` handles everything: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, and the `[$PROJECT_NAME] Starting:` message. Override the trap after sourcing if the script needs custom cleanup.
+`common.sh` handles everything: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, and the `[$PROJECT_NAME] Starting:` message. Use `$PORT` as the service port — never hardcode a port number. Override the trap after sourcing if the script needs custom cleanup.
 
 **Python** — import `common.py` then add functionality:
 
@@ -78,7 +78,7 @@ flask run --port "$PORT"
 import sys, os; sys.path.insert(0, os.path.dirname(__file__)); from common import op
 
 def main(ctx):
-    # ctx.project_name, ctx.port, ctx.logger available
+    # ctx.project_name, ctx.port, ctx.logger available — use ctx.port as the service port
     pass
 
 if __name__ == '__main__':
