@@ -2,7 +2,7 @@
 
 # DEFAULT DEVELOPMENT RULES
 
-**Version:** 2026-03-15.1
+**Version:** 2026-03-16.1
 
 Full specification: `Specifications/CLAUDE_RULES.md`. This condensed version covers agent behavior only.
 
@@ -29,7 +29,8 @@ ProjectName/
   .env.sample       Required env vars (committed)
   .env              Actual env vars (never committed)
   bin/              All executable scripts
-    common.sh       Shared functions — sourced by all scripts
+    common.sh       Shared functions — sourced by all bash scripts
+    common.py       Shared OperationContext — imported by Python scripts
   doc/              Generated documentation
   logs/             Log files (gitignored)
   data/             Persistent data
@@ -38,74 +39,98 @@ ProjectName/
 
 ---
 
-## Bash Scripts (`bin/`)
+## Scripts (`bin/`)
 
-All scripts begin with this preamble:
+All scripts live in `bin/` — bash (`.sh`) or Python (`.py`). The `# CommandCenter Operation` marker in the first 20 lines registers a script with the platform.
+
+**Standard script names** (only create what the project needs):
+
+| Script | Purpose |
+|--------|---------|
+| `bin/start.sh` | Start service — service projects only |
+| `bin/stop.sh` | Stop service — service projects only |
+| `bin/build.sh` | Build / compile / package |
+| `bin/daily.sh` | Daily maintenance |
+| `bin/weekly.sh` | Weekly maintenance |
+| `bin/build_documentation.sh` | Generate doc/ output |
+| `bin/deploy.sh` | Deploy to environment |
+
+**Bash** — source `common.sh` then add functionality:
 
 ```bash
 #!/bin/bash
 # CommandCenter Operation
-set -euo pipefail
-SCRIPT_NAME="$(basename "$0" .sh)"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-cd "$PROJECT_DIR"
-source "$SCRIPT_DIR/common.sh"
-LOG_FILE="logs/${PROJECT_NAME}_${SCRIPT_NAME}_$(date +%Y%m%d_%H%M%S).log"
-mkdir -p logs
-exec > >(tee -a "$LOG_FILE") 2>&1
-echo "[$PROJECT_NAME] Starting: $SCRIPT_NAME"
+# Category: service
+source "$(cd "$(dirname "$0")" && pwd)/common.sh"
+
+export FLASK_DEBUG=1
+flask run --port "$PORT"
 ```
 
-- Use Linux line endings (no `\r`). Run `chmod +x bin/*.sh`.
-- Emit `[$PROJECT_NAME] Started/Stopped/Error: $SCRIPT_NAME` for platform parsing.
-- Long-running services: `trap 'echo "[$PROJECT_NAME] Stopped: $SCRIPT_NAME"; exit 0' SIGTERM SIGINT`
+`common.sh` handles everything: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, and the `[$PROJECT_NAME] Starting:` message. Override the trap after sourcing if the script needs custom cleanup.
 
-`bin/common.sh` reads METADATA.md and activates venv:
+**Python** — import `common.py` then add functionality:
 
-```bash
-#!/bin/bash
-get_metadata() { grep "^${1}:" "$PROJECT_DIR/METADATA.md" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//"; }
-PROJECT_NAME="$(get_metadata "name")"
-PORT="$(get_metadata "port")"
-[ -d "$PROJECT_DIR/venv" ] && source "$PROJECT_DIR/venv/bin/activate" 2>/dev/null
-[ -f "$PROJECTS_DIR/.secrets" ] && set -a && source "$PROJECTS_DIR/.secrets" && set +a
-[ -f "$PROJECT_DIR/.env" ] && set -a && source "$PROJECT_DIR/.env" && set +a
+```python
+#!/usr/bin/env python3
+# CommandCenter Operation
+# Category: maintenance
+import sys, os; sys.path.insert(0, os.path.dirname(__file__)); from common import op
+
+def main(ctx):
+    # ctx.project_name, ctx.port, ctx.logger available
+    pass
+
+if __name__ == '__main__':
+    op(__file__).run(main)
 ```
+
+`op(__file__).run(main)` handles the same concerns as `common.sh`: path setup, METADATA.md parsing, env loading, logging, SIGTERM, and status messages.
+
+Use Linux line endings (no `\r`). Run `chmod +x bin/*.sh`.
 
 ---
 
 ## METADATA.md
 
-Key-value format (not YAML). Minimum required fields:
+**Authoritative source for project identity.** Always read `name`, `display_name`, `short_description`, and `git_repo` from this file — never infer them from directory names. Present in every set-up project.
+
+Key-value format (not YAML):
 
 ```
-name: MyProject
-display_name: My Project
-port: 8000
-status: ACTIVE
-stack: Python,Flask,SQLite
-short_description: One sentence.
-health: /health
+# AUTHORITATIVE PROJECT METADATA - THE FIELDS IN THIS FILE SHOULD BE CURRENT
+
+name: MyProject                              # machine slug, matches directory name
+display_name: My Project                     # human-readable name for UI/display
+git_repo: https://github.com/org/MyProject   # full HTTPS URL, for links only
+port: 8000                                   # omit if not a service
+short_description: One sentence.             # shown in dashboards and indexes
+health: /health                              # omit if not a service
+status: PROTOTYPE                            # IDEA|PROTOTYPE|ACTIVE|PRODUCTION|ARCHIVED
+stack: Python/Flask/SQLite                   # slash-separated, used by generate_prompt.sh
+version: 2026-03-16.1                        # YYYY-MM-DD.N, increment on releases
+updated: 20260316_120000                     # set automatically by platform scripts
 ```
 
-Status levels: `IDEA` → `PROTOTYPE` → `ACTIVE` → `PRODUCTION` → `ARCHIVED`
+`port`, `health`, `stack`, and `status` are platform fields — managed by GAME and platform scripts, not needed for day-to-day agent work. `git_repo` SSH remotes are normalised to HTTPS automatically.
 
 ---
 
-## AGENTS.md Required Sections (ACTIVE+)
+## AGENTS.md Required Sections
 
 ```markdown
 ## Dev Commands
-- Start: `./bin/start.sh`
-- Stop: `./bin/stop.sh`
-- Test: `./bin/test.sh`
+- Start: `./bin/start.sh`   # service projects only
+- Stop: `./bin/stop.sh`     # service projects only
+- Test: `./bin/test.sh`     # if tests exist
 
-## Service Endpoints
+## Service Endpoints        # omit if not a service
 - Local: http://localhost:PORT
 
 ## Bookmarks
 - [Documentation](doc/index.html)
 ```
+
+Only include commands and endpoints that actually exist for the project.
 
 # CLAUDE_RULES_END
