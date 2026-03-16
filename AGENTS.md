@@ -2,14 +2,34 @@
 
 > **This is the source repository for platform standards. It is exempt from CLAUDE_RULES
 > injection — it does not contain `CLAUDE_RULES_START` and must never receive it.**
-> Read `PROCESS_RULES.md` for the full intent and rationale behind all rules.
 > Read `CLAUDE_RULES.md` for the condensed agent-facing version that is distributed to projects.
+
+## Purpose
+
+This repository has two roles:
+1. **Managing the core infrastructure of other projects** — distributing standards,
+   templates, and tooling (CLAUDE_RULES.md, common.sh, common.py) that every project
+   consumes via `bin/create_project.py`.
+2. **Acting as a specification repository** — housing detailed specs (GAME/, AlexaPrototypeOne/,
+   stack/) that define what to build and how.
+
+## Design Intent
+
+The rules system exists so that any AI agent, given CLAUDE_RULES.md and a project's
+spec files, can build, operate, and maintain that project without additional context.
+The platform (GAME) then discovers and integrates projects automatically by reading
+the same standards (METADATA.md, bin/ headers, AGENTS.md).
+
+**What this means for changes to CLAUDE_RULES.md:**
+- Keep the distributed file minimal — target agents follow rules, they don't need rationale
+- Rules must be complete enough that an agent can act correctly without asking questions
+- When a rule changes here, run `bash bin/update_projects.sh` to propagate to all projects
+- Stack files in `stack/` are prescriptive — copy-paste patterns, not guidelines
 
 ## What This Repo Is
 
 The platform specification and standards repository. It defines:
 - **CLAUDE_RULES.md** — condensed agent behavior contract, distributed to all projects
-- **PROCESS_RULES.md** — full intent, rationale, and compliance standards; read this to understand WHY rules exist before changing them
 - **templates/** — canonical `common.sh` and `common.py` distributed to all projects
 - **stack/** — prescriptive, copy-paste-ready tech reference files per technology
 - **GAME/** and **AlexaPrototypeOne/** — project specifications organized by screen/component
