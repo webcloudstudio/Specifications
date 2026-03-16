@@ -273,6 +273,7 @@ def update_projects(project_filter, dry_run: bool) -> None:
         d for d in PROJECTS_DIR.iterdir()
         if d.is_dir() and not d.name.startswith(".")
         and d.name not in ("__pycache__", "venv", "node_modules")
+        and d != SPEC_DIR  # never update the Specifications source repo itself
     )
     if project_filter:
         candidates = [d for d in candidates if d.name == project_filter]

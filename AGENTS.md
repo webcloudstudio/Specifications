@@ -1,12 +1,17 @@
 # AGENTS.md — Specifications Repository
 
+> **This is the source repository for platform standards. It is exempt from CLAUDE_RULES
+> injection — it does not contain `CLAUDE_RULES_START` and must never receive it.**
+> Read `PROCESS_RULES.md` for the full intent and rationale behind all rules.
+> Read `CLAUDE_RULES.md` for the condensed agent-facing version that is distributed to projects.
+
 ## What This Repo Is
 
-A platform specification and standards repository. It defines:
-- **CLAUDE_RULES.md** — the agent behavior contract all projects must embed
-- **PROCESS_RULES.md** — the full canonical compliance standard
-- **stack/** — prescriptive, copy-paste-ready tech reference files per technology
+The platform specification and standards repository. It defines:
+- **CLAUDE_RULES.md** — condensed agent behavior contract, distributed to all projects
+- **PROCESS_RULES.md** — full intent, rationale, and compliance standards; read this to understand WHY rules exist before changing them
 - **templates/** — canonical `common.sh` and `common.py` distributed to all projects
+- **stack/** — prescriptive, copy-paste-ready tech reference files per technology
 - **GAME/** and **AlexaPrototypeOne/** — project specifications organized by screen/component
 
 ## Dev Commands
@@ -28,10 +33,10 @@ bash bin/generate_prompt.sh GAME > build-prompt.md
 # Regenerate browsable HTML index
 bash bin/rebuild_index.sh
 
-# Scan all projects for compliance
+# Scan all projects for compliance (full report)
 python3 bin/validate_project.py --projects ..
 
-# Dry-run update
+# Dry-run update (preview without writing)
 bash bin/update_projects.sh --dry-run
 ```
 
@@ -39,39 +44,31 @@ bash bin/update_projects.sh --dry-run
 
 ### bin/create_project.py
 Creates new projects and updates existing ones.
-- **Create mode** (`<name>`): scaffolds directory, METADATA.md, CLAUDE.md (@AGENTS.md), AGENTS.md with CLAUDE_RULES injected, bin/common.sh, bin/common.py, .env.sample, .gitignore
-- **Update mode** (`--update`): scans all projects in `../`; updates only those with `CLAUDE_RULES_START` marker (= set-up projects). Projects without it are skipped (idea phase). Updates CLAUDE_RULES block + common.sh/common.py templates.
-- **Flag for set-up**: presence of `# CLAUDE_RULES_START` in AGENTS.md (or CLAUDE.md if not a redirect)
+- **Create** (`<name>`): scaffolds directory, METADATA.md, CLAUDE.md (@AGENTS.md), AGENTS.md with CLAUDE_RULES injected, bin/common.sh, bin/common.py, .env.sample, .gitignore
+- **Update** (`--update`): scans all projects in `../`; updates only those with `CLAUDE_RULES_START` marker. Skips idea-phase projects (no marker) and this repo (SPEC_DIR excluded by design).
+- Verifies `git_repo` from actual git remote (SSH → HTTPS normalised) and bumps `updated` timestamp on every METADATA.md write.
 
-### bin/validate_project.sh
-Thin wrapper around `bin/verify.py` for a single project. Auto-detects projects directory.
-
-### bin/validate_project.py
-Compliance scanner. Reads each project's METADATA.md, determines its `status`, and applies cumulative rules per level (IDEA → PROTOTYPE → ACTIVE → PRODUCTION). Exit 0 = pass, 1 = fail. Requires `--projects <dir>` argument.
+### bin/validate_project.sh / bin/validate_project.py
+`validate_project.sh` is a thin wrapper around `validate_project.py` for a single named project. `validate_project.py` applies cumulative compliance rules per status level (IDEA → PRODUCTION). Requires `--projects <dir>`.
 
 ### bin/generate_prompt.sh
-Builds a complete AI agent prompt by reading `stack:` from METADATA.md, mapping tokens to `stack/*.md` reference files, then concatenating: header + CLAUDE_RULES.md + stack files + all project `*.md` specs.
+Builds a complete AI build prompt: reads `stack:` from METADATA.md, maps to `stack/*.md` reference files, concatenates header + CLAUDE_RULES.md + stack files + all project `*.md` specs.
 
 ### templates/
-Canonical source for `common.sh` and `common.py`. `create_project.py` copies these into `bin/` of new projects; `--update` refreshes them in existing set-up projects.
+Canonical source for `common.sh` and `common.py`. Copied into `bin/` of new projects; refreshed in existing set-up projects by `--update`.
 
 ### METADATA.md format
-Line-based key-value (not YAML). Parsed with grep/sed. Required fields:
-```
-name: <slug>
-display_name: <Human Name>
-port: 5000
-short_description: One sentence.
-health: /health
-```
+Line-based key-value (not YAML). See CLAUDE_RULES.md for field reference.
 
 ### Project spec organization
-- **GAME/** — organized by screen (SCREEN-*.md) + ARCHITECTURE.md + DATABASE.md
-- **AlexaPrototypeOne/** — organized numerically (01-OVERVIEW.md … 11-STARTUP.md)
+- **GAME/** — by screen (SCREEN-*.md) + ARCHITECTURE.md + DATABASE.md
+- **AlexaPrototypeOne/** — numerically (01-OVERVIEW.md … 11-STARTUP.md)
 - **stack/** — one file per technology (flask.md, sqlite.md, aws-sqs.md, etc.)
 
 ## Key Conventions
 
-- CLAUDE.md in each project is a bare `@AGENTS.md` pointer; AGENTS.md holds the real instructions
+- CLAUDE.md in each target project is a bare `@AGENTS.md` pointer; AGENTS.md holds the real instructions + injected CLAUDE_RULES block
+- This repo's CLAUDE.md points here but carries NO injected CLAUDE_RULES block
 - `archive/` holds superseded documents — do not treat as current spec
-- `index.html` files are auto-generated; edit the templates (`_root_index_template.html`, `_project_index_template.html`), not the outputs
+- `index.html` files are auto-generated — edit the templates (`_root_index_template.html`, `_project_index_template.html`), not the outputs
+- When changing CLAUDE_RULES.md or templates/, run `bash bin/update_projects.sh` to propagate to all set-up projects
