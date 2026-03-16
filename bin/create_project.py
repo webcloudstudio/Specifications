@@ -298,7 +298,29 @@ def update_projects(project_filter, dry_run: bool) -> None:
 
             changed = False
             if not dry_run:
-                changed = inject_rules(target, rules)
+                claude_md = project_dir / "CLAUDE.md"
+                claude_content = claude_md.read_text(encoding="utf-8").strip() if claude_md.exists() else ""
+
+                if claude_content == "@AGENTS.md":
+                    # Correct structure — update rules block in AGENTS.md
+                    agents_md = project_dir / "AGENTS.md"
+                    if agents_md.exists():
+                        changed = inject_rules(agents_md, rules)
+                    else:
+                        agents_md.write_text(rules, encoding="utf-8")
+                        changed = True
+                else:
+                    # Legacy: CLAUDE_RULES is inline in CLAUDE.md — migrate to AGENTS.md pattern
+                    original_claude = claude_md.read_text(encoding="utf-8")
+                    pre_rules = strip_rules_block(original_claude).rstrip("\n")
+                    new_agents = pre_rules + "\n" + rules
+                    agents_md = project_dir / "AGENTS.md"
+                    agents_ok = agents_md.exists() and agents_md.read_text(encoding="utf-8") == new_agents
+                    claude_ok = claude_content == "@AGENTS.md"  # always False in this branch
+                    if not agents_ok or not claude_ok:
+                        agents_md.write_text(new_agents, encoding="utf-8")
+                        claude_md.write_text("@AGENTS.md\n", encoding="utf-8")
+                        changed = True
 
                 for tmpl_name in ("common.sh", "common.py"):
                     dest = project_dir / "bin" / tmpl_name
