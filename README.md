@@ -60,3 +60,8 @@ bash generate-prompt.sh GAME > build-prompt.md
 - **doc/** — Generated documentation. Built by `bin/build_documentation.sh`.
 - **Version format** — `YYYY-MM-DD.N` (e.g., `2026-03-13.2`).
 - **Date format** — Always `yyyymmdd` or `yyyymmdd_hhmmss` for sorting.
+
+## WORKFLOW FOR UPDATING
+
+# Validate project compliance
+ python3 verify.py --project GAME --projects ../

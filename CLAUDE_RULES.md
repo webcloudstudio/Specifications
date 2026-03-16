@@ -1,9 +1,12 @@
-<!-- CLAUDE_RULES_START v2026-03-13.4 -->
-# CLAUDE_RULES — Project Integration Standard
+# CLAUDE_RULES_START
+
+# DEFAULT DEVELOPMENT RULES STANDARDS
 
 **Version:** 2026-03-13.4
 
-This file is appended to each project's CLAUDE.md (or AGENTS.md). To update, copy the content between the `CLAUDE_RULES_START` and `CLAUDE_RULES_END` markers from `Specifications/CLAUDE_RULES.md` into `~/.claude/CLAUDE.md` or the project's CLAUDE.md. The canonical source is always `Specifications/CLAUDE_RULES.md`.
+This file should be a part of each project's CLAUDE.md (or AGENTS.md) text. 
+
+The sections between the tag `CLAUDE_RULES_START` and the tag `CLAUDE_RULES_END` can always be replaced by the latest version from canonical source `Specifications/CLAUDE_RULES.md` in the git Specifications repository.
 
 An AI agent conforming to these rules can build, operate, and maintain any project in the ecosystem. A project that follows these rules is automatically discovered and integrated by the platform.
 
@@ -17,8 +20,9 @@ If the project has a `.git` directory, follow these rules:
 2. **Commit messages** should have a descriptive text (no "Claude"/"Anthropic"/"AI" mentions).
 3. **DO NOT push** — only commit to local git.
 4. **NO co-authored-by lines** in commits.
-5. **Always end code change responses with a restart notice** for any project that runs a web server:
-   - If only templates/CSS/static files changed: "No restart needed — browser refresh is enough."
+
+**For any project that runs a web server**
+   - If only templates/CSS/static files changed: print "No restart needed — browser refresh is enough."
    - If any Python/JS server files changed: "Restart required — `flask run --port 8080` (or equivalent)."
    - Flask's dev reloader auto-restarts on Python file saves when `FLASK_DEBUG=1` or `debug=True`; state otherwise.
 
@@ -33,15 +37,15 @@ ProjectName/
   METADATA.md              Project identity and configuration
   AGENTS.md                AI agent context (the real file)
   CLAUDE.md                Contains only: @AGENTS.md
-  .env.example             Required env vars with placeholders
+  .env.sample              Required env vars with placeholders
   .env                     Actual env vars (never committed)
   .gitignore               Must exclude .env, logs/, venv/, __pycache__/
   bin/                     Executable scripts
     common.sh              Shared functions (sourced by other scripts)
-    start.sh               Start services
-    stop.sh                Stop services
-    test.sh                Run tests
-    build_documentation.sh Generate docs
+    start.sh               Start services (optional)
+    stop.sh                Stop services (optional)
+    test.sh                Run tests (optional)
+    build_documentation.sh Generate docs (optional)
   doc/                     Generated documentation output
   logs/                    Operation log files (gitignored)
   venv/                    Python virtual environment (gitignored)
@@ -99,14 +103,15 @@ Additional sections as needed: `## Architecture`, `## Database`, `## Known Issue
 
 ## Script Rules
 
-**LOCATION**: All executable scripts live in `bin/`. Bash (`.sh`) or Python (`.py`).
+**LOCATION**: All user executable scripts live in `bin/`. Bash (`.sh`) or Python (`.py`).  In general a .py script will have a related .sh script.
+
+**PURPOSE**: This standard provides observability for operations and therefore scheduled tasks and operations run manually such as server starts and data loads should have a bash script.  
 
 **REGISTRATION**: Scripts with a `# CommandCenter Operation` marker in the first 20 lines are discovered as platform operations. The operation name is derived from the filename: `start.sh` → "Start", `build_documentation.sh` → "Build Documentation".
 
 ```bash
 #!/bin/bash
 # CommandCenter Operation
-# Health:   /health
 # Schedule: daily 02:00
 # Timeout:  300
 # Category: service
@@ -141,6 +146,7 @@ source "$SCRIPT_DIR/common.sh"
 
 `SCRIPT_NAME` is derived from the filename with extension stripped. `basename "$0" .sh` turns `bin/start.sh` into `start`.
 
+**USE LINUX not WINDOWS FORMAT** so remove trailing \r newlines 
 **COMMON FUNCTIONS** (`bin/common.sh`): Shared utilities sourced by all scripts in the project.
 
 ```bash
@@ -213,7 +219,7 @@ port: 8000
 status: ACTIVE
 version: 2026-03-13.1
 updated: 20260313_142530
-stack: Python/Flask/SQLite
+stack: Python,Flask,SQLite 
 image: images/myproject.webp
 health: /health
 show_on_homepage: true
@@ -252,7 +258,7 @@ namespace: development
 | Field | Description |
 |-------|-------------|
 | `port` | Primary port the service listens on. Read by `bin/common.sh`. The single source of truth for port assignment. To change a project's port, edit METADATA.md — all scripts pick it up via `common.sh`. The platform dashboard may provide a UI for editing this field directly. |
-| `stack` | Technology summary. Example: `Python/Flask/SQLite`. |
+| `stack` | CSV list of technoloties to use - relates to specifiction files. Example: `Python,Flask,SQLite`. |
 | `health` | Health check endpoint path. Default: `/health`. |
 | `desired_state` | What should be running. Values: `running` (service stays up), `on-demand` (started manually, stops when done). Default: `on-demand`. |
 | `namespace` | Logical environment. Values: `development`, `qa`, `production`, or a custom name. Default: `development`. |
@@ -262,12 +268,8 @@ namespace: development
 
 | Field | Description |
 |-------|-------------|
-| `version` | Format: `YYYY-MM-DD.N` where N increments per commit on that date. Example: `2026-03-13.3` means third commit on March 13. Updated automatically by commit hooks or manually. This versioning format applies to all versioned markdown files in the ecosystem, not just METADATA.md. |
+| `version` | Format: `YYYY-MM-DD.N` where N increments per commit on that date. Example: `2026-03-13.3` means third commit on March 13. Updated automatically by commit hooks or manually. |
 | `updated` | Timestamp of last meaningful change. Format: `yyyymmdd_hhmmss`. Example: `20260313_142530`. |
-
-**VERSIONING RULE**: All markdown files that carry a version use the `YYYY-MM-DD.N` format. This includes CLAUDE_RULES.md itself, FEATURES.md, and any specification file with a version field. The `.N` suffix increments per change on that calendar date. This ensures versions sort lexicographically and are globally unambiguous.
-
-**STACK FIELD**: The `stack:` field lists technology components separated by `/`. Each component must correspond to a file in the `stack/` directory of the Specifications repository. Example: `Python/Flask/SQLite/Bootstrap5` maps to `stack/python.md`, `stack/flask.md`, `stack/sqlite.md`, `stack/bootstrap5.md`. Component names are case-insensitive for matching. `verify.py` checks that each component has a corresponding stack file.
 
 **Portfolio fields** (optional):
 
@@ -422,4 +424,5 @@ Features defined in FEATURES.md but not yet covered by rules:
 | Rolling Restarts | Not defined |
 | Workflow States (Kanban) | Data model defined, UI not built |
 | Event Log retention/query | Format defined, storage not built |
-<!-- CLAUDE_RULES_END -->
+
+# CLAUDE_RULES_END

@@ -18,6 +18,7 @@ Kanban columns (one per state) across all projects. Filter by project or tag.
 | IN DEVELOPMENT | AI session running or recently finished |
 | TESTING | Work complete, human validating |
 | DONE | Accepted |
+| ARCHIVED | Archived possibly Removed from disk |
 
 ## Transitions
 

@@ -4,25 +4,29 @@
 
 ---
 
+## NOTE - THE CORRECT PAGE LAYOUT IS BELOW - THE ADDITIONAL FIELDS ON THE CURRENT LAYOUT ARE NOT NEEDED
+
 ## Layout
 
-Three sections: Build, Preview, Publish.
+Three sections: Build, Preview, Push/Publish, Homepage.
 
 ## Build Section
 
 - Rebuild button
 - Last build timestamp and status
-- Error output if build failed
+- Error output if build failed in a panel below clearly labeled as such
 
 ## Preview Section
 
-- Start/stop local preview server
-- Preview URL when running
+- Clicking the button will Start or stop local preview server (start if it is not running)
+- Preview URL Button under the Above always
 
 ## Publish Section
 
 - Push to GitHub Pages button
 - Last publish timestamp
+
+## Homepage
 - Link to live site
 
 ## How It Works

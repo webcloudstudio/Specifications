@@ -32,8 +32,7 @@ Scans `$PROJECTS_DIR` for project directories. For each:
 1. Read METADATA.md → parse key:value fields
 2. Read AGENTS.md / CLAUDE.md → extract endpoints, bookmarks
 3. Read bin/ scripts → parse CommandCenter headers
-4. Read git status (branch, dirty, unpushed)
-5. Upsert into `projects` and `operations` tables
+4. Upsert into `projects` and `operations` tables
 
 Runs asynchronously on startup (not blocking first page load). Triggered manually by rescan button.
 
@@ -60,24 +59,13 @@ Builds static portfolio site from METADATA.md fields.
 4. Write static site to output directory
 5. Optionally push to GitHub Pages
 
-### Config Engine (`config_engine.py`)
-
-Manages AI assistant configuration profiles.
-
-1. List profiles from `config_engine/profiles/*.yaml`
-2. Generate config files from selected profile
-3. Write to `config_engine/staged/` and git commit
-4. Copy to AI assistant's live config directory
-5. Rollback: checkout a past staged commit
-
 ### Usage Analyzer (`usage.py`)
 
-Reads AI session JSONL logs (external files, not produced by GAME).
+Reads AI session JSONL logs (produced by ai engine, not produced by GAME).
 
-1. Scan log directory for JSONL files
-2. Parse: timestamp, project, model, tokens
-3. Join with `usage_rates` for cost estimates
-4. Aggregate by day/week/month and by project
+A mechanism to scan the ai agent logs or to poll the ai agent to see
+information similar to the anthropic /usage command so we can display
+data to the user.  At present I have not found a solution.
 
 ## Routes (HTMX)
 

@@ -20,6 +20,10 @@ Process list (most recent first) with expandable log viewer.
 | View Log | Opens log viewer |
 | Stop | Sends SIGTERM (shown only when RUNNING) |
 
+The process list should be sortable and filterable.
+
+We know the project name and script name and location so there is no need for full pathnames. 
+
 ## Log Viewer
 
 Monospace output area. Auto-scrolls while the process is running. Stops on process exit.

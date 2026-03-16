@@ -1,41 +1,27 @@
 # Screen: Configuration
 
-**AI assistant config profile management.** Deploy profiles, preview diffs, roll back.
+## Purpose
 
----
+This file allows editing of the metadata stored for each project
 
 ## Layout
 
-Three sections: Active Profile, Profile Library, Deployment History.
+Tabular design with standard header colunns
+    status
+    Project Icon
+    display_name
+    port (label port:)
+    show_on_homepage (label show:)
+    tags:  (label tags:)
+    Cog Icon
 
-## Active Profile
+Selecting the Cog Icon on the far right allows a screen enabling edit of ANY of the fields in metadata.md
 
-- Current profile name and deploy time
-- Diff preview showing what will change
-- Deploy button per profile
+The Workflow: item does not need to show (prior version) - that is handled by simply clicking on the workflow status button
 
-## Profile Library
+The Initial Columns Status Badge, An Icon indicating Project Type, and Project name are a standard header for several pages.
 
-- List of profiles with names and descriptions
-- Edit and New buttons
+## Persistence
 
-## Deployment History
-
-- Table of past deployments
-- Rollback button per row
-
-## How It Works
-
-1. User selects a profile (YAML file in `config_engine/profiles/`)
-2. Platform generates config files from profile
-3. Files written to `config_engine/staged/` (committed to git — this is the rollback store)
-4. Files copied to AI assistant's live config directory
-
-Rollback: copy staged files from a past git commit back to live config.
-
-## Data Flow
-
-| Reads | Writes |
-|-------|--------|
-| Profile YAML files | Staged configs (git committed) |
-| AGENTS.md from projects | AI assistant live config |
+All data edited on this screen is saved in the database and in the project metadata.md
+Persistence is immediate after a field is tabbed out of or the tab itself is exited

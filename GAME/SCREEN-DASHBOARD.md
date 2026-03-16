@@ -6,7 +6,7 @@
 
 ## Layout
 
-Full-width project list. One row per project. Nav bar at top with running process count and today's AI cost.
+Full-width project list. One row per project. Nav bar at top 
 
 ## Per-Project Row
 
@@ -15,18 +15,22 @@ Full-width project list. One row per project. Nav bar at top with running proces
 | Project name | METADATA.md `display_name` | Click → project detail |
 | Status badge | METADATA.md `status` | Display only |
 | Namespace badge | METADATA.md `namespace` | Display only |
-| Tags (colored) | METADATA.md `tags` + color config | Click tag → filter |
+| Tags | METADATA.md | tags |
+| Tag Colors | Database Table | 
 | Stack summary | METADATA.md `stack` | Display only |
 | Running indicator | Process engine state | Green dot if running |
 | Operation buttons | bin/ headers (one per registered script) | Click → run script |
-| Push button | Git: shown only if unpushed commits | Click → git push |
 | Quick links | AGENTS.md bookmarks | Click → open URL |
+| Settings | Operation Icon | Click -> Open page enabling editing of markdown.md
+
+The Settings Icon is used on several pages
+
+The Initial Columns Status Badge, An Icon indicating Project Type, and Project name are a standard header for several pages
 
 ## Project Detail (click into a project)
 
 - All operations with run status
 - All endpoints and bookmarks from AGENTS.md
-- Git status: branch, uncommitted count, unpushed count, last commit
 - METADATA.md fields
 - AGENTS.md content (expandable)
 
@@ -40,9 +44,8 @@ Full-width project list. One row per project. Nav bar at top with running proces
 
 ## Startup Behavior
 
-On web server startup, the platform scans the projects directory **asynchronously**. The dashboard renders immediately with cached data; scan results update the view when complete. This avoids blocking on 30+ `git status` calls.
-
-Scan reads: METADATA.md, AGENTS.md, bin/ headers, git status per project. Missing files produce compliance gaps, not errors. Projects removed from disk are marked inactive.
+Scan reads: METADATA.md, AGENTS.md, and the headers from the files in bin/. Missing files produce compliance gaps, not errors. 
+Projects removed from disk are marked ARCHIVED.
 
 ## Tag Management
 
