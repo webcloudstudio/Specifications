@@ -1,0 +1,36 @@
+/* GEM Theme: Mughal Green (#306030)  |  gem-base.css must follow this file */
+:root {
+  --c-topbar-bg:     #0D180C;
+  --c-side-bg:       #182A16;
+  --c-side-border:   #2A4828;
+  --c-side-section:  #487048;
+  --c-side-link:     #98C898;
+
+  --c-accent:        #6AD06A;
+  --c-accent-text:   #0D180C;
+
+  --c-h1:            #306030;
+  --c-h1-border:     #B0D8B0;
+  --c-h2:            #427842;
+  --c-h2-border:     #C0E4C0;
+  --c-h3:            #509050;
+
+  --c-bg:            #F4FAF4;
+  --c-text:          #101E10;
+
+  --c-th-bg:         #306030;
+  --c-th-text:       #E8F5E8;
+  --c-td-border:     #B0D8B0;
+  --c-tr-alt:        #ECF7EC;
+  --c-tr-hover:      #D0EAD0;
+
+  --c-code-bg:       #D8EED8;
+  --c-code-text:     #306030;
+  --c-pre-bg:        #0D180C;
+  --c-pre-text:      #98C898;
+
+  --c-callout-bg:    rgba(106,208,106,0.07);
+  --c-callout-border:rgba(106,208,106,0.25);
+
+  --c-foot-text:     #588058;
+}

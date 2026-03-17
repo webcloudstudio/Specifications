@@ -1,6 +1,12 @@
+
+
+
 # TODO
 
 Ideas and tasks collected during specification review (2026-03-13).
+
+BRANDING DOCUMENT - color schema
+
 
 ---
 
@@ -66,3 +72,6 @@ Ideas and tasks collected during specification review (2026-03-13).
 - [ ] **Audio/image attachments on tickets** — Voice notes and screenshots during ideation. Good UX for solo practitioners.
 
 - [ ] **Per-ticket cost attribution** — Link AI session costs to workflow tickets.
+
+
+

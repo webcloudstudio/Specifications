@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specifications — Platform Standards &amp; Rules</title>
+<link rel="stylesheet" type="text/css" href="styles/gem.css">
+</head>
+<body class="gem-page">
+<nav class="gem-sidebar-panel">
+<div class="gem-toc-title">Specifications</div>
+<div class="gem-toc-subtitle">Platform Standards &amp; Rules</div>
+<div class="gem-toc-section">Documents</div>
+<a href="#claude-rules">Claude Rules</a>
+<a href="#doc-branding">Documentation Branding</a>
+</nav>
+<main class="gem-content-panel">
+<section id="claude-rules">
+<h1 id="default-development-rules">DEFAULT DEVELOPMENT RULES</h1>
+<p><strong>Version:</strong> 2026-03-16.1</p>
+<p>Full specification: <code>Specifications/CLAUDE_RULES.md</code>. This condensed version covers agent behavior only.</p>
+<hr>
+<h2 id="git-workflow">Git Workflow</h2>
+<ol>
+<li>Commit immediately after completing a task with no errors.</li>
+<li>Commit messages: descriptive text, no "Claude"/"Anthropic"/"AI" mentions.</li>
+<li>DO NOT push — local commits only.</li>
+<li>NO co-authored-by lines.</li>
+</ol>
+<p>Web server changes: print "No restart needed — browser refresh is enough." (templates/CSS/static only) or "Restart required — <code>./bin/start.sh</code>." (Python/JS server files).</p>
+<hr>
+<h2 id="project-layout">Project Layout</h2>
+<pre><code>ProjectName/
+  METADATA.md       Identity (name, port, status, stack, etc.)
+  AGENTS.md         AI context: dev commands, endpoints, architecture
+  CLAUDE.md         Contains only: @AGENTS.md
+  .env.sample       Required env vars (committed)
+  .env              Actual env vars (never committed)
+  bin/              All executable scripts
+    common.sh       Shared functions — sourced by all bash scripts
+    common.py       Shared OperationContext — imported by Python scripts
+  doc/              Generated documentation
+  logs/             Log files (gitignored)
+  data/             Persistent data
+  tests/            Test suite</code></pre>
+<hr>
+<h2 id="scripts---bin">Scripts (<code>bin/</code>)</h2>
+<p>All scripts live in <code>bin/</code> — bash (<code>.sh</code>) or Python (<code>.py</code>). The <code># CommandCenter Operation</code> marker in the first 20 lines registers a script with the platform.</p>
+<p><strong>Standard script names</strong> (only create what the project needs):</p>
+<table>
+<thead><tr>
+<th>Script</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><code>bin/start.sh</code></td>
+<td>Start service — service projects only</td>
+</tr>
+<tr>
+<td><code>bin/stop.sh</code></td>
+<td>Stop service — service projects only</td>
+</tr>
+<tr>
+<td><code>bin/build.sh</code></td>
+<td>Build / compile / package</td>
+</tr>
+<tr>
+<td><code>bin/daily.sh</code></td>
+<td>Daily maintenance</td>
+</tr>
+<tr>
+<td><code>bin/weekly.sh</code></td>
+<td>Weekly maintenance</td>
+</tr>
+<tr>
+<td><code>bin/build_documentation.sh</code></td>
+<td>Generate doc/ output</td>
+</tr>
+<tr>
+<td><code>bin/deploy.sh</code></td>
+<td>Deploy to environment</td>
+</tr>
+</tbody></table>
+<p><strong>Bash</strong> — source <code>common.sh</code> then add functionality:</p>
+<pre><code>#!/bin/bash
+# CommandCenter Operation
+# Category: service
+source &quot;$(cd &quot;$(dirname &quot;$0&quot;)&quot; &amp;&amp; pwd)/common.sh&quot;
+
+# your start command — use $PORT for the service port
+# e.g. Flask: export FLASK_DEBUG=1 &amp;&amp; flask run --port &quot;$PORT&quot;</code></pre>
+<p><code>common.sh</code> handles everything: <code>SCRIPT_NAME</code>, <code>PROJECT_DIR</code>, <code>cd</code>, <code>PROJECT_NAME</code>, <code>PORT</code>, venv activation, <code>.secrets</code>/<code>.env</code> loading, timestamped log file, SIGTERM trap, and the <code>[$PROJECT_NAME] Starting:</code> message. Use <code>$PORT</code> as the service port — never hardcode a port number. Override the trap after sourcing if the script needs custom cleanup.</p>
+<p><strong>Python</strong> — import <code>common.py</code> then add functionality:</p>
+<pre><code>#!/usr/bin/env python3
+# CommandCenter Operation
+# Category: maintenance
+import sys, os; sys.path.insert(0, os.path.dirname(__file__)); from common import op
+
+def main(ctx):
+    # ctx.project_name, ctx.port, ctx.logger available — use ctx.port as the service port
+    pass
+
+if __name__ == &#x27;__main__&#x27;:
+    op(__file__).run(main)</code></pre>
+<p><code>op(__file__).run(main)</code> handles the same concerns as <code>common.sh</code>: path setup, METADATA.md parsing, env loading, logging, SIGTERM, and status messages.</p>
+<p>Use Linux line endings (no <code>\r</code>). Run <code>chmod +x bin/*.sh</code>.</p>
+<hr>
+<h2 id="metadata-md">METADATA.md</h2>
+<p><strong>Authoritative source for project identity.</strong> Always read <code>name</code>, <code>display_name</code>, <code>short_description</code>, and <code>git_repo</code> from this file — never infer them from directory names. Present in every set-up project.</p>
+<p>Key-value format (not YAML):</p>
+<pre><code># AUTHORITATIVE PROJECT METADATA - THE FIELDS IN THIS FILE SHOULD BE CURRENT
+
+name: MyProject                              # machine slug, matches directory name
+display_name: My Project                     # human-readable name for UI/display
+git_repo: https://github.com/org/MyProject   # full HTTPS URL, for links only
+port: 8000                                   # omit if not a service
+short_description: One sentence.             # shown in dashboards and indexes
+health: /health                              # omit if not a service
+status: PROTOTYPE                            # IDEA|PROTOTYPE|ACTIVE|PRODUCTION|ARCHIVED
+stack: Python/Flask/SQLite                   # slash-separated, used by generate_prompt.sh
+version: 2026-03-16.1                        # YYYY-MM-DD.N, increment on releases
+updated: 20260316_120000                     # set automatically by platform scripts</code></pre>
+<p><code>port</code>, <code>health</code>, <code>stack</code>, and <code>status</code> are platform fields — managed by GAME and platform scripts, not needed for day-to-day agent work. <code>git_repo</code> SSH remotes are normalised to HTTPS automatically.</p>
+<hr>
+<h2 id="agents-md-required-sections">AGENTS.md Required Sections</h2>
+<pre><code>## Dev Commands
+- Start: `./bin/start.sh`   # service projects only
+- Stop: `./bin/stop.sh`     # service projects only
+- Test: `./bin/test.sh`     # if tests exist
+
+## Service Endpoints        # omit if not a service
+- Local: http://localhost:PORT
+
+## Bookmarks
+- [Documentation](doc/index.html)</code></pre>
+<p>Only include commands and endpoints that actually exist for the project.</p>
+</section>
+
+<section id="doc-branding">
+<h1 id="documentation-branding-standards">Documentation Branding Standards</h1>
+<p><strong>Version:</strong> 1.0 — 2026-03-16 <strong>Maintainer:</strong> Ed Barlow / SQL Technologies <strong>Reference implementation:</strong> <code>/mnt/c/Users/barlo/projects/gem/doc/</code></p>
+<hr>
+<h2 id="design-philosophy">Design Philosophy</h2>
+<p>Documentation uses a <strong>dark chrome / light content</strong> split:</p>
+<ul>
+<li><strong>Navigation chrome</strong> (top bar, left sidebar) — dark background, light text. Always dark regardless of content mode.</li>
+<li><strong>Content area</strong> — light background (<code>#F4FAF4</code> tinted white), dark text. Optimised for reading long documents.</li>
+<li><strong>Hyperlinks in content</strong> — standard blue, always underlined. This is the web convention and should not be overridden for content links.</li>
+<li><strong>Navigation links</strong> — no underline. Hover shows a colored left border (accent color) and subtle background lift.</li>
+</ul>
+<p>The dark chrome and the content area create a natural frame. The sidebar and top bar read as <strong>one continuous dark panel</strong> — they use the same background color family, with the top bar slightly darker than the sidebar body.</p>
+<hr>
+<h2 id="the-four-color-system">The Four-Color System</h2>
+<p>Every theme reduces to four visible color families:</p>
+<table>
+<thead><tr>
+<th>#</th>
+<th>Role</th>
+<th>Where used</th>
+<th>Example (Evergreen)</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td><strong>Top bar</strong> (darkest)</td>
+<td><code>body.gem-topbar</code> background</td>
+<td><code>#071208</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Sidebar + section banners</strong> (slightly lighter)</td>
+<td><code>body.gem-sidebar</code>, content <code>&lt;h1&gt;</code> section dividers</td>
+<td><code>#0C1E10</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Light text on dark</strong></td>
+<td>Sidebar links, top bar text, GEM badge text, version, copyright</td>
+<td><code>#90C898</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Accent</strong></td>
+<td>GEM badge bg, sidebar hover indicator (3px left border), h1 underline, callout borders</td>
+<td><code>#7AE890</code></td>
+</tr>
+</tbody></table>
+<p>Content headings (h1/h2/h3) use progressively lighter shades of the theme's base hue on the light content background. Hyperlinks are always <code>#1565C0</code> blue regardless of theme.</p>
+<p><strong>Rule:</strong> If two things are in the dark chrome zone, they must either be the same color or clearly different shades of the same family. Never place dark green text on a dark green background.</p>
+<hr>
+<h2 id="available-themes">Available Themes</h2>
+<p>Six themes ship with the reference implementation. Each is defined as a single <code>:root {}</code> CSS variable block.</p>
+<table>
+<thead><tr>
+<th>Theme name</th>
+<th>Base color</th>
+<th>Hex</th>
+<th>Character</th>
+</tr></thead><tbody>
+<tr>
+<td><code>green</code> <em>(default)</em></td>
+<td>Evergreen</td>
+<td><code>#1B5E20</code></td>
+<td>Forest green, clean</td>
+</tr>
+<tr>
+<td><code>midnight</code></td>
+<td>Midnight Blue</td>
+<td><code>#0D3B8E</code></td>
+<td>Corporate navy</td>
+</tr>
+<tr>
+<td><code>purple</code></td>
+<td>Royal Purple</td>
+<td><code>#4527A0</code></td>
+<td>Distinctive, dramatic</td>
+</tr>
+<tr>
+<td><code>midnight-green</code></td>
+<td>Midnight Green</td>
+<td><code>#004953</code></td>
+<td>Deep teal</td>
+</tr>
+<tr>
+<td><code>mughal</code></td>
+<td>Mughal Green</td>
+<td><code>#306030</code></td>
+<td>Rich forest</td>
+</tr>
+<tr>
+<td><code>rainforest</code></td>
+<td>Tropical Rainforest</td>
+<td><code>#00755E</code></td>
+<td>Warm teal-green</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="theme-variable-reference">Theme Variable Reference</h2>
+<p>The complete set of CSS custom properties required per theme. Copy this block and fill in values to create a new theme.</p>
+<pre><code>/* GEM Theme: &lt;Name&gt;  |  gem-base.css must follow this file */
+:root {
+  /* ── Dark chrome (top bar + sidebar) ─────────────────── */
+  --c-topbar-bg:     ;   /* darkest — top bar background */
+  --c-side-bg:       ;   /* slightly lighter — sidebar body + content section banners */
+  --c-side-border:   ;   /* border between chrome and content, scrollbar */
+  --c-side-section:  ;   /* muted section label text (small uppercase in sidebar) */
+  --c-side-link:     ;   /* sidebar link text, top bar version + copyright text */
+
+  /* ── Accent ───────────────────────────────────────────── */
+  --c-accent:        ;   /* GEM badge bg, sidebar hover left border, callout borders */
+  --c-accent-text:   ;   /* text ON the GEM badge (usually very dark, matches topbar) */
+
+  /* ── Content headings (on light bg — must be ≥4.5:1 contrast) ─ */
+  --c-h1:            ;   /* darkest heading — close to base color */
+  --c-h1-border:     ;   /* h1 underline (light tint of theme color) */
+  --c-h2:            ;   /* medium heading */
+  --c-h2-border:     ;   /* h2 underline (lighter) */
+  --c-h3:            ;   /* lighter heading */
+
+  /* ── Content area ─────────────────────────────────────── */
+  --c-bg:            ;   /* page background (tinted white, not pure white) */
+  --c-text:          ;   /* body text (very dark, near-black, slight tint of theme) */
+
+  /* ── Tables ───────────────────────────────────────────── */
+  --c-th-bg:         ;   /* table header background (use h1 color or darker) */
+  --c-th-text:       ;   /* table header text (light) */
+  --c-td-border:     ;   /* cell borders (light tint) */
+  --c-tr-alt:        ;   /* alternating row background */
+  --c-tr-hover:      ;   /* row hover background */
+
+  /* ── Code ─────────────────────────────────────────────── */
+  --c-code-bg:       ;   /* inline code background (light tint) */
+  --c-code-text:     ;   /* inline code text (h1 or h2 color) */
+  --c-pre-bg:        ;   /* code block background (match topbar-bg) */
+  --c-pre-text:      ;   /* code block text (match side-link) */
+
+  /* ── Callout box ──────────────────────────────────────── */
+  --c-callout-bg:    ;   /* rgba(accent, 0.07) */
+  --c-callout-border:;   /* rgba(accent, 0.25) */
+
+  /* ── Footer ───────────────────────────────────────────── */
+  --c-foot-text:     ;   /* muted copyright footer text */
+}</code></pre>
+<h3 id="evergreen--default----complete-example">Evergreen (default) — complete example</h3>
+<pre><code>:root {
+  --c-topbar-bg:     #071208;
+  --c-side-bg:       #0C1E10;
+  --c-side-border:   #1A4828;
+  --c-side-section:  #5A9868;
+  --c-side-link:     #90C898;
+
+  --c-accent:        #7AE890;
+  --c-accent-text:   #071208;
+
+  --c-h1:            #1B5E20;
+  --c-h1-border:     #B8DFC0;
+  --c-h2:            #2E7D32;
+  --c-h2-border:     #C8EAC8;
+  --c-h3:            #388E3C;
+
+  --c-bg:            #F4FAF4;
+  --c-text:          #0D2010;
+
+  --c-th-bg:         #1B5E20;
+  --c-th-text:       #E8F5E9;
+  --c-td-border:     #B8DFC0;
+  --c-tr-alt:        #EDF7EE;
+  --c-tr-hover:      #D4EDDA;
+
+  --c-code-bg:       #DFF0E0;
+  --c-code-text:     #1B5E20;
+  --c-pre-bg:        #071208;
+  --c-pre-text:      #90C898;
+
+  --c-callout-bg:    rgba(74,200,112,0.07);
+  --c-callout-border:rgba(74,200,112,0.25);
+
+  --c-foot-text:     #6A9F72;
+}</code></pre>
+<hr>
+<h2 id="typography">Typography</h2>
+<p>No web fonts. Uses the OS system font stack — renders natively on Windows, Mac, and Linux.</p>
+<pre><code>/* All text */
+font-family: &#x27;Segoe UI&#x27;, &#x27;Trebuchet MS&#x27;, Arial, Helvetica, sans-serif;
+
+/* Code and pre blocks */
+font-family: &#x27;Cascadia Code&#x27;, &#x27;Consolas&#x27;, &#x27;Courier New&#x27;, monospace;</code></pre>
+<table>
+<thead><tr>
+<th>Element</th>
+<th>Size</th>
+<th>Weight</th>
+<th>Notes</th>
+</tr></thead><tbody>
+<tr>
+<td>Body</td>
+<td>14px</td>
+<td>400</td>
+<td><code>line-height: 1.65</code></td>
+</tr>
+<tr>
+<td>h1</td>
+<td>22px</td>
+<td>700</td>
+<td>Theme h1 color + thin underline</td>
+</tr>
+<tr>
+<td>h2</td>
+<td>16px</td>
+<td>600</td>
+<td>Theme h2 color + thin underline</td>
+</tr>
+<tr>
+<td>h3</td>
+<td>14px</td>
+<td>600</td>
+<td>Theme h3 color, no decoration</td>
+</tr>
+<tr>
+<td>h4–h6</td>
+<td>13–12px</td>
+<td>600</td>
+<td>Theme h3 color</td>
+</tr>
+<tr>
+<td>Sidebar links</td>
+<td>12.5px</td>
+<td>400</td>
+<td><code>--c-side-link</code> color</td>
+</tr>
+<tr>
+<td>Sidebar section labels</td>
+<td>9.5px</td>
+<td>700</td>
+<td><code>--c-side-section</code> color, uppercase, <code>letter-spacing: 1px</code></td>
+</tr>
+<tr>
+<td>Top bar title</td>
+<td>13.5px</td>
+<td>500</td>
+<td>White (<code>#FFFFFF</code>) always</td>
+</tr>
+<tr>
+<td>Top bar nav links</td>
+<td>12px</td>
+<td>400</td>
+<td><code>--c-side-link</code> color</td>
+</tr>
+<tr>
+<td>Version badge</td>
+<td>10px</td>
+<td>500</td>
+<td><code>--c-side-link</code> color, pill border</td>
+</tr>
+<tr>
+<td>Copyright</td>
+<td>10.5px</td>
+<td>400</td>
+<td><code>--c-side-link</code> color</td>
+</tr>
+<tr>
+<td>Code inline</td>
+<td>12.5px</td>
+<td>400</td>
+<td>Monospace, tinted bg</td>
+</tr>
+<tr>
+<td>Code block</td>
+<td>12.5px</td>
+<td>400</td>
+<td>Monospace, dark bg matching topbar</td>
+</tr>
+<tr>
+<td>Footer</td>
+<td>11.5px</td>
+<td>400</td>
+<td><code>--c-foot-text</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="link-rules">Link Rules</h2>
+<table>
+<thead><tr>
+<th>Context</th>
+<th>Style</th>
+<th>Rationale</th>
+</tr></thead><tbody>
+<tr>
+<td>Content body (<code>&lt;a&gt;</code>)</td>
+<td><code>color: #1565C0; text-decoration: underline</code></td>
+<td>Standard web hyperlink convention</td>
+</tr>
+<tr>
+<td>Content visited</td>
+<td>Same blue <code>#1565C0</code></td>
+<td>Prevents the default browser purple, which clashes with dark themes</td>
+</tr>
+<tr>
+<td>Content hover</td>
+<td>Darker blue <code>#0D3B8E</code>, still underlined</td>
+<td>Feedback without color drama</td>
+</tr>
+<tr>
+<td>Sidebar nav links</td>
+<td><code>--c-side-link</code> color, no underline</td>
+<td>Navigation item, not a body link</td>
+</tr>
+<tr>
+<td>Sidebar nav hover</td>
+<td>White text + subtle bg + 3px accent left border</td>
+<td>Conquer 2026 / ezdocs pattern</td>
+</tr>
+<tr>
+<td>Top bar nav links</td>
+<td>Same as sidebar links</td>
+<td>Unified chrome</td>
+</tr>
+<tr>
+<td>Top bar nav hover</td>
+<td>White text + subtle bg + 2px accent bottom border</td>
+<td>Horizontal nav variant</td>
+</tr>
+<tr>
+<td>Links inside section banners (dark bg)</td>
+<td><code>rgba(255,255,255,0.88)</code>, underlined</td>
+<td>Must be readable on dark background</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="page-structure">Page Structure</h2>
+<h3 id="three-panel--frameset---legacy-projects-like-gem">Three-panel (frameset — legacy projects like GEM)</h3>
+<pre><code>┌──────────────────────────────────────────────────────────┐
+│  TOP BAR (top.htm) — 56px                               │
+│  [GEM] [Build/version] Title  │  Nav links  │ Copyright │
+│  bg: --c-topbar-bg             │             │           │
+├──────────────────┬───────────────────────────────────────┤
+│ SIDEBAR          │  CONTENT                              │
+│ (toc.htm) 24%   │  (readme.htm) 76%                    │
+│ bg: --c-side-bg  │  bg: --c-bg (light)                  │
+│                  │                                       │
+│ [Section label]  │  [dark banner — bg: --c-side-bg]     │
+│   Nav link       │    h1 heading (white on dark)         │
+│   Nav link       │  [dark banner ...]                    │
+│   Nav link ◀▌    │                                       │
+│   (hover: left   │  Body text, tables, code              │
+│    accent bar)   │                                       │
+│                  │  [footer — copyright]                 │
+└──────────────────┴───────────────────────────────────────┘</code></pre>
+<p>The sidebar title strip uses <code>--c-topbar-bg</code> — same as the top bar — so the top-left corner reads as one unified dark header.</p>
+<h3 id="single-page--modern-projects-like-ezdocs--conquer_2026--edbarlowsstoredprocs">Single-page (modern projects like ezdocs, conquer_2026, EdBarlowsStoredProcs)</h3>
+<pre><code>&lt;body&gt;                          &lt;!-- bg: --c-bg --&gt;
+  &lt;nav class=&quot;sidebar&quot;&gt;         &lt;!-- bg: --c-side-bg, left border --&gt;
+    &lt;div class=&quot;sidebar-header&quot;&gt; &lt;!-- bg: --c-topbar-bg --&gt;
+      &lt;h1&gt;Project Name&lt;/h1&gt;
+      &lt;p&gt;v1.0 — subtitle&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;nav-section&quot;&gt;SECTION&lt;/div&gt;
+    &lt;a href=&quot;#anchor&quot;&gt;Link text&lt;/a&gt;
+  &lt;/nav&gt;
+  &lt;main&gt;                        &lt;!-- max-width: 860px, padding --&gt;
+    &lt;h1&gt;...&lt;/h1&gt;
+    ...
+  &lt;/main&gt;
+&lt;/body&gt;</code></pre>
+<hr>
+<h2 id="section-divider-banners--legacy-html">Section Divider Banners (Legacy HTML)</h2>
+<p>Legacy content files use <code>&lt;TABLE BGCOLOR=#0066cc&gt;</code> as section heading banners. The theme reskins these using <code>--c-side-bg</code> (sidebar color) so banners match the sidebar:</p>
+<pre><code>table[bgcolor=&quot;#0066cc&quot;] {
+  background: var(--c-side-bg) !important;
+  border: 1px solid var(--c-side-border) !important;
+  border-radius: 4px;
+  width: 100% !important;
+  margin: 20px 0 12px 0 !important;
+}
+table[bgcolor=&quot;#0066cc&quot;] h1,
+table[bgcolor=&quot;#0066cc&quot;] h2 {
+  color: #FFFFFF !important;   /* CRITICAL: must be white on dark bg */
+  border: none !important;
+}</code></pre>
+<hr>
+<h2 id="callout---note-boxes">Callout / Note Boxes</h2>
+<pre><code>&lt;div class=&quot;gem-note&quot;&gt;
+  &lt;strong&gt;Note:&lt;/strong&gt; important information here.
+&lt;/div&gt;</code></pre>
+<p>Or use a plain <code>&lt;blockquote&gt;</code> — both are styled identically:</p>
+<ul>
+<li>Background: <code>rgba(accent, 0.07)</code> tinted</li>
+<li>Left border: <code>4px solid --c-accent</code></li>
+<li>Border: <code>1px solid rgba(accent, 0.25)</code></li>
+</ul>
+<hr>
+<h2 id="implementation-for-a-new-project">Implementation for a New Project</h2>
+<h3 id="option-a---modern-single-page-doc--recommended-for-new-projects">Option A — Modern single-page doc (recommended for new projects)</h3>
+<ol>
+<li>Copy <code>gem/doc/styles/gem-base.css</code> to your project's <code>doc/styles/</code>.</li>
+<li>Create <code>doc/styles/themes/</code> and copy the theme files you want.</li>
+<li>In your build script, concatenate theme + base:</li>
+</ol>
+<p>``<code>bash    cat doc/styles/themes/green.css doc/styles/gem-base.css &gt; doc/styles/gem.css    </code>``</p>
+<ol>
+<li>Reference <code>gem.css</code> in your HTML:</li>
+</ol>
+<p>``<code>html    &lt;link rel=&quot;stylesheet&quot; href=&quot;styles/gem.css&quot;&gt;    </code>``</p>
+<ol>
+<li>Use <code>body</code> with no class for content pages. Classes <code>gem-topbar</code> and <code>gem-sidebar</code> are reserved for the navigation chrome.</li>
+</ol>
+<h3 id="option-b---legacy-frameset-project">Option B — Legacy frameset project</h3>
+<p>Use <code>bin/build_documentation.sh</code> from the GEM project as a reference. It:</p>
+<ol>
+<li>Generates <code>gem.css</code> from a theme file + base CSS.</li>
+<li>Runs <code>bin/update_doc_theme.pl</code> to rebuild <code>top.htm</code>, <code>toc.htm</code>, update frameset heights, inject CSS + copyright footers into content files, and humanize CamelCase nav link text.</li>
+</ol>
+<p>To port to a new project, copy both scripts and adjust the nav links in <code>process_top()</code>.</p>
+<h3 id="switching-themes">Switching themes</h3>
+<pre><code>./bin/build_documentation.sh --theme=green          # default
+./bin/build_documentation.sh --theme=midnight
+./bin/build_documentation.sh --theme=purple
+./bin/build_documentation.sh --theme=midnight-green
+./bin/build_documentation.sh --theme=mughal
+./bin/build_documentation.sh --theme=rainforest
+./bin/build_documentation.sh --theme=X --css-only   # rebuild CSS only, no HTML</code></pre>
+<hr>
+<h2 id="reference-files">Reference Files</h2>
+<table>
+<thead><tr>
+<th>File</th>
+<th>Location</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><code>gem-base.css</code></td>
+<td><code>gem/doc/styles/gem-base.css</code></td>
+<td>All structural CSS rules (no colors)</td>
+</tr>
+<tr>
+<td><code>themes/*.css</code></td>
+<td><code>gem/doc/styles/themes/</code></td>
+<td>One file per theme — only <code>:root {}</code> variables</td>
+</tr>
+<tr>
+<td><code>gem.css</code></td>
+<td><code>gem/doc/styles/gem.css</code></td>
+<td>Generated active theme (do not edit)</td>
+</tr>
+<tr>
+<td><code>build_documentation.sh</code></td>
+<td><code>gem/bin/</code></td>
+<td>Build entry point</td>
+</tr>
+<tr>
+<td><code>update_doc_theme.pl</code></td>
+<td><code>gem/bin/</code></td>
+<td>HTML processor (frameset projects)</td>
+</tr>
+<tr>
+<td><code>DOC_STANDARDS.md</code></td>
+<td><code>gem/doc/DOC_STANDARDS.md</code></td>
+<td>GEM-specific build instructions</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="copyright">Copyright</h2>
+<p>Copyright notices appear in two places:</p>
+<ol>
+<li><strong>Top bar</strong> — extracted verbatim from the source <code>top.htm</code> file. Never modified by the build script.</li>
+<li><strong>Page footer</strong> — injected before <code>&lt;/body&gt;</code> if not already present. Text is extracted from the page's own content, or falls back to <code>Copyright © 1994–2012 SQL Technologies. All rights reserved.</code></li>
+</ol>
+<p>For new projects, put the copyright in the sidebar header or page footer as appropriate.</p>
+<hr>
+<h2 id="what-not-to-do">What Not to Do</h2>
+<table>
+<thead><tr>
+<th>❌ Don't</th>
+<th>✓ Do instead</th>
+</tr></thead><tbody>
+<tr>
+<td>Dark text on dark background</td>
+<td>Always verify: <code>--c-side-section</code> must be lighter than <code>--c-side-bg</code></td>
+</tr>
+<tr>
+<td>Purple visited links (<code>#6040a0</code>)</td>
+<td>Keep <code>a:visited</code> the same blue as <code>a:link</code></td>
+</tr>
+<tr>
+<td>Gradient on top bar that differs from sidebar</td>
+<td>Flat <code>--c-topbar-bg</code>, no gradient</td>
+</tr>
+<tr>
+<td>Top bar background lighter than sidebar</td>
+<td>Top bar = darkest shade; sidebar = slightly lighter</td>
+</tr>
+<tr>
+<td>CamelCase nav text (<code>TheWin32Process</code>)</td>
+<td>Run through humanizer or write with spaces from the start</td>
+</tr>
+<tr>
+<td>Different link styles per theme</td>
+<td>Links are always <code>#1565C0</code> blue + underlined in content</td>
+</tr>
+<tr>
+<td>Font size chaos (mixing 8pt/16pt/12px)</td>
+<td>Use the type scale above; body = 14px base</td>
+</tr>
+</tbody></table>
+</section>
+<div class="gem-page-footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies. All rights reserved.</div>
+</main>
+</body>
+</html>

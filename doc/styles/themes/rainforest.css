@@ -1,0 +1,36 @@
+/* GEM Theme: Tropical Rainforest (#00755E)  |  gem-base.css must follow this file */
+:root {
+  --c-topbar-bg:     #021510;
+  --c-side-bg:       #082820;
+  --c-side-border:   #0E3D2E;
+  --c-side-section:  #2A7060;
+  --c-side-link:     #80C0B0;
+
+  --c-accent:        #00C898;
+  --c-accent-text:   #021510;
+
+  --c-h1:            #00755E;
+  --c-h1-border:     #A0D8C8;
+  --c-h2:            #009070;
+  --c-h2-border:     #B8E4D8;
+  --c-h3:            #00A882;
+
+  --c-bg:            #F0FAF8;
+  --c-text:          #081E18;
+
+  --c-th-bg:         #00755E;
+  --c-th-text:       #E0F5F0;
+  --c-td-border:     #A0D8C8;
+  --c-tr-alt:        #E8F7F4;
+  --c-tr-hover:      #C8ECDE;
+
+  --c-code-bg:       #D8F2EC;
+  --c-code-text:     #00755E;
+  --c-pre-bg:        #021510;
+  --c-pre-text:      #80C0B0;
+
+  --c-callout-bg:    rgba(0,200,152,0.07);
+  --c-callout-border:rgba(0,200,152,0.25);
+
+  --c-foot-text:     #4A9880;
+}
