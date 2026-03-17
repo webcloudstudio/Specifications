@@ -94,14 +94,14 @@ body.gem-topbar {
 
 /* Version pill */
 .gem-header-version {
-  color: var(--c-side-link);
+  color: rgba(255,255,255,0.75);
   font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.4px;
   white-space: nowrap;
   padding: 2px 7px;
-  border: 1px solid var(--c-side-border);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: 10px;
 }
 
@@ -127,30 +127,49 @@ body.gem-topbar {
 }
 
 .gem-header-nav a {
-  color: var(--c-side-link);
+  color: #FFFFFF;
   text-decoration: none;
   font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 600;
   padding: 6px 10px;
   white-space: nowrap;
   border-bottom: 2px solid transparent;
 }
 .gem-header-nav a:hover {
   color: #FFFFFF;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.12);
   border-bottom-color: var(--c-accent);
   text-decoration: none;
 }
 
 .gem-header-copyright {
-  color: var(--c-side-link);
+  color: rgba(255,255,255,0.65);
   font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 10.5px;
   flex-shrink: 0;
   white-space: nowrap;
   padding-left: 10px;
-  border-left: 1px solid var(--c-side-border);
+  border-left: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ☰ site-map link in top bar — navigates to root doc/index.htm (all sections) */
+.gem-header-menu-btn {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 15px;
+  padding: 3px 9px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-left: 4px;
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+.gem-header-menu-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  text-decoration: none;
 }
 
 /* ================================================================
