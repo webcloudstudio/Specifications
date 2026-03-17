@@ -56,8 +56,8 @@
 body.gem-topbar {
   background: var(--c-topbar-bg);
   border-bottom: 1px solid var(--c-side-border);
-  overflow: hidden;
-  height: 56px;
+  overflow: visible;
+  min-height: 56px;
   margin: 0;
   padding: 0;
 }
@@ -65,9 +65,10 @@ body.gem-topbar {
 .gem-header {
   display: flex;
   align-items: center;
-  height: 56px;
-  padding: 0 14px;
-  gap: 8px;
+  flex-wrap: wrap;           /* allow 2nd row on narrow windows */
+  min-height: 56px;
+  padding: 4px 14px;
+  gap: 4px 8px;
 }
 
 .gem-header-left {
@@ -120,10 +121,10 @@ body.gem-topbar {
 /* Horizontal nav — styled like sidebar links (not buttons) */
 .gem-header-nav {
   display: flex;
+  flex-wrap: wrap;           /* nav links wrap to 2nd row on narrow windows */
   gap: 0;
   flex: 1;
   justify-content: center;
-  overflow: hidden;
 }
 
 .gem-header-nav a {
@@ -153,24 +154,6 @@ body.gem-topbar {
   border-left: 1px solid rgba(255,255,255,0.2);
 }
 
-/* ☰ site-map link in top bar — navigates to root doc/index.htm (all sections) */
-.gem-header-menu-btn {
-  color: rgba(255,255,255,0.75);
-  text-decoration: none;
-  font-size: 15px;
-  padding: 3px 9px;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 3px;
-  flex-shrink: 0;
-  margin-left: 4px;
-  line-height: 1;
-  transition: background 0.1s, color 0.1s;
-}
-.gem-header-menu-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  text-decoration: none;
-}
 
 /* ================================================================
    SIDEBAR  (toc.htm)
@@ -263,6 +246,19 @@ body.gem-content {
   line-height: 1.65;
   margin: 0;
   padding: 20px 28px 32px 28px;
+}
+
+/* ================================================================
+   FONT NORMALISATION — override legacy <font face="..."> elements
+   and <body TEXT=...> attributes that appear throughout the old HTML.
+   The !important is intentional: inline presentation attributes in
+   pre-HTML5 content cannot otherwise be overridden by an external sheet.
+   code/pre/tt are excluded so monospace blocks keep their fonts.
+   ================================================================ */
+body:not(.gem-topbar):not(.gem-sidebar) font,
+body:not(.gem-topbar):not(.gem-sidebar) basefont {
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif !important;
+  color: inherit !important;
 }
 
 /* ================================================================
