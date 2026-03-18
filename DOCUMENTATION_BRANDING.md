@@ -1,6 +1,6 @@
 # Documentation Branding Standards
 
-**Version:** 1.0 — 2026-03-16
+**Version:** 1.1 — 2026-03-17
 **Maintainer:** Ed Barlow / SQL Technologies
 **Reference implementation:** `/mnt/c/Users/barlo/projects/gem/doc/`
 
@@ -158,20 +158,20 @@ font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
 
 | Element | Size | Weight | Notes |
 |---|---|---|---|
-| Body | 14px | 400 | `line-height: 1.65` |
-| h1 | 22px | 700 | Theme h1 color + thin underline |
-| h2 | 16px | 600 | Theme h2 color + thin underline |
-| h3 | 14px | 600 | Theme h3 color, no decoration |
-| h4–h6 | 13–12px | 600 | Theme h3 color |
-| Sidebar links | 12.5px | 400 | `--c-side-link` color |
+| Body | 16px | 400 | `line-height: 1.7` |
+| h1 | 26px | 700 | Theme h1 color + thin underline |
+| h2 | 20px | 600 | Theme h2 color + thin underline |
+| h3 | 17px | 600 | Theme h3 color, no decoration |
+| h4–h6 | 15–13px | 600 | Theme h3 color |
+| Sidebar links | 13.5px | 400 | `--c-side-link` color |
 | Sidebar section labels | 9.5px | 700 | `--c-side-section` color, uppercase, `letter-spacing: 1px` |
-| Top bar title | 13.5px | 500 | White (`#FFFFFF`) always |
-| Top bar nav links | 12px | 400 | `--c-side-link` color |
-| Version badge | 10px | 500 | `--c-side-link` color, pill border |
-| Copyright | 10.5px | 400 | `--c-side-link` color |
-| Code inline | 12.5px | 400 | Monospace, tinted bg |
-| Code block | 12.5px | 400 | Monospace, dark bg matching topbar |
-| Footer | 11.5px | 400 | `--c-foot-text` |
+| Top bar title | 15px | 500 | White (`#FFFFFF`) always |
+| Top bar nav links | 13px | 600 | White (`#FFFFFF`) always |
+| Version badge | 11px | 500 | `rgba(255,255,255,0.75)`, pill border |
+| Copyright | 11.5px | 400 | `rgba(255,255,255,0.65)` |
+| Code inline | 13px | 400 | Monospace, tinted bg |
+| Code block | 13px | 400 | Monospace, dark bg matching topbar |
+| Footer | 12.5px | 400 | `--c-foot-text` |
 
 ---
 
@@ -344,4 +344,4 @@ For new projects, put the copyright in the sidebar header or page footer as appr
 | Top bar background lighter than sidebar | Top bar = darkest shade; sidebar = slightly lighter |
 | CamelCase nav text (`TheWin32Process`) | Run through humanizer or write with spaces from the start |
 | Different link styles per theme | Links are always `#1565C0` blue + underlined in content |
-| Font size chaos (mixing 8pt/16pt/12px) | Use the type scale above; body = 14px base |
+| Font size chaos (mixing 8pt/16pt/12px) | Use the type scale above; body = 16px base |
