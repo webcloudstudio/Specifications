@@ -27,8 +27,9 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 SPEC_DIR = SCRIPT_DIR.parent
 PROJECTS_DIR = SPEC_DIR.parent
-TEMPLATES_DIR = SPEC_DIR / "templates"
-RULES_FILE = SPEC_DIR / "CLAUDE_RULES.md"
+GLOBAL_RULES_DIR = SPEC_DIR / "GLOBAL_RULES"
+TEMPLATES_DIR = GLOBAL_RULES_DIR / "templates"
+RULES_FILE = GLOBAL_RULES_DIR / "CLAUDE_RULES.md"
 
 MARKER_START = "# CLAUDE_RULES_START"
 MARKER_END = "# CLAUDE_RULES_END"
@@ -205,7 +206,7 @@ def create_project(name: str, dry_run: bool) -> None:
         (project_dir / sub).mkdir(parents=True, exist_ok=True)
 
     # .gitignore
-    gitignore_src = SPEC_DIR / ".gitignore"
+    gitignore_src = GLOBAL_RULES_DIR / "gitignore"
     if gitignore_src.exists():
         (project_dir / ".gitignore").write_text(
             gitignore_src.read_text(encoding="utf-8"), encoding="utf-8"

@@ -15,8 +15,8 @@ DOC_DIR = PROJECT_DIR / "doc"
 
 # Documents to include, in order: (anchor_id, filename, sidebar_label)
 DOCUMENTS = [
-    ("claude-rules",       "CLAUDE_RULES.md",           "Claude Rules"),
-    ("doc-branding",       "DOCUMENTATION_BRANDING.md", "Documentation Branding"),
+    ("claude-rules",       "GLOBAL_RULES/CLAUDE_RULES.md",           "Claude Rules"),
+    ("doc-branding",       "GLOBAL_RULES/DOCUMENTATION_BRANDING.md", "Documentation Branding"),
 ]
 
 

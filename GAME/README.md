@@ -1,10 +1,16 @@
 # GAME — Generic AI Management Environment
 
-A web dashboard for managing AI-assisted development projects. Discovers local projects by reading their METADATA.md and bin/ script headers, then provides a unified interface for running operations, viewing logs, publishing portfolios, managing AI configurations, and tracking usage costs.
+A project framework for managing your projects.
+
+Common built in standards provide enterprise features out of the box for users projects.  Projects can be easily conformed to a simple set of developement best practices which your agent can implement for you.  
+
+Each AI project has a minimal configured set of instructions placed in their rules which will expose project operations, endpoints, capabilities, documentation, command and control in a standard way that can be leveraged to make the easy to run and work with.  They will all work similarly. 
 
 ## Intent
 
-A solo practitioner or small team managing multiple AI-built projects needs one place to see what's running, launch operations, and track costs. GAME is that place. It does not modify project code — it reads filesystem contracts (METADATA.md, AGENTS.md, bin/ headers) and surfaces them as a dashboard with buttons.
+A solo practitioner or small team managing multiple AI-built projects needs one methedology.  If your projects have custom capabilities then it is difficult to manage.  A users projects become easier to manage when they are standard in format.  Start/Stop Services, Logs, Documentation, Health Checks, Unit Testing and other features are all set the same way. 
+
+Projects go through workflow.  They have several stages where we conform the project to standards and verify the metadata as we work through our workflow.  
 
 ## Stack
 
@@ -14,11 +20,11 @@ A solo practitioner or small team managing multiple AI-built projects needs one 
 - **Frontend:** Bootstrap 5 (dark theme, CDN)
 - **Port:** 5001
 
-Each stack component maps to a prescriptive reference file in `../stack/` (python.md, flask.md, sqlite.md, bootstrap5.md). These files define exactly how to implement with concrete code examples.
+Each stack component maps to a prescriptive reference file in `../GLOBAL_RULES/stack/` (python.md, flask.md, sqlite.md, bootstrap5.md). These files define exactly how to implement with concrete code examples.
 
 ## Specifications
 
-All project integration standards (script headers, METADATA.md format, secrets, documentation) are defined in `../CLAUDE_RULES.md` — that file should be appended to your CLAUDE.md before building this project.
+All project integration standards (script headers, METADATA.md format, secrets, documentation) are defined in `../GLOBAL_RULES/CLAUDE_RULES.md` — that file is injected into each project's AGENTS.md.
 
 The specs in this directory describe GAME specifically:
 

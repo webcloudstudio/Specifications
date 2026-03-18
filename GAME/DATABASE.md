@@ -76,41 +76,6 @@ User-defined tag colors.
 | tag | TEXT PK | Tag name |
 | color | TEXT | Hex color (#4caf50) |
 
-### config_deployments
-
-AI configuration deployment history.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | INTEGER PK | Auto-increment |
-| profile_name | TEXT | Profile that was deployed |
-| deployed_at | TEXT | yyyymmdd_hhmmss |
-| git_sha | TEXT | Commit SHA of staged config |
-
-### usage_sessions
-
-Parsed AI session records (read from external JSONL logs).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | INTEGER PK | Auto-increment |
-| project_name | TEXT | Project context |
-| model | TEXT | AI model name |
-| tokens_in | INTEGER | Input tokens |
-| tokens_out | INTEGER | Output tokens |
-| estimated_cost | REAL | From rates table |
-| session_time | TEXT | yyyymmdd_hhmmss |
-
-### usage_rates
-
-User-editable cost rates.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| model | TEXT PK | Model name |
-| cost_per_million_in | REAL | Cost per 1M input tokens |
-| cost_per_million_out | REAL | Cost per 1M output tokens |
-
 ---
 
 ## Conventions
