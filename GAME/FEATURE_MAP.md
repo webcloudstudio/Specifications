@@ -1,466 +1,628 @@
-# GAME Project Feature Map
+# GAME Feature Map
 
-**Comprehensive catalog of all project attributes, metadata fields, and runtime features.**
+**Complete catalog of project attributes, platform features, and operational capabilities.**
 
-This document maps every capability available in GAME as a personal project management platform. Features are organized by: metadata (static), runtime state, operations (actions), and integration points.
+This is the primary feature reference for GAME. It defines what the platform knows about projects, what it can do with them, and what "magic" it provides for Claude-developed projects. All SCREEN-*.md files reference features defined here; all DATABASE.md columns trace back to attributes listed here.
 
 ---
 
-## I. Project Identity & Metadata
+## I. Project Identity
 
-### Core Attributes (METADATA.md)
+### Naming (Consolidation)
 
-| Attribute | Type | Source | Purpose | Example |
-|-----------|------|--------|---------|---------|
-| `name` | string | METADATA.md | Machine slug, unique identifier, matches directory name | `MyProject` |
-| `display_name` | string | METADATA.md | Human-readable name for UI | `My Project` |
-| `title` | string | METADATA.md or UI | Full display title with tagline | `My Project — Full Stack App` |
-| `short_description` | string | METADATA.md | One-sentence summary for cards/lists | `Manages user workflows` |
-| `description` | string | METADATA.md | Longer narrative description | Full paragraph or markdown |
-| `stack` | string | METADATA.md | Technology summary, slash-separated | `Python/Flask/SQLite` |
-| `port` | integer | METADATA.md or UI | Service port (if applicable) | `5001` |
-| `version` | string | METADATA.md | Semantic version, YYYY-MM-DD.N format | `2026-03-16.1` |
-| `git_repo` | string | METADATA.md | Full HTTPS URL to repository | `https://github.com/org/MyProject` |
+The platform has too many name/description fields. The canonical model:
 
-### Project Status & Lifecycle
+| Field | Source | Purpose | Required |
+|-------|--------|---------|----------|
+| `name` | METADATA.md | Machine slug, matches directory name | Yes |
+| `display_name` | METADATA.md | Human-readable name for all UI display | Yes |
+| `short_description` | METADATA.md | One sentence, shown in lists and cards | Yes |
+| `git_repo` | METADATA.md | Full HTTPS URL to repository | Yes |
 
-| Attribute | Type | Values | Purpose |
-|-----------|------|--------|---------|
+**Derived / Override fields** (should default from the above, only stored separately when user explicitly overrides):
+
+| Field | Defaults From | Override Purpose |
+|-------|---------------|------------------|
+| `card_title` | `display_name` | Portfolio card shows a different name |
+| `card_desc` | `short_description` | Portfolio card shows a different summary |
+| `title` | `display_name` | Legacy — **candidate for removal** |
+| `description` | `short_description` | Longer narrative — rarely used, store in `extra` if needed |
+
+**Rule:** If `card_title` is empty, use `display_name`. If `card_desc` is empty, use `short_description`. Never require the user to enter the same text twice.
+
+### Visual Identity (NEW)
+
+| Field | Type | Source | Purpose |
+|-------|------|--------|---------|
+| `color` | hex string | METADATA.md | Project accent color for dashboard cards, charts, badges |
+| `icon` | string | METADATA.md | Emoji or icon identifier for quick visual scanning |
+| `logo` | path | METADATA.md | Path to project logo image (relative to project dir) |
+
+**Usage:** The dashboard row shows the icon next to the project name. The color tints the project's card border, tag pills, and chart segments. The logo appears in the project detail view and on portfolio cards (falls back to a colored initial if missing).
+
+**Default behavior:** If `color` not set, derive from a hash of the project name (deterministic palette). If `icon` not set, use the first letter of `display_name` in a colored circle.
+
+### Classification
+
+| Field | Type | Values | Purpose |
+|-------|------|--------|---------|
+| `project_type` | enum | `software`, `book`, custom | Determines UI template and default operations |
+| `category` | string | `infrastructure`, `client`, `tool`, `library`, `experiment` | High-level grouping for filtering/reporting |
+| `owner` | string | Name or handle | Who maintains this project |
+| `tags` | csv | Freeform | Cross-cutting labels for filtering |
+
+### Lifecycle
+
+| Field | Type | Values | Purpose |
+|-------|------|--------|---------|
 | `status` | enum | IDEA, PROTOTYPE, ACTIVE, PRODUCTION, ARCHIVED | Development phase |
-| `is_active` | boolean | true/false | Removed from disk = marked ARCHIVED |
-| `desired_state` | enum | running, on-demand | Service always-on vs. launch-on-use |
+| `is_active` | boolean | Auto | false = removed from disk |
+| `desired_state` | enum | running, on-demand | Service always-on vs. manual start |
 | `namespace` | string | development, qa, production, custom | Environment segregation |
 
-### Project Type & Configuration
+### Technology & Infrastructure
 
-| Attribute | Type | Source | Purpose |
-|-----------|------|--------|---------|
-| `project_type` | enum | METADATA.md or UI | Type registry: `software`, `book`, custom | Determines UI templates and default operations |
-| `extra` | JSON blob | METADATA.md | Additional type-specific fields (no schema migration needed) | Store `tech_stack`, `railway_id`, `website_url` |
+| Field | Type | Source | Purpose |
+|-------|------|--------|---------|
+| `stack` | string | METADATA.md | Slash-separated tech summary |
+| `port` | integer | METADATA.md | Service port (if applicable) |
+| `health_endpoint` | string | METADATA.md | Health check path (default `/health`) |
+| `deploy_url` | string | METADATA.md | Production/live URL |
+| `version` | string | METADATA.md | YYYY-MM-DD.N format |
 
-### Portfolio & Visibility
+### Auto-Detected Flags (Scanner)
 
-| Attribute | Type | Purpose |
-|-----------|------|---------|
-| `card_title` | string | Title shown on portfolio card (if published) |
-| `card_desc` | string | Description shown on portfolio card |
-| `card_tags` | string | Comma-separated tags for card filtering |
-| `card_type` | string | Type badge for card (e.g., "Software", "Book") |
-| `card_url` | string | URL linked from card (overrides default) |
-| `card_image` | string | Image path for card thumbnail |
-| `show_on_homepage` | boolean | Include in published portfolio site |
+| Flag | Detection Method | Purpose |
+|------|------------------|---------|
+| `has_git` | `.git/` directory exists | Show git status, push button |
+| `has_venv` | `venv/` or `.venv/` exists | Activate before running scripts |
+| `has_node` | `node_modules/` or `package.json` exists | npm-based operations |
+| `has_claude` | `CLAUDE.md` or `AGENTS.md` exists | Claude-integrated project |
+| `has_tests` | `tests/` or `bin/test.sh` exists | Show test runner button |
+| `has_docs` | `doc/index.html` exists | Show documentation link |
+| `has_specs` | Corresponding dir in Specifications/ | Specification management link |
 
-### Infrastructure & Endpoints
+### Portfolio & Publishing
 
-| Attribute | Type | Purpose |
-|-----------|------|---------|
-| `health_endpoint` | string | Health check path (default: `/health`) |
-| `path` | string | Absolute filesystem path to project directory |
+| Field | Defaults From | Purpose |
+|-------|---------------|---------|
+| `show_on_homepage` | false | Include in published portfolio |
+| `card_title` | `display_name` | Override title for portfolio card |
+| `card_desc` | `short_description` | Override description for card |
+| `card_tags` | `tags` | Override tags for card filtering |
+| `card_type` | `project_type` | Override type badge |
+| `card_url` | `deploy_url` or `git_repo` | Override link URL |
+| `card_image` | `logo` | Override card thumbnail |
 
-### Environment & Runtime Flags
+### Git State (Auto-Detected)
 
-| Attribute | Type | Purpose |
-|-----------|------|---------|
-| `has_git` | boolean | Git repository detected |
-| `has_venv` | boolean | Python venv detected |
-| `has_node` | boolean | Node.js detected |
-| `has_claude` | boolean | CLAUDE.md / AGENTS.md detected |
+| Field | Type | Source | Purpose |
+|-------|------|--------|---------|
+| `git_branch` | string | Scanner | Current branch name |
+| `git_dirty` | boolean | Scanner | Uncommitted changes |
+| `git_unpushed` | integer | Scanner | Commits ahead of remote |
+| `git_last_commit` | string | Scanner | Last commit message |
 
 ### Timestamps
 
-| Attribute | Format | Purpose |
+| Field | Format | Purpose |
+|-------|--------|---------|
+| `created_at` | ISO 8601 | First scan / record creation |
+| `updated_at` | ISO 8601 | Last database modification |
+| `last_scanned` | yyyymmdd_hhmmss | Last scanner pass |
+
+### Type-Specific Extension
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `extra` | JSON blob | Type-specific fields, no migration needed |
+
+The type registry (`models.py`) defines which fields each type uses. New types add entries to `PROJECT_TYPES` and two HTML partials.
+
+---
+
+## II. Operations & Script Registry
+
+### Discovery
+
+Scripts in `bin/` with the `# CommandCenter Operation` marker in the first 20 lines are automatically registered on scan.
+
+### Operation Attributes
+
+| Attribute | Header | Purpose |
 |-----------|--------|---------|
-| `updated` | yyyymmdd_hhmmss | Last update timestamp (auto-set by platform) |
-| `last_scanned` | yyyymmdd_hhmmss | Last scanner run timestamp |
-| `created_at` | ISO 8601 | Record creation time |
-| `updated_at` | ISO 8601 | Record last modified |
+| `script_name` | (filename) | Operation identifier |
+| `script_path` | (relative path) | Execution path |
+| `display_name` | (derived) | Button label |
+| `category` | `# Category:` | Group: `service`, `maintenance`, `build`, `deploy` |
+| `port` | `# Port:` | Service port override |
+| `health_path` | `# Health:` | Health endpoint for monitoring |
+| `schedule` | `# Schedule:` | Cron expression for automated runs |
+| `timeout` | `# Timeout:` | Max execution seconds |
 
----
+### Default Operations (by stack)
 
-## II. Git Integration & Source Control
-
-### Git Status Attributes
-
-| Attribute | Type | Source | Purpose |
-|-----------|------|--------|---------|
-| `git_branch` | string | Scanner | Current branch name |
-| `git_dirty` | boolean | Scanner | Uncommitted changes detected |
-| `git_unpushed` | integer | Scanner | Count of commits not pushed to remote |
-| `git_last_commit` | string | Scanner | Message from last commit |
-
-### Git Operations
-
-| Operation | Trigger | Result |
-|-----------|---------|--------|
-| Push | Dashboard button (shown when `git_unpushed > 0`) | `git push` to remote |
-| Scan | Rescan button | Re-reads all METADATA.md, AGENTS.md, bin/ headers |
-
----
-
-## III. Project-Level Tags & Filtering
-
-### Tag System
-
-| Feature | Details |
-|---------|---------|
-| **Tag Storage** | Comma-separated string in `projects.tags` |
-| **Tag Colors** | Editable via UI → Settings → Tags |
-| **Color Persistence** | `data/tag_colors.json` (git-committed) |
-| **Filter By Tag** | Dashboard filter pill button |
-| **Inline Editing** | Click tag on dashboard to edit |
-
----
-
-## IV. Operations & Script Registry
-
-### Operation Attributes (from bin/ headers)
-
-Operations are automatically discovered from scripts in `bin/` directory. Each script header registers metadata:
-
-| Attribute | Source | Purpose |
-|-----------|--------|---------|
-| `script_name` | Filename (e.g., `start.sh`) | Operation identifier |
-| `script_path` | Relative path (e.g., `bin/start.sh`) | Execution path |
-| `display_name` | Derived from filename | Button label (e.g., "Start Server") |
-| `category` | `# Category:` header | Operation group (e.g., `service`, `maintenance`) |
-| `port` | `# Port:` header | Service port override |
-| `health_path` | `# Health:` header | Health endpoint path |
-| `schedule` | `# Schedule:` header | Cron-style recurrence (if applicable) |
-| `timeout` | `# Timeout:` header | Max execution time in seconds |
-
-### Built-in Default Operations
-
-For `software` project type, auto-registered based on stack detection:
-
-| Stack | Default Operation | Command |
-|-------|-------------------|---------|
+| Stack | Operation | Command |
+|-------|-----------|---------|
 | Flask | Start Server | `flask run --port {port}` |
 | Django | Start Server | `python manage.py runserver {port}` |
 | Node | Start Dev | `npm run dev` |
 | Astro | Start Dev | `npm run dev` |
 | Bash | Run Script | `./start.sh` |
 
-### Operation Execution (Runs)
+### Run Records
 
-When an operation is triggered, a `run` record is created:
-
-| Attribute | Type | Values |
-|-----------|------|--------|
+| Field | Type | Values |
+|-------|------|--------|
 | `status` | enum | STARTING, RUNNING, DONE, ERROR, STOPPED |
-| `pid` | integer | OS process ID (while running) |
-| `exit_code` | integer | Exit status (once finished) |
-| `started_at` | yyyymmdd_hhmmss | Start timestamp |
-| `finished_at` | yyyymmdd_hhmmss | End timestamp (null while running) |
-| `log_path` | string | Path to `logs/{project}_{script}_{yyyymmdd_hhmmss}.log` |
-
----
-
-## V. Screens & Navigation
-
-### Dashboard Screen
-- **Path:** `/`
-- **Purpose:** Project list with status, operations, tags, links
-- **Elements per row:**
-  - Status badge (IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED)
-  - Project type icon
-  - Display name (clickable → detail)
-  - Namespace badge
-  - Tags with color coding
-  - Stack summary
-  - Running indicator (green dot)
-  - Operation buttons (dynamic, based on bin/ headers)
-  - Quick links (from AGENTS.md bookmarks)
-  - Settings icon (click → METADATA.md editor)
-- **Filters:** By tag, status, namespace, text search
-- **Actions:** Run operation, stop operation, push git, rescan projects
-
-### Project Detail Screen
-- **Trigger:** Click project name on dashboard
-- **Shows:**
-  - All METADATA.md fields
-  - All AGENTS.md content (bookmarks, endpoints, services, dev commands)
-  - All registered operations with run history
-  - Git status and push button
-  - Tag editing
-
-### Processes Screen
-- **Path:** `/processes`
-- **Purpose:** Live monitoring of running operations
-- **Shows:** Process list (most recent first), expandable log viewer
-- **Columns:** Project, Operation, Status, Start time, Duration, Controls
-- **Log Viewer:** Monospace output, auto-scrolls while running, stops on exit
-- **Actions:** Stop operation (SIGTERM), view full log, filter/sort
-
-### Configuration Screen
-- **Path:** `/config`
-- **Purpose:** Project metadata editing
-- **Features:** Edit METADATA.md fields inline, save changes
-
-### GIT-Homepage (Publisher) Screen
-- **Path:** `/publisher`
-- **Purpose:** Portfolio site generation and deployment
-- **Features:**
-  - Build portfolio from projects where `show_on_homepage = true`
-  - Generate card HTML: title, short_description, tags, image
-  - Add documentation links (if `doc/index.html` exists)
-  - Preview generated site
-  - Publish to GitHub Pages
-
-### Monitoring Screen
-- **Path:** `/monitoring`
-- **Purpose:** Health check aggregation (if defined in operations)
-- **Shows:** Service status, uptime, last check time
-
-### Workflow Screen
-- **Path:** `/workflow`
-- **Purpose:** Kanban-style task board (if tickets enabled)
-- **States:** Configurable from `workflow.json` (defaults: IDEA, PROPOSED, READY, IN_DEVELOPMENT, TESTING, DONE)
-- **Features:** Drag-drop tickets between states, add/edit tickets per project
-
-### Settings Screen
-- **Path:** `/settings`
-- **Purpose:** Global platform settings
-- **Features:** Tag color management, workflow state editor, environment config
-
----
-
-## VI. Endpoints & Integration Points
-
-### Bookmarks/Quick Links (from AGENTS.md)
-
-Projects can define bookmarks in `AGENTS.md` under `## Bookmarks`:
-
-```markdown
-## Bookmarks
-- [Documentation](doc/index.html)
-- [Live Site](https://example.com)
-```
-
-These appear as clickable links in the dashboard and project detail.
-
-### Service Endpoints (from AGENTS.md)
-
-Projects can define live service endpoints:
-
-```markdown
-## Service Endpoints
-- Local: http://localhost:5001
-```
-
-Endpoints are clickable and can trigger health checks.
-
-### API Routes (for HTMX)
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| POST | `/api/scan` | Re-scan projects directory |
-| POST | `/api/run/{op_id}` | Launch operation |
-| POST | `/api/stop/{run_id}` | Stop running operation |
-| POST | `/api/push/{project_id}` | Git push |
-| GET | `/api/project/{id}` | Fetch project detail fragment |
-| GET | `/health` | Health check endpoint |
-
----
-
-## VII. Integration with AGENTS.md & CLAUDE.md
-
-### Scanner Extraction
-
-On scan, GAME reads:
-
-| File | Extracted Data |
-|------|----------------|
-| `METADATA.md` | All key:value fields (name, display_name, status, stack, etc.) |
-| `AGENTS.md` | Dev commands, service endpoints, bookmarks |
-| `bin/` script headers | Operation metadata (category, port, health, schedule, timeout) |
-
-### CLAUDE.md / AGENTS.md Content Viewer
-
-- Dashboard settings icon → opens modal showing full AGENTS.md content
-- Displays project context, dev commands, architecture, etc.
-
----
-
-## VIII. Type Registry & Custom Fields
-
-### Project Types
-
-Defined in `models.py` `PROJECT_TYPES` dict:
-
-| Type | Template | Fields | Default Ops |
-|------|----------|--------|-------------|
-| `software` | `types/_software_detail.html` | tech_stack, port, railway_id, website_url | Stack-based (Flask, Django, Node, etc.) |
-| `book` | `types/_book_detail.html` | (none) | (none) |
-
-### Extensibility
-
-- Add new type to `PROJECT_TYPES` dict
-- Create two HTML partials: `_yourtype_detail.html`, `_yourtype_row.html`
-- Type-specific fields stored in `extra` JSON column (no migration)
-
----
-
-## IX. Data Persistence & Lifecycle
-
-### Database Tables
-
-| Table | Purpose | Lifecycle |
-|-------|---------|-----------|
-| `projects` | Project records | Upserted on scan, marked ARCHIVED if removed from disk |
-| `operations` | Registered scripts | Repopulated on scan from bin/ headers |
-| `op_runs` | Operation execution history | Permanent record, never deleted |
-| `tickets` | Workflow tasks (if enabled) | User-created, lifecycle managed in UI |
-| `tag_colors` | Tag color map | User-edited, persistent |
-| `config_deployments` | Config rollback history | Auto-created on deploy |
-
-### Log Files
-
-- Stored in `logs/` directory (gitignored)
-- Named: `{project}_{script}_{yyyymmdd_hhmmss}.log`
-- Captured from operation stdout/stderr
-- Parsed for `[$PROJECT_NAME]` status lines
-
-### Configuration Files (git-committed)
-
-- `workflow.json` — Workflow state definitions
-- `data/tag_colors.json` — Tag color mappings
-- `config/site_config.md` — Site branding for publisher
-- `git_homepage.md` — GAME card metadata for portfolio
-
----
-
-## X. Run-Time State & Monitoring
+| `pid` | integer | OS process ID |
+| `exit_code` | integer | null while running |
+| `started_at` | yyyymmdd_hhmmss | Launch time |
+| `finished_at` | yyyymmdd_hhmmss | Completion time |
+| `log_path` | string | `logs/{project}_{script}_{yyyymmdd_hhmmss}.log` |
 
 ### Process State Machine
 
 ```
-IDLE → STARTING → RUNNING → DONE
-                          → ERROR (non-zero exit)
-                          → STOPPED (user cancelled)
+IDLE --> STARTING --> RUNNING --> DONE
+                              --> ERROR (non-zero exit)
+                              --> STOPPED (user SIGTERM)
 ```
 
-### Running Operations Indicator
+---
 
-- Dashboard nav bar shows green badges for running projects
-- Per-project green dot on dashboard row
-- Aggregated count in nav
+## III. Scheduling Engine
 
-### Health Checks
+### Schedule Declaration
 
-- If operation defines `# Health:` header, platform can poll endpoint
-- Status displayed on Monitoring screen
-- Integrated with process state machine
+Operations declare schedules via the `# Schedule:` header in bin/ scripts:
+
+```bash
+#!/bin/bash
+# CommandCenter Operation
+# Category: maintenance
+# Schedule: 0 2 * * *
+```
+
+### Schedule Attributes
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `schedule` | cron expr | When to run (standard 5-field cron) |
+| `last_scheduled_run` | yyyymmdd_hhmmss | Last time the scheduler fired this |
+| `next_scheduled_run` | yyyymmdd_hhmmss | Calculated next fire time |
+| `schedule_enabled` | boolean | Can be paused without removing the header |
+
+### Standard Scheduled Scripts
+
+| Script | Convention | Typical Schedule |
+|--------|------------|------------------|
+| `bin/daily.sh` | Daily maintenance | `0 2 * * *` |
+| `bin/weekly.sh` | Weekly maintenance | `0 3 * * 0` |
+| `bin/build.sh` | Rebuild on schedule | Project-specific |
+
+### Missed Run Recovery
+
+On startup, the scheduler checks `last_scheduled_run` against the cron expression. If a run was missed (platform was down), it fires immediately (catch-up). Only the most recent missed run fires — no backfill cascade.
 
 ---
 
-## XI. Publisher & Portfolio Generation
+## IV. Heartbeats & Events
 
-### Portfolio Site Generation
+Two fundamentally different observation types. Heartbeats answer "what is the state right now?" Events answer "what happened?"
 
-From projects where `show_on_homepage = true`:
+### Heartbeats (Continuous State)
 
-1. Read `card_title`, `card_desc`, `card_image`, `card_tags`, `card_type`
-2. Generate HTML card with title, tags, thumbnail, type badge
-3. Add "Documentation" link if `doc/index.html` exists
-4. Output static site (location configurable)
-5. Push to GitHub Pages via `PushAndPublish.sh`
+Heartbeats are periodic polls that produce a current state. They have no history beyond the current value and a rolling window.
 
-### Source Metadata
+| Heartbeat | Source | States | Poll Method |
+|-----------|--------|--------|-------------|
+| **Service Health** | `port` + `health` from METADATA.md | UP / DOWN / UNKNOWN | HTTP GET to health endpoint |
+| **Process State** | Operations engine | RUNNING / STOPPED | Check PID existence |
+| **Git State** | Scanner | CLEAN / DIRTY / UNPUSHED | `git status` + `git log` |
+| **Compliance** | Scanner | COMPLIANT / GAPS / UNCHECKED | Check required files exist |
 
-- `git_homepage.md` — Metadata for GAME card (stored per-project)
-- `config/site_config.md` — Global site branding (YAML frontmatter + markdown body)
+**Heartbeat record:**
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `project_id` | FK | Which project |
+| `heartbeat_type` | enum | service_health, process_state, git_state, compliance |
+| `current_state` | string | Current state value |
+| `last_checked` | yyyymmdd_hhmmss | When last polled |
+| `response_ms` | integer | Response time (service health only) |
+| `uptime_pct` | float | Rolling 24h percentage (service health only) |
+
+**Aggregate indicators:**
+- **UP** = all heartbeats healthy
+- **DOWN** = any heartbeat in failure state
+- **MIXED** = some up, some down (multi-service projects)
+
+### Events (Discrete Occurrences)
+
+Events are timestamped records of things that happened. They accumulate in a log and are never overwritten.
+
+| Event Type | Source | Trigger |
+|------------|--------|---------|
+| `operation_started` | Operations engine | Script launched |
+| `operation_completed` | Operations engine | Script exited (includes exit code) |
+| `operation_failed` | Operations engine | Non-zero exit |
+| `state_transition` | Heartbeat poller | UP-->DOWN, DOWN-->UP, etc. |
+| `git_push` | Dashboard action | User pushed commits |
+| `git_commit` | Scanner | New commit detected on scan |
+| `schedule_fired` | Scheduler | Cron triggered an operation |
+| `schedule_missed` | Scheduler | Startup catch-up detected missed run |
+| `build_completed` | Publisher | Portfolio site rebuilt |
+| `deploy_completed` | Publisher/config | Site published or config deployed |
+| `scan_completed` | Scanner | Project directory re-scanned |
+| `ticket_transition` | Workflow | Ticket moved between states |
+| `metadata_changed` | Configuration | METADATA.md field edited |
+| `alert_fired` | Monitoring | Health alert triggered |
+| `spec_updated` | Specification mgmt | Spec file committed via transaction log |
+
+**Event record:**
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | PK | Auto-increment |
+| `project_id` | FK | Which project (null for platform events) |
+| `event_type` | string | From the table above |
+| `timestamp` | yyyymmdd_hhmmss | When it happened |
+| `summary` | string | Human-readable one-liner |
+| `detail` | JSON | Event-specific payload |
+| `source` | string | Which subsystem generated it |
+
+**Platform-level event log** visible on the Monitoring screen as a timeline. Per-project event log visible on the project detail screen.
 
 ---
 
-## XII. Templating & UI Customization
+## V. Specification Management
 
-### Template Hierarchy
+### Transaction Log Integration
 
-| Template | Purpose |
+Projects with a corresponding directory in `Specifications/` (e.g., `Specifications/GAME/`) have specification management capabilities. The transaction log tracks AI decisions and changes:
+
+| Feature | Details |
+|---------|---------|
+| **Spec Directory** | `Specifications/{project_name}/` — linked by convention |
+| **Transaction Log** | Ordered record of spec decisions, changes, rationale |
+| **Spec Files** | Markdown documents: README, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE_MAP, etc. |
+| **Versioning** | Spec changes committed to the Specifications repo with descriptive messages |
+
+### Transaction Log Record
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | PK | Sequential entry number |
+| `project_id` | FK | Which project |
+| `timestamp` | yyyymmdd_hhmmss | When the decision was made |
+| `category` | enum | `decision`, `change`, `question`, `rationale` |
+| `title` | string | One-line summary |
+| `body` | text | Full description, context, alternatives considered |
+| `files_affected` | JSON | List of spec files modified |
+| `ticket_id` | FK | Optional link to workflow ticket |
+
+### Spec-to-Code Traceability
+
+| Direction | Mechanism |
+|-----------|-----------|
+| Spec --> Code | Transaction log entry links to ticket; ticket links to commits |
+| Code --> Spec | Scanner detects `has_specs` flag; UI links to spec directory |
+| Spec --> Spec | Cross-references between FEATURE_MAP, SCREEN-*, ARCHITECTURE |
+
+---
+
+## VI. Auto-Detection Magic
+
+Features that GAME provides automatically for Claude-developed projects by reading filesystem conventions:
+
+### On Scan (Automatic)
+
+| Detection | Method | Result |
+|-----------|--------|--------|
+| **Project exists** | Directory with METADATA.md in $PROJECTS_DIR | Project record created |
+| **Identity** | Parse METADATA.md key:value fields | All identity fields populated |
+| **Operations** | Parse `# CommandCenter Operation` headers in bin/ | Operation buttons appear |
+| **Bookmarks** | Parse `## Bookmarks` in AGENTS.md | Quick-link buttons on dashboard |
+| **Endpoints** | Parse `## Service Endpoints` in AGENTS.md | Clickable service links |
+| **Dev Commands** | Parse `## Dev Commands` in AGENTS.md | Context for the platform |
+| **Stack detection** | `requirements.txt` --> Python, `package.json` --> Node, `Cargo.toml` --> Rust | Auto-populate stack if empty |
+| **Git status** | `git status`, `git log`, `git rev-list` | Branch, dirty, unpushed, last commit |
+| **Environment flags** | Check for venv/, node_modules/, .git/, CLAUDE.md, tests/, doc/ | Boolean flags |
+| **Schedule registration** | `# Schedule:` headers in bin/ scripts | Cron jobs registered |
+| **Compliance check** | Required files present per CLAUDE_RULES | Compliance gaps flagged |
+| **Spec linkage** | Matching directory in Specifications/ | Spec management enabled |
+
+### Contract-Earns-Capability Principle
+
+"Add the file; the platform discovers the capability."
+
+| File Added | Capability Earned |
+|------------|-------------------|
+| `METADATA.md` | Project appears in dashboard |
+| `AGENTS.md` | Bookmarks, endpoints, dev commands extracted |
+| `bin/start.sh` with header | Start button appears |
+| `bin/daily.sh` with `# Schedule:` | Daily automation registered |
+| `doc/index.html` | Documentation link appears |
+| `Specifications/{name}/` | Specification management enabled |
+| `health: /health` in METADATA | Health monitoring enabled |
+| `port: NNNN` in METADATA | Service monitoring + heartbeat enabled |
+| `show_on_homepage: true` | Portfolio card generated |
+
+### Suggested Enhancements (Magic for Claude Users)
+
+| Feature | How It Works | Value |
+|---------|-------------|-------|
+| **Auto-scaffold** | `create_project.py` generates all required files from a template | Zero-to-dashboard in one command |
+| **Spec generation** | Generate ARCHITECTURE.md from scanning code structure, imports, routes | Keep specs in sync with code |
+| **Dependency detection** | Scan imports and config for references to other managed projects | Dependency graph on dashboard |
+| **Stale project detection** | No git commits in N days + status ACTIVE = flag for review | Surface forgotten projects |
+| **Environment drift** | Compare `.env.example` vs `.env` across projects | Catch missing config |
+| **Documentation freshness** | Compare `doc/` mtime vs last code commit | Flag stale docs |
+| **Test coverage hint** | `has_tests` false + status ACTIVE = suggest adding tests | Quality nudge |
+| **Common.sh drift** | Compare project's `bin/common.sh` against Specifications/templates/ | Flag outdated infrastructure |
+
+---
+
+## VII. Tag System
+
+| Feature | Details |
+|---------|---------|
+| **Storage** | Comma-separated string in `projects.tags` |
+| **Colors** | Per-tag hex color, stored in `tag_colors` table and `data/tag_colors.json` |
+| **Filtering** | Dashboard filter by tag (pill buttons) |
+| **Inline Editing** | Click tag on dashboard to edit |
+| **Cross-project** | Same tag across projects creates a natural grouping |
+| **Color Picker** | Settings screen with visual color selection |
+
+---
+
+## VIII. API Layer
+
+### HTMX Endpoints (HTML fragments)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/` | Full dashboard page |
+| GET | `/api/project/{id}` | Project detail fragment |
+| POST | `/api/scan` | Trigger re-scan |
+| POST | `/api/run/{op_id}` | Launch operation |
+| POST | `/api/stop/{run_id}` | Stop running operation |
+| POST | `/api/push/{project_id}` | Git push |
+| POST | `/api/project/{id}/toggle-publish` | Toggle portfolio inclusion |
+| GET | `/processes` | Process list page |
+| GET | `/processes/{run_id}/log` | Log content fragment |
+| GET | `/publisher` | Publisher page |
+| POST | `/publisher/build` | Rebuild portfolio |
+| POST | `/publisher/publish` | Publish to GitHub Pages |
+| GET | `/config` | Configuration page |
+| GET | `/monitoring` | Monitoring page |
+| GET | `/workflow` | Workflow board |
+| GET | `/health` | `{"status":"ok"}` JSON |
+
+### JSON API (programmatic access)
+
+Potential extension: mirror key HTMX routes as JSON endpoints under `/api/v1/` for external tool integration (CLI tools, other projects, webhooks).
+
+| Endpoint | Purpose |
 |----------|---------|
-| `base.html` | Layout with nav bar, modals, global styles |
-| `dashboard.html` | Project list and filters |
-| `project_detail.html` | Single project expanded view |
-| `processes.html` | Process monitor and log viewer |
-| `config.html` | Metadata editor |
-| `publisher.html` | Portfolio builder controls |
-| `settings.html` | Tag colors, workflow editor |
-| `help.html` | Documentation viewer |
-
-### Reusable Components
-
-- `components/` — Partials (operation button, tag, badge, etc.)
-- `types/` — Type-specific partials (software detail, book detail, etc.)
-
-### HTMX Integration
-
-- All interactions are partial page updates (no full page reloads)
-- Server returns HTML fragments, not JSON
-- Modals for operation output and CLAUDE.md viewer
+| `GET /api/v1/projects` | List all projects with status |
+| `GET /api/v1/projects/{id}` | Single project detail |
+| `GET /api/v1/projects/{id}/heartbeats` | Current heartbeat states |
+| `GET /api/v1/projects/{id}/events` | Recent events |
+| `POST /api/v1/projects/{id}/run/{op_id}` | Trigger operation |
+| `GET /api/v1/events` | Platform-wide event feed |
+| `GET /api/v1/health` | Platform health summary |
 
 ---
 
-## XIII. Inventory of Project Attributes
+## IX. Workflow & Ticketing
 
-### Complete Attribute Matrix
+### Ticket Attributes
 
-| Category | Attribute | Type | Mutable | Source |
-|----------|-----------|------|---------|--------|
-| **Identity** | name | string | ✗ | METADATA.md |
-| | display_name | string | ✓ | METADATA.md |
-| | title | string | ✓ | UI |
-| | description | string | ✓ | METADATA.md |
-| **Status** | status | enum | ✓ | METADATA.md |
-| | is_active | boolean | Auto | Scanner |
-| | desired_state | enum | ✓ | UI |
-| | namespace | string | ✓ | METADATA.md |
-| **Technology** | stack | string | ✓ | METADATA.md |
-| | port | int | ✓ | METADATA.md |
-| | project_type | enum | ✓ | UI |
-| | health_endpoint | string | ✓ | Operation |
-| **Infrastructure** | has_git | boolean | Auto | Scanner |
-| | has_venv | boolean | Auto | Scanner |
-| | has_node | boolean | Auto | Scanner |
-| | has_claude | boolean | Auto | Scanner |
-| **Portfolio** | show_on_homepage | boolean | ✓ | UI |
-| | card_title | string | ✓ | UI |
-| | card_desc | string | ✓ | UI |
-| | card_tags | string | ✓ | UI |
-| | card_type | string | ✓ | UI |
-| | card_image | string | ✓ | UI |
-| | card_url | string | ✓ | UI |
-| **Git** | git_branch | string | Auto | Scanner |
-| | git_dirty | boolean | Auto | Scanner |
-| | git_unpushed | int | Auto | Scanner |
-| | git_last_commit | string | Auto | Scanner |
-| **Metadata** | git_repo | string | ✓ | METADATA.md |
-| | version | string | ✓ | METADATA.md |
-| | tags | string | ✓ | UI |
-| | extra | JSON | ✓ | METADATA.md |
-| **Timestamps** | created_at | ISO8601 | ✗ | DB |
-| | updated_at | ISO8601 | Auto | DB |
-| | last_scanned | yyyymmdd_hhmmss | Auto | Scanner |
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | PK | Ticket identifier |
+| `project_id` | FK | Parent project |
+| `title` | string | One-line summary |
+| `description` | text | Full description, acceptance criteria |
+| `state` | enum | From workflow.json states |
+| `tags` | csv | Ticket-level tags |
+| `priority` | enum | Low, Medium, High, Critical |
+| `created_at` | yyyymmdd_hhmmss | Creation time |
+| `updated_at` | yyyymmdd_hhmmss | Last modification |
+
+### Workflow States
+
+Default states from `workflow.json` (user-configurable):
+
+```
+IDEA --> PROPOSED --> READY --> IN DEVELOPMENT --> TESTING --> DONE
+                                    ^                |
+                                  READY <------------+  (rework)
+```
+
+### AI Transaction Log (per ticket)
+
+When a ticket enters IN DEVELOPMENT, the AI agent's decisions are logged:
+
+| Field | Purpose |
+|-------|---------|
+| `decision` | What was decided and why |
+| `alternatives` | What was considered but rejected |
+| `files_changed` | Which files were modified |
+| `timestamp` | When the work happened |
+
+This creates an audit trail from idea through implementation.
 
 ---
 
-## XIV. Summary: What Makes a Project Manageable
+## X. Publisher & Portfolio
 
-A "complete" GAME project has:
+### How It Works
 
-1. **Identity** → METADATA.md with name, display_name, status, stack, version
-2. **Context** → AGENTS.md with dev commands, endpoints, bookmarks, architecture
-3. **Operations** → bin/ scripts with CommandCenter headers (category, port, health, etc.)
-4. **Git** → Active git repository with branches and commit history
-5. **Type** → Project type enum (software, book, custom) determining UI and defaults
-6. **Visibility** → Tags, namespace, status badge, portfolio inclusion settings
-7. **Health** → Health endpoint (if service) for monitoring
-8. **Documentation** → `doc/index.html` for the portfolio and project detail
+1. Scan projects where `show_on_homepage = true`
+2. For each: use `card_title` (or `display_name`), `card_desc` (or `short_description`), `card_image` (or `logo`), `card_tags` (or `tags`)
+3. If `doc/index.html` exists, add documentation link
+4. Generate static site from `config/site_config.md` branding
+5. Serve locally or push to GitHub Pages
+
+### Source Files
+
+| File | Purpose |
+|------|---------|
+| `config/site_config.md` | Site title, branding, home page markdown (YAML frontmatter + body) |
+| `git_homepage.md` | Per-project card metadata override |
+| `static/images/*.webp` | Card thumbnail images |
+
+---
+
+## XI. Compliance & Project Health
+
+### Compliance Checks (Scanner)
+
+Based on CLAUDE_RULES requirements:
+
+| Check | Required For | Detection |
+|-------|-------------|-----------|
+| METADATA.md exists | All projects | File presence |
+| AGENTS.md exists | All projects | File presence |
+| CLAUDE.md points to AGENTS.md | All projects | Content check |
+| bin/common.sh exists | Projects with bin/ | File presence |
+| .env.example when .env exists | Projects with .env | File comparison |
+| `name` field in METADATA.md | All projects | Parse check |
+| `display_name` in METADATA.md | All projects | Parse check |
+| Version format valid | All projects | Regex: `YYYY-MM-DD.N` |
+| Git initialized | ACTIVE+ status | `.git/` exists |
+| Health endpoint responding | PRODUCTION services | HTTP check |
+
+### Project Health Score (Derived)
+
+Composite score from multiple signals:
+
+| Signal | Weight | Healthy | Unhealthy |
+|--------|--------|---------|-----------|
+| Compliance | High | All checks pass | Missing required files |
+| Git activity | Medium | Commits within 30 days | Stale (no activity) |
+| Service health | High | UP heartbeat | DOWN heartbeat |
+| Tests exist | Low | `has_tests = true` | No tests for ACTIVE+ |
+| Docs current | Low | `has_docs = true` | Docs older than code |
+| Env drift | Medium | .env matches .env.example | Missing vars |
+
+---
+
+## XII. Complete Attribute Matrix
+
+### All Project Fields
+
+| Category | Attribute | Type | Mutable | Source | Notes |
+|----------|-----------|------|---------|--------|-------|
+| **Identity** | name | string | No | METADATA.md | Machine slug |
+| | display_name | string | Yes | METADATA.md | Primary human name |
+| | short_description | string | Yes | METADATA.md | One-liner |
+| | git_repo | string | Yes | METADATA.md | HTTPS URL |
+| **Visual** | color | hex | Yes | METADATA.md | Accent color |
+| | icon | string | Yes | METADATA.md | Emoji or icon |
+| | logo | path | Yes | METADATA.md | Logo image path |
+| **Classification** | project_type | enum | Yes | METADATA.md | Type registry key |
+| | category | string | Yes | METADATA.md | High-level group |
+| | owner | string | Yes | METADATA.md | Maintainer |
+| | tags | csv | Yes | METADATA.md + UI | Cross-cutting labels |
+| **Lifecycle** | status | enum | Yes | METADATA.md | IDEA...ARCHIVED |
+| | is_active | boolean | Auto | Scanner | false if removed from disk |
+| | desired_state | enum | Yes | METADATA.md | running / on-demand |
+| | namespace | string | Yes | METADATA.md | Environment |
+| **Technology** | stack | string | Yes | METADATA.md | Tech summary |
+| | port | int | Yes | METADATA.md | Service port |
+| | health_endpoint | string | Yes | METADATA.md | Health path |
+| | deploy_url | string | Yes | METADATA.md | Live URL |
+| | version | string | Yes | METADATA.md | YYYY-MM-DD.N |
+| **Auto-Detect** | has_git | boolean | Auto | Scanner | .git/ exists |
+| | has_venv | boolean | Auto | Scanner | venv/ exists |
+| | has_node | boolean | Auto | Scanner | package.json exists |
+| | has_claude | boolean | Auto | Scanner | CLAUDE.md exists |
+| | has_tests | boolean | Auto | Scanner | tests/ or bin/test.sh |
+| | has_docs | boolean | Auto | Scanner | doc/index.html |
+| | has_specs | boolean | Auto | Scanner | Specifications/{name}/ |
+| **Git State** | git_branch | string | Auto | Scanner | Current branch |
+| | git_dirty | boolean | Auto | Scanner | Uncommitted changes |
+| | git_unpushed | int | Auto | Scanner | Commits ahead |
+| | git_last_commit | string | Auto | Scanner | Last commit msg |
+| **Portfolio** | show_on_homepage | boolean | Yes | UI | Portfolio inclusion |
+| | card_title | string | Yes | UI | Override display_name |
+| | card_desc | string | Yes | UI | Override short_description |
+| | card_tags | string | Yes | UI | Override tags |
+| | card_type | string | Yes | UI | Override project_type |
+| | card_url | string | Yes | UI | Override link target |
+| | card_image | string | Yes | UI | Override logo |
+| **Timestamps** | created_at | ISO8601 | No | DB | Record creation |
+| | updated_at | ISO8601 | Auto | DB | Last modification |
+| | last_scanned | yyyymmdd_hhmmss | Auto | Scanner | Last scan pass |
+| **Extension** | extra | JSON | Yes | METADATA.md | Type-specific overflow |
+
+---
+
+## XIII. Specification Directory Organization
+
+Recommended structure for the `Specifications/GAME/` directory:
+
+```
+Specifications/GAME/
+  README.md                  Overview, intent, stack, how to build
+  METADATA.md                Project identity fields (the actual metadata)
+  FEATURE_MAP.md             THIS FILE — complete feature catalog (primary reference)
+  ARCHITECTURE.md            Backend modules, app factory, data flow, directory layout
+  DATABASE.md                Schema, tables, conventions
+  UI-GENERAL.md              Shared UI patterns: nav bar, standard headers, dark theme,
+                               modals, HTMX conventions, filter patterns
+  SCREEN-DASHBOARD.md        Dashboard screen spec (references UI-GENERAL + FEATURE_MAP)
+  SCREEN-PROCESSES.md        Process viewer screen spec
+  SCREEN-PUBLISHER.md        Publisher screen spec
+  SCREEN-CONFIGURATION.md    Configuration/metadata editor screen spec
+  SCREEN-MONITORING.md       Monitoring/heartbeat screen spec
+  SCREEN-WORKFLOW.md         Workflow/kanban screen spec
+  UNUSED-SCREEN-USAGE.md     Archived usage screen (deprecated)
+```
+
+### Document Responsibilities
+
+| Document | Answers | Does NOT Cover |
+|----------|---------|----------------|
+| **FEATURE_MAP** (this file) | What attributes exist? What features does the platform offer? What can it detect? | How the UI renders it. How the code implements it. |
+| **ARCHITECTURE** | How is the code organized? What are the modules? How does data flow? | What the user sees. What features exist. |
+| **DATABASE** | What tables exist? What columns? What constraints? | Why those columns exist (→ FEATURE_MAP). |
+| **UI-GENERAL** | What shared UI patterns exist? Nav bar, standard row header, dark theme, modals, HTMX. | Screen-specific layouts. |
+| **SCREEN-*** | What does this specific screen show? What can the user do? | Backend implementation. Full attribute definitions. |
+
+**Flow:** FEATURE_MAP defines features --> ARCHITECTURE describes modules --> DATABASE defines storage --> UI-GENERAL defines shared patterns --> SCREEN-* defines per-screen layout.
+
+---
+
+## XIV. Summary: What Makes a Project Fully Managed
+
+A project earns platform capabilities by adding files (contract-earns-capability):
+
+| Level | Files Required | Capabilities Earned |
+|-------|---------------|---------------------|
+| **Discovered** | METADATA.md | Appears in dashboard, identity, status |
+| **Contextual** | + AGENTS.md | Bookmarks, endpoints, dev commands extracted |
+| **Operational** | + bin/ scripts with headers | Operation buttons, run/stop, logging |
+| **Monitored** | + `port:` + `health:` in METADATA | Heartbeat polling, UP/DOWN/MIXED status |
+| **Scheduled** | + `# Schedule:` in script headers | Automated cron runs, missed-run catch-up |
+| **Published** | + `show_on_homepage: true` | Portfolio card on GitHub Pages |
+| **Documented** | + doc/index.html | Documentation link in dashboard + portfolio |
+| **Specified** | + Specifications/{name}/ | Spec management, transaction log |
+| **Compliant** | + All CLAUDE_RULES files | Full compliance score, health badge |
 
 ---
 
 ## References
 
-- **Architecture Spec**: `ARCHITECTURE.md`
-- **Database Schema**: `DATABASE.md`
-- **Screen Specs**: `SCREEN-*.md` (Dashboard, Processes, Publisher, Monitoring, Workflow, Configuration)
-- **Rules & Conventions**: `CLAUDE_RULES.md` (project layout, scripts, METADATA.md format)
+| Document | Location | Purpose |
+|----------|----------|---------|
+| ARCHITECTURE.md | This directory | Backend code structure |
+| DATABASE.md | This directory | Schema definition |
+| UI-GENERAL.md | This directory | Shared UI patterns |
+| SCREEN-*.md | This directory | Per-screen specifications |
+| CLAUDE_RULES.md | `../CLAUDE_RULES.md` | Agent behavior contract |
+| DOCUMENTATION_BRANDING.md | `../DOCUMENTATION_BRANDING.md` | Documentation theming standards |

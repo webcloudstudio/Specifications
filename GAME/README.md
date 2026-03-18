@@ -22,9 +22,15 @@ All project integration standards (script headers, METADATA.md format, secrets, 
 
 The specs in this directory describe GAME specifically:
 
-- **ARCHITECTURE.md** — App factory, blueprints, backend modules (scanner, engine, publisher, config, usage), routes, directory layout
-- **DATABASE.md** — SQLite schema for projects, operations, runs, tags, config, usage
-- **SCREEN-*.md** — What each UI screen shows and how users interact with it
+| Document | Answers |
+|----------|---------|
+| **FEATURE_MAP.md** | What attributes exist? What features does the platform offer? What can it detect? Primary reference. |
+| **ARCHITECTURE.md** | How is the code organized? What are the modules? How does data flow? |
+| **DATABASE.md** | What tables exist? What columns? What constraints? |
+| **UI-GENERAL.md** | Shared UI patterns: nav bar, standard headers, dark theme, modals, HTMX conventions. |
+| **SCREEN-*.md** | What does each screen show? What can the user do on it? |
+
+**Flow:** FEATURE_MAP defines features --> ARCHITECTURE describes modules --> DATABASE defines storage --> UI-GENERAL defines shared patterns --> SCREEN-* defines per-screen layout.
 
 ## Building From This Specification
 
