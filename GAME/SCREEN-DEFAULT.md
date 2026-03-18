@@ -17,8 +17,26 @@ GET /default
 | `title` | DEFAULT | Page title shown in the section header and nav |
 | `columns` | Links,Actions,Help | Comma-separated list of middle columns to display |
 | `filter` | normal | Active filter state (normal / all / idea / archive) |
+| `sort` | name | Sort order: `name`, `status_asc`, `status_desc` |
 
 Example: `/default?title=DEFAULT&columns=Links,Actions,Help`
+
+---
+
+## Data Access Rules
+
+**All data is read from the SQLite database. No file I/O occurs during a page render.**
+
+- Page renders call `db.get_all_projects()` and `db.get_all_operations_keyed()` — two queries total.
+- The database is populated at startup and refreshed on demand via the Refresh button.
+- The Refresh button (`/api/sync`) is the only path that reads the filesystem.
+
+---
+
+## Layout Rules
+
+- Main content area is **100% width** — no max-width cap, no centering margin.
+- The table expands to fill available viewport width.
 
 ---
 
@@ -59,37 +77,47 @@ Columns without a header title render an empty `<th>`.
 
 ### Per-Project Row
 
+#### No-Wrap Rules
+
+**These cells must never wrap** — wrapping breaks the visual layout of the row:
+
+| Cell | Rule |
+|------|------|
+| Status badge | `white-space: nowrap` |
+| Icon + project name | `white-space: nowrap`; the icon (💻 or 📖) and name are in the same cell and must stay on one line |
+
+Other columns (Links, Actions, Tags, etc.) may wrap freely.
+
 #### Fixed Columns (always present)
 
-| Position | Element | Source | Interaction |
-|----------|---------|--------|-------------|
-| First | Status badge | `status` from METADATA.md | Click → rotate through IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED, persist immediately via HTMX |
-| Second | Namespace badge | `namespace` from METADATA.md | Display only; hidden if value is `development` (default) |
-| Third | Project name | `display_name` from METADATA.md | Click → `/project/{id}` |
-| Last | Settings cog ⚙️ | — | Click → `/project/{id}` |
+| Position | Element | Source (DB column) | Interaction |
+|----------|---------|---------------------|-------------|
+| First | Status badge | `projects.status` | Click → rotate IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED via HTMX; writes to DB + METADATA.md |
+| Second | Namespace badge | `projects.namespace` | Display only; hidden if value is `development` |
+| Third | Icon + project name | `projects.project_type`, `projects.display_name` | Name links to `/project/{id}`; must not wrap |
+| Last | Settings cog ⚙️ | — | Links to `/project/{id}` |
 
 #### Middle Columns (configurable)
 
 Middle columns appear in the order they are listed in the `columns` argument.
 
-| Column Key | Header Title | Source | Renders |
-|------------|-------------|--------|---------|
-| `Tags` | Tags | `tags` from METADATA.md | Colored tag pills |
-| `Port` | Port | `port` from METADATA.md | Port number; clickable to edit inline |
-| `Stack` | Stack | `stack` from METADATA.md | Monospace stack string |
-| `Actions` | Actions | `bin/` scripts where Category != maintenance | Operation buttons (one per script); click launches script |
-| `Links` | Links | `## Links` table in METADATA.md | Link buttons with ↗; falls back to Server link if port defined |
-| `Claude` | CLAUDE.md | `has_claude` flag | CLAUDE.md button → opens modal with AGENTS.md content |
-| `Help` | Help | `doc/index.html` presence or Documentation link | 📖 button → opens project documentation page in new tab |
-| `Maintenance` | Maintenance | `bin/` scripts where Category = maintenance | Operation buttons; click launches script |
-| `LastUpdate` | Updated | `version_date` field (from `version:` in METADATA.md) | Date string; falls back to `updated_at` timestamp |
+| Column Key | Header Title | DB Source | Renders |
+|------------|-------------|-----------|---------|
+| `Tags` | Tags | `projects.tags` | Colored tag pills |
+| `Port` | Port | `projects.port` | Port number; clickable to edit inline |
+| `Stack` | Stack | `projects.stack` | Monospace stack string |
+| `Actions` | Actions | `operations` where `category != 'maintenance'` | Operation buttons; click launches script |
+| `Links` | Links | `projects.extra.links` | Link buttons with ↗; falls back to Server link if port set |
+| `Claude` | CLAUDE.md | `projects.has_claude` | CLAUDE.md button → opens modal with AGENTS.md content |
+| `Help` | Help | `projects.has_docs` + `projects.extra.doc_path` | 📖 button → opens docs in new tab (file:// URL) |
+| `Maintenance` | Maintenance | `operations` where `category = 'maintenance'` | Operation buttons; click launches script |
+| `LastUpdate` | Updated | `projects.version` | Date portion of version field (strips `.N` build suffix) |
 
 **Notes on column behavior:**
 - `Actions` shows all operations where category is NOT `maintenance`
 - `Maintenance` shows only operations where category IS `maintenance`
-- `Help` looks for a link labeled "Documentation" in the project's METADATA.md links first; if absent but `has_docs = true`, constructs `file://{project_path}/doc/index.html`
-- `Tags`: duplicate entry removed from original spec — appears once
-- `LastUpdate`: on scan, GAME reads the last git commit date if `has_git = true`; otherwise falls back to the `version:` date field
+- `Help`: displays only when `has_docs = true`. URL is `file://{project_path}/{doc_path}` where `doc_path` is one of `doc/index.html`, `docs/index.html`, `doc/index.htm`, `docs/index.htm` (whichever was found at last scan). Opens in a new tab. GAME is a local-machine console — `file://` URLs are correct and appropriate.
+- `LastUpdate`: uses `version` field, strips `.N` suffix (e.g., `2026-03-13.4` → `2026-03-13`)
 
 ---
 
@@ -99,22 +127,30 @@ Operations are registered from `bin/` scripts containing within the first 20 lin
 - `# CommandCenter Operation` — marks the script as an operation
 - `# Category: <name>` — used to route to Actions vs Maintenance column (optional; defaults to `local`)
 
+Documentation presence (`has_docs`) is detected during scan by checking for:
+1. `doc/index.html`
+2. `docs/index.html`
+3. `doc/index.htm`
+4. `docs/index.htm`
+
+The first match wins. The relative path is stored as `doc_path` in the project's `extra` JSON.
+
 ---
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| Projects table (all fields) | Status click → `status` field (immediate HTMX update) |
-| Operations table (category filter) | Operation button → `op_runs` table (via operations engine) |
-| Extra JSON (links, bookmarks) | |
-| `doc/index.html` presence flag | |
+| `projects` table (all fields) | Status click → `projects.status` (DB) + METADATA.md (file) |
+| `operations` table (all projects, one query) | Operation button → `op_runs` table |
+| `projects.extra` JSON (links, doc_path) | |
+
+No file I/O on page render. All data pre-loaded into DB at startup or Refresh.
 
 ---
 
-## Open Questions / Design Decisions
+## Resolved Design Decisions
 
-- **Filter button**: Implemented as a cycling link-button (GET request to same URL with next filter state). Does not require JavaScript — each state is a link.
-- **Namespace column**: Spec shows namespace as a separate second column. Current implementation renders it as a badge in the name cell for compactness. Second column option is cleaner for sorting purposes — requires decision.
-- **LastUpdate source**: Currently uses `version_date` (from METADATA.md `version:` field). Richer option is `git log --format=%ci -1` run on scan and stored in a `git_last_commit_date` DB column (not yet implemented).
-- **Help URL**: Local `file://` URLs work for same-machine browser access. For networked GAME access, GAME would need to proxy/serve the project's `doc/` directory.
+- **Help URL**: `file://` URLs are correct. GAME is a local-machine console; it does not serve remote projects. No proxy needed.
+- **Namespace column**: Rendered as a badge inline in the name cell (compact). A separate sortable column can be added later if needed.
+- **LastUpdate source**: Uses `version` field from METADATA.md (stored as `projects.version`). Git commit date not yet implemented; would require a `git_last_commit_date` column added in a future schema pass.
