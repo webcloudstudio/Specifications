@@ -116,7 +116,7 @@ Middle columns appear in the order they are listed in the `columns` argument.
 **Notes on column behavior:**
 - `Actions` shows all operations where category is NOT `maintenance`
 - `Maintenance` shows only operations where category IS `maintenance`
-- `Help`: displays only when `has_docs = true`. URL is `file://{project_path}/{doc_path}` where `doc_path` is one of `doc/index.html`, `docs/index.html`, `doc/index.htm`, `docs/index.htm` (whichever was found at last scan). Opens in a new tab. GAME is a local-machine console — `file://` URLs are correct and appropriate.
+- `Help`: displays only when `has_docs = true`. URL is `/project/{id}/doc/index.html` — served through Flask's `/project/<id>/doc/<path>` route, which proxies files from the project's `doc/` or `docs/` directory. Opens in a new tab. Note: `file://` URLs cannot be used — browsers block navigation to `file://` from `http://` pages (cross-origin policy).
 - `LastUpdate`: uses `version` field, strips `.N` suffix (e.g., `2026-03-13.4` → `2026-03-13`)
 
 ---
