@@ -10,7 +10,8 @@
 |-------|------|
 | **Project files** (`METADATA.md`, `bin/`, filesystem) | Authoritative source of truth — committed to git, editable by developer |
 | **SQLite database** | Runtime cache — the sole source of data for all UI page renders |
-| **Startup scan / Refresh button** | Syncs DB from files; the only operation that reads the filesystem |
+| **Startup scan** | Runs automatically in a background thread every time Flask starts; populates the DB from disk |
+| **Refresh button** | Re-runs the same scan without restarting; useful when files changed mid-session |
 
 **Page rendering reads the database only.** No template, route, or partial reads a file from disk during a normal page load.
 
@@ -107,7 +108,9 @@ Operations are deleted and re-seeded on every scan (only `bin/` operations — c
 
 ## Startup / Refresh Sequence
 
-Both server startup and the Refresh button execute `scan_projects()`. The only difference is that startup runs it in a background thread so the server is immediately ready.
+Both server startup and the Refresh button execute the same `scan_projects()` function in `scanner.py`. `scanner.py` is a library module — it has no entry point; it is called by `app.py` (startup) and by the `/api/sync` route (Refresh button).
+
+On startup, the scan runs in a **background thread** so the server is immediately ready to serve requests; the DB will be fully populated within a few seconds. After a restart, the Refresh button is redundant — the startup scan has already run. Use Refresh only when project files change *while the server is running* and you want to pick up those changes without restarting.
 
 ```
 1. cleanup_orphaned()        Remove DB rows for projects no longer on disk
