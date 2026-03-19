@@ -109,14 +109,14 @@ Middle columns appear in the order they are listed in the `columns` argument.
 | `Actions` | Actions | `operations` where `category != 'maintenance'` | Operation buttons; click launches script |
 | `Links` | Links | `projects.extra.links` | Link buttons with ↗; falls back to Server link if port set |
 | `Claude` | CLAUDE.md | `projects.has_claude` | CLAUDE.md button → opens modal with AGENTS.md content |
-| `Help` | Help | `projects.has_docs` + `projects.extra.doc_path` | 📖 button → opens docs in new tab (file:// URL) |
+| `Help` | Help | `projects.has_docs` + `projects.extra.doc_path` | Green "Documentation" button → opens docs in new tab |
 | `Maintenance` | Maintenance | `operations` where `category = 'maintenance'` | Operation buttons; click launches script |
 | `LastUpdate` | Updated | `projects.version` | Date portion of version field (strips `.N` build suffix) |
 
 **Notes on column behavior:**
 - `Actions` shows all operations where category is NOT `maintenance`
 - `Maintenance` shows only operations where category IS `maintenance`
-- `Help`: displays only when `has_docs = true`. URL is `/project/{id}/doc/index.html` — served through Flask's `/project/<id>/doc/<path>` route, which proxies files from the project's `doc/` or `docs/` directory. Opens in a new tab. Note: `file://` URLs cannot be used — browsers block navigation to `file://` from `http://` pages (cross-origin policy).
+- `Help`: displays only when `has_docs = true`. Renders as a green "Documentation" button (white text, `op-btn--success` style). URL is `/project/{id}/doc/index.html` — served through Flask's `/project/<id>/doc/<path>` route, which proxies files from the project's `doc/` or `docs/` directory. Opens in a new tab. Note: `file://` URLs cannot be used — browsers block navigation to `file://` from `http://` pages (cross-origin policy).
 - `LastUpdate`: uses `version` field, strips `.N` suffix (e.g., `2026-03-13.4` → `2026-03-13`)
 
 ---
