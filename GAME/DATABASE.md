@@ -65,7 +65,7 @@ Every field stored in the `projects` table, its source, and when it is read.
 | `has_venv` | `venv/` or `.venv/` directory present | Scan | Boolean flag |
 | `has_node` | `node_modules/` directory present | Scan | Boolean flag |
 | `has_claude` | `CLAUDE.md` file present | Scan | Boolean flag; enables CLAUDE.md modal |
-| `has_docs` | `doc/index.html`, `docs/index.html`, `doc/index.htm`, `docs/index.htm` (first match) | Scan | Boolean flag; enables 📖 Help button |
+| `has_docs` | Any subdir starting with `doc` containing `index.html` or `index.htm` (glob: `*/doc*/index.htm*`) | Scan | Boolean flag; enables 📖 Help button |
 | `card_title` | `METADATA.md` → `title:` (card section) | Scan | Portfolio card; overrides `display_name` if set |
 | `card_desc` | `METADATA.md` → `short_description:` or `description:` | Scan | Portfolio card description |
 | `card_tags` | `METADATA.md` → `tags:` | Scan | Portfolio card tags |

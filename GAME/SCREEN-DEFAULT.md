@@ -127,13 +127,13 @@ Operations are registered from `bin/` scripts containing within the first 20 lin
 - `# CommandCenter Operation` — marks the script as an operation
 - `# Category: <name>` — used to route to Actions vs Maintenance column (optional; defaults to `local`)
 
-Documentation presence (`has_docs`) is detected during scan by checking for:
-1. `doc/index.html`
-2. `docs/index.html`
-3. `doc/index.htm`
-4. `docs/index.htm`
+Documentation presence (`has_docs`) is detected during scan by the equivalent of:
 
-The first match wins. The relative path is stored as `doc_path` in the project's `extra` JSON.
+```sh
+ls */doc*/index.htm*
+```
+
+Any immediate subdirectory whose name starts with `doc` (`doc/`, `docs/`, `documentation/`, etc.) that contains `index.html` or `index.htm`. The first match wins. The relative path (e.g. `docs/index.html`) is stored as `doc_path` in the project's `extra` JSON.
 
 ---
 
