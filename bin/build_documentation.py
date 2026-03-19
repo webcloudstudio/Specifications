@@ -13,10 +13,29 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).parent.parent
 DOC_DIR = PROJECT_DIR / "doc"
 
-# Documents to include, in order: (anchor_id, filename, sidebar_label)
+# Documents to include, in order.
+# Section headers: (None, None, "Section Title") — rendered in sidebar, skipped in body.
+# Document entries: (anchor_id, filename, sidebar_label)
 DOCUMENTS = [
-    ("claude-rules",       "GLOBAL_RULES/CLAUDE_RULES.md",           "Claude Rules"),
-    ("doc-branding",       "GLOBAL_RULES/DOCUMENTATION_BRANDING.md", "Documentation Branding"),
+    (None,                  None,                                      "Foundation"),
+    ("claude-rules",        "GLOBAL_RULES/CLAUDE_RULES.md",           "Claude Rules"),
+    ("doc-branding",        "GLOBAL_RULES/DOCUMENTATION_BRANDING.md", "Documentation Branding"),
+
+    (None,                  None,                                      "GAME — Project Specification"),
+    ("game-overview",       "GAME/README.md",                         "Overview"),
+    ("game-feature-map",    "GAME/FEATURE_MAP.md",                    "Feature Map"),
+    ("game-architecture",   "GAME/ARCHITECTURE.md",                   "Architecture"),
+    ("game-database",       "GAME/DATABASE.md",                       "Database"),
+    ("game-functionality",  "GAME/FUNCTIONALITY.md",                  "Functionality"),
+    ("game-metadata",       "GAME/METADATA.md",                       "METADATA.md Format"),
+    ("game-ui-general",     "GAME/UI-GENERAL.md",                     "UI — General"),
+    ("game-screen-default", "GAME/SCREEN-DEFAULT.md",                 "Screen: Default"),
+    ("game-screen-dashboard","GAME/SCREEN-DASHBOARD.md",              "Screen: Dashboard"),
+    ("game-screen-config",  "GAME/SCREEN-CONFIGURATION.md",          "Screen: Configuration"),
+    ("game-screen-processes","GAME/SCREEN-PROCESSES.md",              "Screen: Processes"),
+    ("game-screen-monitoring","GAME/SCREEN-MONITORING.md",            "Screen: Monitoring"),
+    ("game-screen-publisher","GAME/SCREEN-PUBLISHER.md",              "Screen: Publisher"),
+    ("game-screen-workflow", "GAME/SCREEN-WORKFLOW.md",               "Screen: Workflow"),
 ]
 
 
@@ -194,10 +213,12 @@ def build_sidebar(doc_items: list[tuple[str, str]]) -> str:
         '<nav class="gem-sidebar-panel">',
         '<div class="gem-toc-title">Specifications</div>',
         '<div class="gem-toc-subtitle">Platform Standards &amp; Rules</div>',
-        '<div class="gem-toc-section">Documents</div>',
     ]
     for anchor, label in doc_items:
-        parts.append(f'<a href="#{html_lib.escape(anchor)}">{html_lib.escape(label)}</a>')
+        if anchor is None:
+            parts.append(f'<div class="gem-toc-section">{html_lib.escape(label)}</div>')
+        else:
+            parts.append(f'<a href="#{html_lib.escape(anchor)}">{html_lib.escape(label)}</a>')
     parts.append('</nav>')
     return '\n'.join(parts)
 
@@ -230,6 +251,9 @@ def main() -> None:
     sidebar_items: list[tuple[str, str]] = []
 
     for anchor, filename, label in DOCUMENTS:
+        if anchor is None:
+            sidebar_items.append((None, label))
+            continue
         path = PROJECT_DIR / filename
         if not path.exists():
             print(f"  [skip] {filename} not found", file=sys.stderr)
