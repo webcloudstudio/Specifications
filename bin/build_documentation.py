@@ -47,7 +47,7 @@ GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE', 'CREATE-IMAG
 GUIDE_TITLES = {
     'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
-    'PROMOTE':               'Promote',
+    'PROMOTE':               'Promote Prototype To Project',
     'CREATE-IMAGE':          'Create Image',
 }
 

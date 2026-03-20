@@ -1,14 +1,13 @@
 # Specification Process
 
-**Version:** 20260320 V1  
-
+**Version:** 20260320 V2
 **Description:** Step-by-step guide to the Prototyper specification workflow
 
 Prototyper converts concise specification files into AI agent build prompts.
 
 ---
 
-## Step 1 — Create the Spec Directory
+## Step 1 — Setup the Prototype Directory
 
 ```bash
 bash bin/setup_prototype.sh <ProjectName>
@@ -21,7 +20,7 @@ Edit `METADATA.md` immediately. `validate.sh` requires all four fields to be set
 
 ---
 
-## Step 2 — Write the Spec Files
+## Step 2 — Create the Spec Files
 
 Edit each file. Delete `DATABASE.md` or `UI.md` if not applicable.
 Rename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.
@@ -36,7 +35,7 @@ Rename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.
 
 ---
 
-## Step 3 — Validate
+## Step 3 — Validate the Spec
 
 ```bash
 bash bin/validate.sh <ProjectName>       # from repo root
@@ -58,7 +57,7 @@ Exit 0 = ready. Exit 1 = errors to fix.
 
 ---
 
-## Step 4 — Convert  *(optional)*
+## Step 4 — Convert to Detailed Specs  *(optional)*
 
 ```bash
 bash bin/convert.sh <ProjectName> > convert-prompt.md
@@ -73,7 +72,7 @@ Replace the concise spec files with the expanded output, then proceed to Step 5.
 
 ---
 
-## Step 5 — Build
+## Step 5 — Build the Prompt
 
 ```bash
 bash bin/build.sh <ProjectName> > build-prompt.md
@@ -93,22 +92,3 @@ git tag -l "build/<Project>/*"
 git diff build/<Project>/2026-03-19.1..build/<Project>/2026-03-20.1 -- <Project>/
 git checkout build/<Project>/2026-03-19.1 -- <Project>/DATABASE.md
 ```
-
----
-
-## Step 6 — Iterate
-
-Edit spec files → validate → build. Each build creates a permanent git tag.
-
----
-
-## Step 7 — Promote
-
-```bash
-cp -r Specifications/<ProjectName> ~/projects/<ProjectName>
-cd ~/projects/<ProjectName>
-git init && git add -A && git commit -m "Initial spec"
-git remote add origin <url>
-```
-
-Run `python3 bin/create_project.py <ProjectName>` from `GAME/` to scaffold the code project.
