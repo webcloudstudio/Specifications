@@ -1,4 +1,8 @@
 #!/bin/bash
+# CommandCenter Operation
+# Name: Generate Prompt
+# Category: maintenance
+#
 # Generate a complete build prompt from a project's METADATA.md, stack files, and spec files.
 #
 # Reads METADATA.md for stack components, collects technology files from stack/,

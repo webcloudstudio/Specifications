@@ -1,4 +1,8 @@
 #!/bin/bash
+# CommandCenter Operation
+# Name: Update Projects
+# Category: maintenance
+#
 # Update all set-up projects with the latest CLAUDE_RULES and templates.
 # Skips projects in the idea phase (those without CLAUDE_RULES_START).
 #

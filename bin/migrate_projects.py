@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # CommandCenter Operation
+# Name: Migrate Projects
 # Category: maintenance
 """
 Migrate METADATA.md files across all projects to conform to the CLAUDE_RULES standard.

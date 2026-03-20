@@ -15,8 +15,8 @@ LOG_FILE="logs/${PROJECT_NAME}_${SCRIPT_NAME}_$(date +%Y%m%d_%H%M%S).log"
 mkdir -p logs doc/styles/themes
 exec > >(tee -a "$LOG_FILE") 2>&1
 
-# Parse --theme=<name> argument (default: midnight)
-THEME="midnight"
+# Parse --theme=<name> argument (default: slate)
+THEME="slate"
 for arg in "$@"; do
   case "$arg" in
     --theme=*) THEME="${arg#--theme=}" ;;

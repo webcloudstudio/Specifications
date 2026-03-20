@@ -1,4 +1,8 @@
 #!/bin/bash
+# CommandCenter Operation
+# Name: Rebuild Index
+# Category: maintenance
+#
 # Rebuilds index.html files in the Specifications directory.
 # Generates:
 #   - Specifications/index.html (FOUNDATION + PROJECT links)

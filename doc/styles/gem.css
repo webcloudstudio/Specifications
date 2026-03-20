@@ -1,46 +1,46 @@
-/* Theme: Midnight Blue  |  gem-base.css must follow this file */
+/* Theme: Slate — charcoal sidebar, warm cream content, teal accent */
 :root {
-  /* Structural */
-  --c-topbar-bg:     #071420;   /* top bar + sidebar title — same color */
-  --c-side-bg:       #0F1C2E;   /* sidebar body — slightly lighter */
-  --c-side-border:   #1E3A5F;
-  --c-side-section:  #4A7898;   /* muted section labels */
-  --c-side-link:     #A8C8E0;   /* sidebar link text */
+  /* Sidebar — neutral charcoal, not blue */
+  --c-topbar-bg:     #1A1D23;
+  --c-side-bg:       #22262E;
+  --c-side-border:   #363B44;
+  --c-side-section:  #8A8F9A;
+  --c-side-link:     #C0C4CC;
 
-  /* Accent — used for: badge, h1, sidebar hover border, section divider accent */
-  --c-accent:        #4DA8FF;
-  --c-accent-text:   #05111E;   /* text ON the badge */
+  /* Accent — warm teal */
+  --c-accent:        #2CB67D;
+  --c-accent-text:   #0E1012;
 
-  /* Content headings (on light bg — must be dark enough) */
-  --c-h1:            #0D3B8E;
-  --c-h1-border:     #C0D5F0;
-  --c-h2:            #1565C0;
-  --c-h2-border:     #D0E4F8;
-  --c-h3:            #1E88E5;
+  /* Content headings — dark charcoal, warm tones */
+  --c-h1:            #1E2328;
+  --c-h1-border:     #D0D4DA;
+  --c-h2:            #2E3640;
+  --c-h2-border:     #DDE0E5;
+  --c-h3:            #505A68;
 
-  /* Content area */
-  --c-bg:            #F7FAFF;
-  --c-text:          #1A2840;
+  /* Content area — warm off-white */
+  --c-bg:            #FAFAF8;
+  --c-text:          #2A2E35;
 
   /* Tables */
-  --c-th-bg:         #0D3B8E;
-  --c-th-text:       #E8F4FF;
-  --c-td-border:     #C0D8F0;
-  --c-tr-alt:        #EEF4FF;
-  --c-tr-hover:      #DAE8FF;
+  --c-th-bg:         #2E3640;
+  --c-th-text:       #F0F1F3;
+  --c-td-border:     #D5D8DE;
+  --c-tr-alt:        #F3F4F2;
+  --c-tr-hover:      #E8EAE6;
 
   /* Code */
-  --c-code-bg:       #EAF0FF;
-  --c-code-text:     #0D3B8E;
-  --c-pre-bg:        #071420;
-  --c-pre-text:      #A8C8E0;
+  --c-code-bg:       #EDEEE8;
+  --c-code-text:     #2E3640;
+  --c-pre-bg:        #1A1D23;
+  --c-pre-text:      #C0C4CC;
 
   /* Callout */
-  --c-callout-bg:    rgba(77,168,255,0.07);
-  --c-callout-border:rgba(77,168,255,0.25);
+  --c-callout-bg:    rgba(44,182,125,0.06);
+  --c-callout-border:rgba(44,182,125,0.2);
 
   /* Footer */
-  --c-foot-text:     #7A9AB8;
+  --c-foot-text:     #8A8F9A;
 }
 /* ================================================================
    Documentation — Base Structural CSS

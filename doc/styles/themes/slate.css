@@ -1,0 +1,44 @@
+/* Theme: Slate — charcoal sidebar, warm cream content, teal accent */
+:root {
+  /* Sidebar — neutral charcoal, not blue */
+  --c-topbar-bg:     #1A1D23;
+  --c-side-bg:       #22262E;
+  --c-side-border:   #363B44;
+  --c-side-section:  #8A8F9A;
+  --c-side-link:     #C0C4CC;
+
+  /* Accent — warm teal */
+  --c-accent:        #2CB67D;
+  --c-accent-text:   #0E1012;
+
+  /* Content headings — dark charcoal, warm tones */
+  --c-h1:            #1E2328;
+  --c-h1-border:     #D0D4DA;
+  --c-h2:            #2E3640;
+  --c-h2-border:     #DDE0E5;
+  --c-h3:            #505A68;
+
+  /* Content area — warm off-white */
+  --c-bg:            #FAFAF8;
+  --c-text:          #2A2E35;
+
+  /* Tables */
+  --c-th-bg:         #2E3640;
+  --c-th-text:       #F0F1F3;
+  --c-td-border:     #D5D8DE;
+  --c-tr-alt:        #F3F4F2;
+  --c-tr-hover:      #E8EAE6;
+
+  /* Code */
+  --c-code-bg:       #EDEEE8;
+  --c-code-text:     #2E3640;
+  --c-pre-bg:        #1A1D23;
+  --c-pre-text:      #C0C4CC;
+
+  /* Callout */
+  --c-callout-bg:    rgba(44,182,125,0.06);
+  --c-callout-border:rgba(44,182,125,0.2);
+
+  /* Footer */
+  --c-foot-text:     #8A8F9A;
+}

@@ -1,4 +1,8 @@
 #!/bin/bash
+# CommandCenter Operation
+# Name: Validate Project
+# Category: maintenance
+#
 # Validate a single project against CLAUDE_RULES compliance standards.
 # Wraps verify.py with auto-detected projects directory.
 #

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# CommandCenter Operation
+# Name: Validate Project
+# Category: maintenance
 """
 verify.py — CLAUDE_RULES Compliance Checker
 

@@ -8,9 +8,38 @@ Each AI project has a minimal configured set of instructions placed in their rul
 
 ## Intent
 
-A solo practitioner or small team managing multiple AI-built projects needs one methedology.  If your projects have custom capabilities then it is difficult to manage.  A users projects become easier to manage when they are standard in format.  Start/Stop Services, Logs, Documentation, Health Checks, Unit Testing and other features are all set the same way. 
+Purpose 1: Provide the user interface and central agent for the Project Owner to see their various Projects
 
-Projects go through workflow.  They have several stages where we conform the project to standards and verify the metadata as we work through our workflow.  
+        * Manage projects you want to keep around and update (software, book, or project)
+
+Purpose 2: To Conform all projects to standards enabling thier management
+
+    Standard workflow benefits any Tecnical Product Owner
+        This framework provides one shot project creation
+        This framework ensures project conformity
+
+    Conformed projects expose Start/Stop commands, Routine Operations, Performance, Maintenace, Scheduled Tasks, Event Logging, Documentation, Heartbeats/Health Checks, Unit Testing.
+    Exposed information can be seen in a user interface and managed
+
+    This project workflow ensures we can add agents.md guidance such that your project builds correctly
+
+Purpose 3: To Provide Workflow with value
+
+    For value add i would ideally like the end of each claude session to be done with a custom skill that remembers next steps and questions 
+
+The GAME project consists of
+    The Flask user Interface with Configrable Snap In Screens
+        A set of best practice screens that expose all the nice features we have for our projects so i can easily manage them
+        I want to see by project but to easily filter to the project i want probably by last date
+        Enables the project owner to manage their projects
+    The Workflow engine
+        I envision submitting feature tickets to claude for automated processing
+        I envision being able to build the project from idea
+        I envision being able to iterate the specification to make changes.  That iterateion could be a change to a specification file or a new markdown file.
+
+The interface should use simple elegant design with form follows function 
+
+Less is more... Reduce it to its fundamentals and produce the elegant simple solution.
 
 ## Stack
 
