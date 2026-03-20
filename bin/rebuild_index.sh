@@ -42,7 +42,7 @@ def generate_root_index():
         if os.path.isdir(fpath) and not entry.startswith('.'):
             # Only include dirs that have .md files
             md_files = [f for f in os.listdir(fpath) if f.endswith('.md')]
-            if md_files and entry not in ['__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates']:
+            if md_files and entry not in ['__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates', 'doc', 'logs', 'GLOBAL_RULES'] and not entry.startswith('Proposed'):
                 # Try to read display_name or name from METADATA.md
                 meta_path = os.path.join(fpath, 'METADATA.md')
                 display = None

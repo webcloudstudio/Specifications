@@ -1,135 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>doc Specification</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specifications</title>
+<link rel="stylesheet" type="text/css" href="styles/gem.css">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #0d1117; color: #c9d1d9;
-  display: flex; height: 100vh; overflow: hidden;
+.spec-file-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 16px 0; }
+.spec-file-pill {
+  background: var(--c-code-bg); color: var(--c-code-text);
+  font-size: 12px; padding: 3px 10px; border-radius: 12px;
+  border: 1px solid var(--c-td-border); font-family: 'Segoe UI', Arial, sans-serif;
 }
-#sidebar {
-  width: 260px; min-width: 260px; background: #161b22;
-  border-right: 1px solid #21262d; overflow-y: auto; display: flex; flex-direction: column;
-}
-#sidebar header { padding: 20px 16px 12px; border-bottom: 1px solid #21262d; }
-#sidebar header h1 { font-size: 15px; font-weight: 600; color: #f0f6fc; }
-#sidebar header p { font-size: 11px; color: #6e7681; margin-top: 4px; }
-#sidebar header a { color: #58a6ff; text-decoration: none; font-size: 11px; margin-top: 8px; display: inline-block; }
-#sidebar header a:hover { text-decoration: underline; }
-.nav-section { padding: 16px 0 8px; }
-.nav-section-title {
-  font-size: 10px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .08em; color: #6e7681; padding: 0 16px 6px;
-}
-.nav-item {
-  display: block; padding: 7px 16px; font-size: 13px; color: #8b949e;
-  cursor: pointer; border-left: 3px solid transparent;
-  transition: color .1s, border-color .1s, background .1s; text-decoration: none;
-}
-.nav-item:hover { color: #c9d1d9; background: #1f2428; }
-.nav-item.active { color: #58a6ff; border-left-color: #58a6ff; background: rgba(88,166,255,.06); }
-#content { flex: 1; overflow-y: auto; }
-#home-panel { padding: 40px 48px; max-width: 860px; }
-#doc-panel { padding: 40px 48px; max-width: 860px; display: none; }
-#home-panel h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin: 24px 0 12px; }
-.section-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: #6e7681; margin-top: 16px; margin-bottom: 12px; letter-spacing: .08em; }
-.file-list { list-style: none; }
-.file-list li { padding: 6px 0; }
-.file-list a { color: #58a6ff; text-decoration: none; cursor: pointer; }
-.file-list a:hover { text-decoration: underline; }
-.doc-content h1 { font-size: 24px; font-weight: 700; margin: 24px 0 16px; color: #f0f6fc; }
-.doc-content h2 { font-size: 20px; font-weight: 600; margin: 20px 0 12px; color: #f0f6fc; }
-.doc-content h3 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; color: #c9d1d9; }
-.doc-content h4 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; color: #c9d1d9; }
-.doc-content p { margin: 12px 0; line-height: 1.6; }
-.doc-content ul, .doc-content ol { margin: 12px 0 12px 20px; line-height: 1.6; }
-.doc-content li { margin: 6px 0; }
-.doc-content pre {
-  background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 12px;
-  overflow-x: auto; margin: 12px 0; font-size: 12px; line-height: 1.4;
-}
-.doc-content code {
-  background: #161b22; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-  font-size: 12px; color: #79c0ff;
-}
-.doc-content pre code { background: none; padding: 0; }
-.doc-content table { border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-.doc-content table th, .doc-content table td { padding: 8px 12px; border: 1px solid #21262d; text-align: left; }
-.doc-content table th { background: #161b22; font-weight: 600; }
-.doc-content blockquote { border-left: 4px solid #58a6ff; padding-left: 16px; margin: 12px 0; color: #8b949e; font-style: italic; }
-.doc-content hr { border: none; border-top: 1px solid #21262d; margin: 24px 0; }
-.subtitle { font-size: 13px; color: #8b949e; margin: 8px 0 16px; }
+.spec-intro { color: var(--c-h3); font-size: 15px; margin: 0 0 20px 0; line-height: 1.6; }
 </style>
 </head>
-<body>
+<body class="gem-page">
+<nav class="gem-sidebar-panel">
+<div class="gem-toc-title">Specifications</div>
+<div class="gem-toc-subtitle">Spec-Driven Build System</div>
+<div class="gem-toc-section">Documentation</div>
+<a href="#workflow">Workflow</a>
+<a href="#setup">Project Setup</a>
+<div class="gem-toc-section">Projects</div>
+<a href="#project-GAME">GAME</a>
+<a href="#project-Game-Build">GAME (Game-Build)</a>
+</nav>
+<main class="gem-content-panel">
+<h1>Specifications</h1>
 
-<div id="sidebar">
-  <header>
-    <h1>doc</h1>
-    <p>Specification</p>
-    <a href="../index.html">← Back to Foundation</a>
-  </header>
-  <nav>
-    <div class="nav-section">
-      <div class="nav-section-title">Documents</div>
-      <ul class="file-list" id="doc-list"></ul>
-    </div>
-  </nav>
-</div>
+<p class="spec-intro">Write concise markdown specs. Expand them with AI. Build the application in one shot. Iterate by editing specs and rebuilding.</p>
 
-<div id="content">
-  <div id="home-panel">
-    <h1>doc</h1>
-    <p class="subtitle">Click a document in the left sidebar to begin.</p>
-  </div>
+<section id="workflow">
+<h1>Specification Process</h1>
+<p>Write concise specs. Expand them. Build the application. Each step has one command.</p>
+<ol>
+<li><code>bash bin/create_spec.sh MyProject &quot;Short description&quot;</code> — creates <code>Specifications/MyProject/</code> with template files</li>
+<li>Edit the spec files in <code>MyProject/</code> — fill in INTENT.md, ARCHITECTURE.md, add SCREEN and FEATURE files as needed. Delete DATABASE.md or UI.md if not applicable.</li>
+<li><code>bash bin/validate.sh MyProject</code> — checks required files, naming, fields. Exit 0 = ready.</li>
+<li><code>bash bin/convert.sh MyProject &gt; convert-prompt.md</code> — generates expansion prompt. Feed to an AI agent to produce detailed specs.</li>
+<li><code>bash bin/build.sh MyProject &gt; build-prompt.md</code> — tags the commit, generates a complete build prompt. Feed to an AI agent to build the application.</li>
+<li>Promote: copy the spec directory to its own repo when the application works.</li>
+</ol>
+<p>After a build, iterate: edit specs, re-validate, re-build. Each build creates a new annotated git tag (<code>build/MyProject/2026-03-20.1</code>) that permanently records the exact spec state used.</p>
+<pre><code># Diff specs between builds
+git diff build/MyProject/2026-03-19.1..build/MyProject/2026-03-20.1 -- MyProject/</code></pre>
+</section>
 
-  <div id="doc-panel">
-    <div id="doc-content" class="doc-content"></div>
-  </div>
-</div>
+<section id="setup">
+<h1>Project Setup</h1>
+<p>Every spec directory needs these four files. <code>bin/create_spec.sh</code> generates them from templates.</p>
+<h2>Required Files</h2>
+<table><thead><tr>
+<th>File</th>
+<th>Purpose</th>
+</tr></thead><tbody>
+<tr>
+<td><code>METADATA.md</code></td>
+<td>Identity: name, display_name, short_description, status (IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED)</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>One-line project description</td>
+</tr>
+<tr>
+<td><code>INTENT.md</code></td>
+<td>Why this project exists, who it's for, scope boundaries</td>
+</tr>
+<tr>
+<td><code>ARCHITECTURE.md</code></td>
+<td>Modules, routes, directory layout</td>
+</tr>
+</tbody></table>
+<h2>Conditional Files</h2>
+<p>Add what applies. Delete the rest.</p>
+<table><thead><tr>
+<th>File</th>
+<th>When</th>
+</tr></thead><tbody>
+<tr>
+<td><code>DATABASE.md</code></td>
+<td>Project has a database — tables and columns only</td>
+</tr>
+<tr>
+<td><code>UI.md</code></td>
+<td>Project has a UI — shared patterns across screens</td>
+</tr>
+<tr>
+<td><code>SCREEN-{Name}.md</code></td>
+<td>One per screen: route, layout, columns, interactions</td>
+</tr>
+<tr>
+<td><code>FEATURE-{Name}.md</code></td>
+<td>Cross-cutting behavior: trigger, sequence, reads, writes</td>
+</tr>
+</tbody></table>
+<h2>Conventions</h2>
+<ul>
+<li>All spec files except README, METADATA, and INTENT end with <code>## Open Questions</code></li>
+<li>File names use uppercase with hyphens: <code>SCREEN-Dashboard.md</code>, <code>FEATURE-Scan.md</code></li>
+<li>Write concise specs (tables, bullets). CONVERT.md rules expand them during conversion.</li>
+<li>Stack-specific patterns come from <code>GLOBAL_RULES/stack/</code> files — don't repeat them in specs.</li>
+</ul>
+<h2>Global Rules</h2>
+<pre><code>GLOBAL_RULES/
+  CONVERT.md           How concise specs expand into detailed specs
+  CLAUDE_RULES.md      Agent behavior contract (injected into projects)
+  stack/               Technology patterns (flask.md, sqlite.md, ...)
+  spec_template/       Template files used by create_spec.sh</code></pre>
+</section>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-const DOCS = {
-  "PROJECT-SETUP": "# Project Setup Guide\n\nTechnical reference for the files in a specification directory. For the overall process, see `SPECIFICATION-PROCESS.md`.\n\n---\n\n## Required Files\n\n| File | Purpose |\n|------|---------|\n| `METADATA.md` | Project identity: name, display_name, short_description, status, and optional fields |\n| `README.md` | Project name and one-line description |\n| `INTENT.md` | Why this project exists, who it's for, what problem it solves |\n| `ARCHITECTURE.md` | Modules, routes, directory layout |\n\n**METADATA.md required fields:** `name`, `display_name`, `short_description`, `status`.\nAll other METADATA fields are documented in `GLOBAL_RULES/CLAUDE_RULES.md` \u2014 not repeated here.\n\n## Conditional Files\n\n| File | Include when | Delete when |\n|------|-------------|-------------|\n| `DATABASE.md` | Project has a database | No database |\n| `UI.md` | Project has a user interface | No UI (CLI, library, API-only) |\n| `SCREEN-{Name}.md` | One per screen in the UI | No UI |\n| `FEATURE-{Name}.md` | Cross-cutting behavior not tied to one screen | Not needed |\n\n---\n\n## INTENT.md\n\nWhy the project exists. Written by the author, not generated.\n\n```markdown\n# Intent\n\nWho this is for and what problem it solves.\n\n## Core Principle\n\nThe main design idea or philosophy.\n\n## What This Is Not\n\nExplicit scope boundaries.\n```\n\nNo Open Questions section. This file is the author's declaration, not a spec to expand.\n\n---\n\n## ARCHITECTURE.md\n\nCode organization. Keep it concise \u2014 conversion expands it.\n\n```markdown\n# Architecture\n\nOne-line pattern summary.\n\n## Modules\n\n| Module | Responsibility |\n|--------|---------------|\n| module.py | What it does |\n\n## Routes\n\n| Method | Path | Returns |\n|--------|------|---------|\n| GET | / | Full page |\n\n## Directory Layout\n\n{tree}\n\n## Open Questions\n\n- Unresolved architectural decisions\n```\n\n---\n\n## DATABASE.md\n\nTables and columns only. Stack conventions (WAL, migrations, etc.) are applied during conversion from `stack/*.md` files \u2014 do not repeat them here.\n\n```markdown\n# Database\n\nSQLite at `data/app.db`. Stack conventions per `stack/sqlite.md`.\n\n## table_name\n\n| Column | Type | Notes |\n|--------|------|-------|\n| id | INTEGER PK | |\n| name | TEXT | unique |\n| extra | JSON | |\n| created_at | TEXT | timestamp |\n\n## Open Questions\n\n- Schema decisions not yet resolved\n```\n\n**Type shorthand:** `INTEGER PK`, `TEXT`, `FK` (\u2192 references), `JSON` (stored as TEXT), `INTEGER` (booleans use 0/1).\n\n---\n\n## SCREEN-*.md\n\nOne per screen. File name matches the nav bar label.\n\n```markdown\n# Screen: ScreenName\n\nOne-line description.\n\n## Route\n\nGET /path\n\n## Layout\n\nMajor sections/areas.\n\n## Columns\n\n| Column | Content |\n|--------|---------|\n\n## Interactions\n\n| Action | Trigger | Effect |\n|--------|---------|--------|\n\n## Open Questions\n\n-\n```\n\nReference `UI.md` for shared components \u2014 don't redefine shared patterns in screen files.\n\n---\n\n## FEATURE-*.md\n\nOne per cross-cutting behavior that spans multiple screens or has no screen.\n\n```markdown\n# Feature: FeatureName\n\nOne-line description.\n\n## Trigger\n\nWhat starts this.\n\n## Sequence\n\n1. Step one\n2. Step two\n\n## Reads\n\nData sources consumed.\n\n## Writes\n\nData stores modified.\n\n## Open Questions\n\n-\n```\n\nMark roadmap features: `# Feature: Name [ROADMAP]`. Conversion preserves intent without expanding implementation detail.\n\n---\n\n## UI.md\n\nShared visual patterns. Screen files reference this instead of repeating.\n\n```markdown\n# UI Standards\n\n## Theme\n\nFramework, color scheme, CSS approach.\n\n## Navigation\n\nWhat's in the nav bar.\n\n## Shared Components\n\nReusable pieces: row headers, buttons, filters, modals.\n\n## Open Questions\n\n-\n```\n\n---\n\n## Open Questions Convention\n\nAll spec files except README.md, METADATA.md, and INTENT.md end with:\n\n```markdown\n## Open Questions\n\n- Unresolved design decision\n- Another question\n```\n\nThese signal to the builder: \"ask the human before deciding.\" Preserved through conversion and build. Agents add questions here rather than creating new files.\n\n---\n\n## Scaffolding\n\n```bash\nbash bin/create_spec.sh <project-name> [\"Short description\"]\n```\n\nCreates the directory with all template files. Edit, rename, and delete as needed. Then validate:\n\n```bash\nbash bin/validate.sh <project-name>\n```\n",
-  "SPECIFICATION-PROCESS": "# Specification Process\n\nContract and state machine for the spec-driven build system.\n\n---\n\n## State Machine\n\n```\nCREATE \u2500\u2500> DRAFT \u2500\u2500> VALIDATED \u2500\u2500> CONVERTED \u2500\u2500> BUILT \u2500\u2500> PROMOTED\n                        \u2502                          \u2502\n                        \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 (iterate) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n| State | Entry Condition | Exit Condition |\n|-------|----------------|----------------|\n| **CREATE** | `bin/create_spec.sh` runs | Directory exists with template files |\n| **DRAFT** | Author edits spec files | Author decides specs are complete enough |\n| **VALIDATED** | `bin/validate.sh` exits 0 | Required files present, naming correct, fields set |\n| **CONVERTED** | `bin/convert.sh` output reviewed | Detailed specs committed (or skipped \u2014 build handles inline) |\n| **BUILT** | `bin/build.sh` tags commit + generates prompt | Build prompt fed to AI agent, application produced |\n| **PROMOTED** | Spec directory copied to own repo (`../ProjectName/`) | Project lives independently with its own git history |\n\nIteration: after a build, edit specs \u2192 re-validate \u2192 re-build. Each build creates a new tag. Diff between tags to see what changed.\n\n---\n\n## Scripts\n\nAll scripts take the project specification directory name as the first argument.\n\n### `bin/create_spec.sh`\n\n```\nbash bin/create_spec.sh <project-name> [\"Short description\"]\n```\n\n| Arg | Required | Description |\n|-----|----------|-------------|\n| `$1` | yes | Project name \u2014 becomes directory name and METADATA slug |\n| `$2` | no | Short description \u2014 populates METADATA and README |\n\nCreates `<project-name>/` from `GLOBAL_RULES/spec_template/`. Substitutes project name, slug, description, and date into templates.\n\n**Produces:** METADATA.md, README.md, INTENT.md, ARCHITECTURE.md, DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md\n\n### `bin/validate.sh`\n\n```\nbash bin/validate.sh <project-name> [--verbose]\n```\n\n| Arg | Required | Description |\n|-----|----------|-------------|\n| `$1` | yes | Project name \u2014 specification directory to validate |\n| `--verbose` | no | Show passing checks (default: errors and warnings only) |\n\n**Exit 0** = valid. **Exit 1** = errors found.\n\nChecks:\n- Required files: METADATA.md, README.md, INTENT.md, ARCHITECTURE.md\n- Required METADATA fields: name, display_name, short_description, status\n- Status value is valid enum\n- Stack files exist in GLOBAL_RULES/stack/ (if stack declared)\n- INTENT.md has real content (not template placeholder)\n- File naming conventions (SCREEN-*, FEATURE-* prefixes)\n- Open Questions section in spec files (not README, METADATA, INTENT)\n- No leftover template files (SCREEN-Example.md, FEATURE-Example.md)\n\n### `bin/convert.sh`\n\n```\nbash bin/convert.sh <project-name> > convert-prompt.md\n```\n\n| Arg | Required | Description |\n|-----|----------|-------------|\n| `$1` | yes | Project name \u2014 specification directory to convert |\n\nGenerates a prompt to stdout. Contents: GLOBAL_RULES/CONVERT.md expansion rules + stack reference files + all concise spec files from the project directory. Feed to an AI agent for expansion into detailed specs.\n\n**Requires:** METADATA.md with `stack:` field.\n\n### `bin/build.sh`\n\n```\nbash bin/build.sh <project-name> [--no-tag] [--tag-only] > build-prompt.md\n```\n\n| Arg | Required | Description |\n|-----|----------|-------------|\n| `$1` | yes | Project name \u2014 specification directory to build from |\n| `--no-tag` | no | Generate prompt without creating a build tag |\n| `--tag-only` | no | Create build tag without generating prompt |\n\nCreates annotated git tag `build/{project}/{YYYY-MM-DD.N}`, then generates a complete build prompt to stdout. Contents: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.\n\nWarns on uncommitted changes. Shows diff stat from previous build tag.\n\n### `bin/test.sh`\n\n```\nbash bin/test.sh\n```\n\nNo arguments. Tests the specification system itself: verifies templates exist, scripts have correct headers, global rules are intact, and runs a create+validate round-trip.\n\n---\n\n## Build Tags\n\nEvery `bin/build.sh` run creates an annotated git tag:\n\n```\nbuild/{project}/{YYYY-MM-DD.N}\n```\n\n**Properties:**\n- Annotated tags are full git objects \u2014 never pruned by `git gc`\n- Include metadata: commit SHA, commit message, build timestamp\n- Auto-increment: `.1`, `.2`, `.3` within same day\n\n**Operations:**\n\n```bash\n# List builds for a project\ngit tag -l \"build/Game-Build/*\"\n\n# Diff specs between builds\ngit diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-20.1 -- Game-Build/\n\n# See what commit a build used\ngit show build/Game-Build/2026-03-19.1\n\n# Restore a spec file from a previous build\ngit checkout build/Game-Build/2026-03-19.1 -- Game-Build/DATABASE.md\n```\n\n---\n\n## Git Strategy\n\nSingle repo, solo developer, autocommitting.\n\n| Concern | Approach |\n|---------|----------|\n| Branching | Stay on `main`. No feature branches. |\n| Commits | Autocommit as you work. Git is for rollback and safety. |\n| Stable points | Build tags mark \"I built from this state.\" |\n| Rollback | `git checkout build/{tag} -- {file}` to restore a spec. |\n| Diff | `git diff build/{old}..build/{new} -- {project}/` for spec-to-spec comparison. |\n| Push | Never force-push. Never rebase. Linear history. |\n\n---\n\n## File Contract\n\n### Required (every spec directory)\n\n| File | Purpose | Has Open Questions |\n|------|---------|-------------------|\n| `METADATA.md` | Project identity fields | No |\n| `README.md` | One-line description | No |\n| `INTENT.md` | Why this project exists | No |\n| `ARCHITECTURE.md` | Modules, routes, directory layout | Yes |\n\n### Conditional\n\n| File | When | Has Open Questions |\n|------|------|-------------------|\n| `DATABASE.md` | Project has a database | Yes |\n| `UI.md` | Project has a user interface | Yes |\n| `SCREEN-{Name}.md` | One per UI screen | Yes |\n| `FEATURE-{Name}.md` | One per cross-cutting behavior | Yes |\n\n### Required METADATA.md Fields\n\n| Field | Description |\n|-------|-------------|\n| `name` | Machine slug, matches directory name |\n| `display_name` | Human-readable name |\n| `short_description` | One sentence |\n| `status` | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |\n\nAll other METADATA fields are optional. `stack:` is needed for convert/build but not required at IDEA status.\n\n### Naming Rules\n\n| Pattern | Use for |\n|---------|---------|\n| `SCREEN-{NavLabel}.md` | Screen specs \u2014 name matches nav bar label |\n| `FEATURE-{Capability}.md` | Feature specs \u2014 name describes the capability |\n| Uppercase with hyphens | All spec files |\n\n---\n\n## Global Rules Location\n\n```\nGLOBAL_RULES/\n  CONVERT.md           Expansion methodology (how concise \u2192 detailed)\n  CLAUDE_RULES.md      Agent behavior contract (injected into project AGENTS.md)\n  stack/               Technology patterns (flask.md, sqlite.md, ...)\n  spec_template/       Template files for create_spec.sh\n  templates/           Code templates (common.sh, common.py)\n```\n\nCONVERT.md is global, not per-project. The methodology is shared. Project-specific decisions live in the spec files themselves.\n\n---\n\n## Promotion\n\nWhen a spec is built and the application works, promote the spec directory to its own repo:\n\n1. `cp -r Game-Build/ ../Game-Build/` (or wherever the project lives)\n2. The spec files become the project's documentation\n3. The Specifications repo retains the build tags \u2014 they remain valid for diffing\n4. The project repo gets its own git history from that point forward\n",
-};
+<section id="project-GAME">
+<h2>GAME<span style="background:#0073ea;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px">ACTIVE</span></h2>
+<p>Dashboard for managing local AI-assisted projects</p>
+<div class="spec-file-list"><span class="spec-file-pill">Metadata</span> <span class="spec-file-pill">Architecture</span> <span class="spec-file-pill">Database</span> <span class="spec-file-pill">Feature Map</span> <span class="spec-file-pill">Functionality</span> <span class="spec-file-pill">Overview</span> <span class="spec-file-pill">Screen: CONFIGURATION</span> <span class="spec-file-pill">Ui General</span></div>
+</section>
 
-marked.setOptions({ gfm: true, breaks: false });
-
-function buildDocList() {
-  const list = document.getElementById('doc-list');
-  Object.keys(DOCS).sort().forEach(key => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.textContent = key.replace(/-/g, ' ');
-    a.onclick = () => showDoc(key);
-    li.appendChild(a);
-    list.appendChild(li);
-  });
-}
-
-function showDoc(key) {
-  if (!DOCS[key]) {
-    console.warn('Document not found:', key);
-    return;
-  }
-  document.getElementById('home-panel').style.display = 'none';
-  document.getElementById('doc-panel').style.display = 'block';
-
-  document.getElementById('doc-content').innerHTML = marked.parse(DOCS[key]);
-
-  document.querySelectorAll('.file-list a').forEach(el => el.classList.remove('active'));
-  const activeLink = Array.from(document.querySelectorAll('.file-list a')).find(a => a.textContent.replace(/ /g, '-') === key);
-  if (activeLink) activeLink.classList.add('active');
-}
-
-buildDocList();
-</script>
-
+<section id="project-Game-Build">
+<h2>GAME (Game-Build)<span style="background:#0073ea;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px">ACTIVE</span></h2>
+<p>Dashboard for managing local AI-assisted projects</p>
+<div class="spec-file-list"><span class="spec-file-pill">Metadata</span> <span class="spec-file-pill">Architecture</span> <span class="spec-file-pill">Database</span> <span class="spec-file-pill">Feature: Heartbeat</span> <span class="spec-file-pill">Feature: Operations</span> <span class="spec-file-pill">Feature: Publish</span> <span class="spec-file-pill">Feature: Scan</span> <span class="spec-file-pill">Feature: Schedule</span> <span class="spec-file-pill">Intent</span> <span class="spec-file-pill">Overview</span> <span class="spec-file-pill">Screen: Configuration</span> <span class="spec-file-pill">Screen: Dashboard</span> <span class="spec-file-pill">Screen: Monitoring</span> <span class="spec-file-pill">Screen: Processes</span> <span class="spec-file-pill">Screen: Publisher</span> <span class="spec-file-pill">Screen: Workflow</span> <span class="spec-file-pill">UI Standards</span></div>
+</section>
+<div class="gem-page-footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies. All rights reserved.</div>
+</main>
 </body>
 </html>
