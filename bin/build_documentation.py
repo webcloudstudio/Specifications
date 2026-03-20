@@ -332,9 +332,10 @@ body {{ display: flex; height: 100vh; overflow: hidden;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }}
 
-.sidebar-header {{ background: var(--c-topbar-bg); padding: 12px 16px;
-  border-bottom: 1px solid var(--c-side-border); flex-shrink: 0; }}
-.sidebar-header h1 {{ color: #fff; font-size: 14px; font-weight: 600; line-height: 1; }}
+.sidebar-header {{ background: var(--c-topbar-bg); padding: 7px 14px;
+  border-bottom: 2px solid var(--c-accent); flex-shrink: 0; cursor: pointer; }}
+.sidebar-header:hover {{ background: rgba(255,255,255,.04); }}
+.sidebar-header h1 {{ color: #fff; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .3px; }}
 
 .nav-section {{ font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--c-side-section); padding: 10px 16px 3px; }}
@@ -470,16 +471,10 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 <body>
 
 <nav class="sidebar">
-  <div class="sidebar-header">
+  <div class="sidebar-header" onclick="show('workflow')">
     <h1>&#9654; Prototyper</h1>
   </div>
 
-  <div class="nav-sep"></div>
-  <a class="sn" data-sec="workflow" onclick="show('workflow')">Workflow</a>
-{step_nav}
-  <div class="nav-sep"></div>
-  <div class="nav-section">Workflow Scripts</div>
-{wf_script_nav}
   <div class="nav-sep"></div>
   <a class="sn" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Setup a Project</a>
 
