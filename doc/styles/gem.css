@@ -1,4 +1,4 @@
-/* GEM Theme: Midnight Blue  |  gem-base.css must follow this file */
+/* Theme: Midnight Blue  |  gem-base.css must follow this file */
 :root {
   /* Structural */
   --c-topbar-bg:     #071420;   /* top bar + sidebar title — same color */
@@ -43,8 +43,8 @@
   --c-foot-text:     #7A9AB8;
 }
 /* ================================================================
-   GEM Documentation — Base Structural CSS
-   gem-base.css  |  Version 3.0  |  2026-03-16
+   Documentation — Base Structural CSS
+   gem-base.css  |  Version 3.1  |  2026-03-20
 
    All colors come from CSS custom properties defined in theme files.
    NEVER edit colors here — edit in doc/styles/themes/<theme>.css

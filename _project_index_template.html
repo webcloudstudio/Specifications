@@ -3,92 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><!-- PROJECT_NAME --> Specification</title>
+<title><!-- PROJECT_NAME --> — Specification</title>
+<link rel="stylesheet" href="../doc/styles/gem.css">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #0d1117; color: #c9d1d9;
-  display: flex; height: 100vh; overflow: hidden;
+  display: flex; height: 100vh; margin: 0; overflow: hidden;
+  background: var(--c-bg); color: var(--c-text);
+  font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; line-height: 1.65;
 }
+
+/* ── Sidebar ─────────────────────────────── */
 #sidebar {
-  width: 260px; min-width: 260px; background: #161b22;
-  border-right: 1px solid #21262d; overflow-y: auto; display: flex; flex-direction: column;
+  width: 250px; min-width: 250px; background: var(--c-side-bg);
+  border-right: 1px solid var(--c-side-border);
+  overflow-y: auto; display: flex; flex-direction: column;
 }
-#sidebar header { padding: 20px 16px 12px; border-bottom: 1px solid #21262d; }
-#sidebar header h1 { font-size: 15px; font-weight: 600; color: #f0f6fc; }
-#sidebar header p { font-size: 11px; color: #6e7681; margin-top: 4px; }
-#sidebar header a { color: #58a6ff; text-decoration: none; font-size: 11px; margin-top: 8px; display: inline-block; }
-#sidebar header a:hover { text-decoration: underline; }
-.nav-section { padding: 16px 0 8px; }
-.nav-section-title {
-  font-size: 10px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .08em; color: #6e7681; padding: 0 16px 6px;
+#sidebar::-webkit-scrollbar { width: 5px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--c-side-border); border-radius: 3px; }
+.side-header {
+  padding: 16px 16px 12px; border-bottom: 1px solid var(--c-side-border);
+  background: var(--c-topbar-bg);
+}
+.side-header h1 { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
+.side-header .subtitle { font-size: 11px; color: var(--c-side-section); margin-top: 3px; }
+.side-header a {
+  color: var(--c-accent); text-decoration: none; font-size: 11px;
+  display: inline-block; margin-top: 8px;
+}
+.side-header a:hover { text-decoration: underline; }
+.nav-group { padding: 12px 0 4px; }
+.nav-group-label {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-side-section); padding: 0 16px 4px;
 }
 .nav-item {
-  display: block; padding: 7px 16px; font-size: 13px; color: #8b949e;
-  cursor: pointer; border-left: 3px solid transparent;
-  transition: color .1s, border-color .1s, background .1s; text-decoration: none;
+  display: block; padding: 5px 14px 5px 18px; font-size: 13px;
+  color: var(--c-side-link); cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .12s; text-decoration: none;
 }
-.nav-item:hover { color: #c9d1d9; background: #1f2428; }
-.nav-item.active { color: #58a6ff; border-left-color: #58a6ff; background: rgba(88,166,255,.06); }
-#content { flex: 1; overflow-y: auto; }
-#home-panel { padding: 40px 48px; max-width: 860px; }
-#doc-panel { padding: 40px 48px; max-width: 860px; display: none; }
-#home-panel h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin: 24px 0 12px; }
-.section-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: #6e7681; margin-top: 16px; margin-bottom: 12px; letter-spacing: .08em; }
-.file-list { list-style: none; }
-.file-list li { padding: 6px 0; }
-.file-list a { color: #58a6ff; text-decoration: none; cursor: pointer; }
-.file-list a:hover { text-decoration: underline; }
-.doc-content h1 { font-size: 24px; font-weight: 700; margin: 24px 0 16px; color: #f0f6fc; }
-.doc-content h2 { font-size: 20px; font-weight: 600; margin: 20px 0 12px; color: #f0f6fc; }
-.doc-content h3 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; color: #c9d1d9; }
-.doc-content h4 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; color: #c9d1d9; }
-.doc-content p { margin: 12px 0; line-height: 1.6; }
-.doc-content ul, .doc-content ol { margin: 12px 0 12px 20px; line-height: 1.6; }
-.doc-content li { margin: 6px 0; }
-.doc-content pre {
-  background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 12px;
-  overflow-x: auto; margin: 12px 0; font-size: 12px; line-height: 1.4;
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }
+.nav-item.active { color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(255,255,255,.04); }
+
+/* ── Content ─────────────────────────────── */
+#content { flex: 1; overflow-y: auto; padding: 32px 40px 48px; max-width: 860px; }
+
+/* Home panel */
+.project-info {
+  background: var(--c-side-bg); border: 1px solid var(--c-side-border);
+  border-radius: 8px; padding: 20px 24px; margin-bottom: 28px;
+  color: var(--c-side-link);
 }
-.doc-content code {
-  background: #161b22; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-  font-size: 12px; color: #79c0ff;
+.project-info h1 { color: #fff; font-size: 22px; margin: 0 0 4px 0; border: none; }
+.project-info .status {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; color: #fff; margin-left: 8px; vertical-align: middle;
 }
-.doc-content pre code { background: none; padding: 0; }
-.doc-content table { border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-.doc-content table th, .doc-content table td { padding: 8px 12px; border: 1px solid #21262d; text-align: left; }
-.doc-content table th { background: #161b22; font-weight: 600; }
-.doc-content blockquote { border-left: 4px solid #58a6ff; padding-left: 16px; margin: 12px 0; color: #8b949e; font-style: italic; }
-.doc-content hr { border: none; border-top: 1px solid #21262d; margin: 24px 0; }
-.subtitle { font-size: 13px; color: #8b949e; margin: 8px 0 16px; }
+.project-info .desc { font-size: 14px; margin: 6px 0 0; color: var(--c-side-link); }
+.project-info .meta-row {
+  font-size: 12px; color: var(--c-side-section); margin-top: 10px;
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.project-info .meta-row span { white-space: nowrap; }
+
+.file-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px; margin: 12px 0 24px;
+}
+.file-card {
+  background: #fff; border: 1px solid var(--c-td-border); border-radius: 6px;
+  padding: 10px 14px; cursor: pointer; transition: all .15s; text-decoration: none; display: block;
+}
+.file-card:hover { border-color: var(--c-accent); background: var(--c-tr-hover); }
+.file-card .icon { font-size: 16px; margin-right: 6px; }
+.file-card .name { font-size: 13px; font-weight: 600; color: var(--c-h1); }
+.group-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-h3); margin: 20px 0 8px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--c-td-border);
+}
+
+/* Doc panel */
+#doc-panel { display: none; }
+.back-link { color: var(--c-accent); text-decoration: none; font-size: 12px; display: inline-block; margin-bottom: 16px; }
+.back-link:hover { text-decoration: underline; }
+
+/* Rendered markdown */
+.md h1 { font-size: 24px; font-weight: 700; color: var(--c-h1); border-bottom: 2px solid var(--c-h1-border); padding-bottom: 5px; margin: 24px 0 14px; }
+.md h2 { font-size: 19px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 20px 0 10px; }
+.md h3 { font-size: 16px; font-weight: 600; color: var(--c-h3); margin: 16px 0 8px; }
+.md h4 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 6px; }
+.md p { margin: 10px 0; line-height: 1.65; }
+.md ul, .md ol { margin: 8px 0 8px 20px; line-height: 1.65; }
+.md li { margin: 4px 0; }
+.md table { border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 7px 14px; text-align: left; }
+.md td { padding: 6px 14px; border-bottom: 1px solid var(--c-td-border); background: #fff; }
+.md tr:nth-child(even) td { background: var(--c-tr-alt); }
+.md tr:hover td { background: var(--c-tr-hover); }
+.md pre {
+  background: var(--c-pre-bg); color: var(--c-pre-text);
+  border: 1px solid var(--c-side-border); border-radius: 5px;
+  padding: 14px 16px; overflow-x: auto; margin: 12px 0; font-size: 13px; line-height: 1.5;
+}
+.md code {
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px;
+  background: var(--c-code-bg); color: var(--c-code-text);
+  padding: 1px 5px; border-radius: 3px; border: 1px solid var(--c-td-border);
+}
+.md pre code { background: none; border: none; padding: 0; color: inherit; }
+.md blockquote {
+  border-left: 4px solid var(--c-accent); padding: 10px 16px; margin: 12px 0;
+  background: var(--c-callout-bg); border-radius: 0 4px 4px 0; font-size: 14px;
+}
+.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 20px 0; }
 </style>
 </head>
 <body>
 
 <div id="sidebar">
-  <header>
+  <div class="side-header">
     <h1><!-- PROJECT_NAME --></h1>
-    <p>Specification</p>
-    <a href="../index.html">← Back to Foundation</a>
-  </header>
-  <nav>
-    <div class="nav-section">
-      <div class="nav-section-title">Documents</div>
-      <ul class="file-list" id="doc-list"></ul>
-    </div>
-  </nav>
+    <div class="subtitle">Specification</div>
+    <a href="../index.html">&larr; All Projects</a>
+  </div>
+  <nav id="nav"></nav>
 </div>
 
 <div id="content">
-  <div id="home-panel">
-    <h1><!-- PROJECT_NAME --></h1>
-    <p class="subtitle">Click a document in the left sidebar to begin.</p>
-  </div>
-
+  <div id="home-panel"></div>
   <div id="doc-panel">
-    <div id="doc-content" class="doc-content"></div>
+    <a href="javascript:showHome()" class="back-link">&larr; Back to overview</a>
+    <div id="doc-content" class="md"></div>
   </div>
 </div>
 
@@ -98,35 +144,142 @@ const DOCS = {};
 
 marked.setOptions({ gfm: true, breaks: false });
 
-function buildDocList() {
-  const list = document.getElementById('doc-list');
-  Object.keys(DOCS).sort().forEach(key => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.textContent = key.replace(/-/g, ' ');
-    a.onclick = () => showDoc(key);
-    li.appendChild(a);
-    list.appendChild(li);
+const STATUS_COLORS = {
+  IDEA: '#94a3b8', PROTOTYPE: '#fdab3d', ACTIVE: '#0073ea',
+  PRODUCTION: '#00c875', ARCHIVED: '#4a5568'
+};
+
+const FILE_ICONS = {
+  METADATA: '\u{1F4CB}', README: '\u{1F4D6}', INTENT: '\u{1F3AF}',
+  ARCHITECTURE: '\u{1F3D7}', DATABASE: '\u{1F5C4}', UI: '\u{1F3A8}',
+};
+
+function getIcon(name) {
+  if (name.startsWith('SCREEN-')) return '\u{1F5A5}';
+  if (name.startsWith('FEATURE-')) return '\u26A1';
+  return FILE_ICONS[name] || '\u{1F4C4}';
+}
+
+function displayName(key) {
+  if (key === 'METADATA') return 'Metadata';
+  if (key === 'README') return 'Overview';
+  if (key === 'INTENT') return 'Intent';
+  if (key === 'ARCHITECTURE') return 'Architecture';
+  if (key === 'DATABASE') return 'Database';
+  if (key === 'UI' || key === 'UI-GENERAL') return 'UI Standards';
+  if (key.startsWith('SCREEN-')) return 'Screen: ' + key.slice(7).replace(/-/g, ' ');
+  if (key.startsWith('FEATURE-')) return 'Feature: ' + key.slice(8).replace(/-/g, ' ');
+  return key.replace(/-/g, ' ').replace(/_/g, ' ');
+}
+
+function groupFiles(keys) {
+  const groups = { Core: [], Design: [], Screens: [], Features: [], Other: [] };
+  const core = new Set(['METADATA', 'README', 'INTENT']);
+  const design = new Set(['ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL']);
+  keys.forEach(k => {
+    if (core.has(k)) groups.Core.push(k);
+    else if (design.has(k)) groups.Design.push(k);
+    else if (k.startsWith('SCREEN-')) groups.Screens.push(k);
+    else if (k.startsWith('FEATURE-')) groups.Features.push(k);
+    else groups.Other.push(k);
+  });
+  return groups;
+}
+
+function parseMeta(text) {
+  const fields = {};
+  text.split('\n').forEach(line => {
+    const m = line.match(/^(\w[\w_]*):\s*(.+)/);
+    if (m) fields[m[1]] = m[2].trim();
+  });
+  return fields;
+}
+
+function buildNav(groups) {
+  const nav = document.getElementById('nav');
+  const order = ['Core', 'Design', 'Screens', 'Features', 'Other'];
+  order.forEach(group => {
+    const files = groups[group].filter(k => k !== 'METADATA');
+    if (!files.length) return;
+    const div = document.createElement('div');
+    div.className = 'nav-group';
+    div.innerHTML = '<div class="nav-group-label">' + group + '</div>';
+    files.forEach(key => {
+      const a = document.createElement('a');
+      a.className = 'nav-item';
+      a.textContent = displayName(key);
+      a.onclick = () => showDoc(key);
+      div.appendChild(a);
+    });
+    nav.appendChild(div);
   });
 }
 
-function showDoc(key) {
-  if (!DOCS[key]) {
-    console.warn('Document not found:', key);
-    return;
+function buildHome(groups, meta) {
+  const home = document.getElementById('home-panel');
+  let html = '';
+
+  // Project info card from METADATA
+  const statusColor = STATUS_COLORS[meta.status] || '#94a3b8';
+  html += '<div class="project-info">';
+  html += '<h1>' + (meta.display_name || meta.name || '');
+  if (meta.status) html += ' <span class="status" style="background:' + statusColor + '">' + meta.status + '</span>';
+  html += '</h1>';
+  if (meta.short_description) html += '<p class="desc">' + meta.short_description + '</p>';
+  const metaItems = [];
+  if (meta.stack) metaItems.push('Stack: ' + meta.stack);
+  if (meta.port) metaItems.push('Port: ' + meta.port);
+  if (meta.repo) metaItems.push('Repo: ' + meta.repo);
+  if (metaItems.length) {
+    html += '<div class="meta-row">' + metaItems.map(i => '<span>' + i + '</span>').join('') + '</div>';
   }
-  document.getElementById('home-panel').style.display = 'none';
-  document.getElementById('doc-panel').style.display = 'block';
+  html += '</div>';
 
-  document.getElementById('doc-content').innerHTML = marked.parse(DOCS[key]);
+  // File cards by group (skip METADATA — shown above)
+  const order = ['Core', 'Design', 'Screens', 'Features', 'Other'];
+  const labels = { Core: 'Core', Design: 'Architecture & Data', Screens: 'Screens', Features: 'Features', Other: 'Other' };
+  order.forEach(group => {
+    const files = groups[group].filter(k => k !== 'METADATA');
+    if (!files.length) return;
+    html += '<div class="group-label">' + labels[group] + '</div>';
+    html += '<div class="file-grid">';
+    files.forEach(key => {
+      html += '<a class="file-card" onclick="showDoc(\'' + key + '\')">';
+      html += '<span class="icon">' + getIcon(key) + '</span>';
+      html += '<span class="name">' + displayName(key) + '</span>';
+      html += '</a>';
+    });
+    html += '</div>';
+  });
 
-  document.querySelectorAll('.file-list a').forEach(el => el.classList.remove('active'));
-  const activeLink = Array.from(document.querySelectorAll('.file-list a')).find(a => a.textContent.replace(/ /g, '-') === key);
-  if (activeLink) activeLink.classList.add('active');
+  home.innerHTML = html;
 }
 
-buildDocList();
-</script>
+function showDoc(key) {
+  if (!DOCS[key]) return;
+  document.getElementById('home-panel').style.display = 'none';
+  document.getElementById('doc-panel').style.display = 'block';
+  document.getElementById('doc-content').innerHTML = marked.parse(DOCS[key]);
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.textContent === displayName(key)) el.classList.add('active');
+  });
+  document.getElementById('content').scrollTop = 0;
+}
 
+function showHome() {
+  document.getElementById('home-panel').style.display = 'block';
+  document.getElementById('doc-panel').style.display = 'none';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('content').scrollTop = 0;
+}
+
+// Init
+const keys = Object.keys(DOCS).sort();
+const groups = groupFiles(keys);
+const meta = DOCS['METADATA'] ? parseMeta(DOCS['METADATA']) : {};
+buildNav(groups);
+buildHome(groups, meta);
+</script>
 </body>
 </html>

@@ -1,36 +1,37 @@
-/* GEM Theme: Midnight Green (#004953)  |  gem-base.css must follow this file */
+/* Theme: Midnight Green (#004953)  |  gem-base.css must follow this file */
 :root {
   --c-topbar-bg:     #020E12;
   --c-side-bg:       #062028;
   --c-side-border:   #0A3840;
-  --c-side-section:  #2A6C78;
-  --c-side-link:     #80C0CC;
+  --c-side-section:  #5A9CA8;   /* brighter for readability on dark bg */
+  --c-side-link:     #90D0DC;
 
-  --c-accent:        #00C8D8;
+  --c-accent:        #00D4E8;
   --c-accent-text:   #020E12;
 
-  --c-h1:            #004953;
-  --c-h1-border:     #A0D8E0;
-  --c-h2:            #006B7A;
-  --c-h2-border:     #B8E4EA;
-  --c-h3:            #008899;
+  /* Headings: darker for strong contrast on light content bg */
+  --c-h1:            #003038;
+  --c-h1-border:     #80C8D0;
+  --c-h2:            #004D5A;
+  --c-h2-border:     #A0D8E0;
+  --c-h3:            #006878;
 
-  --c-bg:            #F0FAFB;
+  --c-bg:            #F5FBFC;
   --c-text:          #081820;
 
-  --c-th-bg:         #004953;
+  --c-th-bg:         #003038;
   --c-th-text:       #E0F5F8;
   --c-td-border:     #A0D8E0;
-  --c-tr-alt:        #E8F7F9;
-  --c-tr-hover:      #C8ECF0;
+  --c-tr-alt:        #EAF7F9;
+  --c-tr-hover:      #D0EEF2;
 
-  --c-code-bg:       #D8F2F5;
-  --c-code-text:     #004953;
+  --c-code-bg:       #DCF2F5;
+  --c-code-text:     #003038;
   --c-pre-bg:        #020E12;
-  --c-pre-text:      #80C0CC;
+  --c-pre-text:      #90D0DC;
 
-  --c-callout-bg:    rgba(0,200,216,0.07);
-  --c-callout-border:rgba(0,200,216,0.25);
+  --c-callout-bg:    rgba(0,212,232,0.07);
+  --c-callout-border:rgba(0,212,232,0.25);
 
-  --c-foot-text:     #4A9098;
+  --c-foot-text:     #5A9CA8;
 }

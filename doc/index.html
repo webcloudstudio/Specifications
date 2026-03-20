@@ -3,16 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Specifications</title>
+<title>Specifications — Documentation</title>
 <link rel="stylesheet" type="text/css" href="styles/gem.css">
 <style>
-.spec-file-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 16px 0; }
+.spec-intro { color: var(--c-h3); font-size: 15px; margin: 0 0 24px 0; line-height: 1.6; }
+.spec-projects { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 16px 0 28px; }
+.spec-project-card {
+  display: block; background: #fff; border: 1px solid var(--c-td-border);
+  border-radius: 8px; padding: 18px 20px; text-decoration: none;
+  transition: border-color .15s, box-shadow .15s; cursor: pointer;
+}
+.spec-project-card:hover {
+  border-color: var(--c-accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.spec-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.spec-card-name { font-size: 17px; font-weight: 700; color: var(--c-h1); }
+.spec-status {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 10px; font-weight: 600; color: #fff;
+}
+.spec-card-desc { font-size: 13px; color: var(--c-h3); margin: 0 0 8px; line-height: 1.5; }
+.spec-file-list { display: flex; flex-wrap: wrap; gap: 5px; }
 .spec-file-pill {
   background: var(--c-code-bg); color: var(--c-code-text);
-  font-size: 12px; padding: 3px 10px; border-radius: 12px;
-  border: 1px solid var(--c-td-border); font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  border: 1px solid var(--c-td-border);
 }
-.spec-intro { color: var(--c-h3); font-size: 15px; margin: 0 0 20px 0; line-height: 1.6; }
+.spec-divider {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-h3); margin: 28px 0 10px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--c-td-border);
+}
 </style>
 </head>
 <body class="gem-page">
@@ -23,8 +45,7 @@
 <a href="#workflow">Workflow</a>
 <a href="#setup">Project Setup</a>
 <div class="gem-toc-section">Projects</div>
-<a href="#project-GAME">GAME</a>
-<a href="#project-Game-Build">GAME (Game-Build)</a>
+<a href="../GAME/index.html">GAME</a>
 </nav>
 <main class="gem-content-panel">
 <h1>Specifications</h1>
@@ -110,17 +131,17 @@ git diff build/MyProject/2026-03-19.1..build/MyProject/2026-03-20.1 -- MyProject
   spec_template/       Template files used by create_spec.sh</code></pre>
 </section>
 
-<section id="project-GAME">
-<h2>GAME<span style="background:#0073ea;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px">ACTIVE</span></h2>
-<p>Dashboard for managing local AI-assisted projects</p>
-<div class="spec-file-list"><span class="spec-file-pill">Metadata</span> <span class="spec-file-pill">Architecture</span> <span class="spec-file-pill">Database</span> <span class="spec-file-pill">Feature Map</span> <span class="spec-file-pill">Functionality</span> <span class="spec-file-pill">Overview</span> <span class="spec-file-pill">Screen: CONFIGURATION</span> <span class="spec-file-pill">Ui General</span></div>
-</section>
+<div class="spec-divider">Projects</div>
 
-<section id="project-Game-Build">
-<h2>GAME (Game-Build)<span style="background:#0073ea;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px">ACTIVE</span></h2>
-<p>Dashboard for managing local AI-assisted projects</p>
-<div class="spec-file-list"><span class="spec-file-pill">Metadata</span> <span class="spec-file-pill">Architecture</span> <span class="spec-file-pill">Database</span> <span class="spec-file-pill">Feature: Heartbeat</span> <span class="spec-file-pill">Feature: Operations</span> <span class="spec-file-pill">Feature: Publish</span> <span class="spec-file-pill">Feature: Scan</span> <span class="spec-file-pill">Feature: Schedule</span> <span class="spec-file-pill">Intent</span> <span class="spec-file-pill">Overview</span> <span class="spec-file-pill">Screen: Configuration</span> <span class="spec-file-pill">Screen: Dashboard</span> <span class="spec-file-pill">Screen: Monitoring</span> <span class="spec-file-pill">Screen: Processes</span> <span class="spec-file-pill">Screen: Publisher</span> <span class="spec-file-pill">Screen: Workflow</span> <span class="spec-file-pill">UI Standards</span></div>
-</section>
+<div class="spec-projects">
+
+<a href="../GAME/index.html" class="spec-project-card">
+<div class="spec-card-header"><span class="spec-card-name">GAME</span><span class="spec-status" style="background:#0073ea">ACTIVE</span></div>
+<p class="spec-card-desc">Dashboard for managing local AI-assisted projects</p>
+<div class="spec-file-list"><span class="spec-file-pill">Metadata</span> <span class="spec-file-pill">Architecture</span> <span class="spec-file-pill">Database</span> <span class="spec-file-pill">Feature Map</span> <span class="spec-file-pill">Functionality</span> <span class="spec-file-pill">Overview</span> <span class="spec-file-pill">Screen: CONFIGURATION</span> <span class="spec-file-pill">Ui General</span></div>
+</a>
+
+</div>
 <div class="gem-page-footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies. All rights reserved.</div>
 </main>
 </body>

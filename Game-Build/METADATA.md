@@ -15,6 +15,7 @@ stack: Python/Flask/SQLite/Bootstrap5
 health: /health
 show_on_homepage: true
 tags: dashboard, tool, platform
+type: build-artifact
 desired_state: on-demand
 namespace: development
 

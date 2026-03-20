@@ -16,11 +16,52 @@ import json
 import os
 import re
 
-def generate_root_index():
-    """Generate the root Specifications/index.html with FOUNDATION + PROJECT links."""
+SKIP_DIRS = {
+    '__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates',
+    'doc', 'logs', 'GLOBAL_RULES',
+}
 
-    # Read foundation docs
-    # Discover foundation docs: any .md file at root (not in subdirs)
+STATUS_COLORS = {
+    'IDEA': '#94a3b8', 'PROTOTYPE': '#fdab3d', 'ACTIVE': '#0073ea',
+    'PRODUCTION': '#00c875', 'ARCHIVED': '#4a5568',
+}
+
+
+def read_meta_fields(meta_path):
+    """Parse key: value fields from METADATA.md."""
+    fields = {}
+    if os.path.isfile(meta_path):
+        with open(meta_path, 'r', encoding='utf-8') as mf:
+            for line in mf:
+                if ':' in line and not line.startswith('#'):
+                    k, v = line.split(':', 1)
+                    fields[k.strip()] = v.strip()
+    return fields
+
+
+def is_project_dir(entry):
+    """True if directory is a real project spec (has METADATA.md, not a build artifact)."""
+    if entry.startswith('.') or entry.startswith('Proposed'):
+        return False
+    if entry in SKIP_DIRS:
+        return False
+    fpath = os.path.join('.', entry)
+    if not os.path.isdir(fpath):
+        return False
+    meta = os.path.join(fpath, 'METADATA.md')
+    if not os.path.isfile(meta):
+        return False
+    # Skip build pipeline artifact directories
+    fields = read_meta_fields(meta)
+    if fields.get('type', '').lower() in ('build', 'build-artifact'):
+        return False
+    return True
+
+
+def generate_root_index():
+    """Generate the root Specifications/index.html."""
+
+    # Foundation docs: .md files at root (not README, not TODO)
     foundation_files = sorted([
         f for f in os.listdir('.')
         if f.endswith('.md') and os.path.isfile(f)
@@ -29,150 +70,127 @@ def generate_root_index():
 
     foundation_docs = {}
     for fname in foundation_files:
-        fpath = os.path.join('.', fname)
-        if os.path.exists(fpath):
-            with open(fpath, 'r', encoding='utf-8') as f:
-                doc_key = fname.replace('.md', '')
-                foundation_docs[doc_key] = f.read()
+        with open(fname, 'r', encoding='utf-8') as f:
+            foundation_docs[fname.replace('.md', '')] = f.read()
 
-    # Find project directories (skip hidden, stack, etc.)
+    # Find project directories
     projects = []
     for entry in sorted(os.listdir('.')):
+        if not is_project_dir(entry):
+            continue
         fpath = os.path.join('.', entry)
-        if os.path.isdir(fpath) and not entry.startswith('.'):
-            # Only include dirs that have .md files
-            md_files = [f for f in os.listdir(fpath) if f.endswith('.md')]
-            if md_files and entry not in ['__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates', 'doc', 'logs', 'GLOBAL_RULES'] and not entry.startswith('Proposed'):
-                # Try to read display_name or name from METADATA.md
-                meta_path = os.path.join(fpath, 'METADATA.md')
-                display = None
-                if os.path.isfile(meta_path):
-                    meta_fields = {}
-                    with open(meta_path, 'r') as mf:
-                        for line in mf:
-                            if ':' in line and not line.startswith('#'):
-                                k, v = line.split(':', 1)
-                                meta_fields[k.strip()] = v.strip()
-                    display = meta_fields.get('display_name') or meta_fields.get('name') or None
-                if not display:
-                    display = entry.replace('_', ' ')
-                projects.append({
-                    'name': entry,
-                    'display_name': display,
-                    'md_count': len(md_files)
-                })
+        fields = read_meta_fields(os.path.join(fpath, 'METADATA.md'))
+        display = fields.get('display_name') or fields.get('name') or entry.replace('_', ' ')
+        status = fields.get('status', '')
+        desc = fields.get('short_description', '')
+        md_files = [f for f in os.listdir(fpath)
+                    if f.endswith('.md')
+                    and not f.startswith('PROPOSED')
+                    and not f.startswith('UNUSED')]
+        projects.append({
+            'name': entry, 'display_name': display,
+            'status': status, 'description': desc,
+            'md_count': len(md_files),
+        })
 
-    # Generate DOCS JS object
+    # DOCS JS for foundation content
     docs_js = "const DOCS = {\n"
     for key, text in foundation_docs.items():
         docs_js += f"  {json.dumps(key)}: {json.dumps(text)},\n"
     docs_js += "};"
 
-    # Read the HTML template
     html_template = open('_root_index_template.html', 'r', encoding='utf-8').read()
 
-    # Generate foundation nav items (sidebar)
-    foundation_nav_html = ""
+    # Foundation sidebar nav
+    foundation_nav = ""
     for key in foundation_docs:
-        display = key.replace('_', ' ').replace('-', ' ').title()
-        foundation_nav_html += f'      <a class="nav-item" onclick="showDoc(\'{key}\')">{display}</a>\n'
+        label = key.replace('_', ' ').replace('-', ' ').title()
+        foundation_nav += f'      <a class="nav-item" onclick="showDoc(\'{key}\')">{label}</a>\n'
 
-    # Generate foundation cards (home panel)
-    foundation_cards_html = ""
+    # Foundation cards
+    foundation_cards = ""
     for key, text in foundation_docs.items():
-        display = key.replace('_', ' ').replace('-', ' ').title()
-        # Extract first paragraph as description (strip markdown formatting)
-        lines = [l.strip() for l in text.split('\n') if l.strip() and not l.strip().startswith('#') and not l.strip().startswith('<!--')]
+        label = key.replace('_', ' ').replace('-', ' ').title()
+        lines = [l.strip() for l in text.split('\n')
+                 if l.strip() and not l.strip().startswith('#') and not l.strip().startswith('<!--')]
         desc = lines[0][:120] if lines else 'Foundation document'
-        desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', desc)  # strip bold
-        desc = re.sub(r'\*([^*]+)\*', r'\1', desc)  # strip italic
+        desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', desc)
+        desc = re.sub(r'\*([^*]+)\*', r'\1', desc)
         desc = html_mod.escape(desc)
-        foundation_cards_html += f'''      <div class="card" onclick="showDoc('{key}')">
-        <h3>{display}</h3>
+        foundation_cards += f'''      <div class="card" onclick="showDoc('{key}')">
+        <h3>{label}</h3>
         <p>{desc}</p>
-        <span class="tag foundation">Foundation</span>
       </div>\n'''
 
-    # Generate project links (sidebar)
-    project_nav_html = ""
+    # Project sidebar nav
+    project_nav = ""
     for proj in projects:
-        project_nav_html += f'      <a href="{proj["name"]}/index.html" class="nav-item">{proj["display_name"]}</a>\n'
+        project_nav += f'      <a href="{proj["name"]}/index.html" class="nav-item">{proj["display_name"]}</a>\n'
 
-    # Generate project cards (home panel)
-    project_cards_html = ""
+    # Project cards with status badges
+    project_cards = ""
     for proj in projects:
-        project_cards_html += f'''      <a href="{proj["name"]}/index.html" class="card" style="text-decoration:none;">
+        color = STATUS_COLORS.get(proj['status'], '#94a3b8')
+        badge = ''
+        if proj['status']:
+            badge = f'<span class="badge" style="background:{color}">{proj["status"]}</span>'
+        desc = html_mod.escape(proj['description']) if proj['description'] else f'{proj["md_count"]} specification files'
+        project_cards += f'''      <a href="{proj["name"]}/index.html" class="card" style="text-decoration:none">
         <h3>{proj["display_name"]}</h3>
-        <p>{proj["md_count"]} specification files</p>
-        <span class="tag feature">Project</span>
+        <p>{desc}</p>
+        {badge}
       </a>\n'''
 
-    # Replace placeholders
-    html = html_template.replace('<!-- FOUNDATION_NAV -->', foundation_nav_html)
-    html = html.replace('<!-- FOUNDATION_CARDS -->', foundation_cards_html)
-    html = html.replace('<!-- PROJECT_LINKS -->', project_nav_html)
-    html = html.replace('<!-- PROJECT_CARDS -->', project_cards_html)
+    html = html_template
+    html = html.replace('<!-- FOUNDATION_NAV -->', foundation_nav)
+    html = html.replace('<!-- FOUNDATION_CARDS -->', foundation_cards)
+    html = html.replace('<!-- PROJECT_LINKS -->', project_nav)
+    html = html.replace('<!-- PROJECT_CARDS -->', project_cards)
     html = html.replace('const DOCS = {};', docs_js)
 
-    # Write root index.html
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
 
     print(f"Generated Specifications/index.html with {len(foundation_docs)} foundation docs + {len(projects)} projects")
     return projects
 
-def generate_project_index(project_name):
-    """Generate a per-project index.html."""
 
+def generate_project_index(project_name):
+    """Generate a per-project index.html with grouped file navigation."""
     project_dir = os.path.join('.', project_name)
 
-    # Read all .md files in the project directory
+    # Read .md files, skip PROPOSED/UNUSED
     docs = {}
     for fname in sorted(os.listdir(project_dir)):
-        if fname.endswith('.md'):
-            fpath = os.path.join(project_dir, fname)
-            with open(fpath, 'r', encoding='utf-8') as f:
-                doc_key = fname.replace('.md', '')
-                docs[doc_key] = f.read()
+        if not fname.endswith('.md'):
+            continue
+        if fname.startswith('PROPOSED') or fname.startswith('UNUSED'):
+            continue
+        with open(os.path.join(project_dir, fname), 'r', encoding='utf-8') as f:
+            docs[fname.replace('.md', '')] = f.read()
 
-    # Generate DOCS JS object
     docs_js = "const DOCS = {\n"
     for key, text in docs.items():
         docs_js += f"  {json.dumps(key)}: {json.dumps(text)},\n"
     docs_js += "};"
 
-    # Read project template
     html_template = open('_project_index_template.html', 'r', encoding='utf-8').read()
 
-    # Try to read display_name or name from METADATA.md
-    display_name = None
-    meta_path = os.path.join(project_dir, 'METADATA.md')
-    if os.path.isfile(meta_path):
-        meta_fields = {}
-        with open(meta_path, 'r') as mf:
-            for line in mf:
-                if ':' in line and not line.startswith('#'):
-                    k, v = line.split(':', 1)
-                    meta_fields[k.strip()] = v.strip()
-        display_name = meta_fields.get('display_name') or meta_fields.get('name') or None
-    if not display_name:
-        display_name = project_name.replace('_', ' ')
+    fields = read_meta_fields(os.path.join(project_dir, 'METADATA.md'))
+    display_name = fields.get('display_name') or fields.get('name') or project_name.replace('_', ' ')
+
     html = html_template.replace('<!-- PROJECT_NAME -->', display_name)
     html = html.replace('const DOCS = {};', docs_js)
 
-    # Write project index.html
-    output_path = os.path.join(project_dir, 'index.html')
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(os.path.join(project_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(html)
 
     print(f"Generated {project_name}/index.html with {len(docs)} docs")
 
-# Generate root index
-projects = generate_root_index()
 
-# Generate per-project indices
+# Run
+projects = generate_root_index()
 for proj in projects:
     generate_project_index(proj['name'])
-
 print("\nAll index.html files generated successfully!")
 PYEOF
