@@ -8,6 +8,7 @@ short_description: __SHORT_DESCRIPTION__
 status: IDEA
 version: __TODAY__.1
 updated: __TODAY_COMPACT__
+image_description:
 
 ## Agent Instructions
 

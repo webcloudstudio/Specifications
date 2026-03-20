@@ -43,11 +43,12 @@ SCRIPT_DESCRIPTIONS = {
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
 }
 
-GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE']
+GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE', 'CREATE-IMAGE']
 GUIDE_TITLES = {
     'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
     'PROMOTE':               'Promote',
+    'CREATE-IMAGE':          'Create Image',
 }
 
 # Scripts whose usage block is always shown (no expand toggle)
@@ -223,8 +224,9 @@ def build_page(scripts, projects, guides):
     # ── Sidebar: steps with sub-items (script or guide) ──────────────────────
     # Each entry: (step_num, label, [(sub_label, 'script'|'guide', target), ...])
     STEP_NAV = [
-        (1, 'Step 1 — Create',   [('create_spec.sh',   'script', 'create_spec.sh')]),
-        (2, 'Step 2 — Create',   [('Project Creation', 'guide',  'PROJECT-SETUP')]),
+        (1, 'Step 1 — Create',   [('create_spec.sh',      'script', 'create_spec.sh'),
+                                   ('Create Image (AI)',   'guide',  'CREATE-IMAGE')]),
+        (2, 'Step 2 — Create',   [('Project Creation',    'guide',  'PROJECT-SETUP')]),
         (3, 'Step 3 — Validate', [('validate.sh',       'script', 'validate.sh')]),
         (4, 'Step 4 — Convert',  [('convert.sh',        'script', 'convert.sh')]),
         (5, 'Step 5 — Build',    [('build.sh',          'script', 'build.sh')]),
@@ -342,10 +344,12 @@ body {{ display: flex; height: 100vh; overflow: hidden;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }}
 
-.sidebar-header {{ background: var(--c-topbar-bg); padding: 8px 8px 6px;
-  flex-shrink: 0; cursor: pointer; text-align: center; }}
-.sidebar-header:hover {{ background: rgba(255,255,255,.04); }}
-.sidebar-header h1 {{ color: #fff; font-size: 17px; font-weight: 700; line-height: 1; letter-spacing: .3px; }}
+.sidebar-header {{ background: var(--c-topbar-bg); padding: 0;
+  flex-shrink: 0; cursor: pointer; text-align: center; overflow: hidden; }}
+.sidebar-header:hover {{ opacity: .9; }}
+.sidebar-header img {{ width: 100%; height: 88px; object-fit: cover; object-position: center top; display: block; }}
+.sidebar-header h1 {{ color: #fff; font-size: 15px; font-weight: 700; line-height: 1;
+  letter-spacing: .5px; padding: 5px 0 6px; background: var(--c-topbar-bg); }}
 
 .nav-section {{ font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--c-side-section); padding: 10px 16px 3px; }}
@@ -358,7 +362,7 @@ body {{ display: flex; height: 100vh; overflow: hidden;
   text-decoration: none; transition: background .1s, border-color .1s;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
 .sn:hover {{ background: rgba(255,255,255,.07); border-left-color: var(--c-accent); }}
-.sn.active {{ color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(44,182,125,.08); }}
+.sn.active {{ color: #fff; border-left-color: var(--c-accent); background: rgba(44,182,125,.12); }}
 
 /* Sub-nav items (steps under Workflow) */
 .sn-sub {{ display: block; padding: 3px 16px 3px 28px;
@@ -483,7 +487,8 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 
 <nav class="sidebar">
   <div class="sidebar-header" onclick="show('workflow')">
-    <h1>&#9654; Prototyper</h1>
+    <img src="images/prototyper.webp" alt="Prototyper">
+    <h1>Prototyper</h1>
   </div>
 {step_nav}
   <div class="nav-sep"></div>
