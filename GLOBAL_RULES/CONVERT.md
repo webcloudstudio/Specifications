@@ -1,5 +1,8 @@
 # Specification Conversion Rules
 
+**Version:** 20260320 V1
+**Description:** Rules for expanding concise spec files into implementation-ready detailed specs
+
 **How to expand concise project specs into detailed, implementation-ready specifications.**
 
 These rules are global — they apply to all projects regardless of stack. Stack-specific expansion is handled by the corresponding `stack/*.md` file.

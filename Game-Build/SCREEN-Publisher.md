@@ -1,5 +1,8 @@
 # Screen: Publisher
 
+**Version:** 20260320 V1
+**Description:** Spec for the Publisher screen
+
 Build and publish a static portfolio site from project metadata.
 
 ## Route

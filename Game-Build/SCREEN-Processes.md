@@ -1,5 +1,8 @@
 # Screen: Processes
 
+**Version:** 20260320 V1
+**Description:** Spec for the Processes screen
+
 View running and completed operations across all projects.
 
 ## Route

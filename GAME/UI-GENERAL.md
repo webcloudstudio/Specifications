@@ -1,5 +1,8 @@
 # UI General Standards
 
+**Version:** 20260320 V1
+**Description:** Shared UI patterns and conventions across all screens
+
 **Shared UI patterns, components, and conventions used across all screens.**
 
 All SCREEN-*.md files reference this document for shared elements. Screen specs define only what is unique to that screen.

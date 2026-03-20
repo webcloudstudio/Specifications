@@ -1,5 +1,8 @@
 # Intent
 
+**Version:** 20260320 V1
+**Description:** Project intent: why it exists, who it serves, and scope
+
 A solo practitioner or small team managing multiple AI-built projects needs one methodology. If your projects have custom capabilities then it is difficult to manage. Projects become easier to manage when they are standard in format.
 
 GAME is the dashboard that discovers, monitors, and operates projects that follow the standard. It scans project directories, reads METADATA.md and bin/ script headers, and presents a unified operations interface.

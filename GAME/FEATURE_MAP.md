@@ -1,5 +1,8 @@
 # GAME Feature Map
 
+**Version:** 20260320 V1
+**Description:** Feature map: complete list of system features
+
 **Complete catalog of project attributes, platform features, and operational capabilities.**
 
 This is the primary feature reference for GAME. It defines what the platform knows about projects, what it can do with them, and what capabilities it provides automatically. All SCREEN-*.md files reference features defined here; all DATABASE.md columns trace back to attributes listed here.

@@ -1,5 +1,8 @@
 # AWS API Gateway Best Practices
 
+**Version:** 20260320 V1
+**Description:** AWS API Gateway patterns: routes, authentication, and Lambda integration
+
 Technology reference for Amazon API Gateway (HTTP API) with Lambda integration.
 This file does not change between projects.
 

@@ -1,5 +1,8 @@
 # Feature: Heartbeat Monitoring [ROADMAP]
 
+**Version:** 20260320 V1
+**Description:** Spec for the Heartbeat Monitoring feature
+
 Periodic health polling for projects with a port and health endpoint.
 
 ## Trigger

@@ -1,5 +1,8 @@
 # Architecture
 
+**Version:** 20260320 V1
+**Description:** Module layout, routes, and directory structure
+
 Flask app factory with blueprints. Scanner, process engine, and publisher are backend modules feeding data to screen routes.
 
 ## App Factory

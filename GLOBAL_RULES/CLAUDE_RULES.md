@@ -2,7 +2,8 @@
 
 # DEFAULT DEVELOPMENT RULES
 
-**Version:** 2026-03-16.1
+**Version:** 20260320 V1
+**Description:** Agent behavior contract distributed to all AI agent projects — covers git, error handling, and completion standards
 
 Full specification and methodology: `Specifications/AGENTS.md` in the Specifications repository. This condensed version covers agent behavior only.
 

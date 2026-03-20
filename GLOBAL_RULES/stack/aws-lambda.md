@@ -1,5 +1,8 @@
 # AWS Lambda Best Practices
 
+**Version:** 20260320 V1
+**Description:** AWS Lambda deployment patterns: handlers, events, and packaging
+
 Technology reference for AWS Lambda functions in Python.
 This file does not change between projects.
 

@@ -1,5 +1,8 @@
 # AWS SQS Best Practices
 
+**Version:** 20260320 V1
+**Description:** AWS SQS message queue patterns: producers, consumers, and error handling
+
 Technology reference for Amazon SQS message queues with Python (boto3).
 This file does not change between projects.
 

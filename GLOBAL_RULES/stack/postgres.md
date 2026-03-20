@@ -1,5 +1,8 @@
 # PostgreSQL Best Practices
 
+**Version:** 20260320 V1
+**Description:** PostgreSQL database patterns: schema, queries, and connection management
+
 Technology reference for PostgreSQL in Python applications. This file does not change between projects.
 
 Prerequisites: `stack/python.md`

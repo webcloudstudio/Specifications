@@ -1,5 +1,8 @@
 # Feature: Project Scan
 
+**Version:** 20260320 V1
+**Description:** Spec for the Project Scan feature
+
 Discovers projects on disk and populates the database.
 
 ## Trigger

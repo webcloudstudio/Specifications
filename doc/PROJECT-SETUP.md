@@ -1,5 +1,8 @@
 # Project Setup
 
+**Version:** 20260320 V1
+**Description:** Guide to spec directory structure, required files, and file naming conventions
+
 A spec directory is a self-contained project description — concise enough to fit in a single build prompt, structured enough for an AI agent to implement from. Run `bin/create_spec.sh <ProjectName>` to scaffold the directory. Edit the four required files first, then add conditional files as the design takes shape. Delete anything that doesn't apply.
 
 ## Required Files

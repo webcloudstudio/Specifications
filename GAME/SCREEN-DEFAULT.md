@@ -1,5 +1,8 @@
 # Screen: Baseline
 
+**Version:** 20260320 V1
+**Description:** Spec for the Baseline screen
+
 A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
 
 ## Route

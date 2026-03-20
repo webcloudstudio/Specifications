@@ -1,5 +1,8 @@
 # Screen: Project Detail
 
+**Version:** 20260320 V1
+**Description:** Spec for the Project Detail screen
+
 **Single-project deep view.** Shows all metadata, operations, run history, links, and events for one project. Also serves as the metadata editor for that project.
 
 ## Route

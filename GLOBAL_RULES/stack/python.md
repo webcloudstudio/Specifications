@@ -1,5 +1,8 @@
 # Python Best Practices
 
+**Version:** 20260320 V1
+**Description:** Python language conventions and patterns for spec-driven projects
+
 Technology reference for Python development. Framework-agnostic — applies to any Python project. This file does not change between projects.
 
 Prerequisite: `stack/common.md`

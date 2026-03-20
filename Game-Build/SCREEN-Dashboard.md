@@ -1,5 +1,8 @@
 # Screen: Dashboard
 
+**Version:** 20260320 V1
+**Description:** Spec for the Dashboard screen
+
 Main screen. Shows all projects with status, operations, and quick actions.
 
 ## Route

@@ -1,5 +1,8 @@
 # Architecture
 
+**Version:** 20260320 V1
+**Description:** Module layout, routes, and directory structure
+
 **Flask app with blueprints.** App factory pattern. Scanner, process engine, and publisher are backend modules that feed data to the screen routes.
 
 ---
