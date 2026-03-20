@@ -15,14 +15,7 @@
 
 ## Blueprints
 
-| Blueprint | Mount | Purpose |
-|-----------|-------|---------|
-| `dashboard` | `/` | Main project list, project detail, inline actions |
-| `processes` | `/processes` | Process list, log viewer, stop endpoint |
-| `publisher` | `/publisher` | Portfolio build, preview, publish |
-| `config` | `/config` | Profile management, deploy, rollback |
-| `usage` | `/usage` | Token analytics dashboard |
-| `api` | `/api` | JSON endpoints for HTMX partial updates |
+Single blueprint `cc` registered on `/`. All routes live in `routes.py`.
 
 ## Backend Modules
 
@@ -36,7 +29,7 @@ Scans `$PROJECTS_DIR` for project directories. For each:
 
 Runs asynchronously on startup (not blocking first page load). Triggered manually by rescan button.
 
-### Process Engine (`engine.py`)
+### Process Engine (`ops.py` + `spawn.py`)
 
 Launches bin/ scripts as background subprocesses.
 
@@ -59,7 +52,7 @@ Builds static portfolio site from METADATA.md fields.
 4. Write static site to output directory
 5. Optionally push to GitHub Pages
 
-### Usage Analyzer (`usage.py`)
+### Usage Analyzer (`usage_analyzer.py`)
 
 Reads AI session JSONL logs (produced by ai engine, not produced by GAME).
 
@@ -74,7 +67,7 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | Method | Path | Returns | Trigger |
 |--------|------|---------|---------|
 | GET | `/` | Full dashboard page | Page load |
-| POST | `/api/scan` | Status message | Rescan button |
+| POST | `/api/sync` | Status message | Rescan button |
 | POST | `/api/run/{op_id}` | Updated button state | Operation click |
 | POST | `/api/stop/{run_id}` | Updated button state | Stop click |
 | POST | `/api/push/{project_id}` | Git status fragment | Push button |
@@ -95,35 +88,27 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 ```
 GAME/
   app.py                 App factory (create_app)
+  routes.py              All routes (single blueprint: cc)
   scanner.py             Project discovery
-  engine.py              Process execution
+  ops.py                 Operation launch/stop/status
+  spawn.py               Subprocess management
   publisher.py           Portfolio builder
-  config_engine.py       Config profile manager
-  usage.py               Token analytics
-  models.py              Database helpers, schema creation
-  templates/
+  usage_analyzer.py      Token analytics
+  models.py              PROJECT_TYPES registry
+  db.py                  Database access helpers
+  claude_convention.py   CLAUDE.md / AGENTS.md parsing
+  templates/             Flask/Jinja2 templates
     base.html            Layout with nav bar
-    dashboard.html       Main project list
-    project_detail.html  Single project view
-    processes.html       Process list and log viewer
-    publisher.html       Publisher controls
-    config.html          Config management
-    usage.html           Usage analytics
     partials/            HTMX response fragments
   static/
-    css/style.css        Custom styles (Bootstrap 5 dark theme)
-    js/app.js            Client-side helpers
+    style.css            Custom styles (Bootstrap 5 dark theme)
   bin/
     common.sh            Shared script functions
     start.sh             Start Flask dev server
     stop.sh              Stop server
-    build_documentation.sh  Generate doc/
+    build_documentation.sh  Generate docs/
   data/
-    game.db              SQLite database
-    migrations/          Numbered SQL migration files
-  config_engine/
-    profiles/            YAML config profiles
-    staged/              Git-committed staged configs
-  doc/                   Generated documentation
+    cc.db                SQLite database
+  docs/                  Generated documentation
   logs/                  Operation log files
 ```
