@@ -198,17 +198,18 @@ WORKFLOW = [
 
 def build_page(scripts, projects):
     # ── Sidebar ──
-    proj_links = ''
+    proj_nav = ''
     for proj in projects:
-        proj_links += f'<a class="side-link side-sub-link" href="../{proj["name"]}/index.html" target="_blank">{h.escape(proj["display_name"])}</a>\n'
+        color = STATUS_COLORS.get(proj['status'], '#94a3b8')
+        dot = f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{color};margin-right:5px;vertical-align:middle"></span>'
+        proj_nav += f'<a class="side-link side-sub" onclick="show(\'projects\')" href="../{proj["name"]}/index.html" target="_blank">{dot}{h.escape(proj["display_name"])}</a>\n'
 
     sidebar = f'''<nav class="side">
 <div class="side-title">Prototyper</div>
-<div class="side-sub">Specification System</div>
-<a class="side-link active" onclick="show('workflow')">Workflow</a>
-<a class="side-link" onclick="show('files')">File Architecture</a>
-<a class="side-link" onclick="show('scripts')">Scripts</a>
-<a class="side-link" onclick="show('projects')">Projects</a>
+<div class="side-sep"></div>
+<a class="side-link active" data-sec="projects" onclick="show('projects')">Projects</a>
+<a class="side-link" data-sec="scripts" onclick="show('scripts')">Scripts</a>
+<a class="side-link" data-sec="workflow" onclick="show('workflow')">Workflow</a>
 </nav>'''
 
     # ── Hero ──
@@ -230,7 +231,7 @@ def build_page(scripts, projects):
 <span class="wf-desc">— {h.escape(desc)}</span>
 </div>\n'''
 
-    workflow_section = f'''<section id="workflow">
+    workflow_section = f'''<section id="workflow" style="display:none">
 <h2>Workflow</h2>
 <p class="si">Each step has one command. Edit spec files between steps.</p>
 <div class="wf-list">{steps}</div>
@@ -238,41 +239,10 @@ def build_page(scripts, projects):
 Each build creates an annotated git tag recording the spec state.</div>
 </section>'''
 
-    # ── File Architecture ──
-    file_cards = ''
-    for fname, icon_key, desc in FILE_ARCH:
-        icon = ICONS.get(icon_key, '')
-        href = template_href(fname)
-        if '{Name}' in fname:
-            example = fname.replace('{Name}', 'Example')
-            href = template_href(example)
-        if href:
-            file_cards += f'''<a href="{href}" target="_blank" class="fc">
-<div class="fc-icon">{icon}</div>
-<div class="fc-body"><div class="fc-name">{h.escape(fname)}</div>
-<div class="fc-desc">{h.escape(desc)}</div></div>
-</a>\n'''
-        else:
-            file_cards += f'''<div class="fc">
-<div class="fc-icon">{icon}</div>
-<div class="fc-body"><div class="fc-name">{h.escape(fname)}</div>
-<div class="fc-desc">{h.escape(desc)}</div></div>
-</div>\n'''
-
-    files_section = f'''<section id="files" style="display:none">
-<h2>File Architecture</h2>
-<p class="si"><code>bin/create_spec.sh</code> generates all files from
-<a href="../GLOBAL_RULES/spec_template/" target="_blank">templates</a>.
-Spec files end with <code>## Open Questions</code> (except README, METADATA, INTENT).</p>
-<div class="fc-grid">{file_cards}</div>
-</section>'''
-
     # ── Scripts ──
     script_rows = ''
     for fname, label, desc in scripts:
-        icon = ICONS.get('terminal', '')
         script_rows += f'''<div class="sc-row">
-<span class="sc-icon">{icon}</span>
 <code class="sc-name">{h.escape(fname)}</code>
 <span class="sc-desc">{h.escape(desc)}</span>
 </div>\n'''
@@ -288,20 +258,21 @@ Spec files end with <code>## Open Questions</code> (except README, METADATA, INT
     for proj in projects:
         color = STATUS_COLORS.get(proj['status'], '#94a3b8')
         badge = f'<span class="badge" style="background:{color}">{proj["status"]}</span>' if proj['status'] else ''
-        desc_text = h.escape(proj['description']) if proj['description'] else f'{len(proj["files"])} spec files'
-        file_list = ', '.join(f.replace('.md', '') for f in proj['files'][:8])
-        if len(proj['files']) > 8:
-            file_list += f' (+{len(proj["files"]) - 8} more)'
-        project_cards += f'''<a href="../{proj["name"]}/index.html" target="_blank" class="pc">
-<div class="pc-head"><span class="pc-name">{h.escape(proj["display_name"])}</span>{badge}</div>
-<div class="pc-desc">{desc_text}</div>
-<div class="pc-files">{h.escape(file_list)}</div>
-</a>\n'''
+        desc_text = h.escape(proj['description']) if proj['description'] else ''
+        file_list = ' &nbsp;·&nbsp; '.join(f.replace('.md', '') for f in proj['files'])
+        project_cards += f'''<div class="pc">
+<div class="pc-head">
+  <a href="../{proj["name"]}/index.html" target="_blank" class="pc-name">{h.escape(proj["display_name"])}</a>
+  {badge}
+</div>
+{f'<div class="pc-desc">{desc_text}</div>' if desc_text else ''}
+<div class="pc-files">{file_list}</div>
+</div>\n'''
 
-    projects_section = f'''<section id="projects" style="display:none">
+    projects_section = f'''<section id="projects">
 <h2>Projects</h2>
-<p class="si">Specification directories. Click to open the project spec viewer.</p>
-<div class="pc-grid">{project_cards}</div>
+<p class="si">Click a project name to open the spec viewer.</p>
+<div class="pc-list">{project_cards}</div>
 </section>'''
 
     return f'''<!DOCTYPE html>
@@ -309,7 +280,7 @@ Spec files end with <code>## Open Questions</code> (except README, METADATA, INT
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Specifications</title>
+<title>Prototyper</title>
 <link rel="stylesheet" type="text/css" href="styles/gem.css">
 <style>
 body {{ display: flex; height: 100vh; margin: 0; overflow: hidden;
@@ -317,21 +288,19 @@ body {{ display: flex; height: 100vh; margin: 0; overflow: hidden;
   font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.45; }}
 
 /* Sidebar */
-.side {{ width: 200px; min-width: 200px; background: var(--c-side-bg);
+.side {{ width: 190px; min-width: 190px; background: var(--c-side-bg);
   border-right: 1px solid var(--c-side-border); display: flex; flex-direction: column;
   overflow-y: auto; }}
-.side-title {{ color: #fff; font-size: 14px; font-weight: 700; padding: 12px 14px 1px; }}
-.side-sub {{ color: var(--c-side-section); font-size: 10px; padding: 0 14px 10px;
-  border-bottom: 1px solid var(--c-side-border); text-transform: uppercase; letter-spacing: .5px; }}
+.side-title {{ color: #fff; font-size: 14px; font-weight: 700; padding: 12px 14px 10px; }}
+.side-sep {{ border-bottom: 1px solid var(--c-side-border); margin: 0 0 6px; }}
 .side-link {{ display: block; padding: 5px 14px; font-size: 13px;
   color: var(--c-side-link); cursor: pointer; border-left: 3px solid transparent;
   transition: all .1s; text-decoration: none; }}
-.side-link:first-of-type {{ margin-top: 8px; }}
 .side-link:hover {{ color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }}
-.side-link.active {{ color: var(--c-accent); border-left-color: var(--c-accent); }}
+.side-link.active {{ color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(44,182,125,.06); }}
 
 /* Content */
-main {{ flex: 1; overflow-y: auto; padding: 16px 28px 32px; max-width: 820px; }}
+main {{ flex: 1; overflow-y: auto; padding: 16px 28px 32px; max-width: 860px; }}
 
 /* Hero */
 .hero {{ position: relative; overflow: hidden; background: var(--c-side-bg);
@@ -343,9 +312,9 @@ main {{ flex: 1; overflow-y: auto; padding: 16px 28px 32px; max-width: 820px; }}
 
 /* Section */
 section h2 {{ font-size: 17px; color: var(--c-h1); font-weight: 700;
-  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 3px; margin: 0 0 6px; }}
+  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 3px; margin: 0 0 8px; }}
 .si {{ font-size: 12.5px; color: var(--c-h3); margin: 0 0 10px; line-height: 1.45; }}
-.si code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
+.si code, code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
 .si a {{ color: var(--c-accent); }}
 
@@ -367,41 +336,27 @@ section h2 {{ font-size: 17px; color: var(--c-h1); font-weight: 700;
   background: var(--c-callout-bg); border-left: 3px solid var(--c-accent);
   border-radius: 0 3px 3px 0; margin-top: 2px; }}
 
-/* File cards */
-.fc-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 6px; }}
-.fc {{ display: flex; align-items: flex-start; gap: 8px;
-  background: #fff; border: 1px solid var(--c-td-border); border-radius: 5px;
-  padding: 7px 10px; transition: border-color .15s; text-decoration: none; color: inherit; }}
-.fc:hover {{ border-color: var(--c-accent); }}
-a.fc {{ cursor: pointer; }}
-.fc-icon {{ width: 16px; height: 16px; color: var(--c-accent); flex-shrink: 0; margin-top: 1px; }}
-.fc-icon svg {{ width: 100%; height: 100%; }}
-.fc-name {{ font-weight: 700; font-size: 12.5px; color: var(--c-h1); }}
-.fc-desc {{ font-size: 11.5px; color: var(--c-h3); }}
-
-/* Scripts */
-.sc-list {{ margin: 0; }}
-.sc-row {{ display: flex; align-items: center; gap: 8px; padding: 5px 0;
-  border-bottom: 1px solid var(--c-td-border); }}
+/* Scripts — man-page style */
+.sc-list {{ margin: 0; border: 1px solid var(--c-td-border); border-radius: 4px; overflow: hidden; }}
+.sc-row {{ display: flex; align-items: baseline; gap: 10px; padding: 5px 10px;
+  border-bottom: 1px solid var(--c-td-border); background: var(--c-bg); }}
 .sc-row:last-child {{ border-bottom: none; }}
-.sc-icon {{ width: 14px; height: 14px; color: var(--c-h3); flex-shrink: 0; }}
-.sc-icon svg {{ width: 100%; height: 100%; }}
-.sc-name {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
-  background: var(--c-code-bg); color: var(--c-code-text);
-  padding: 1px 5px; border-radius: 3px; white-space: nowrap; min-width: 170px; }}
+.sc-row:nth-child(even) {{ background: var(--c-callout-bg); }}
+.sc-name {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
+  color: var(--c-code-text); white-space: nowrap; min-width: 200px; }}
 .sc-desc {{ font-size: 12px; color: var(--c-h3); }}
 
 /* Projects */
-.pc-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 6px; }}
-.pc {{ display: block; background: #fff; border: 1px solid var(--c-td-border); border-radius: 5px;
-  padding: 8px 10px; transition: border-color .15s; text-decoration: none; color: inherit; cursor: pointer; }}
-.pc:hover {{ border-color: var(--c-accent); }}
-.pc-head {{ display: flex; align-items: center; gap: 8px; }}
-.pc-name {{ font-weight: 700; font-size: 13px; color: var(--c-h1); }}
+.pc-list {{ display: flex; flex-direction: column; gap: 5px; }}
+.pc {{ background: var(--c-bg); border: 1px solid var(--c-td-border); border-radius: 5px;
+  padding: 9px 12px; }}
+.pc-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }}
+.pc-name {{ font-weight: 700; font-size: 14px; color: var(--c-accent); text-decoration: none; }}
+.pc-name:hover {{ text-decoration: underline; }}
 .badge {{ display: inline-block; padding: 1px 7px; border-radius: 3px;
   color: #fff; font-size: 10px; font-weight: 600; text-transform: uppercase; }}
-.pc-desc {{ font-size: 11.5px; color: var(--c-h3); margin-top: 2px; }}
-.pc-files {{ font-size: 11px; color: var(--c-foot-text); margin-top: 3px;
+.pc-desc {{ font-size: 12.5px; color: var(--c-text); margin-bottom: 4px; }}
+.pc-files {{ font-size: 11px; color: var(--c-h3);
   font-family: 'Cascadia Code', Consolas, monospace; }}
 
 .footer {{ margin-top: 24px; padding-top: 6px; border-top: 1px solid var(--c-td-border);
@@ -412,10 +367,9 @@ a.fc {{ cursor: pointer; }}
 {sidebar}
 <main>
 {hero}
-{workflow_section}
-{files_section}
-{scripts_section}
 {projects_section}
+{scripts_section}
+{workflow_section}
 <div class="footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies.</div>
 </main>
 <script>
@@ -423,9 +377,17 @@ function show(id) {{
   document.querySelectorAll('section').forEach(s => s.style.display = 'none');
   document.getElementById(id).style.display = 'block';
   document.querySelectorAll('.side-link').forEach(a => a.classList.remove('active'));
-  var link = document.querySelector('.side-link[onclick*="' + id + '"]');
+  var link = document.querySelector('[data-sec="' + id + '"]');
   if (link) link.classList.add('active');
+  // handle hash
+  if (history.pushState) history.pushState(null, '', '#' + id);
 }}
+// Handle initial hash
+(function() {{
+  var id = (location.hash || '#projects').replace('#','');
+  var sec = document.getElementById(id);
+  if (sec) show(id);
+}})();
 </script>
 </body>
 </html>'''

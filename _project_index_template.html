@@ -6,135 +6,185 @@
 <title><!-- PROJECT_NAME --> — Specification</title>
 <link rel="stylesheet" href="../doc/styles/gem.css">
 <style>
+* { box-sizing: border-box; }
 body {
-  display: flex; height: 100vh; margin: 0; overflow: hidden;
+  display: flex; flex-direction: column; height: 100vh; margin: 0; overflow: hidden;
   background: var(--c-bg); color: var(--c-text);
-  font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; line-height: 1.65;
+  font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.5;
 }
+
+/* ── Topbar ──────────────────────────────── */
+#topbar {
+  display: flex; align-items: center; gap: 0;
+  background: var(--c-topbar-bg); border-bottom: 1px solid var(--c-side-border);
+  height: 42px; flex-shrink: 0; padding: 0;
+}
+.tb-brand {
+  font-size: 13px; font-weight: 700; color: #fff;
+  padding: 0 18px; height: 100%; display: flex; align-items: center;
+  border-right: 1px solid var(--c-side-border); text-decoration: none;
+  white-space: nowrap;
+}
+.tb-brand:hover { background: rgba(255,255,255,.07); }
+.tb-brand span { color: var(--c-accent); margin-right: 6px; font-size: 15px; }
+.tb-project {
+  font-size: 13px; font-weight: 600; color: var(--c-side-link);
+  padding: 0 16px; height: 100%; display: flex; align-items: center;
+  border-right: 1px solid var(--c-side-border);
+}
+.tb-sep { color: var(--c-side-section); padding: 0 4px; }
+.tb-project-name { color: #fff; }
+.tb-spacer { flex: 1; }
+.tb-btn {
+  font-size: 12px; font-weight: 500; color: var(--c-side-link);
+  padding: 0 16px; height: 100%; display: flex; align-items: center; gap: 6px;
+  border-left: 1px solid var(--c-side-border); text-decoration: none;
+  transition: color .1s, background .1s; white-space: nowrap;
+}
+.tb-btn:hover { color: #fff; background: rgba(255,255,255,.07); }
+.tb-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── Main layout ─────────────────────────── */
+#main { display: flex; flex: 1; overflow: hidden; }
 
 /* ── Sidebar ─────────────────────────────── */
 #sidebar {
-  width: 250px; min-width: 250px; background: var(--c-side-bg);
+  width: 220px; min-width: 220px; background: var(--c-side-bg);
   border-right: 1px solid var(--c-side-border);
   overflow-y: auto; display: flex; flex-direction: column;
 }
-#sidebar::-webkit-scrollbar { width: 5px; }
-#sidebar::-webkit-scrollbar-thumb { background: var(--c-side-border); border-radius: 3px; }
-.side-header {
-  padding: 16px 16px 12px; border-bottom: 1px solid var(--c-side-border);
-  background: var(--c-topbar-bg);
-}
-.side-header h1 { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
-.side-header .subtitle { font-size: 11px; color: var(--c-side-section); margin-top: 3px; }
-.side-header a {
-  color: var(--c-accent); text-decoration: none; font-size: 11px;
-  display: inline-block; margin-top: 8px;
-}
-.side-header a:hover { text-decoration: underline; }
-.nav-group { padding: 12px 0 4px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--c-side-border); border-radius: 2px; }
+.nav-group { padding: 8px 0 2px; }
 .nav-group-label {
-  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-side-section); padding: 0 16px 4px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-side-section); padding: 0 14px 3px;
 }
 .nav-item {
-  display: block; padding: 5px 14px 5px 18px; font-size: 13px;
+  display: block; padding: 5px 14px 5px 16px; font-size: 12.5px;
   color: var(--c-side-link); cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: all .12s; text-decoration: none;
+  border-left: 3px solid transparent; transition: all .1s; text-decoration: none;
 }
 .nav-item:hover { color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }
 .nav-item.active { color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(255,255,255,.04); }
 
 /* ── Content ─────────────────────────────── */
-#content { flex: 1; overflow-y: auto; padding: 32px 40px 48px; max-width: 860px; }
+#content { flex: 1; overflow-y: auto; padding: 24px 36px 40px; }
 
-/* Home panel */
+/* Project info card */
 .project-info {
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
-  border-radius: 8px; padding: 20px 24px; margin-bottom: 28px;
-  color: var(--c-side-link);
+  border-radius: 7px; padding: 18px 22px; margin-bottom: 20px;
 }
-.project-info h1 { color: #fff; font-size: 22px; margin: 0 0 4px 0; border: none; }
-.project-info .status {
-  display: inline-block; padding: 2px 10px; border-radius: 12px;
-  font-size: 11px; font-weight: 600; color: #fff; margin-left: 8px; vertical-align: middle;
+.project-info h1 {
+  color: #fff; font-size: 20px; margin: 0 0 3px 0; border: none;
+  display: flex; align-items: center; gap: 10px;
 }
-.project-info .desc { font-size: 14px; margin: 6px 0 0; color: var(--c-side-link); }
-.project-info .meta-row {
-  font-size: 12px; color: var(--c-side-section); margin-top: 10px;
-  display: flex; gap: 16px; flex-wrap: wrap;
+.status {
+  display: inline-block; padding: 2px 9px; border-radius: 10px;
+  font-size: 10px; font-weight: 600; color: #fff;
 }
-.project-info .meta-row span { white-space: nowrap; }
+.project-info .desc { font-size: 13px; margin: 5px 0 0; color: var(--c-side-link); line-height: 1.5; }
+.meta-row {
+  font-size: 11.5px; color: var(--c-side-section); margin-top: 8px;
+  display: flex; gap: 14px; flex-wrap: wrap;
+}
+.meta-row span { white-space: nowrap; }
 
+.group-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-h3); margin: 16px 0 6px;
+  padding-bottom: 3px; border-bottom: 1px solid var(--c-td-border);
+}
 .file-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px; margin: 12px 0 24px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 6px; margin-bottom: 4px;
 }
 .file-card {
-  background: #fff; border: 1px solid var(--c-td-border); border-radius: 6px;
-  padding: 10px 14px; cursor: pointer; transition: all .15s; text-decoration: none; display: block;
+  background: #fff; border: 1px solid var(--c-td-border); border-radius: 5px;
+  padding: 8px 12px; cursor: pointer; transition: all .12s; text-decoration: none;
+  display: flex; align-items: center; gap: 7px;
 }
 .file-card:hover { border-color: var(--c-accent); background: var(--c-tr-hover); }
-.file-card .icon { font-size: 16px; margin-right: 6px; }
-.file-card .name { font-size: 13px; font-weight: 600; color: var(--c-h1); }
-.group-label {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-h3); margin: 20px 0 8px;
-  padding-bottom: 4px; border-bottom: 1px solid var(--c-td-border);
-}
+.file-card .icon { font-size: 14px; flex-shrink: 0; }
+.file-card .name { font-size: 12.5px; font-weight: 600; color: var(--c-h1); }
 
 /* Doc panel */
 #doc-panel { display: none; }
-.back-link { color: var(--c-accent); text-decoration: none; font-size: 12px; display: inline-block; margin-bottom: 16px; }
+.back-link {
+  color: var(--c-accent); text-decoration: none; font-size: 12px;
+  display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px;
+}
 .back-link:hover { text-decoration: underline; }
 
 /* Rendered markdown */
-.md h1 { font-size: 24px; font-weight: 700; color: var(--c-h1); border-bottom: 2px solid var(--c-h1-border); padding-bottom: 5px; margin: 24px 0 14px; }
-.md h2 { font-size: 19px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 20px 0 10px; }
-.md h3 { font-size: 16px; font-weight: 600; color: var(--c-h3); margin: 16px 0 8px; }
-.md h4 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 6px; }
-.md p { margin: 10px 0; line-height: 1.65; }
-.md ul, .md ol { margin: 8px 0 8px 20px; line-height: 1.65; }
-.md li { margin: 4px 0; }
-.md table { border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
-.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 7px 14px; text-align: left; }
-.md td { padding: 6px 14px; border-bottom: 1px solid var(--c-td-border); background: #fff; }
+.md h1 { font-size: 22px; font-weight: 700; color: var(--c-h1); border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin: 20px 0 12px; }
+.md h2 { font-size: 17px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 16px 0 8px; }
+.md h3 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 6px; }
+.md h4 { font-size: 13px; font-weight: 600; color: var(--c-h3); margin: 10px 0 4px; }
+.md p { margin: 8px 0; line-height: 1.6; }
+.md ul, .md ol { margin: 6px 0 6px 18px; line-height: 1.6; }
+.md li { margin: 3px 0; }
+.md table { border-collapse: collapse; margin: 10px 0; font-size: 13px; width: 100%; }
+.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 6px 12px; text-align: left; }
+.md td { padding: 5px 12px; border-bottom: 1px solid var(--c-td-border); background: #fff; }
 .md tr:nth-child(even) td { background: var(--c-tr-alt); }
 .md tr:hover td { background: var(--c-tr-hover); }
 .md pre {
   background: var(--c-pre-bg); color: var(--c-pre-text);
   border: 1px solid var(--c-side-border); border-radius: 5px;
-  padding: 14px 16px; overflow-x: auto; margin: 12px 0; font-size: 13px; line-height: 1.5;
+  padding: 12px 14px; overflow-x: auto; margin: 10px 0; font-size: 12.5px; line-height: 1.5;
 }
 .md code {
-  font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px;
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
   background: var(--c-code-bg); color: var(--c-code-text);
-  padding: 1px 5px; border-radius: 3px; border: 1px solid var(--c-td-border);
+  padding: 1px 4px; border-radius: 3px; border: 1px solid var(--c-td-border);
 }
 .md pre code { background: none; border: none; padding: 0; color: inherit; }
 .md blockquote {
-  border-left: 4px solid var(--c-accent); padding: 10px 16px; margin: 12px 0;
-  background: var(--c-callout-bg); border-radius: 0 4px 4px 0; font-size: 14px;
+  border-left: 3px solid var(--c-accent); padding: 8px 14px; margin: 10px 0;
+  background: var(--c-callout-bg); border-radius: 0 4px 4px 0; font-size: 13px;
 }
-.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 20px 0; }
+.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 16px 0; }
 </style>
 </head>
 <body>
 
-<div id="sidebar">
-  <div class="side-header">
-    <h1><!-- PROJECT_NAME --></h1>
-    <div class="subtitle">Specification</div>
-    <a href="../index.html">&larr; All Projects</a>
+<div id="topbar">
+  <a class="tb-brand" href="../doc/index.html">
+    <span>&#9654;</span>Prototyper
+  </a>
+  <div class="tb-project">
+    <span class="tb-sep">&#47;</span>&nbsp;<span class="tb-project-name"><!-- PROJECT_NAME --></span>
   </div>
-  <nav id="nav"></nav>
+  <div class="tb-spacer"></div>
+  <a class="tb-btn" href="../doc/index.html#projects">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+      <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+    </svg>
+    All Projects
+  </a>
+  <a class="tb-btn" href="../doc/index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+    </svg>
+    Documentation
+  </a>
 </div>
 
-<div id="content">
-  <div id="home-panel"></div>
-  <div id="doc-panel">
-    <a href="javascript:showHome()" class="back-link">&larr; Back to overview</a>
-    <div id="doc-content" class="md"></div>
+<div id="main">
+  <div id="sidebar">
+    <nav id="nav"></nav>
+  </div>
+
+  <div id="content">
+    <div id="home-panel"></div>
+    <div id="doc-panel">
+      <a href="javascript:showHome()" class="back-link">&#8592; Back to overview</a>
+      <div id="doc-content" class="md"></div>
+    </div>
   </div>
 </div>
 
@@ -152,6 +202,7 @@ const STATUS_COLORS = {
 const FILE_ICONS = {
   METADATA: '\u{1F4CB}', README: '\u{1F4D6}', INTENT: '\u{1F3AF}',
   ARCHITECTURE: '\u{1F3D7}', DATABASE: '\u{1F5C4}', UI: '\u{1F3A8}',
+  'UI-GENERAL': '\u{1F3A8}', 'FEATURE_MAP': '\u26A1', FUNCTIONALITY: '\u{1F504}',
 };
 
 function getIcon(name) {
@@ -167,15 +218,17 @@ function displayName(key) {
   if (key === 'ARCHITECTURE') return 'Architecture';
   if (key === 'DATABASE') return 'Database';
   if (key === 'UI' || key === 'UI-GENERAL') return 'UI Standards';
-  if (key.startsWith('SCREEN-')) return 'Screen: ' + key.slice(7).replace(/-/g, ' ');
-  if (key.startsWith('FEATURE-')) return 'Feature: ' + key.slice(8).replace(/-/g, ' ');
+  if (key === 'FEATURE_MAP') return 'Feature Map';
+  if (key === 'FUNCTIONALITY') return 'Functionality';
+  if (key.startsWith('SCREEN-')) return key.slice(7).replace(/-/g, ' ');
+  if (key.startsWith('FEATURE-')) return key.slice(8).replace(/-/g, ' ');
   return key.replace(/-/g, ' ').replace(/_/g, ' ');
 }
 
 function groupFiles(keys) {
   const groups = { Core: [], Design: [], Screens: [], Features: [], Other: [] };
   const core = new Set(['METADATA', 'README', 'INTENT']);
-  const design = new Set(['ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL']);
+  const design = new Set(['ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL', 'FEATURE_MAP', 'FUNCTIONALITY']);
   keys.forEach(k => {
     if (core.has(k)) groups.Core.push(k);
     else if (design.has(k)) groups.Design.push(k);
@@ -197,17 +250,30 @@ function parseMeta(text) {
 
 function buildNav(groups) {
   const nav = document.getElementById('nav');
+  const labels = { Core: 'Core', Design: 'Design', Screens: 'Screens', Features: 'Features', Other: 'Other' };
   const order = ['Core', 'Design', 'Screens', 'Features', 'Other'];
+  // Home link first
+  const homeDiv = document.createElement('div');
+  homeDiv.className = 'nav-group';
+  const homeA = document.createElement('a');
+  homeA.className = 'nav-item active';
+  homeA.id = 'nav-home';
+  homeA.textContent = 'Overview';
+  homeA.onclick = showHome;
+  homeDiv.appendChild(homeA);
+  nav.appendChild(homeDiv);
+
   order.forEach(group => {
     const files = groups[group].filter(k => k !== 'METADATA');
     if (!files.length) return;
     const div = document.createElement('div');
     div.className = 'nav-group';
-    div.innerHTML = '<div class="nav-group-label">' + group + '</div>';
+    div.innerHTML = '<div class="nav-group-label">' + labels[group] + '</div>';
     files.forEach(key => {
       const a = document.createElement('a');
       a.className = 'nav-item';
       a.textContent = displayName(key);
+      a.dataset.key = key;
       a.onclick = () => showDoc(key);
       div.appendChild(a);
     });
@@ -219,7 +285,6 @@ function buildHome(groups, meta) {
   const home = document.getElementById('home-panel');
   let html = '';
 
-  // Project info card from METADATA
   const statusColor = STATUS_COLORS[meta.status] || '#94a3b8';
   html += '<div class="project-info">';
   html += '<h1>' + (meta.display_name || meta.name || '');
@@ -229,13 +294,12 @@ function buildHome(groups, meta) {
   const metaItems = [];
   if (meta.stack) metaItems.push('Stack: ' + meta.stack);
   if (meta.port) metaItems.push('Port: ' + meta.port);
-  if (meta.repo) metaItems.push('Repo: ' + meta.repo);
+  if (meta.namespace && meta.namespace !== 'development') metaItems.push('Namespace: ' + meta.namespace);
   if (metaItems.length) {
     html += '<div class="meta-row">' + metaItems.map(i => '<span>' + i + '</span>').join('') + '</div>';
   }
   html += '</div>';
 
-  // File cards by group (skip METADATA — shown above)
   const order = ['Core', 'Design', 'Screens', 'Features', 'Other'];
   const labels = { Core: 'Core', Design: 'Architecture & Data', Screens: 'Screens', Features: 'Features', Other: 'Other' };
   order.forEach(group => {
@@ -261,9 +325,8 @@ function showDoc(key) {
   document.getElementById('doc-panel').style.display = 'block';
   document.getElementById('doc-content').innerHTML = marked.parse(DOCS[key]);
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(el => {
-    if (el.textContent === displayName(key)) el.classList.add('active');
-  });
+  const link = document.querySelector('.nav-item[data-key="' + key + '"]');
+  if (link) link.classList.add('active');
   document.getElementById('content').scrollTop = 0;
 }
 
@@ -271,10 +334,11 @@ function showHome() {
   document.getElementById('home-panel').style.display = 'block';
   document.getElementById('doc-panel').style.display = 'none';
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const h = document.getElementById('nav-home');
+  if (h) h.classList.add('active');
   document.getElementById('content').scrollTop = 0;
 }
 
-// Init
 const keys = Object.keys(DOCS).sort();
 const groups = groupFiles(keys);
 const meta = DOCS['METADATA'] ? parseMeta(DOCS['METADATA']) : {};
