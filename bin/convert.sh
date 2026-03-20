@@ -16,7 +16,22 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_NAME="${1:?Usage: bash bin/convert.sh <project-name>}"
+
+# Auto-detect project from CWD if no argument given
+if [ "${1:-}" = "" ]; then
+    CWD_NAME="$(basename "$(pwd)")"
+    if [ "$(pwd)" = "$REPO_DIR/$CWD_NAME" ] && [ -d "$REPO_DIR/$CWD_NAME" ]; then
+        PROJECT_NAME="$CWD_NAME"
+    else
+        echo "Usage: bash bin/convert.sh <project-name>" >&2
+        echo "       Run without arguments from within a spec directory." >&2
+        exit 1
+    fi
+else
+    PROJECT_NAME="$1"
+    shift || true
+fi
+
 PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 METADATA_FILE="$PROJECT_DIR/METADATA.md"
 CONVERT_FILE="$REPO_DIR/GLOBAL_RULES/CONVERT.md"

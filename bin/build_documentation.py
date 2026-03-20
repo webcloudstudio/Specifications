@@ -153,9 +153,15 @@ def build_page(scripts, projects, guides):
             wf_rows += f'<tr>{num_cell}<td class="wcmd"><code>{cmd}</code></td><td class="wdesc">{desc}</td></tr>\n'
 
     # ── Overview guide links ──────────────────────────────────────────────────
+    guide_subtitles = {
+        'SPECIFICATION-PROCESS': 'Step-by-step workflow',
+        'PROJECT-SETUP': 'Spec files and conventions',
+    }
     ov_guide_links = ''
     for g in guides:
-        ov_guide_links += f'      <a class="ov-link" onclick="showGuide(\'{g["key"]}\')">{h.escape(g["title"])} &rarr;</a>\n'
+        sub = guide_subtitles.get(g['key'], '')
+        sub_html = f'<span class="ov-link-sub">{h.escape(sub)}</span>' if sub else ''
+        ov_guide_links += f'      <a class="ov-link" onclick="showGuide(\'{g["key"]}\')">{h.escape(g["title"])} &rarr;{sub_html}</a>\n'
 
     # ── Projects sidebar ──────────────────────────────────────────────────────
     proj_nav = ''
@@ -225,11 +231,12 @@ main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; }}
 .pip-step .pc {{ font-size: 10.5px; color: var(--c-side-section); font-family: 'Cascadia Code', Consolas, monospace; }}
 .pip-arr {{ color: var(--c-side-section); padding: 0 6px; font-size: 16px; }}
 .ov-links {{ display: flex; gap: 10px; flex-wrap: wrap; }}
-.ov-link {{ display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+.ov-link {{ display: inline-flex; flex-direction: column; padding: 5px 14px;
   background: var(--c-side-bg); border: 1px solid var(--c-side-border); border-radius: 4px;
   color: var(--c-accent); font-size: 13px; font-weight: 600; text-decoration: none;
   cursor: pointer; transition: border-color .1s; }}
 .ov-link:hover {{ border-color: var(--c-accent); }}
+.ov-link-sub {{ font-size: 11px; font-weight: 400; color: var(--c-side-section); margin-top: 1px; }}
 
 /* ── Rendered markdown ── */
 .md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-h1);

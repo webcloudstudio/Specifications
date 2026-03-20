@@ -6,11 +6,12 @@
 # Validates a specification directory for completeness and correctness.
 #
 # Usage:
-#   bash bin/validate.sh <project-name>
+#   bash bin/validate.sh <project-name>           # from repo root
+#   bash bin/validate.sh                           # from within project directory
 #   bash bin/validate.sh <project-name> --verbose
 #
 # Arguments:
-#   $1        Project name (required) — specification directory name
+#   $1        Project name (optional — auto-detected from CWD)
 #   --verbose Show passing checks too (default: errors and warnings only)
 #
 # Exit codes:
@@ -29,11 +30,25 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_NAME="${1:?Usage: bash bin/validate.sh <project-name>}"
+
+# Auto-detect project from CWD if no argument given
+if [ "${1:-}" = "" ] || [[ "${1:-}" == --* ]]; then
+    CWD_NAME="$(basename "$(pwd)")"
+    if [ "$(pwd)" = "$REPO_DIR/$CWD_NAME" ] && [ -d "$REPO_DIR/$CWD_NAME" ]; then
+        PROJECT_NAME="$CWD_NAME"
+    else
+        echo "Usage: bash bin/validate.sh <project-name> [--verbose]" >&2
+        echo "       Run without arguments from within a spec directory." >&2
+        exit 1
+    fi
+else
+    PROJECT_NAME="$1"
+    shift || true
+fi
+
 PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 VERBOSE=false
 
-shift || true
 for arg in "$@"; do
     case "$arg" in
         --verbose) VERBOSE=true ;;

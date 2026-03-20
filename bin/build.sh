@@ -22,13 +22,27 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_NAME="${1:?Usage: bash bin/build.sh <project-name>}"
+
+# Auto-detect project from CWD if first arg is missing or is a flag
+if [ "${1:-}" = "" ] || [[ "${1:-}" == --* ]]; then
+    CWD_NAME="$(basename "$(pwd)")"
+    if [ "$(pwd)" = "$REPO_DIR/$CWD_NAME" ] && [ -d "$REPO_DIR/$CWD_NAME" ]; then
+        PROJECT_NAME="$CWD_NAME"
+    else
+        echo "Usage: bash bin/build.sh <project-name> [--no-tag|--tag-only]" >&2
+        echo "       Run without arguments from within a spec directory." >&2
+        exit 1
+    fi
+else
+    PROJECT_NAME="$1"
+    shift || true
+fi
+
 PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 METADATA_FILE="$PROJECT_DIR/METADATA.md"
 
 TAG_ONLY=false
 NO_TAG=false
-shift
 for arg in "$@"; do
     case "$arg" in
         --tag-only) TAG_ONLY=true ;;

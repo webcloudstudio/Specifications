@@ -7,11 +7,9 @@
 #
 # Usage:
 #   bash bin/create_spec.sh <project-name>
-#   bash bin/create_spec.sh <project-name> "Short description"
 #
 # Arguments:
 #   $1  Project name (required) — becomes directory name and METADATA slug
-#   $2  Short description (optional) — one-line project summary
 #
 # Creates:
 #   <project-name>/
@@ -23,8 +21,8 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_NAME="${1:?Usage: bash bin/create_spec.sh <project-name> [\"Short description\"]}"
-SHORT_DESC="${2:-TODO: add short description}"
+PROJECT_NAME="${1:?Usage: bash bin/create_spec.sh <project-name>}"
+SHORT_DESC="TODO: add short description"
 PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 TEMPLATE_DIR="$REPO_DIR/GLOBAL_RULES/spec_template"
 
