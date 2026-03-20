@@ -30,6 +30,8 @@ CONVERT.md defines expansion rules. Stack files define technology patterns. The 
 pipeline combines everything into a single prompt an AI agent can execute.
 
 **What this means for changes to GLOBAL_RULES/:**
+- BUSINESS_RULES.md is the source for agent behavioral rules — full rationale lives there
+- CLAUDE_RULES.md is generated from BUSINESS_RULES.md via `bin/generate_claude_rules.sh` — never edit it directly
 - Keep CLAUDE_RULES.md minimal — agents follow rules, they don't need rationale
 - CONVERT.md defines how concise specs expand — methodology lives here, not in project dirs
 - Stack files are prescriptive — copy-paste patterns, not guidelines
@@ -40,7 +42,8 @@ pipeline combines everything into a single prompt an AI agent can execute.
 ```
 Specifications/
   GLOBAL_RULES/                    Global standards distributed to all projects
-    CLAUDE_RULES.md                Agent behavior contract (injected into AGENTS.md)
+    BUSINESS_RULES.md              Source for agent behavior rules — edit this, not CLAUDE_RULES.md
+    CLAUDE_RULES.md                Generated agent behavior contract (injected into AGENTS.md)
     CONVERT.md                     Specification expansion rules (global methodology)
     DOCUMENTATION_BRANDING.md      Documentation theming and color standards
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
@@ -53,6 +56,7 @@ Specifications/
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
     build.sh                       Tag commit + generate build prompt
+    generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
     generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md)
     rebuild_index.sh               Regenerate browsable HTML spec viewers
@@ -63,6 +67,10 @@ Specifications/
   archive/                         Superseded documents — not current spec
   doc/                             Documentation: process guide, project setup guide
 ```
+
+**Reference standards in GLOBAL_RULES/ (not auto-distributed):**
+- `DOCUMENTATION_BRANDING.md` — color variables, typography, theme standards. Not auto-distributed; projects copy patterns from here manually. Authoritative for all documentation styling.
+- `BUSINESS_RULES.md` — source of truth for agent behavioral rules. Edit here, then regenerate CLAUDE_RULES.md.
 
 **Separation of concerns:**
 - `GLOBAL_RULES/` = what standards projects must follow + how specs expand
@@ -87,6 +95,13 @@ Specifications/
 Spec files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README, METADATA, and INTENT do not.
 
 ## Dev Commands
+
+### CLAUDE_RULES regeneration
+
+```bash
+bash bin/generate_claude_rules.sh > rules-prompt.md
+# Feed rules-prompt.md to an AI agent — paste output over GLOBAL_RULES/CLAUDE_RULES.md
+```
 
 ### Specification workflow (all take `<project-name>` as $1)
 
@@ -165,6 +180,9 @@ changes exist. Shows diff stat from previous build tag.
 Tests the specification system: verifies global rules, stack files, templates, script headers,
 and runs a create+validate round-trip on a temporary project.
 
+### bin/generate_claude_rules.sh
+Generates a prompt for an AI agent to regenerate `GLOBAL_RULES/CLAUDE_RULES.md` from `GLOBAL_RULES/BUSINESS_RULES.md`. Auto-increments the version (date + sequence). Output is fed to an AI agent; the agent produces the new CLAUDE_RULES.md content.
+
 ### bin/generate_prompt.sh
 Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create build tags. Use `bin/build.sh` instead for new projects.
 
@@ -205,3 +223,4 @@ The pattern for adding any new contract/file that all projects should have:
 - `index.html` files are auto-generated — edit the templates, not the outputs
 - When changing `GLOBAL_RULES/` content, run `bash bin/update_projects.sh` from `../GAME/` to propagate
 - CONVERT.md is global (in GLOBAL_RULES/), not per-project — methodology is shared
+- BUSINESS_RULES.md is the source of truth for agent behavioral rules; CLAUDE_RULES.md is generated — never edit CLAUDE_RULES.md directly

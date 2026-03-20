@@ -54,6 +54,10 @@ assert_file "GLOBAL_RULES/CONVERT.md"
 assert_file "GLOBAL_RULES/DOCUMENTATION_BRANDING.md"
 assert_contains "GLOBAL_RULES/CLAUDE_RULES.md" "CLAUDE_RULES_START"
 assert_contains "GLOBAL_RULES/CLAUDE_RULES.md" "CLAUDE_RULES_END"
+assert_contains "GLOBAL_RULES/CLAUDE_RULES.md" "do not edit directly"
+assert_file "GLOBAL_RULES/BUSINESS_RULES.md"
+assert_contains "GLOBAL_RULES/BUSINESS_RULES.md" "Conformity Levels"
+assert_contains "GLOBAL_RULES/BUSINESS_RULES.md" "Rule text:"
 assert_contains "GLOBAL_RULES/CONVERT.md" "Expansion Principles"
 echo ""
 
@@ -82,11 +86,11 @@ echo ""
 
 # --- Bin scripts ---
 echo "Bin scripts:"
-for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh; do
+for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh bin/generate_claude_rules.sh; do
     assert_file "$script"
 done
 # Verify CommandCenter headers
-for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh; do
+for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
     assert_contains "$script" "CommandCenter Operation"
     assert_contains "$script" "# Name:"
     assert_contains "$script" "# Category:"
@@ -95,9 +99,16 @@ echo ""
 
 # --- Script executability ---
 echo "Script executability:"
-for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh; do
+for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
     assert "$script is executable" test -x "$script"
 done
+echo ""
+
+# --- Generate Claude Rules ---
+echo "Generate Claude Rules:"
+assert "generate_claude_rules.sh runs without error" bash bin/generate_claude_rules.sh
+assert "output contains CLAUDE_RULES_START" bash -c 'bash bin/generate_claude_rules.sh | grep -q "CLAUDE_RULES_START"'
+assert "output references BUSINESS_RULES" bash -c 'bash bin/generate_claude_rules.sh | grep -q "BUSINESS_RULES"'
 echo ""
 
 # --- Create + validate round-trip ---

@@ -118,6 +118,16 @@ if [ -f "$PROJECT_DIR/METADATA.md" ]; then
         esac
     fi
 
+    # --- Conformity level enforcement ---
+    case "${STATUS:-}" in
+        IDEA)       CONF_LEVEL=0 ;;
+        PROTOTYPE)  CONF_LEVEL=1 ;;
+        ACTIVE)     CONF_LEVEL=2 ;;
+        PRODUCTION) CONF_LEVEL=3 ;;
+        ARCHIVED)   CONF_LEVEL=-1 ;;
+        *)          CONF_LEVEL=0 ;;
+    esac
+
     # Stack file check (optional field)
     STACK=$(get_field "stack")
     if [ -n "$STACK" ]; then
@@ -131,6 +141,24 @@ if [ -f "$PROJECT_DIR/METADATA.md" ]; then
                 warn "stack file missing: stack/${comp_lower}.md (declared in stack: $STACK)"
             fi
         done
+    fi
+fi
+echo ""
+
+# --- Conformity level announcement ---
+echo "Conformity level:"
+if [ "${CONF_LEVEL:-0}" -eq -1 ]; then
+    echo "  INFO  status: ARCHIVED — no enforcement"
+else
+    echo "  INFO  conformity level: ${STATUS:-UNKNOWN} (${CONF_LEVEL:-0})"
+fi
+
+# PROTOTYPE+ checks
+if [ "${CONF_LEVEL:-0}" -ge 1 ]; then
+    if [ -f "$PROJECT_DIR/AGENTS.md" ]; then
+        pass "AGENTS.md exists (required at PROTOTYPE+)"
+    else
+        warn "AGENTS.md missing (expected at PROTOTYPE+)"
     fi
 fi
 echo ""
