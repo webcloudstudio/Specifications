@@ -17,24 +17,31 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Auto-detect project from CWD if no argument given
-if [ "${1:-}" = "" ]; then
-    CWD_NAME="$(basename "$(pwd)")"
-    if [ "$(pwd)" = "$REPO_DIR/$CWD_NAME" ] && [ -d "$REPO_DIR/$CWD_NAME" ]; then
-        PROJECT_NAME="$CWD_NAME"
-    else
-        echo "Usage: bash bin/convert.sh <project-name>" >&2
-        echo "       Run without arguments from within a spec directory." >&2
+# Resolve project directory — accepts name, absolute path, relative path, or CWD
+_resolve_dir() {
+    local arg="$1"
+    if [[ "$arg" == /* ]]; then echo "$arg"
+    elif [[ "$arg" == ./* || "$arg" == ../* ]]; then cd "$arg" && pwd
+    elif [ -d "$REPO_DIR/$arg" ]; then echo "$REPO_DIR/$arg"
+    elif [ -d "$arg" ]; then cd "$arg" && pwd
+    else echo ""
+    fi
+}
+
+if [ "${1:-}" = "" ] || [[ "${1:-}" == --* ]]; then
+    PROJECT_DIR="$(pwd)"
+    shift || true
+else
+    PROJECT_DIR="$(_resolve_dir "$1")"
+    shift || true
+    if [ -z "$PROJECT_DIR" ]; then
+        echo "Usage: bash bin/convert.sh <project-name-or-path>" >&2
         exit 1
     fi
-else
-    PROJECT_NAME="$1"
-    shift || true
 fi
 
-PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 METADATA_FILE="$PROJECT_DIR/METADATA.md"
-CONVERT_FILE="$REPO_DIR/GLOBAL_RULES/CONVERT.md"
+CONVERT_FILE="$REPO_DIR/RulesEngine/CONVERT.md"
 
 if [ ! -f "$METADATA_FILE" ]; then
     echo "ERROR: METADATA.md not found at $METADATA_FILE" >&2
@@ -97,17 +104,17 @@ HEADER
 # --- Conversion Rules ---
 echo "# CONVERSION RULES"
 echo ""
-emit_file "$CONVERT_FILE" "CONVERT.md (GLOBAL_RULES/CONVERT.md)"
+emit_file "$CONVERT_FILE" "CONVERT.md (RulesEngine/CONVERT.md)"
 
 # --- Stack References ---
 echo "# STACK REFERENCES"
 echo ""
-emit_file "$REPO_DIR/GLOBAL_RULES/stack/common.md" "Common Practices"
+emit_file "$REPO_DIR/RulesEngine/stack/common.md" "Common Practices"
 
 for comp in "${COMPONENTS[@]}"; do
     comp_clean="$(echo "$comp" | tr -d ' ')"
     comp_lower="$(echo "$comp_clean" | tr '[:upper:]' '[:lower:]')"
-    stack_file="$REPO_DIR/GLOBAL_RULES/stack/${comp_lower}.md"
+    stack_file="$REPO_DIR/RulesEngine/stack/${comp_lower}.md"
     if [ -f "$stack_file" ]; then
         emit_file "$stack_file" "$comp (stack/${comp_lower}.md)"
     fi

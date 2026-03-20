@@ -2,72 +2,66 @@
 
 Platform standards and project specifications for AI-orchestrated development.
 
-## Purpose
+## Roles
 
-This repository has two distinct roles:
+1. **RulesEngine** (`RulesEngine/`) — agent behavior contract, stack patterns, branding, and spec templates. Distributed to all projects by `create_project.py` / `update_projects.sh`.
+2. **Project specifications** (`GAME/`, etc.) — concise specs (screens, features, architecture) that `build.sh` assembles into AI build prompts.
 
-1. **Global standards** (`GLOBAL_RULES/`) — the behavior contract, templates, tech patterns, and branding rules that every project consumes. Distributed to projects via `bin/create_project.py` and `bin/update_projects.sh`.
-2. **Project specifications** (`GAME/`, `AlexaPrototypeOne/`, etc.) — detailed specs for individual projects, organized by screen/component/architecture.
+Operational tasks (pushing repos, running services) live in GAME. This repo is the standards authority.
 
-Tooling in `bin/` enforces standards: creating projects, validating compliance, propagating rule changes, and generating build prompts. These are **specification-conforming operations** — they verify and shape projects against the global rules.
+## Workflow
 
-**Operational tasks** (pushing git repos, starting services, monitoring health) live in the GAME project, not here. GAME is the runtime dashboard; this repo is the standards authority.
+```bash
+# 1. Create a spec directory
+bash bin/setup.sh <ProjectName>
 
-## How It Works
+# 2. Validate it
+bash bin/validate.sh <ProjectName>
 
-`GLOBAL_RULES/CLAUDE_RULES.md` is the distributed behavior contract. Any AI agent given that file plus a project's spec files can build, operate, and maintain the project without additional context. Stack files in `GLOBAL_RULES/stack/` are prescriptive copy-paste patterns. GAME discovers and integrates all conforming projects by reading their METADATA.md and AGENTS.md.
+# 3. Build an AI prompt from the spec
+bash bin/build.sh <ProjectName> > build-prompt.md
+
+# 4. Promote to a live code project (run from GAME/)
+python3 bin/create_project.py <ProjectName>
+bash bin/update_projects.sh
+
+# 5. Regenerate agent rules after editing RulesEngine/BUSINESS_RULES.md
+bash bin/generate_claude_rules.sh > rules-prompt.md
+# Feed rules-prompt.md to an AI agent → paste output over RulesEngine/CLAUDE_RULES.md
+```
 
 ## Structure
 
 ```
 Specifications/
-  GLOBAL_RULES/                    Global standards (distributed to all projects)
-    CLAUDE_RULES.md                Agent behavior contract
-    DOCUMENTATION_BRANDING.md      Documentation theming and color system
+  RulesEngine/                     Agent rules, stack patterns, branding, spec templates
+    BUSINESS_RULES.md              Source for CLAUDE_RULES.md — edit here, then regenerate
+    CLAUDE_RULES.md                Generated agent behavior contract (injected into projects)
+    CONVERT.md                     Spec expansion rules (concise → detailed)
+    DOCUMENTATION_BRANDING.md      Color variables, typography, theme standards
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
-    templates/                     Canonical common.sh and common.py
-    gitignore                      Standard .gitignore for new projects
+    spec_template/                 Template files for setup.sh
+    templates/                     Canonical common.sh and common.py for code projects
+    gitignore                      Standard .gitignore distributed to projects
 
-  bin/                             Specification tooling
-    create_project.py              Scaffold new projects / update existing ones
-    validate_project.py            Compliance checker per status level
-    update_projects.sh             Push latest rules + templates to all set-up projects
-    generate_prompt.sh             Build complete AI build prompt from specs + stack
-    rebuild_index.sh               Regenerate browsable HTML indexes
-    build_documentation.sh/.py     Generate doc/ output
+  bin/                             Spec tooling (accept any directory: name, /abs, or ./rel)
+    setup.sh                       Scaffold or update a spec directory from templates
+    validate.sh                    Validate a spec directory for completeness and correctness
+    convert.sh                     Generate concise→detailed expansion prompt
+    build.sh                       Tag commit + generate complete build prompt
+    generate_claude_rules.sh       Regenerate CLAUDE_RULES.md from BUSINESS_RULES.md
+    test.sh                        Self-test the specification system
 
-  GAME/                            GAME project spec (SCREEN-*.md + ARCHITECTURE + DATABASE)
-  AlexaPrototypeOne/               Alexa prototype spec (01-OVERVIEW.md ... 11-STARTUP.md)
+  GAME/                            GAME project specification
+  data/                            HTML viewer templates (used by build_documentation.py)
+  doc/                             Generated documentation
   archive/                         Superseded documents — not current spec
-  doc/                             Generated documentation output
-```
-
-## Quick Start
-
-```bash
-# Create a new project
-python3 bin/create_project.py <name>
-
-# Push latest rules and templates to all set-up projects
-bash bin/update_projects.sh
-
-# Validate a project against compliance rules
-bash bin/validate_project.sh <name> --verbose
-
-# Build a complete AI build prompt for a project
-bash bin/generate_prompt.sh GAME > build-prompt.md
-
-# Scan all projects for compliance
-python3 bin/validate_project.py --projects ..
-
-# Regenerate browsable HTML index
-bash bin/rebuild_index.sh
 ```
 
 ## Key Conventions
 
-- **METADATA.md** — Line-based `key: value` format (not YAML). Single source of project identity.
-- **AGENTS.md** — AI context file. Each project's CLAUDE.md is a bare pointer: `@AGENTS.md`.
-- **GLOBAL_RULES/templates/** — Canonical `common.sh` and `common.py` distributed to all projects. Reads PORT and PROJECT_NAME from METADATA.md.
-- **$PROJECTS_DIR/.secrets** — Global API keys. Per-project overrides in `.env`.
-- **Version format** — `YYYY-MM-DD.N` (e.g., `2026-03-13.2`).
+- **METADATA.md** — `key: value` format (not YAML). Single source of project identity.
+- **AGENTS.md** — AI context file. Each project's `CLAUDE.md` is a bare `@AGENTS.md` pointer.
+- **BUSINESS_RULES.md** — Edit rules here; never edit `CLAUDE_RULES.md` directly.
+- **RulesEngine/stack/** — One prescriptive `.md` per technology. Referenced by build and convert prompts.
+- **Version format** — `YYYY-MM-DD.N` (e.g., `2026-03-20.1`).

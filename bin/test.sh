@@ -47,50 +47,50 @@ assert_contains() {
 echo "=== Specification System Tests ==="
 echo ""
 
-# --- Global rules ---
-echo "Global rules:"
-assert_file "GLOBAL_RULES/CLAUDE_RULES.md"
-assert_file "GLOBAL_RULES/CONVERT.md"
-assert_file "GLOBAL_RULES/DOCUMENTATION_BRANDING.md"
-assert_contains "GLOBAL_RULES/CLAUDE_RULES.md" "CLAUDE_RULES_START"
-assert_contains "GLOBAL_RULES/CLAUDE_RULES.md" "CLAUDE_RULES_END"
-assert_contains "GLOBAL_RULES/CLAUDE_RULES.md" "do not edit directly"
-assert_file "GLOBAL_RULES/BUSINESS_RULES.md"
-assert_contains "GLOBAL_RULES/BUSINESS_RULES.md" "Conformity Levels"
-assert_contains "GLOBAL_RULES/BUSINESS_RULES.md" "Rule text:"
-assert_contains "GLOBAL_RULES/CONVERT.md" "Expansion Principles"
+# --- Rules Engine ---
+echo "Rules Engine:"
+assert_file "RulesEngine/CLAUDE_RULES.md"
+assert_file "RulesEngine/CONVERT.md"
+assert_file "RulesEngine/DOCUMENTATION_BRANDING.md"
+assert_file "RulesEngine/BUSINESS_RULES.md"
+assert_contains "RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES_START"
+assert_contains "RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES_END"
+assert_contains "RulesEngine/CLAUDE_RULES.md" "do not edit directly"
+assert_contains "RulesEngine/BUSINESS_RULES.md" "Conformity Levels"
+assert_contains "RulesEngine/BUSINESS_RULES.md" "Rule text:"
+assert_contains "RulesEngine/CONVERT.md" "Expansion Principles"
 echo ""
 
 # --- Stack files ---
 echo "Stack files:"
-assert_file "GLOBAL_RULES/stack/common.md"
-assert_file "GLOBAL_RULES/stack/python.md"
-assert_file "GLOBAL_RULES/stack/flask.md"
-assert_file "GLOBAL_RULES/stack/sqlite.md"
-assert_file "GLOBAL_RULES/stack/bootstrap5.md"
+assert_file "RulesEngine/stack/common.md"
+assert_file "RulesEngine/stack/python.md"
+assert_file "RulesEngine/stack/flask.md"
+assert_file "RulesEngine/stack/sqlite.md"
+assert_file "RulesEngine/stack/bootstrap5.md"
 echo ""
 
 # --- Spec templates ---
 echo "Spec templates:"
-assert_file "GLOBAL_RULES/spec_template/METADATA.md"
-assert_file "GLOBAL_RULES/spec_template/README.md"
-assert_file "GLOBAL_RULES/spec_template/INTENT.md"
-assert_file "GLOBAL_RULES/spec_template/ARCHITECTURE.md"
-assert_file "GLOBAL_RULES/spec_template/DATABASE.md"
-assert_file "GLOBAL_RULES/spec_template/UI.md"
-assert_file "GLOBAL_RULES/spec_template/SCREEN-Example.md"
-assert_file "GLOBAL_RULES/spec_template/FEATURE-Example.md"
-assert_contains "GLOBAL_RULES/spec_template/METADATA.md" "__PROJECT_NAME__"
-assert_contains "GLOBAL_RULES/spec_template/METADATA.md" "__PROJECT_SLUG__"
+assert_file "RulesEngine/spec_template/METADATA.md"
+assert_file "RulesEngine/spec_template/README.md"
+assert_file "RulesEngine/spec_template/INTENT.md"
+assert_file "RulesEngine/spec_template/ARCHITECTURE.md"
+assert_file "RulesEngine/spec_template/DATABASE.md"
+assert_file "RulesEngine/spec_template/UI.md"
+assert_file "RulesEngine/spec_template/SCREEN-Example.md"
+assert_file "RulesEngine/spec_template/FEATURE-Example.md"
+assert_contains "RulesEngine/spec_template/METADATA.md" "__PROJECT_NAME__"
+assert_contains "RulesEngine/spec_template/METADATA.md" "__PROJECT_SLUG__"
 echo ""
 
 # --- Bin scripts ---
 echo "Bin scripts:"
-for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh bin/generate_claude_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh bin/generate_claude_rules.sh; do
     assert_file "$script"
 done
 # Verify CommandCenter headers
-for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
     assert_contains "$script" "CommandCenter Operation"
     assert_contains "$script" "# Name:"
     assert_contains "$script" "# Category:"
@@ -99,7 +99,7 @@ echo ""
 
 # --- Script executability ---
 echo "Script executability:"
-for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
     assert "$script is executable" test -x "$script"
 done
 echo ""
@@ -119,8 +119,8 @@ if [ -d "$TEST_DIR" ]; then
 fi
 
 # Create a test project
-bash bin/setup_prototype.sh __test_project__ "Test project for validation" > /dev/null 2>&1
-assert "setup_prototype.sh creates directory" test -d "$TEST_DIR"
+bash bin/setup.sh __test_project__ > /dev/null 2>&1
+assert "setup.sh creates directory" test -d "$TEST_DIR"
 assert "created METADATA.md" test -f "$TEST_DIR/METADATA.md"
 assert "created README.md" test -f "$TEST_DIR/README.md"
 assert "created INTENT.md" test -f "$TEST_DIR/INTENT.md"
@@ -131,6 +131,9 @@ assert_contains "$TEST_DIR/README.md" "Test Project"
 
 # Validate should pass (with warnings for template placeholders)
 assert "validate.sh runs without error" bash bin/validate.sh __test_project__
+
+# Test --update mode on existing directory
+assert "setup.sh --update on existing dir succeeds" bash bin/setup.sh __test_project__ --update
 
 # Clean up
 rm -rf "$TEST_DIR"

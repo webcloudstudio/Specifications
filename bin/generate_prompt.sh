@@ -70,14 +70,14 @@ $(for comp in "${COMPONENTS[@]}"; do echo "- $comp"; done)
 HEADER
 
 # --- CLAUDE_RULES.md ---
-if [ -f "$REPO_DIR/GLOBAL_RULES/CLAUDE_RULES.md" ]; then
+if [ -f "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" ]; then
     echo "# PROJECT INTEGRATION STANDARD"
     echo ""
     echo "---"
     echo ""
     echo "## CLAUDE_RULES.md"
     echo ""
-    cat "$REPO_DIR/GLOBAL_RULES/CLAUDE_RULES.md"
+    cat "$REPO_DIR/RulesEngine/CLAUDE_RULES.md"
     echo ""
     echo ""
 fi
@@ -101,17 +101,17 @@ emit_file() {
 }
 
 # Always include common.md first
-emit_file "$REPO_DIR/GLOBAL_RULES/stack/common.md" "Common Practices (GLOBAL_RULES/stack/common.md)"
+emit_file "$REPO_DIR/RulesEngine/stack/common.md" "Common Practices (RulesEngine/stack/common.md)"
 
 # Emit each stack component's reference file
 for comp in "${COMPONENTS[@]}"; do
     comp_clean="$(echo "$comp" | tr -d ' ')"
     comp_lower="$(echo "$comp_clean" | tr '[:upper:]' '[:lower:]')"
-    stack_file="$REPO_DIR/GLOBAL_RULES/stack/${comp_lower}.md"
+    stack_file="$REPO_DIR/RulesEngine/stack/${comp_lower}.md"
     if [ -f "$stack_file" ]; then
-        emit_file "$stack_file" "$comp (GLOBAL_RULES/stack/${comp_lower}.md)"
+        emit_file "$stack_file" "$comp (RulesEngine/stack/${comp_lower}.md)"
     else
-        echo "<!-- WARNING: No stack file for '$comp' (expected GLOBAL_RULES/stack/${comp_lower}.md) -->"
+        echo "<!-- WARNING: No stack file for '$comp' (expected RulesEngine/stack/${comp_lower}.md) -->"
         echo ""
     fi
 done

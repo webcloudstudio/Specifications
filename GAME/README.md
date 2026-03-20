@@ -39,11 +39,11 @@ Standard workflow benefits any Technical Product Owner:
 - **Frontend:** Bootstrap 5 (dark theme, CDN)
 - **Port:** 5001
 
-Each stack component maps to a prescriptive reference file in `../GLOBAL_RULES/stack/`.
+Each stack component maps to a prescriptive reference file in `../RulesEngine/stack/`.
 
 ## Specifications
 
-All project integration standards are defined in `../GLOBAL_RULES/CLAUDE_RULES.md`.
+All project integration standards are defined in `../RulesEngine/CLAUDE_RULES.md`.
 
 | Document | Answers |
 |----------|---------|

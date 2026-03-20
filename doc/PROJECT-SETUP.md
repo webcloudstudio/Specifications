@@ -3,7 +3,7 @@
 **Version:** 20260320 V1  
 **Description:** Guide to spec directory structure, required files, and file naming conventions
 
-A spec directory is a self-contained project description — concise enough to fit in a single build prompt, structured enough for an AI agent to implement from. Run `bin/setup_prototype.sh <ProjectName>` to scaffold the directory. Edit the four required files first, then add conditional files as the design takes shape. Delete anything that doesn't apply.
+A spec directory is a self-contained project description — concise enough to fit in a single build prompt, structured enough for an AI agent to implement from. Run `bin/setup.sh <ProjectName>` to scaffold the directory. Edit the four required files first, then add conditional files as the design takes shape. Delete anything that doesn't apply.
 
 ## Required Files
 
@@ -30,14 +30,14 @@ Add what applies. Delete the rest.
 - All spec files except README, METADATA, and INTENT end with `## Open Questions`
 - File names use uppercase with hyphens: `SCREEN-Dashboard.md`, `FEATURE-Scan.md`
 - Write concise specs (tables, bullets). CONVERT.md rules expand them during conversion.
-- Stack-specific patterns come from `GLOBAL_RULES/stack/` files — don't repeat them in specs.
+- Stack-specific patterns come from `RulesEngine/stack/` files — don't repeat them in specs.
 
 ## Global Rules
 
 ```
-GLOBAL_RULES/
+RulesEngine/
   CONVERT.md           How concise specs expand into detailed specs
   CLAUDE_RULES.md      Agent behavior contract (injected into projects)
   stack/               Technology patterns (flask.md, sqlite.md, ...)
-  spec_template/       Template files used by setup_prototype.sh
+  spec_template/       Template files used by setup.sh
 ```

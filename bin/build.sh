@@ -23,32 +23,41 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Auto-detect project from CWD if first arg is missing or is a flag
-if [ "${1:-}" = "" ] || [[ "${1:-}" == --* ]]; then
-    CWD_NAME="$(basename "$(pwd)")"
-    if [ "$(pwd)" = "$REPO_DIR/$CWD_NAME" ] && [ -d "$REPO_DIR/$CWD_NAME" ]; then
-        PROJECT_NAME="$CWD_NAME"
-    else
-        echo "Usage: bash bin/build.sh <project-name> [--no-tag|--tag-only]" >&2
-        echo "       Run without arguments from within a spec directory." >&2
-        exit 1
+# Resolve project directory — accepts name, absolute path, relative path, or CWD
+_resolve_dir() {
+    local arg="$1"
+    if [[ "$arg" == /* ]]; then echo "$arg"
+    elif [[ "$arg" == ./* || "$arg" == ../* ]]; then cd "$arg" && pwd
+    elif [ -d "$REPO_DIR/$arg" ]; then echo "$REPO_DIR/$arg"
+    elif [ -d "$arg" ]; then cd "$arg" && pwd
+    else echo ""
     fi
-else
-    PROJECT_NAME="$1"
-    shift || true
-fi
-
-PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
-METADATA_FILE="$PROJECT_DIR/METADATA.md"
+}
 
 TAG_ONLY=false
 NO_TAG=false
+POSITIONAL=""
 for arg in "$@"; do
     case "$arg" in
         --tag-only) TAG_ONLY=true ;;
         --no-tag)   NO_TAG=true ;;
+        --*)        ;;
+        *)          [ -z "$POSITIONAL" ] && POSITIONAL="$arg" ;;
     esac
 done
+
+if [ -z "$POSITIONAL" ]; then
+    PROJECT_DIR="$(pwd)"
+else
+    PROJECT_DIR="$(_resolve_dir "$POSITIONAL")"
+    if [ -z "$PROJECT_DIR" ]; then
+        echo "Usage: bash bin/build.sh <project-name-or-path> [--no-tag|--tag-only]" >&2
+        exit 1
+    fi
+fi
+
+PROJECT_NAME="$(basename "$PROJECT_DIR")"
+METADATA_FILE="$PROJECT_DIR/METADATA.md"
 
 if [ ! -f "$METADATA_FILE" ]; then
     echo "ERROR: METADATA.md not found at $METADATA_FILE" >&2
@@ -57,7 +66,8 @@ fi
 
 # --- Check for uncommitted changes in project directory ---
 cd "$REPO_DIR"
-if [ -n "$(git status --porcelain -- "$PROJECT_NAME/")" ]; then
+REL_PATH="$(realpath --relative-to="$REPO_DIR" "$PROJECT_DIR" 2>/dev/null || echo "$PROJECT_NAME")"
+if [ -n "$(git status --porcelain -- "$REL_PATH/" 2>/dev/null || true)" ]; then
     echo "WARNING: Uncommitted changes in $PROJECT_NAME/. Commit before building for a clean tag." >&2
     echo "         Proceeding anyway — tag will point to current HEAD." >&2
     echo "" >&2
@@ -102,7 +112,7 @@ fi
 
 # --- Generate build prompt (reuse generate_prompt.sh logic) ---
 # Include CONVERT.md in the build prompt so the AI can expand concise specs inline
-CONVERT_FILE="$REPO_DIR/GLOBAL_RULES/CONVERT.md"
+CONVERT_FILE="$REPO_DIR/RulesEngine/CONVERT.md"
 
 get_metadata() {
     grep "^${1}:" "$METADATA_FILE" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//" | tr -d '\r'
@@ -165,25 +175,25 @@ HEADER
 if [ -f "$CONVERT_FILE" ]; then
     echo "# CONVERSION RULES"
     echo ""
-    emit_file "$CONVERT_FILE" "CONVERT.md (GLOBAL_RULES/CONVERT.md)"
+    emit_file "$CONVERT_FILE" "CONVERT.md (RulesEngine/CONVERT.md)"
 fi
 
 # --- CLAUDE_RULES.md ---
-if [ -f "$REPO_DIR/GLOBAL_RULES/CLAUDE_RULES.md" ]; then
+if [ -f "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" ]; then
     echo "# PROJECT INTEGRATION STANDARD"
     echo ""
-    emit_file "$REPO_DIR/GLOBAL_RULES/CLAUDE_RULES.md" "CLAUDE_RULES.md"
+    emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
 fi
 
 # --- Technology Files ---
 echo "# TECHNOLOGY REFERENCES"
 echo ""
-emit_file "$REPO_DIR/GLOBAL_RULES/stack/common.md" "Common Practices (stack/common.md)"
+emit_file "$REPO_DIR/RulesEngine/stack/common.md" "Common Practices (stack/common.md)"
 
 for comp in "${COMPONENTS[@]}"; do
     comp_clean="$(echo "$comp" | tr -d ' ')"
     comp_lower="$(echo "$comp_clean" | tr '[:upper:]' '[:lower:]')"
-    stack_file="$REPO_DIR/GLOBAL_RULES/stack/${comp_lower}.md"
+    stack_file="$REPO_DIR/RulesEngine/stack/${comp_lower}.md"
     if [ -f "$stack_file" ]; then
         emit_file "$stack_file" "$comp (stack/${comp_lower}.md)"
     else

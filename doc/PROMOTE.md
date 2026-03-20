@@ -51,7 +51,7 @@ what gets created:
     METADATA.md          name, display_name, port, short_description, version
     CLAUDE.md            @AGENTS.md  (pointer only)
     AGENTS.md            Dev Commands + Service Endpoints + Bookmarks + CLAUDE_RULES block
-    .gitignore           Standard ignore rules from GLOBAL_RULES/gitignore
+    .gitignore           Standard ignore rules from RulesEngine/gitignore
     .env.sample          Placeholder for required environment variables
     index.html           Redirect to doc/index.html
     bin/
@@ -87,7 +87,7 @@ Preview first with `--dry-run`.
 bash bin/update_projects.sh
 ```
 
-Propagates the latest `GLOBAL_RULES/` files (CLAUDE_RULES.md, common.sh, common.py,
+Propagates the latest `RulesEngine/` files (CLAUDE_RULES.md, common.sh, common.py,
 index.html) to every set-up project. Run after any change to global standards.
 
 ```bash

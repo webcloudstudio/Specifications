@@ -20,11 +20,11 @@ BIN_DIR = PROJECT_DIR / "bin"
 
 SKIP_DIRS = {
     '__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates',
-    'doc', 'logs', 'GLOBAL_RULES',
+    'doc', 'logs', 'data', 'RulesEngine',
 }
 
 # Scripts that appear in the sidebar as Workflow Scripts (in this order)
-WF_SCRIPTS = ['setup_prototype.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
+WF_SCRIPTS = ['setup.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
 
 # Scripts that appear as indented children of another script in Other Scripts
 SCRIPT_CHILDREN = {
@@ -33,11 +33,12 @@ SCRIPT_CHILDREN = {
 
 # Human-readable descriptions override auto-detected ones
 SCRIPT_DESCRIPTIONS = {
-    'setup_prototype.sh':      'Scaffold a new spec directory from templates',
+    'setup.sh':                'Scaffold a new spec directory from templates (or update existing)',
     'validate.sh':             'Check a spec directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise spec files',
     'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
     'generate_prompt.sh':      'Generate a build prompt without creating a git tag (legacy)',
+    'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
@@ -166,9 +167,9 @@ def generate_indexes():
     (PROJECT_DIR / 'index.html').write_text(root_html, encoding='utf-8')
     print('  Generated index.html (redirect)')
 
-    template_path = PROJECT_DIR / '_project_index_template.html'
+    template_path = PROJECT_DIR / 'data' / '_project_index_template.html'
     if not template_path.exists():
-        print('  Skipping project viewers: _project_index_template.html not found')
+        print('  Skipping project viewers: data/_project_index_template.html not found')
         return
     template = template_path.read_text(encoding='utf-8')
 

@@ -627,5 +627,5 @@ A project earns platform capabilities by adding files (contract-earns-capability
 | DATABASE.md | This directory | Schema definition |
 | UI-GENERAL.md | This directory | Shared UI patterns |
 | SCREEN-*.md | This directory | Per-screen specifications |
-| CLAUDE_RULES.md | `../GLOBAL_RULES/CLAUDE_RULES.md` | Agent behavior contract |
-| DOCUMENTATION_BRANDING.md | `../GLOBAL_RULES/DOCUMENTATION_BRANDING.md` | Documentation theming standards |
+| CLAUDE_RULES.md | `../RulesEngine/CLAUDE_RULES.md` | Agent behavior contract |
+| DOCUMENTATION_BRANDING.md | `../RulesEngine/DOCUMENTATION_BRANDING.md` | Documentation theming standards |

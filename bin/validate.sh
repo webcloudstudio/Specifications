@@ -4,14 +4,17 @@
 # Category: maintenance
 
 # Validates a specification directory for completeness and correctness.
+# Works on any directory — not limited to Specifications subdirectories.
 #
 # Usage:
-#   bash bin/validate.sh <project-name>           # from repo root
-#   bash bin/validate.sh                           # from within project directory
+#   bash bin/validate.sh <project-name>           # name relative to this repo root
+#   bash bin/validate.sh /abs/path/to/project     # absolute path
+#   bash bin/validate.sh ./relative/path          # relative to CWD
+#   bash bin/validate.sh                           # validate CWD
 #   bash bin/validate.sh <project-name> --verbose
 #
 # Arguments:
-#   $1        Project name (optional — auto-detected from CWD)
+#   $1        Directory to validate (name, path, or CWD default)
 #   --verbose Show passing checks too (default: errors and warnings only)
 #
 # Exit codes:
@@ -24,36 +27,52 @@
 #   - INTENT.md is not empty / still has template placeholder
 #   - Naming conventions (SCREEN-*, FEATURE-* prefixes)
 #   - Open Questions section exists in applicable files (not README, METADATA, INTENT)
-#   - Stack files exist in GLOBAL_RULES/stack/ if stack: is declared
+#   - Stack files exist in RulesEngine/stack/ if stack: is declared
 #   - No example template files left (SCREEN-Example.md, FEATURE-Example.md)
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RULES_DIR="$REPO_DIR/RulesEngine"
 
-# Auto-detect project from CWD if no argument given
-if [ "${1:-}" = "" ] || [[ "${1:-}" == --* ]]; then
-    CWD_NAME="$(basename "$(pwd)")"
-    if [ "$(pwd)" = "$REPO_DIR/$CWD_NAME" ] && [ -d "$REPO_DIR/$CWD_NAME" ]; then
-        PROJECT_NAME="$CWD_NAME"
+# --- Resolve project directory ---
+# Accepts: no arg (CWD), absolute path, relative path (./ or ../), or project name
+_resolve_dir() {
+    local arg="$1"
+    if [[ "$arg" == /* ]]; then
+        echo "$arg"
+    elif [[ "$arg" == ./* || "$arg" == ../* ]]; then
+        cd "$arg" && pwd
+    elif [ -d "$REPO_DIR/$arg" ]; then
+        echo "$REPO_DIR/$arg"
+    elif [ -d "$arg" ]; then
+        cd "$arg" && pwd
     else
-        echo "Usage: bash bin/validate.sh <project-name> [--verbose]" >&2
-        echo "       Run without arguments from within a spec directory." >&2
-        exit 1
+        echo ""
     fi
-else
-    PROJECT_NAME="$1"
-    shift || true
-fi
+}
 
-PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 VERBOSE=false
-
+POSITIONAL=""
 for arg in "$@"; do
     case "$arg" in
         --verbose) VERBOSE=true ;;
+        --*)       ;;  # ignore unknown flags
+        *)         [ -z "$POSITIONAL" ] && POSITIONAL="$arg" ;;
     esac
 done
+
+if [ -z "$POSITIONAL" ]; then
+    PROJECT_DIR="$(pwd)"
+else
+    PROJECT_DIR="$(_resolve_dir "$POSITIONAL")"
+    if [ -z "$PROJECT_DIR" ]; then
+        echo "ERROR: Directory not found: $POSITIONAL" >&2
+        exit 1
+    fi
+fi
+
+PROJECT_NAME="$(basename "$PROJECT_DIR")"
 
 if [ ! -d "$PROJECT_DIR" ]; then
     echo "ERROR: Directory not found: $PROJECT_DIR" >&2
@@ -79,7 +98,7 @@ fail() {
     ERRORS=$((ERRORS + 1))
 }
 
-echo "Validating: $PROJECT_NAME"
+echo "Validating: $PROJECT_NAME ($PROJECT_DIR)"
 echo ""
 
 # --- Required files ---
@@ -95,6 +114,8 @@ echo ""
 
 # --- METADATA.md fields ---
 echo "METADATA.md fields:"
+CONF_LEVEL=0
+STATUS=""
 if [ -f "$PROJECT_DIR/METADATA.md" ]; then
     get_field() {
         grep "^${1}:" "$PROJECT_DIR/METADATA.md" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//" | tr -d '\r' || true
@@ -134,11 +155,11 @@ if [ -f "$PROJECT_DIR/METADATA.md" ]; then
         IFS='/' read -ra COMPONENTS <<< "$STACK"
         for comp in "${COMPONENTS[@]}"; do
             comp_lower="$(echo "$comp" | tr -d ' ' | tr '[:upper:]' '[:lower:]')"
-            stack_file="$REPO_DIR/GLOBAL_RULES/stack/${comp_lower}.md"
+            stack_file="$RULES_DIR/stack/${comp_lower}.md"
             if [ -f "$stack_file" ]; then
-                pass "stack file exists: stack/${comp_lower}.md"
+                pass "stack file exists: RulesEngine/stack/${comp_lower}.md"
             else
-                warn "stack file missing: stack/${comp_lower}.md (declared in stack: $STACK)"
+                warn "stack file missing: RulesEngine/stack/${comp_lower}.md (declared in stack: $STACK)"
             fi
         done
     fi
@@ -147,14 +168,14 @@ echo ""
 
 # --- Conformity level announcement ---
 echo "Conformity level:"
-if [ "${CONF_LEVEL:-0}" -eq -1 ]; then
+if [ "${CONF_LEVEL}" -eq -1 ]; then
     echo "  INFO  status: ARCHIVED — no enforcement"
 else
-    echo "  INFO  conformity level: ${STATUS:-UNKNOWN} (${CONF_LEVEL:-0})"
+    echo "  INFO  conformity level: ${STATUS:-UNKNOWN} (${CONF_LEVEL})"
 fi
 
 # PROTOTYPE+ checks
-if [ "${CONF_LEVEL:-0}" -ge 1 ]; then
+if [ "${CONF_LEVEL}" -ge 1 ]; then
     if [ -f "$PROJECT_DIR/AGENTS.md" ]; then
         pass "AGENTS.md exists (required at PROTOTYPE+)"
     else
