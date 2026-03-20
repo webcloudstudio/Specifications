@@ -4,6 +4,7 @@
 # Category: maintenance
 """
 Build doc/index.html — single-page documentation for the Prototyper system.
+Also rebuilds root index.html (redirect) and per-project index.html viewers.
 
 Layout: sidebar (dark chrome) + content (light).
 Default view: Workflow pipeline.
@@ -25,6 +26,11 @@ SKIP_DIRS = {
 # Scripts that appear in the sidebar as Workflow Scripts (in this order)
 WF_SCRIPTS = ['create_spec.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
 
+# Scripts that appear as indented children of another script in Other Scripts
+SCRIPT_CHILDREN = {
+    'build_documentation.sh': ['build_documentation.py'],
+}
+
 # Human-readable descriptions override auto-detected ones
 SCRIPT_DESCRIPTIONS = {
     'create_spec.sh':          'Scaffold a new spec directory from templates',
@@ -32,7 +38,6 @@ SCRIPT_DESCRIPTIONS = {
     'convert.sh':              'Generate an AI expansion prompt from concise spec files',
     'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
     'generate_prompt.sh':      'Generate a build prompt without creating a git tag (legacy)',
-    'rebuild_index.sh':        'Rebuild the standalone HTML spec viewers (GAME/index.html etc.)',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
@@ -69,7 +74,8 @@ def discover_scripts():
                         elif line.startswith('# Category:'):
                             category = line.split(':', 1)[1].strip()
                         elif line.startswith('#') and stripped:
-                            detail_lines.append(stripped)
+                            # Preserve indentation — lstrip('#') only, not .strip()
+                            detail_lines.append(line.lstrip('#'))
                     else:
                         in_header = False
                 # Python docstring
@@ -78,8 +84,8 @@ def discover_scripts():
                     desc = inline if inline else (lines[i + 1].strip() if i + 1 < len(lines) else '')
             label = cc_name or path.stem.replace('_', ' ').title()
             if not desc and detail_lines:
-                desc = detail_lines[0]
-            details = '\n'.join(l for l in detail_lines if l).strip()
+                desc = detail_lines[0].strip()
+            details = '\n'.join(detail_lines).strip()
             desc = SCRIPT_DESCRIPTIONS.get(path.name, desc or label)
             scripts.append({
                 'file': path.name, 'label': label,
@@ -139,6 +145,54 @@ def discover_guides():
     return guides
 
 
+# ── Generate per-project and root index.html files ───────────────────────────
+
+def generate_indexes():
+    """Rebuild root index.html (redirect) and per-project index.html viewers."""
+    # Root redirect
+    root_html = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n'
+                 '<meta http-equiv="refresh" content="0; url=doc/index.html">\n'
+                 '<title>Prototyper — Redirecting...</title>\n</head>\n<body>\n'
+                 '<p>Redirecting to <a href="doc/index.html">Prototyper Documentation</a>...</p>\n'
+                 '</body>\n</html>')
+    (PROJECT_DIR / 'index.html').write_text(root_html, encoding='utf-8')
+    print('  Generated index.html (redirect)')
+
+    template_path = PROJECT_DIR / '_project_index_template.html'
+    if not template_path.exists():
+        print('  Skipping project viewers: _project_index_template.html not found')
+        return
+    template = template_path.read_text(encoding='utf-8')
+
+    for entry in sorted(PROJECT_DIR.iterdir()):
+        if not entry.is_dir() or entry.name.startswith('.') or entry.name.startswith('Proposed'):
+            continue
+        if entry.name in SKIP_DIRS:
+            continue
+        meta_path = entry / 'METADATA.md'
+        if not meta_path.exists():
+            continue
+        fields = read_meta(meta_path)
+        if fields.get('type', '').lower() in ('build', 'build-artifact'):
+            continue
+
+        docs = {}
+        for md_file in sorted(entry.glob('*.md')):
+            if md_file.stem.startswith('PROPOSED') or md_file.stem.startswith('UNUSED'):
+                continue
+            docs[md_file.stem] = md_file.read_text(encoding='utf-8')
+
+        docs_js = 'const DOCS = {\n' + ''.join(
+            f'  {json.dumps(k)}: {json.dumps(v)},\n' for k, v in docs.items()
+        ) + '};'
+
+        display_name = fields.get('display_name') or fields.get('name') or entry.name
+        page_html = template.replace('<!-- PROJECT_NAME -->', display_name)
+        page_html = page_html.replace('const DOCS = {};', docs_js)
+        (entry / 'index.html').write_text(page_html, encoding='utf-8')
+        print(f'  Generated {entry.name}/index.html ({len(docs)} docs)')
+
+
 # ── Build HTML ────────────────────────────────────────────────────────────────
 
 def build_page(scripts, projects, guides):
@@ -189,54 +243,74 @@ def build_page(scripts, projects, guides):
                      f'onclick="showProject(\'{h.escape(p["name"])}\', \'{url}\')">'
                      f'{h.escape(p["display"])}</a>\n')
 
-    # ── Pipeline (7 steps) ────────────────────────────────────────────────────
-    pip_steps = [
-        ('Create', 'create_spec.sh'),
-        ('Write', 'spec files'),
-        ('Validate', 'validate.sh'),
-        ('Convert', 'convert.sh'),
-        ('Build', 'build.sh'),
-        ('Iterate', 'edit → validate → build'),
-        ('Promote', 'create_project.py'),
-    ]
-    pip_html = ''
-    for i, (label, cmd) in enumerate(pip_steps):
-        if i > 0:
-            pip_html += '<span class="pip-arr">&#8594;</span>'
-        pip_html += (f'<div class="pip-step">'
-                     f'<span class="pl">{h.escape(label)}</span>'
-                     f'<span class="pc">{h.escape(cmd)}</span>'
-                     f'</div>')
+    # ── Two-row workflow diagram ───────────────────────────────────────────────
+    def wf_box(label, script='', path='', terminal=False):
+        cls = 'wf-box wf-terminal' if terminal else 'wf-box'
+        inner = f'<span class="wf-label">{h.escape(label)}</span>'
+        if script:
+            inner += f'<span class="wf-script">{h.escape(script)}</span>'
+        if path:
+            inner += f'<span class="wf-path">{h.escape(path)}</span>'
+        return f'<div class="{cls}">{inner}</div>'
 
-    # ── Workflow steps table ──────────────────────────────────────────────────
+    ARR = '<span class="wf-arr">&#8594;</span>'
+    DOWN = '<span class="wf-arr">&#8595;</span>'
+
+    row1 = ARR.join([
+        wf_box('Create', 'create_spec.sh', './<PROJECT>'),
+        wf_box('Validate', 'validate.sh'),
+        wf_box('Convert', 'convert.sh'),
+        wf_box('Build', 'build.sh'),
+        wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
+    ])
+    row2 = ARR.join([
+        wf_box('Promote', 'create_project.py'),
+        wf_box('../<PROJECT>', terminal=True),
+    ])
+
+    wf_diagram = (f'<div class="wf-diagram">'
+                  f'<div class="wf-row">{row1}</div>'
+                  f'<div class="wf-row-r">{DOWN}</div>'
+                  f'<div class="wf-row-r">{row2}</div>'
+                  f'</div>')
+
+    # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
-        (1, 'bin/create_spec.sh &lt;Project&gt;', True, 'Scaffold spec directory from templates'),
-        (2, '(edit spec files)', False, 'Write concise specs: INTENT, ARCHITECTURE, SCREEN-*, FEATURE-*'),
-        (3, 'bin/validate.sh &lt;Project&gt;', True, 'Check required files, naming, fields — exit 0 = ready'),
-        (4, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', True, 'Expand to detailed specs with AI — optional'),
-        (5, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', True, 'Tag commit, generate build prompt — feed to AI agent'),
-        (6, '(edit → validate → build)', False, 'Repeat until the spec is complete'),
-        (7, 'python3 bin/create_project.py &lt;Project&gt;', True, 'Scaffold code project — run from GAME/'),
+        (1, 'bin/create_spec.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
+        (2, 'bin/validate.sh &lt;Project&gt;', 'Check required files, naming, fields — exit 0 = ready'),
+        (3, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', 'Expand to detailed specs with AI — optional'),
+        (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Tag commit, generate build prompt — feed to AI agent'),
+        (5, 'python3 bin/create_project.py &lt;Project&gt;', 'Scaffold code project — run from GAME/'),
     ]
     wf_rows = ''
-    for n, cmd, is_code, desc in wf_step_data:
-        cmd_cell = f'<code>{cmd}</code>' if is_code else cmd
-        row_class = '' if is_code else ' class="wedit"'
-        wf_rows += f'<tr{row_class}><td class="wn">{n}</td><td class="wcmd">{cmd_cell}</td><td class="wdesc">{desc}</td></tr>\n'
+    for n, cmd, desc in wf_step_data:
+        wf_rows += f'<tr><td class="wn">{n}</td><td class="wcmd"><code>{cmd}</code></td><td class="wdesc">{desc}</td></tr>\n'
 
-    # ── Other scripts (non-workflow, shown on Workflow page) ──────────────────
-    def sc_entry(s):
+    # ── Other scripts (with child support) ───────────────────────────────────
+    all_children = {c for kids in SCRIPT_CHILDREN.values() for c in kids}
+    scripts_by_file = {s['file']: s for s in scripts}
+
+    def sc_entry(s, child=False):
         sid = s['file'].replace('.', '-')
         if s.get('details'):
             detail = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
             toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
         else:
             detail = toggle = ''
-        return (f'<div class="sc-entry"><div class="sc-head">{toggle}'
+        extra = ' sc-child' if child else ''
+        return (f'<div class="sc-entry{extra}"><div class="sc-head">{toggle}'
                 f'<code class="sc-name">{h.escape(s["file"])}</code>'
                 f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>{detail}</div>\n')
 
-    other_html = f'<div class="sc-group">{"".join(sc_entry(s) for s in other_scripts)}</div>'
+    other_parts = []
+    for s in other_scripts:
+        if s['file'] in all_children:
+            continue
+        other_parts.append(sc_entry(s))
+        for child_file in SCRIPT_CHILDREN.get(s['file'], []):
+            if child_file in scripts_by_file:
+                other_parts.append(sc_entry(scripts_by_file[child_file], child=True))
+    other_html = f'<div class="sc-group">{"".join(other_parts)}</div>'
 
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -292,14 +366,22 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 #project.active {{ display: flex; }}
 #project-frame {{ flex: 1; border: none; width: 100%; height: 100%; display: block; }}
 
-/* ── Pipeline ── */
-.pipeline {{ display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 20px; }}
-.pip-step {{ background: var(--c-side-bg); border: 1px solid var(--c-side-border);
-  border-radius: 4px; padding: 4px 10px; text-align: center; }}
-.pip-step .pl {{ font-size: 11.5px; color: #fff; font-weight: 600; white-space: nowrap; display: block; }}
-.pip-step .pc {{ font-size: 10px; color: var(--c-side-section);
-  font-family: 'Cascadia Code', Consolas, monospace; display: block; }}
-.pip-arr {{ color: var(--c-side-section); padding: 0 5px; font-size: 14px; line-height: 1; }}
+/* ── Two-row workflow diagram ── */
+.wf-diagram {{ display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }}
+.wf-row {{ display: flex; align-items: stretch; flex-wrap: nowrap; gap: 0; }}
+.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-end; }}
+.wf-box {{
+  background: var(--c-side-bg); border: 1px solid var(--c-side-border);
+  border-radius: 4px; padding: 5px 10px; text-align: center;
+  display: inline-flex; flex-direction: column; gap: 2px; align-items: center; }}
+.wf-terminal {{ border-color: var(--c-accent); background: rgba(44,182,125,.08); }}
+.wf-label {{ font-size: 12px; color: #fff; font-weight: 700; white-space: nowrap; display: block; }}
+.wf-script {{ font-size: 10px; color: var(--c-side-section);
+  font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
+.wf-path {{ font-size: 9.5px; color: var(--c-accent);
+  font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
+.wf-arr {{ color: var(--c-side-section); padding: 0 5px; font-size: 14px; align-self: center;
+  display: inline-block; }}
 
 /* ── Rendered markdown ── */
 .md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-accent);
@@ -336,8 +418,8 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .sd-desc-p {{ font-size: 14px; color: var(--c-h3); margin: 0 0 14px; }}
 .sd-pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12.5px;
   font-family: 'Cascadia Code', Consolas, monospace; padding: 12px 16px;
-  border-radius: 4px; line-height: 1.5; white-space: pre-wrap;
-  border: 1px solid var(--c-side-border); }}
+  border-radius: 4px; line-height: 1.5; white-space: pre;
+  border: 1px solid var(--c-side-border); overflow-x: auto; }}
 .sd-none {{ font-size: 13px; color: var(--c-h3); font-style: italic; }}
 
 /* ── Scripts (expandable, for Other Scripts section) ── */
@@ -347,6 +429,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .sc-group {{ margin-bottom: 6px; }}
 .sc-entry {{ border-bottom: 1px solid var(--c-td-border); }}
 .sc-entry:last-child {{ border-bottom: none; }}
+.sc-child {{ padding-left: 16px; background: rgba(255,255,255,.02); }}
 .sc-head {{ display: flex; align-items: baseline; gap: 10px; padding: 5px 4px; }}
 .sc-toggle {{ color: var(--c-accent); cursor: pointer; font-size: 11px; flex-shrink: 0;
   width: 12px; user-select: none; }}
@@ -358,7 +441,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .sc-detail {{ display: none; margin: 0 0 6px 22px; }}
 .sc-detail pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
   font-family: 'Cascadia Code', Consolas, monospace; padding: 8px 12px;
-  border-radius: 4px; line-height: 1.5; white-space: pre-wrap; }}
+  border-radius: 4px; line-height: 1.5; white-space: pre; overflow-x: auto; }}
 
 /* ── Workflow table ── */
 .wf-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
@@ -373,7 +456,6 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .wn {{ width: 24px; color: var(--c-accent); font-weight: 700; font-size: 12px; }}
 .wcmd {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; white-space: nowrap; }}
 .wcmd code {{ background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
-.wedit td {{ color: var(--c-h3); font-style: italic; }}
 .wdesc {{ color: var(--c-h3); font-size: 12.5px; }}
 .note {{ font-size: 12.5px; color: var(--c-h3); padding: 7px 12px; margin-top: 10px;
   background: var(--c-callout-bg); border-left: 3px solid var(--c-accent); border-radius: 0 4px 4px 0; }}
@@ -409,8 +491,8 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
-    <p class="wf-section-h">The Pipeline</p>
-    <div class="pipeline">{pip_html}</div>
+    <p class="wf-section-h">Workflows</p>
+    {wf_diagram}
 
     <p class="wf-section-h">Steps</p>
     <table class="wf-table">
@@ -548,6 +630,7 @@ def main():
     out_path = DOC_DIR / "index.html"
     out_path.write_text(build_page(scripts, projects, guides), encoding='utf-8')
     print(f"  Wrote {out_path}  ({out_path.stat().st_size // 1024} KB)")
+    generate_indexes()
 
 
 if __name__ == '__main__':

@@ -82,7 +82,7 @@ echo ""
 
 # --- Bin scripts ---
 echo "Bin scripts:"
-for script in bin/create_spec.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh bin/rebuild_index.sh; do
+for script in bin/create_spec.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh; do
     assert_file "$script"
 done
 # Verify CommandCenter headers

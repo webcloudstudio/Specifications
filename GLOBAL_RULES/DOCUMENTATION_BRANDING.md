@@ -1,6 +1,7 @@
 # Documentation Branding Standards
 
-**Version:** 1.1 — 2026-03-17
+**Version:** 20260320 V1
+**Description:** Color variables, sidebar colors, and typography standards for documentation themes
 **Maintainer:** Ed Barlow / Web Cloud Studio
 **Reference implementation:** `/mnt/c/Users/barlo/projects/gem/doc/`
 
