@@ -216,24 +216,21 @@ def build_page(scripts, projects, guides):
                         key=lambda s: wf_order.get(s['file'], 999))
     other_scripts = [s for s in scripts if s['file'] not in wf_set]
 
-    # ── Sidebar: workflow script items ────────────────────────────────────────
-    wf_script_nav = ''
-    for s in wf_scripts:
-        wf_script_nav += f'  <a class="sn" data-script="{h.escape(s["file"])}" onclick="showScript(\'{s["file"]}\')">{h.escape(s["file"])}</a>\n'
-
-    # ── Sidebar: step sub-items ───────────────────────────────────────────────
-    step_labels = [
-        'Step 1 — Create the Spec Directory',
-        'Step 2 — Write the Spec Files',
-        'Step 3 — Validate',
-        'Step 4 — Convert',
-        'Step 5 — Build',
-        'Step 6 — Iterate',
-        'Step 7 — Promote',
+    # ── Sidebar: steps with optional script sub-items ────────────────────────
+    STEP_NAV = [
+        (1, 'Step 1 — Create',   'create_spec.sh'),
+        (2, 'Step 2 — Write',    None),
+        (3, 'Step 3 — Validate', 'validate.sh'),
+        (4, 'Step 4 — Convert',  'convert.sh'),
+        (5, 'Step 5 — Build',    'build.sh'),
+        (6, 'Step 6 — Iterate',  None),
+        (7, 'Step 7 — Promote',  None),
     ]
     step_nav = ''
-    for i, label in enumerate(step_labels, 1):
-        step_nav += f'  <a class="sn-sub" data-step="{i}" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', {i})">{h.escape(label)}</a>\n'
+    for num, label, script in STEP_NAV:
+        step_nav += f'  <a class="sn" data-step="{num}" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', {num})">{h.escape(label)}</a>\n'
+        if script:
+            step_nav += f'  <a class="sn-sub" data-script="{h.escape(script)}" onclick="showScript(\'{script}\')">{h.escape(script)}</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -475,6 +472,9 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <h1>&#9654; Prototyper</h1>
   </div>
 
+  <div class="nav-sep"></div>
+  <div class="nav-section">Steps</div>
+{step_nav}
   <div class="nav-sep"></div>
   <a class="sn" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Setup a Project</a>
 
