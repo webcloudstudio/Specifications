@@ -264,8 +264,9 @@ def build_page(scripts, projects, guides):
         wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
     ])
     row2 = ARR.join([
+        wf_box('PROTOTYPE', terminal=True),
         wf_box('Promote', 'create_project.py'),
-        wf_box('../<PROJECT>', terminal=True),
+        wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
 
     wf_diagram = (f'<div class="wf-diagram">'
@@ -374,7 +375,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
   border-radius: 4px; padding: 5px 10px; text-align: center;
   display: inline-flex; flex-direction: column; gap: 2px; align-items: center; }}
-.wf-terminal {{ border-color: var(--c-accent); background: rgba(44,182,125,.08); }}
+.wf-terminal {{ border-color: var(--c-accent); background: rgba(44,182,125,.28); }}
 .wf-label {{ font-size: 12px; color: #fff; font-weight: 700; white-space: nowrap; display: block; }}
 .wf-script {{ font-size: 10px; color: var(--c-side-section);
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}

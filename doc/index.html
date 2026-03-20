@@ -60,7 +60,7 @@ main.project-mode { padding: 0; overflow: hidden; }
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
   border-radius: 4px; padding: 5px 10px; text-align: center;
   display: inline-flex; flex-direction: column; gap: 2px; align-items: center; }
-.wf-terminal { border-color: var(--c-accent); background: rgba(44,182,125,.08); }
+.wf-terminal { border-color: var(--c-accent); background: rgba(44,182,125,.28); }
 .wf-label { font-size: 12px; color: #fff; font-weight: 700; white-space: nowrap; display: block; }
 .wf-script { font-size: 10px; color: var(--c-side-section);
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }
@@ -191,7 +191,7 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
     <p class="wf-section-h">Workflows</p>
-    <div class="wf-diagram"><div class="wf-row"><div class="wf-box"><span class="wf-label">Create</span><span class="wf-script">create_spec.sh</span><span class="wf-path">./&lt;PROJECT&gt;</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Validate</span><span class="wf-script">validate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Convert</span><span class="wf-script">convert.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Build</span><span class="wf-script">build.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span><span class="wf-path">./&lt;PROJECT&gt;_build</span></div></div><div class="wf-row-r"><span class="wf-arr">&#8595;</span></div><div class="wf-row-r"><div class="wf-box"><span class="wf-label">Promote</span><span class="wf-script">create_project.py</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">../&lt;PROJECT&gt;</span></div></div></div>
+    <div class="wf-diagram"><div class="wf-row"><div class="wf-box"><span class="wf-label">Create</span><span class="wf-script">create_spec.sh</span><span class="wf-path">./&lt;PROJECT&gt;</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Validate</span><span class="wf-script">validate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Convert</span><span class="wf-script">convert.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Build</span><span class="wf-script">build.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span><span class="wf-path">./&lt;PROJECT&gt;_build</span></div></div><div class="wf-row-r"><span class="wf-arr">&#8595;</span></div><div class="wf-row-r"><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Promote</span><span class="wf-script">create_project.py</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">Project</span><span class="wf-path">../&lt;PROJECT&gt;</span></div></div></div>
 
     <p class="wf-section-h">Steps</p>
     <table class="wf-table">
