@@ -1,8 +1,9 @@
-# GAME
+# GAME (superseded by Prototyper)
 
-Project management dashboard for AI-assisted development.
+Superseded — see Prototyper/ directory.
 
 name: GAME
+type: build-artifact
 display_name: GAME
 title: GAME — Generic AI Management Environment
 git_repo: GAME

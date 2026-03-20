@@ -9,8 +9,10 @@ Generates a tabbed single-page site with:
   - Workflow: the spec pipeline commands
   - File Architecture: what goes in a spec directory, linked to templates
   - Scripts: every bin/ script with its purpose
+  - Projects: discovered project specifications with file listings
 """
 import html as h
+import json
 import os
 import re
 import sys
@@ -21,27 +23,37 @@ DOC_DIR = PROJECT_DIR / "doc"
 BIN_DIR = PROJECT_DIR / "bin"
 TEMPLATE_DIR = PROJECT_DIR / "GLOBAL_RULES" / "spec_template"
 
+SKIP_DIRS = {
+    '__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates',
+    'doc', 'logs', 'GLOBAL_RULES',
+}
+
+STATUS_COLORS = {
+    'IDEA': '#94a3b8', 'PROTOTYPE': '#fdab3d', 'ACTIVE': '#0073ea',
+    'PRODUCTION': '#00c875', 'ARCHIVED': '#4a5568',
+}
+
 # ── SVG hero: colored block mosaic ──────────────────────────────────────────
 
-HERO_SVG = '''<svg class="hero-mosaic" viewBox="0 0 800 100" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="100" height="48" rx="4" fill="#2CB67D" opacity=".18"/>
-  <rect x="108" y="0" width="64" height="48" rx="4" fill="#E8A838" opacity=".15"/>
-  <rect x="180" y="0" width="88" height="48" rx="4" fill="#7B61FF" opacity=".12"/>
-  <rect x="276" y="0" width="52" height="48" rx="4" fill="#FF6B6B" opacity=".14"/>
-  <rect x="336" y="0" width="76" height="48" rx="4" fill="#4DA8FF" opacity=".12"/>
-  <rect x="420" y="0" width="96" height="48" rx="4" fill="#2CB67D" opacity=".10"/>
-  <rect x="524" y="0" width="60" height="48" rx="4" fill="#E8A838" opacity=".12"/>
-  <rect x="592" y="0" width="80" height="48" rx="4" fill="#7B61FF" opacity=".10"/>
-  <rect x="680" y="0" width="120" height="48" rx="4" fill="#4DA8FF" opacity=".14"/>
-  <rect x="0" y="52" width="72" height="48" rx="4" fill="#FF6B6B" opacity=".10"/>
-  <rect x="80" y="52" width="108" height="48" rx="4" fill="#4DA8FF" opacity=".12"/>
-  <rect x="196" y="52" width="56" height="48" rx="4" fill="#2CB67D" opacity=".15"/>
-  <rect x="260" y="52" width="92" height="48" rx="4" fill="#E8A838" opacity=".10"/>
-  <rect x="360" y="52" width="68" height="48" rx="4" fill="#7B61FF" opacity=".14"/>
-  <rect x="436" y="52" width="84" height="48" rx="4" fill="#FF6B6B" opacity=".12"/>
-  <rect x="528" y="52" width="100" height="48" rx="4" fill="#2CB67D" opacity=".12"/>
-  <rect x="636" y="52" width="76" height="48" rx="4" fill="#4DA8FF" opacity=".10"/>
-  <rect x="720" y="52" width="80" height="48" rx="4" fill="#E8A838" opacity=".14"/>
+HERO_SVG = '''<svg class="hero-mosaic" viewBox="0 0 800 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="100" height="38" rx="3" fill="#2CB67D" opacity=".18"/>
+  <rect x="108" y="0" width="64" height="38" rx="3" fill="#E8A838" opacity=".15"/>
+  <rect x="180" y="0" width="88" height="38" rx="3" fill="#7B61FF" opacity=".12"/>
+  <rect x="276" y="0" width="52" height="38" rx="3" fill="#FF6B6B" opacity=".14"/>
+  <rect x="336" y="0" width="76" height="38" rx="3" fill="#4DA8FF" opacity=".12"/>
+  <rect x="420" y="0" width="96" height="38" rx="3" fill="#2CB67D" opacity=".10"/>
+  <rect x="524" y="0" width="60" height="38" rx="3" fill="#E8A838" opacity=".12"/>
+  <rect x="592" y="0" width="80" height="38" rx="3" fill="#7B61FF" opacity=".10"/>
+  <rect x="680" y="0" width="120" height="38" rx="3" fill="#4DA8FF" opacity=".14"/>
+  <rect x="0" y="42" width="72" height="38" rx="3" fill="#FF6B6B" opacity=".10"/>
+  <rect x="80" y="42" width="108" height="38" rx="3" fill="#4DA8FF" opacity=".12"/>
+  <rect x="196" y="42" width="56" height="38" rx="3" fill="#2CB67D" opacity=".15"/>
+  <rect x="260" y="42" width="92" height="38" rx="3" fill="#E8A838" opacity=".10"/>
+  <rect x="360" y="42" width="68" height="38" rx="3" fill="#7B61FF" opacity=".14"/>
+  <rect x="436" y="42" width="84" height="38" rx="3" fill="#FF6B6B" opacity=".12"/>
+  <rect x="528" y="42" width="100" height="38" rx="3" fill="#2CB67D" opacity=".12"/>
+  <rect x="636" y="42" width="76" height="38" rx="3" fill="#4DA8FF" opacity=".10"/>
+  <rect x="720" y="42" width="80" height="38" rx="3" fill="#E8A838" opacity=".14"/>
 </svg>'''
 
 
@@ -61,10 +73,9 @@ ICONS = {
     'db': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
     'monitor': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
     'flag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
-    'upload': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
-    'refresh': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
     'terminal': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
     'grid': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+    'folder': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
 }
 
 
@@ -77,7 +88,6 @@ def discover_scripts():
         for path in sorted(BIN_DIR.glob(ext)):
             name = path.name
             lines = path.read_text(encoding='utf-8', errors='replace').splitlines()[:20]
-            # Extract CommandCenter Name or first comment description
             cc_name = ''
             desc = ''
             for line in lines:
@@ -89,7 +99,6 @@ def discover_scripts():
                     if candidate and len(candidate) > 10 and not desc:
                         desc = candidate
                 elif line.startswith('"""') and not desc:
-                    # Python docstring
                     doc = line.strip('"""').strip()
                     if not doc and len(lines) > lines.index(line) + 1:
                         doc = lines[lines.index(line) + 1].strip()
@@ -103,14 +112,63 @@ def discover_scripts():
     return scripts
 
 
+# ── Discover projects ────────────────────────────────────────────────────────
+
+def read_meta_fields(meta_path):
+    """Parse key: value fields from METADATA.md."""
+    fields = {}
+    if meta_path.exists():
+        for line in meta_path.read_text(encoding='utf-8').splitlines():
+            if ':' in line and not line.startswith('#'):
+                k, v = line.split(':', 1)
+                fields[k.strip()] = v.strip()
+    return fields
+
+
+def discover_projects():
+    """Find project spec directories and their files."""
+    projects = []
+    for entry in sorted(PROJECT_DIR.iterdir()):
+        if not entry.is_dir():
+            continue
+        if entry.name.startswith('.') or entry.name.startswith('Proposed'):
+            continue
+        if entry.name in SKIP_DIRS:
+            continue
+        meta_path = entry / 'METADATA.md'
+        if not meta_path.exists():
+            continue
+        fields = read_meta_fields(meta_path)
+        if fields.get('type', '').lower() in ('build', 'build-artifact'):
+            continue
+        # Collect spec files (skip PROPOSED, UNUSED, index.html)
+        md_files = sorted([
+            f.name for f in entry.iterdir()
+            if f.name.endswith('.md')
+            and not f.name.startswith('PROPOSED')
+            and not f.name.startswith('UNUSED')
+        ])
+        display = fields.get('display_name') or fields.get('name') or entry.name
+        status = fields.get('status', '')
+        desc = fields.get('short_description', '')
+        projects.append({
+            'name': entry.name,
+            'display_name': display,
+            'status': status,
+            'description': desc,
+            'files': md_files,
+        })
+    return projects
+
+
 # ── Template links ───────────────────────────────────────────────────────────
 
 def template_href(fname):
-    """Return relative href to template file, or empty string if not found."""
-    # fname like METADATA.md, ARCHITECTURE.md, SCREEN-Example.md
+    """Return relative href from doc/index.html to template file."""
     tpl = TEMPLATE_DIR / fname
     if tpl.exists():
-        return f'../../GLOBAL_RULES/spec_template/{fname}'
+        # doc/index.html is one level below Specifications/
+        return f'../GLOBAL_RULES/spec_template/{fname}'
     return ''
 
 
@@ -138,14 +196,19 @@ WORKFLOW = [
 
 # ── Build HTML ───────────────────────────────────────────────────────────────
 
-def build_page(scripts):
+def build_page(scripts, projects):
     # ── Sidebar ──
+    proj_links = ''
+    for proj in projects:
+        proj_links += f'<a class="side-link side-sub-link" href="../{proj["name"]}/index.html" target="_blank">{h.escape(proj["display_name"])}</a>\n'
+
     sidebar = f'''<nav class="side">
 <div class="side-title">Specifications</div>
-<div class="side-sub">Documentation</div>
+<div class="side-sub">Project Manual</div>
 <a class="side-link active" onclick="show('workflow')">Workflow</a>
 <a class="side-link" onclick="show('files')">File Architecture</a>
 <a class="side-link" onclick="show('scripts')">Scripts</a>
+<a class="side-link" onclick="show('projects')">Projects</a>
 </nav>'''
 
     # ── Hero ──
@@ -169,10 +232,10 @@ def build_page(scripts):
 
     workflow_section = f'''<section id="workflow">
 <h2>Workflow</h2>
-<p class="section-intro">Each step has one command. Edit spec files between steps as needed.</p>
+<p class="si">Each step has one command. Edit spec files between steps.</p>
 <div class="wf-list">{steps}</div>
-<div class="wf-note">After a build, iterate: edit specs, re-validate, re-build.
-Each build creates an annotated git tag that permanently records the spec state.</div>
+<div class="wf-note">Iterate: edit specs, re-validate, re-build.
+Each build creates an annotated git tag recording the spec state.</div>
 </section>'''
 
     # ── File Architecture ──
@@ -180,7 +243,6 @@ Each build creates an annotated git tag that permanently records the spec state.
     for fname, icon_key, desc in FILE_ARCH:
         icon = ICONS.get(icon_key, '')
         href = template_href(fname)
-        # For pattern names like SCREEN-{Name}.md, link to SCREEN-Example.md
         if '{Name}' in fname:
             example = fname.replace('{Name}', 'Example')
             href = template_href(example)
@@ -199,10 +261,9 @@ Each build creates an annotated git tag that permanently records the spec state.
 
     files_section = f'''<section id="files" style="display:none">
 <h2>File Architecture</h2>
-<p class="section-intro"><code>bin/create_spec.sh</code> generates all files from
-<a href="../../GLOBAL_RULES/spec_template/" target="_blank">templates</a>.
-Spec files end with <code>## Open Questions</code> (except README, METADATA, INTENT).
-Names use <code>SCREEN-Name.md</code> / <code>FEATURE-Name.md</code> format.</p>
+<p class="si"><code>bin/create_spec.sh</code> generates all files from
+<a href="../GLOBAL_RULES/spec_template/" target="_blank">templates</a>.
+Spec files end with <code>## Open Questions</code> (except README, METADATA, INTENT).</p>
 <div class="fc-grid">{file_cards}</div>
 </section>'''
 
@@ -218,8 +279,29 @@ Names use <code>SCREEN-Name.md</code> / <code>FEATURE-Name.md</code> format.</p>
 
     scripts_section = f'''<section id="scripts" style="display:none">
 <h2>Scripts</h2>
-<p class="section-intro">All scripts live in <code>bin/</code>. Spec workflow scripts take a project directory name as the first argument.</p>
+<p class="si">All scripts in <code>bin/</code>. Spec workflow scripts take a project name as first argument.</p>
 <div class="sc-list">{script_rows}</div>
+</section>'''
+
+    # ── Projects ──
+    project_cards = ''
+    for proj in projects:
+        color = STATUS_COLORS.get(proj['status'], '#94a3b8')
+        badge = f'<span class="badge" style="background:{color}">{proj["status"]}</span>' if proj['status'] else ''
+        desc_text = h.escape(proj['description']) if proj['description'] else f'{len(proj["files"])} spec files'
+        file_list = ', '.join(f.replace('.md', '') for f in proj['files'][:8])
+        if len(proj['files']) > 8:
+            file_list += f' (+{len(proj["files"]) - 8} more)'
+        project_cards += f'''<a href="../{proj["name"]}/index.html" target="_blank" class="pc">
+<div class="pc-head"><span class="pc-name">{h.escape(proj["display_name"])}</span>{badge}</div>
+<div class="pc-desc">{desc_text}</div>
+<div class="pc-files">{h.escape(file_list)}</div>
+</a>\n'''
+
+    projects_section = f'''<section id="projects" style="display:none">
+<h2>Projects</h2>
+<p class="si">Specification directories. Click to open the project spec viewer.</p>
+<div class="pc-grid">{project_cards}</div>
 </section>'''
 
     return f'''<!DOCTYPE html>
@@ -232,85 +314,98 @@ Names use <code>SCREEN-Name.md</code> / <code>FEATURE-Name.md</code> format.</p>
 <style>
 body {{ display: flex; height: 100vh; margin: 0; overflow: hidden;
   background: var(--c-bg); color: var(--c-text);
-  font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; line-height: 1.6; }}
+  font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.45; }}
 
 /* Sidebar */
-.side {{ width: 220px; min-width: 220px; background: var(--c-side-bg);
+.side {{ width: 200px; min-width: 200px; background: var(--c-side-bg);
   border-right: 1px solid var(--c-side-border); display: flex; flex-direction: column;
   overflow-y: auto; }}
-.side-title {{ color: #fff; font-size: 15px; font-weight: 700; padding: 16px 16px 2px; }}
-.side-sub {{ color: var(--c-side-section); font-size: 11px; padding: 0 16px 14px;
-  border-bottom: 1px solid var(--c-side-border); }}
-.side-link {{ display: block; padding: 8px 16px; font-size: 13.5px;
+.side-title {{ color: #fff; font-size: 14px; font-weight: 700; padding: 12px 14px 1px; }}
+.side-sub {{ color: var(--c-side-section); font-size: 10px; padding: 0 14px 10px;
+  border-bottom: 1px solid var(--c-side-border); text-transform: uppercase; letter-spacing: .5px; }}
+.side-link {{ display: block; padding: 5px 14px; font-size: 13px;
   color: var(--c-side-link); cursor: pointer; border-left: 3px solid transparent;
   transition: all .1s; text-decoration: none; }}
-.side-link:first-of-type {{ margin-top: 12px; }}
+.side-link:first-of-type {{ margin-top: 8px; }}
 .side-link:hover {{ color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }}
 .side-link.active {{ color: var(--c-accent); border-left-color: var(--c-accent); }}
 
 /* Content */
-main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; max-width: 820px; }}
+main {{ flex: 1; overflow-y: auto; padding: 16px 28px 32px; max-width: 820px; }}
 
 /* Hero */
 .hero {{ position: relative; overflow: hidden; background: var(--c-side-bg);
-  border: 1px solid var(--c-side-border); border-radius: 10px; margin-bottom: 28px; }}
+  border: 1px solid var(--c-side-border); border-radius: 8px; margin-bottom: 16px; }}
 .hero-mosaic {{ display: block; width: 100%; height: auto; }}
-.hero-text {{ padding: 20px 28px 22px; }}
-.hero h1 {{ color: #fff; font-size: 26px; margin: 0 0 4px; border: none; }}
-.hero p {{ color: var(--c-side-link); font-size: 14px; margin: 0; }}
+.hero-text {{ padding: 12px 20px 14px; }}
+.hero h1 {{ color: #fff; font-size: 22px; margin: 0 0 2px; border: none; }}
+.hero p {{ color: var(--c-side-link); font-size: 13px; margin: 0; }}
 
 /* Section */
-section h2 {{ font-size: 19px; color: var(--c-h1); font-weight: 700;
-  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 5px; margin: 0 0 10px; }}
-.section-intro {{ font-size: 13.5px; color: var(--c-h3); margin: 0 0 16px; line-height: 1.55; }}
-.section-intro code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
-  background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 5px; border-radius: 3px; }}
-.section-intro a {{ color: var(--c-accent); }}
+section h2 {{ font-size: 17px; color: var(--c-h1); font-weight: 700;
+  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 3px; margin: 0 0 6px; }}
+.si {{ font-size: 12.5px; color: var(--c-h3); margin: 0 0 10px; line-height: 1.45; }}
+.si code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
+  background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
+.si a {{ color: var(--c-accent); }}
 
 /* Workflow */
-.wf-list {{ margin: 0 0 12px; }}
-.wf-row {{ display: flex; align-items: center; gap: 10px; padding: 10px 0;
+.wf-list {{ margin: 0 0 6px; }}
+.wf-row {{ display: flex; align-items: center; gap: 8px; padding: 6px 0;
   border-bottom: 1px solid var(--c-td-border); }}
 .wf-row:last-child {{ border-bottom: none; }}
-.wf-num {{ width: 24px; height: 24px; border-radius: 50%; background: var(--c-accent);
-  color: var(--c-side-bg); font-size: 12px; font-weight: 700;
+.wf-num {{ width: 20px; height: 20px; border-radius: 50%; background: var(--c-accent);
+  color: var(--c-side-bg); font-size: 11px; font-weight: 700;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; }}
-.wf-icon {{ width: 18px; height: 18px; color: var(--c-h3); flex-shrink: 0; }}
+.wf-icon {{ width: 16px; height: 16px; color: var(--c-h3); flex-shrink: 0; }}
 .wf-icon svg {{ width: 100%; height: 100%; }}
-.wf-cmd {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
+.wf-cmd {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   background: var(--c-code-bg); color: var(--c-code-text);
-  padding: 2px 7px; border-radius: 3px; white-space: nowrap; }}
-.wf-desc {{ font-size: 13px; color: var(--c-h3); }}
-.wf-note {{ font-size: 12.5px; color: var(--c-h3); padding: 8px 12px;
+  padding: 1px 5px; border-radius: 3px; white-space: nowrap; }}
+.wf-desc {{ font-size: 12px; color: var(--c-h3); }}
+.wf-note {{ font-size: 11.5px; color: var(--c-h3); padding: 5px 10px;
   background: var(--c-callout-bg); border-left: 3px solid var(--c-accent);
-  border-radius: 0 4px 4px 0; margin-top: 4px; }}
+  border-radius: 0 3px 3px 0; margin-top: 2px; }}
 
 /* File cards */
-.fc-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }}
-.fc {{ display: flex; align-items: flex-start; gap: 10px;
-  background: #fff; border: 1px solid var(--c-td-border); border-radius: 6px;
-  padding: 10px 12px; transition: border-color .15s; text-decoration: none; color: inherit; }}
+.fc-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 6px; }}
+.fc {{ display: flex; align-items: flex-start; gap: 8px;
+  background: #fff; border: 1px solid var(--c-td-border); border-radius: 5px;
+  padding: 7px 10px; transition: border-color .15s; text-decoration: none; color: inherit; }}
 .fc:hover {{ border-color: var(--c-accent); }}
 a.fc {{ cursor: pointer; }}
-.fc-icon {{ width: 18px; height: 18px; color: var(--c-accent); flex-shrink: 0; margin-top: 2px; }}
+.fc-icon {{ width: 16px; height: 16px; color: var(--c-accent); flex-shrink: 0; margin-top: 1px; }}
 .fc-icon svg {{ width: 100%; height: 100%; }}
-.fc-name {{ font-weight: 700; font-size: 13px; color: var(--c-h1); }}
-.fc-desc {{ font-size: 12px; color: var(--c-h3); margin-top: 1px; }}
+.fc-name {{ font-weight: 700; font-size: 12.5px; color: var(--c-h1); }}
+.fc-desc {{ font-size: 11.5px; color: var(--c-h3); }}
 
 /* Scripts */
 .sc-list {{ margin: 0; }}
-.sc-row {{ display: flex; align-items: center; gap: 10px; padding: 8px 0;
+.sc-row {{ display: flex; align-items: center; gap: 8px; padding: 5px 0;
   border-bottom: 1px solid var(--c-td-border); }}
 .sc-row:last-child {{ border-bottom: none; }}
-.sc-icon {{ width: 16px; height: 16px; color: var(--c-h3); flex-shrink: 0; }}
+.sc-icon {{ width: 14px; height: 14px; color: var(--c-h3); flex-shrink: 0; }}
 .sc-icon svg {{ width: 100%; height: 100%; }}
-.sc-name {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
+.sc-name {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   background: var(--c-code-bg); color: var(--c-code-text);
-  padding: 2px 7px; border-radius: 3px; white-space: nowrap; min-width: 180px; }}
-.sc-desc {{ font-size: 12.5px; color: var(--c-h3); }}
+  padding: 1px 5px; border-radius: 3px; white-space: nowrap; min-width: 170px; }}
+.sc-desc {{ font-size: 12px; color: var(--c-h3); }}
 
-.footer {{ margin-top: 36px; padding-top: 10px; border-top: 1px solid var(--c-td-border);
-  color: var(--c-foot-text); font-size: 12px; text-align: center; }}
+/* Projects */
+.pc-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 6px; }}
+.pc {{ display: block; background: #fff; border: 1px solid var(--c-td-border); border-radius: 5px;
+  padding: 8px 10px; transition: border-color .15s; text-decoration: none; color: inherit; cursor: pointer; }}
+.pc:hover {{ border-color: var(--c-accent); }}
+.pc-head {{ display: flex; align-items: center; gap: 8px; }}
+.pc-name {{ font-weight: 700; font-size: 13px; color: var(--c-h1); }}
+.badge {{ display: inline-block; padding: 1px 7px; border-radius: 3px;
+  color: #fff; font-size: 10px; font-weight: 600; text-transform: uppercase; }}
+.pc-desc {{ font-size: 11.5px; color: var(--c-h3); margin-top: 2px; }}
+.pc-files {{ font-size: 11px; color: var(--c-foot-text); margin-top: 3px;
+  font-family: 'Cascadia Code', Consolas, monospace; }}
+
+.footer {{ margin-top: 24px; padding-top: 6px; border-top: 1px solid var(--c-td-border);
+  color: var(--c-foot-text); font-size: 11px; text-align: center; }}
 </style>
 </head>
 <body>
@@ -320,6 +415,7 @@ a.fc {{ cursor: pointer; }}
 {workflow_section}
 {files_section}
 {scripts_section}
+{projects_section}
 <div class="footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies.</div>
 </main>
 <script>
@@ -327,7 +423,8 @@ function show(id) {{
   document.querySelectorAll('section').forEach(s => s.style.display = 'none');
   document.getElementById(id).style.display = 'block';
   document.querySelectorAll('.side-link').forEach(a => a.classList.remove('active'));
-  document.querySelector('.side-link[onclick*="' + id + '"]').classList.add('active');
+  var link = document.querySelector('.side-link[onclick*="' + id + '"]');
+  if (link) link.classList.add('active');
 }}
 </script>
 </body>
@@ -337,9 +434,11 @@ function show(id) {{
 def main():
     DOC_DIR.mkdir(exist_ok=True)
     scripts = discover_scripts()
+    projects = discover_projects()
     print(f"  Found {len(scripts)} scripts in bin/")
+    print(f"  Found {len(projects)} project specs")
     out_path = DOC_DIR / "index.html"
-    out_path.write_text(build_page(scripts), encoding='utf-8')
+    out_path.write_text(build_page(scripts, projects), encoding='utf-8')
     print(f"  Wrote {out_path}  ({out_path.stat().st_size // 1024} KB)")
 
 
