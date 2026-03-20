@@ -35,24 +35,43 @@ SCRIPT_CATEGORIES = {
 # ── Discover scripts ──────────────────────────────────────────────────────────
 
 def discover_scripts():
+    """Extract name, category, one-line desc, and full usage block from script headers."""
     scripts = []
     for ext in ('*.sh', '*.py'):
         for path in sorted(BIN_DIR.glob(ext)):
-            lines = path.read_text(encoding='utf-8', errors='replace').splitlines()[:25]
+            text = path.read_text(encoding='utf-8', errors='replace')
+            lines = text.splitlines()[:50]
             cc_name = category = desc = ''
+            detail_lines = []
+            in_header = False
             for i, line in enumerate(lines):
-                if line.startswith('# Name:'):
-                    cc_name = line.split(':', 1)[1].strip()
-                elif line.startswith('# Category:'):
-                    category = line.split(':', 1)[1].strip()
-                elif line.startswith('"""') and not desc:
+                stripped = line.lstrip('#').strip()
+                if 'CommandCenter Operation' in line:
+                    in_header = True
+                    continue
+                if in_header:
+                    if line.startswith('#') or line == '':
+                        if line.startswith('# Name:'):
+                            cc_name = line.split(':', 1)[1].strip()
+                        elif line.startswith('# Category:'):
+                            category = line.split(':', 1)[1].strip()
+                        elif line.startswith('#') and stripped:
+                            detail_lines.append(stripped)
+                    else:
+                        in_header = False
+                # Python docstring
+                if line.startswith('"""') and not desc:
                     inline = line.strip('"""').strip()
                     desc = inline if inline else (lines[i + 1].strip() if i + 1 < len(lines) else '')
             label = cc_name or path.stem.replace('_', ' ').title()
+            if not desc and detail_lines:
+                desc = detail_lines[0]
+            details = '\n'.join(l for l in detail_lines if l).strip()
             scripts.append({
                 'file': path.name, 'label': label,
                 'category': category or 'maintenance',
                 'desc': desc or label,
+                'details': details,
             })
     return scripts
 
@@ -130,11 +149,22 @@ def build_page(scripts, projects, guides):
         label = SCRIPT_CATEGORIES.get(cat, cat.title())
         anchor = f'cat-{cat}'
         script_nav += f'  <a class="sn" data-sec="scripts" onclick="show(\'scripts\'); scrollAnchor(\'{anchor}\')">{label}</a>\n'
-        rows = ''.join(
-            f'<tr><td><code>{h.escape(s["file"])}</code></td><td>{h.escape(s["desc"])}</td></tr>\n'
-            for s in items
-        )
-        scripts_html += f'<h3 id="{anchor}" class="cat-label">{label}</h3>\n<table class="ref-table">{rows}</table>\n'
+        entries = ''
+        for s in items:
+            sid = s['file'].replace('.', '-')
+            detail_html = ''
+            if s.get('details'):
+                detail_html = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
+                toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
+            else:
+                toggle = ''
+            entries += (
+                f'<div class="sc-entry">'
+                f'<div class="sc-head">{toggle}<code class="sc-name">{h.escape(s["file"])}</code>'
+                f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>'
+                f'{detail_html}</div>\n'
+            )
+        scripts_html += f'<h3 id="{anchor}" class="cat-label">{label}</h3>\n<div class="sc-group">{entries}</div>\n'
 
     # ── Workflow ──────────────────────────────────────────────────────────────
     wf_steps = [
@@ -166,9 +196,7 @@ def build_page(scripts, projects, guides):
     # ── Projects sidebar ──────────────────────────────────────────────────────
     proj_nav = ''
     for p in projects:
-        color = STATUS_COLORS.get(p['status'], '#94a3b8')
-        dot = f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{color};flex-shrink:0"></span>'
-        proj_nav += f'  <a class="sn sn-proj" href="../{p["name"]}/index.html" target="_blank">{dot}&nbsp;{h.escape(p["display"])}</a>\n'
+        proj_nav += f'  <a class="sn" href="../{p["name"]}/index.html" target="_blank">{h.escape(p["display"])}</a>\n'
 
     # default: first guide key (or empty)
     default_guide = guides[0]['key'] if guides else ''
@@ -239,11 +267,12 @@ main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; }}
 .ov-link-sub {{ font-size: 11px; font-weight: 400; color: var(--c-side-section); margin-top: 1px; }}
 
 /* ── Rendered markdown ── */
-.md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-h1);
-  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 5px; margin: 24px 0 10px; }}
+.md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-accent);
+  border-bottom: 2px solid var(--c-accent); padding-bottom: 5px; margin: 24px 0 10px; }}
 .md h1:first-child {{ margin-top: 0; }}
-.md h2 {{ font-size: 17px; font-weight: 600; color: var(--c-h2);
-  border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 18px 0 8px; }}
+.md h2 {{ font-size: 15px; font-weight: 700; color: var(--c-side-link);
+  background: var(--c-side-bg); border-left: 3px solid var(--c-accent);
+  padding: 6px 12px; margin: 20px 0 10px; border-radius: 0 4px 4px 0; }}
 .md h3 {{ font-size: 15px; font-weight: 600; color: var(--c-h3); margin: 14px 0 6px; }}
 .md p {{ margin: 8px 0; line-height: 1.7; }}
 .md ul, .md ol {{ margin: 6px 0 6px 20px; }}
@@ -271,14 +300,21 @@ main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; }}
   color: var(--c-h3); margin: 18px 0 4px; padding-bottom: 3px;
   border-bottom: 1px solid var(--c-td-border); }}
 .cat-label:first-child {{ margin-top: 0; }}
-.ref-table {{ width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 13.5px; }}
-.ref-table td {{ padding: 4px 8px; border-bottom: 1px solid var(--c-td-border); vertical-align: top; }}
-.ref-table tr:last-child td {{ border-bottom: none; }}
-.ref-table tr:nth-child(even) td {{ background: var(--c-tr-alt); }}
-.ref-table td:first-child {{ width: 1%; white-space: nowrap; padding-right: 18px; }}
-.ref-table td:last-child {{ color: var(--c-h3); }}
-.ref-table code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
-  color: var(--c-code-text); background: var(--c-code-bg); padding: 1px 4px; border-radius: 3px; }}
+.sc-group {{ margin-bottom: 6px; }}
+.sc-entry {{ border-bottom: 1px solid var(--c-td-border); }}
+.sc-entry:last-child {{ border-bottom: none; }}
+.sc-head {{ display: flex; align-items: baseline; gap: 10px; padding: 5px 4px; }}
+.sc-toggle {{ color: var(--c-accent); cursor: pointer; font-size: 11px; flex-shrink: 0;
+  width: 12px; user-select: none; }}
+.sc-toggle:hover {{ color: #fff; }}
+.sc-name {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
+  color: var(--c-code-text); background: var(--c-code-bg); padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap; flex-shrink: 0; }}
+.sc-desc {{ font-size: 12.5px; color: var(--c-h3); }}
+.sc-detail {{ display: none; margin: 0 0 6px 22px; }}
+.sc-detail pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
+  font-family: 'Cascadia Code', Consolas, monospace; padding: 8px 12px;
+  border-radius: 4px; line-height: 1.5; white-space: pre-wrap; }}
 
 /* ── Workflow ── */
 .wf-table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
@@ -402,6 +438,15 @@ function showGuide(key) {{
 function scrollAnchor(id) {{
   var el = document.getElementById(id);
   if (el) el.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+}}
+
+function toggleDetail(sid) {{
+  var el = document.getElementById('sd-' + sid);
+  var toggle = el && el.previousElementSibling && el.previousElementSibling.querySelector('.sc-toggle');
+  if (!el) return;
+  var open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  if (toggle) toggle.innerHTML = open ? '&#9656;' : '&#9662;';
 }}
 
 // Init from hash

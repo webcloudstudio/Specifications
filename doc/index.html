@@ -64,11 +64,12 @@ main { flex: 1; overflow-y: auto; padding: 28px 36px 48px; }
 .ov-link-sub { font-size: 11px; font-weight: 400; color: var(--c-side-section); margin-top: 1px; }
 
 /* ── Rendered markdown ── */
-.md h1 { font-size: 22px; font-weight: 700; color: var(--c-h1);
-  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 5px; margin: 24px 0 10px; }
+.md h1 { font-size: 22px; font-weight: 700; color: var(--c-accent);
+  border-bottom: 2px solid var(--c-accent); padding-bottom: 5px; margin: 24px 0 10px; }
 .md h1:first-child { margin-top: 0; }
-.md h2 { font-size: 17px; font-weight: 600; color: var(--c-h2);
-  border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 18px 0 8px; }
+.md h2 { font-size: 15px; font-weight: 700; color: var(--c-side-link);
+  background: var(--c-side-bg); border-left: 3px solid var(--c-accent);
+  padding: 6px 12px; margin: 20px 0 10px; border-radius: 0 4px 4px 0; }
 .md h3 { font-size: 15px; font-weight: 600; color: var(--c-h3); margin: 14px 0 6px; }
 .md p { margin: 8px 0; line-height: 1.7; }
 .md ul, .md ol { margin: 6px 0 6px 20px; }
@@ -96,14 +97,21 @@ main { flex: 1; overflow-y: auto; padding: 28px 36px 48px; }
   color: var(--c-h3); margin: 18px 0 4px; padding-bottom: 3px;
   border-bottom: 1px solid var(--c-td-border); }
 .cat-label:first-child { margin-top: 0; }
-.ref-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 13.5px; }
-.ref-table td { padding: 4px 8px; border-bottom: 1px solid var(--c-td-border); vertical-align: top; }
-.ref-table tr:last-child td { border-bottom: none; }
-.ref-table tr:nth-child(even) td { background: var(--c-tr-alt); }
-.ref-table td:first-child { width: 1%; white-space: nowrap; padding-right: 18px; }
-.ref-table td:last-child { color: var(--c-h3); }
-.ref-table code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
-  color: var(--c-code-text); background: var(--c-code-bg); padding: 1px 4px; border-radius: 3px; }
+.sc-group { margin-bottom: 6px; }
+.sc-entry { border-bottom: 1px solid var(--c-td-border); }
+.sc-entry:last-child { border-bottom: none; }
+.sc-head { display: flex; align-items: baseline; gap: 10px; padding: 5px 4px; }
+.sc-toggle { color: var(--c-accent); cursor: pointer; font-size: 11px; flex-shrink: 0;
+  width: 12px; user-select: none; }
+.sc-toggle:hover { color: #fff; }
+.sc-name { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
+  color: var(--c-code-text); background: var(--c-code-bg); padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+.sc-desc { font-size: 12.5px; color: var(--c-h3); }
+.sc-detail { display: none; margin: 0 0 6px 22px; }
+.sc-detail pre { background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
+  font-family: 'Cascadia Code', Consolas, monospace; padding: 8px 12px;
+  border-radius: 4px; line-height: 1.5; white-space: pre-wrap; }
 
 /* ── Workflow ── */
 .wf-table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -148,7 +156,7 @@ section h2 { font-size: 19px; font-weight: 700; color: var(--c-h1);
 
   <div class="nav-sep"></div>
   <div class="nav-section">Projects</div>
-  <a class="sn sn-proj" href="../GAME/index.html" target="_blank"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#0073ea;flex-shrink:0"></span>&nbsp;GAME</a>
+  <a class="sn" href="../GAME/index.html" target="_blank">GAME</a>
 
 </nav>
 
@@ -188,20 +196,92 @@ section h2 { font-size: 19px; font-weight: 700; color: var(--c-h1);
   <div id="scripts" class="content-section">
     <h2>Scripts</h2>
     <h3 id="cat-maintenance" class="cat-label">Maintenance</h3>
-<table class="ref-table"><tr><td><code>build.sh</code></td><td>Build Prompt</td></tr>
-<tr><td><code>convert.sh</code></td><td>Convert Specs</td></tr>
-<tr><td><code>create_spec.sh</code></td><td>Create Spec</td></tr>
-<tr><td><code>generate_prompt.sh</code></td><td>Generate Prompt</td></tr>
-<tr><td><code>rebuild_index.sh</code></td><td>Rebuild Index</td></tr>
-<tr><td><code>test.sh</code></td><td>Test Specs</td></tr>
-<tr><td><code>update_projects.sh</code></td><td>Update Projects</td></tr>
-<tr><td><code>validate.sh</code></td><td>Validate Spec</td></tr>
-<tr><td><code>validate_project.sh</code></td><td>Validate Project</td></tr>
-<tr><td><code>build_documentation.py</code></td><td>Build doc/index.html — single-page documentation for the Prototyper system.</td></tr>
-<tr><td><code>create_project.py</code></td><td>Create a new project conforming to CLAUDE_RULES standards, or update existing</td></tr>
-<tr><td><code>migrate_projects.py</code></td><td>Migrate METADATA.md files across all projects to conform to the CLAUDE_RULES standard.</td></tr>
-<tr><td><code>validate_project.py</code></td><td>verify.py — CLAUDE_RULES Compliance Checker</td></tr>
-</table>
+<div class="sc-group"><div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('build-sh')" title="Show usage">&#9656;</span><code class="sc-name">build.sh</code><span class="sc-desc">Tags the current commit with an annotated build tag and generates a complete build prompt.</span></div><div class="sc-detail" id="sd-build-sh"><pre>Tags the current commit with an annotated build tag and generates a complete build prompt.
+Annotated tags are permanent git objects — never pruned by git gc.
+Usage:
+bash bin/build.sh &lt;project-name&gt;                    # Print prompt to stdout (also tags)
+bash bin/build.sh &lt;project-name&gt; &gt; build-prompt.md  # Save to file
+bash bin/build.sh &lt;project-name&gt; --tag-only         # Tag without generating prompt
+bash bin/build.sh &lt;project-name&gt; --no-tag           # Generate prompt without tagging
+Build tags:
+build/{project}/{YYYY-MM-DD.N}
+Examples:
+bash bin/build.sh Game-Build &gt; build-prompt.md
+git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Build/</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('convert-sh')" title="Show usage">&#9656;</span><code class="sc-name">convert.sh</code><span class="sc-desc">Generates a conversion prompt: concise project specs + CONVERT.md expansion rules + stack files.</span></div><div class="sc-detail" id="sd-convert-sh"><pre>Generates a conversion prompt: concise project specs + CONVERT.md expansion rules + stack files.
+Feed the output to an AI agent to get detailed, implementation-ready specifications.
+Usage:
+bash bin/convert.sh &lt;project-name&gt;                     # Print to stdout
+bash bin/convert.sh &lt;project-name&gt; &gt; convert-prompt.md # Save to file
+Example:
+bash bin/convert.sh Game-Build &gt; convert-prompt.md</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('create_spec-sh')" title="Show usage">&#9656;</span><code class="sc-name">create_spec.sh</code><span class="sc-desc">Scaffolds a new specification directory from templates.</span></div><div class="sc-detail" id="sd-create_spec-sh"><pre>Scaffolds a new specification directory from templates.
+Usage:
+bash bin/create_spec.sh &lt;project-name&gt;
+Arguments:
+$1  Project name (required) — becomes directory name and METADATA slug
+Creates:
+&lt;project-name&gt;/
+METADATA.md, README.md, INTENT.md, ARCHITECTURE.md,
+DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md
+Template source: GLOBAL_RULES/spec_template/</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('generate_prompt-sh')" title="Show usage">&#9656;</span><code class="sc-name">generate_prompt.sh</code><span class="sc-desc">Generate a complete build prompt from a project&#x27;s METADATA.md, stack files, and spec files.</span></div><div class="sc-detail" id="sd-generate_prompt-sh"><pre>Generate a complete build prompt from a project&#x27;s METADATA.md, stack files, and spec files.
+Reads METADATA.md for stack components, collects technology files from stack/,
+collects all .md spec files from the project directory, and concatenates them
+into a single prompt suitable for an AI agent.
+Also prepends CLAUDE_RULES.md as the integration standard.
+Usage:
+bash bin/generate_prompt.sh &lt;project-name&gt;                    # Print to stdout
+bash bin/generate_prompt.sh &lt;project-name&gt; &gt; build-prompt.md  # Save to file
+Example:
+bash bin/generate_prompt.sh GAME &gt; build-prompt.md</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('rebuild_index-sh')" title="Show usage">&#9656;</span><code class="sc-name">rebuild_index.sh</code><span class="sc-desc">Rebuilds index.html files in the Specifications directory.</span></div><div class="sc-detail" id="sd-rebuild_index-sh"><pre>Rebuilds index.html files in the Specifications directory.
+Generates:
+- Specifications/index.html (redirect to doc/index.html)
+- Specifications/PROJECT/index.html (per-project spec viewer)
+Run this any time a .md file changes.
+Usage: bash bin/rebuild_index.sh (from any directory)</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('test-sh')" title="Show usage">&#9656;</span><code class="sc-name">test.sh</code><span class="sc-desc">Runs unit tests on the specification system itself.</span></div><div class="sc-detail" id="sd-test-sh"><pre>Runs unit tests on the specification system itself.
+Verifies that templates, scripts, and global rules are intact.
+Usage:
+bash bin/test.sh
+Arguments:
+(none)
+Exit codes:
+0  All tests pass
+1  One or more failures</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('update_projects-sh')" title="Show usage">&#9656;</span><code class="sc-name">update_projects.sh</code><span class="sc-desc">Update all set-up projects with the latest CLAUDE_RULES and templates.</span></div><div class="sc-detail" id="sd-update_projects-sh"><pre>Update all set-up projects with the latest CLAUDE_RULES and templates.
+Skips projects in the idea phase (those without CLAUDE_RULES_START).
+Usage: bash bin/update_projects.sh [--dry-run]</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('validate-sh')" title="Show usage">&#9656;</span><code class="sc-name">validate.sh</code><span class="sc-desc">Validates a specification directory for completeness and correctness.</span></div><div class="sc-detail" id="sd-validate-sh"><pre>Validates a specification directory for completeness and correctness.
+Usage:
+bash bin/validate.sh &lt;project-name&gt;           # from repo root
+bash bin/validate.sh                           # from within project directory
+bash bin/validate.sh &lt;project-name&gt; --verbose
+Arguments:
+$1        Project name (optional — auto-detected from CWD)
+--verbose Show passing checks too (default: errors and warnings only)
+Exit codes:
+0  All checks pass
+1  One or more errors (spec is not ready to convert/build)
+Checks:
+- Required files exist (METADATA.md, README.md, INTENT.md, ARCHITECTURE.md)
+- METADATA.md has required fields (name, display_name, short_description, status)
+- INTENT.md is not empty / still has template placeholder
+- Naming conventions (SCREEN-*, FEATURE-* prefixes)
+- Open Questions section exists in applicable files (not README, METADATA, INTENT)
+- Stack files exist in GLOBAL_RULES/stack/ if stack: is declared
+- No example template files left (SCREEN-Example.md, FEATURE-Example.md)</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('validate_project-sh')" title="Show usage">&#9656;</span><code class="sc-name">validate_project.sh</code><span class="sc-desc">Validate a single project against CLAUDE_RULES compliance standards.</span></div><div class="sc-detail" id="sd-validate_project-sh"><pre>Validate a single project against CLAUDE_RULES compliance standards.
+Wraps verify.py with auto-detected projects directory.
+Usage: bash bin/validate_project.sh &lt;project-name&gt; [verify.py options]
+e.g. bash bin/validate_project.sh GAME
+bash bin/validate_project.sh GAME --verbose</pre></div></div>
+<div class="sc-entry"><div class="sc-head"><code class="sc-name">build_documentation.py</code><span class="sc-desc">Build doc/index.html — single-page documentation for the Prototyper system.</span></div></div>
+<div class="sc-entry"><div class="sc-head"><code class="sc-name">create_project.py</code><span class="sc-desc">Create a new project conforming to CLAUDE_RULES standards, or update existing</span></div></div>
+<div class="sc-entry"><div class="sc-head"><code class="sc-name">migrate_projects.py</code><span class="sc-desc">Migrate METADATA.md files across all projects to conform to the CLAUDE_RULES standard.</span></div></div>
+<div class="sc-entry"><div class="sc-head"><code class="sc-name">validate_project.py</code><span class="sc-desc">verify.py — CLAUDE_RULES Compliance Checker</span></div></div>
+</div>
 
   </div>
 
@@ -227,7 +307,7 @@ section h2 { font-size: 19px; font-weight: 700; color: var(--c-h1);
 <script>
 const GUIDES = {
   "PROJECT-SETUP": "# Project Setup\n\nEvery spec directory needs these four files. `bin/create_spec.sh` generates them from templates.\n\n## Required Files\n\n| File | Purpose |\n|------|---------|\n| `METADATA.md` | Identity: name, display_name, short_description, status (IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED) |\n| `README.md` | One-line project description |\n| `INTENT.md` | Why this project exists, who it's for, scope boundaries |\n| `ARCHITECTURE.md` | Modules, routes, directory layout |\n\n## Conditional Files\n\nAdd what applies. Delete the rest.\n\n| File | When |\n|------|------|\n| `DATABASE.md` | Project has a database \u2014 tables and columns only |\n| `UI.md` | Project has a UI \u2014 shared patterns across screens |\n| `SCREEN-{Name}.md` | One per screen: route, layout, columns, interactions |\n| `FEATURE-{Name}.md` | Cross-cutting behavior: trigger, sequence, reads, writes |\n\n## Conventions\n\n- All spec files except README, METADATA, and INTENT end with `## Open Questions`\n- File names use uppercase with hyphens: `SCREEN-Dashboard.md`, `FEATURE-Scan.md`\n- Write concise specs (tables, bullets). CONVERT.md rules expand them during conversion.\n- Stack-specific patterns come from `GLOBAL_RULES/stack/` files \u2014 don't repeat them in specs.\n\n## Global Rules\n\n```\nGLOBAL_RULES/\n  CONVERT.md           How concise specs expand into detailed specs\n  CLAUDE_RULES.md      Agent behavior contract (injected into projects)\n  stack/               Technology patterns (flask.md, sqlite.md, ...)\n  spec_template/       Template files used by create_spec.sh\n```\n",
-  "SPECIFICATION-PROCESS": "# Specification Process\n\nPrototyper converts concise specification files into AI agent build prompts.\nInput: a directory of `.md` spec files. Output: a prompt that builds a working application.\n\n---\n\n## Step 1 \u2014 Create the Spec Directory\n\n```bash\nbash bin/create_spec.sh <ProjectName>\n```\n\nCreates `Specifications/<ProjectName>/` from `GLOBAL_RULES/spec_template/`.\n\n**Generated files:**\n\n| File | Required | Action |\n|------|----------|--------|\n| `METADATA.md` | Yes | Fill in required fields (see below) |\n| `README.md` | Yes | One sentence: what this project is |\n| `INTENT.md` | Yes | Why it exists, who it's for, what it is not |\n| `ARCHITECTURE.md` | Yes | Modules, routes, directory layout |\n| `DATABASE.md` | If has DB | Tables, columns, types \u2014 delete if no database |\n| `UI.md` | If has UI | Shared patterns across screens \u2014 delete if no UI |\n| `SCREEN-Example.md` | Rename | Rename to `SCREEN-<Name>.md` for each screen |\n| `FEATURE-Example.md` | Rename | Rename to `FEATURE-<Name>.md` for cross-cutting behavior |\n\n**Required METADATA.md fields:**\n\n```\nname:              ProjectName\ndisplay_name:      Project Name\nshort_description: One sentence description.\nstatus:            IDEA\n```\n\n**Optional METADATA.md fields:**\n\n```\nstack:     flask/sqlite\nport:      5000\ntags:      dashboard, admin\n```\n\n---\n\n## Step 2 \u2014 Write the Spec Files\n\nEdit each file in `<ProjectName>/`. Delete `DATABASE.md` or `UI.md` if not applicable.\nRename `SCREEN-Example.md` \u2192 `SCREEN-<Name>.md` and `FEATURE-Example.md` \u2192 `FEATURE-<Name>.md`.\n\n**Conventions:**\n\n| Rule | Detail |\n|------|--------|\n| `## Open Questions` | Required at end of all files except `README.md`, `METADATA.md`, `INTENT.md` |\n| SCREEN files | `SCREEN-<Name>.md` \u2014 route, layout, columns, interactions |\n| FEATURE files | `FEATURE-<Name>.md` \u2014 trigger, sequence, reads, writes |\n| Spec style | Write concise specs: tables, bullets, short descriptions. `CONVERT.md` rules expand them. |\n| Stack patterns | Do not repeat stack patterns in specs \u2014 they come from `GLOBAL_RULES/stack/` |\n\n---\n\n## Step 3 \u2014 Validate\n\n```bash\nbash bin/validate.sh <ProjectName>    # from repo root\nbash bin/validate.sh                  # from within the project directory\nbash bin/validate.sh <ProjectName> --verbose\n```\n\nExit 0 = ready to build. Exit 1 = errors (must fix before proceeding).\n\n**Checks:**\n\n| Check | Condition |\n|-------|-----------|\n| Required files | `METADATA.md`, `README.md`, `INTENT.md`, `ARCHITECTURE.md` |\n| METADATA fields | `name`, `display_name`, `short_description`, `status` must be set |\n| Status value | Must be one of: `IDEA` `PROTOTYPE` `ACTIVE` `PRODUCTION` `ARCHIVED` |\n| INTENT.md | Must have content \u2014 not the template placeholder |\n| Naming | Spec files must use `SCREEN-*` or `FEATURE-*` prefix |\n| Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` must not remain |\n| Open Questions | All applicable files must have `## Open Questions` section |\n| Stack files | If `stack:` declared in METADATA.md, `GLOBAL_RULES/stack/<component>.md` must exist |\n\n---\n\n## Step 4 \u2014 Convert (Optional)\n\n```bash\nbash bin/convert.sh <ProjectName> > convert-prompt.md\nbash bin/convert.sh                > convert-prompt.md    # from within project directory\n```\n\nGenerates an expansion prompt: `CONVERT.md` rules + stack reference files + concise spec files.\nFeed `convert-prompt.md` to an AI agent to produce expanded, implementation-ready specs.\nReplace concise spec files with the expanded versions, then proceed to Step 5.\n\n> This step is optional. `build.sh` includes `CONVERT.md` inline \u2014 the AI can expand during build.\n\n---\n\n## Step 5 \u2014 Build\n\n```bash\nbash bin/build.sh <ProjectName> > build-prompt.md\nbash bin/build.sh               > build-prompt.md    # from within project directory\n```\n\nCreates an annotated git tag `build/<ProjectName>/YYYY-MM-DD.N` and generates a complete build prompt.\nFeed `build-prompt.md` to an AI agent to build the application.\n\n**Flags:**\n\n| Flag | Effect |\n|------|--------|\n| `--no-tag` | Generate prompt without creating a git tag |\n| `--tag-only` | Tag the current commit without generating a prompt |\n\n**Build tags** are annotated git objects \u2014 not pruned by `git gc`.\n\n```bash\ngit tag -l \"build/<Project>/*\"                                                # list all build tags\ngit show build/<Project>/2026-03-20.1                                         # inspect a tag\ngit diff build/<Project>/2026-03-19.1..build/<Project>/2026-03-20.1 -- <Project>/  # compare specs\ngit checkout build/<Project>/2026-03-19.1 -- <Project>/DATABASE.md           # restore one file\n```\n\n---\n\n## Step 6 \u2014 Iterate\n\nEdit spec files \u2192 re-validate \u2192 re-build. Repeat until the build prompt produces the desired result.\n\n---\n\n## Step 7 \u2014 Promote\n\nWhen the application works, promote the spec directory to its own repository:\n\n```bash\ncp -r Specifications/<ProjectName> ~/projects/<ProjectName>\ncd ~/projects/<ProjectName>\ngit init && git add -A && git commit -m \"Initial spec\"\ngit remote add origin <url>\n```\n\nThe spec directory becomes the project's authoritative specification.\nRun `python3 bin/create_project.py <ProjectName>` from `Specifications/` to scaffold the code project.\n",
+  "SPECIFICATION-PROCESS": "# Specification Process\n\nPrototyper converts concise specification files into AI agent build prompts.\n\n---\n\n## Step 1 \u2014 Create the Spec Directory\n\n```bash\nbash bin/create_spec.sh <ProjectName>\n```\n\nCreates `Specifications/<ProjectName>/` with template files from `GLOBAL_RULES/spec_template/`.\n\nEdit `METADATA.md` immediately. The only field required to proceed is `name:`.\nAdditional fields are required by `validate.sh` as the project progresses to higher status levels:\n\n| Field | Required at | Description |\n|-------|-------------|-------------|\n| `name:` | always | Directory name and slug |\n| `display_name:` | PROTOTYPE | Human-readable name |\n| `short_description:` | PROTOTYPE | One sentence summary |\n| `status:` | PROTOTYPE | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |\n| `stack:` | ACTIVE | Technology stack, slash-delimited: `flask/sqlite` |\n| `port:` | ACTIVE | Service port |\n| `tags:` | ACTIVE | Category tags, comma-delimited |\n\n---\n\n## Step 2 \u2014 Write the Spec Files\n\nEdit each file. Delete `DATABASE.md` or `UI.md` if not applicable.\nRename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.\n\n| Convention | Rule |\n|------------|------|\n| Scope | Concise specs only: tables, bullets, short descriptions. `CONVERT.md` expands them. |\n| Screens | `SCREEN-<Name>.md` \u2014 route, layout, columns, interactions |\n| Features | `FEATURE-<Name>.md` \u2014 trigger, sequence, reads, writes |\n| End section | All files except `README.md`, `METADATA.md`, `INTENT.md` must end with `## Open Questions` |\n| Stack | Do not repeat stack patterns \u2014 they come from `GLOBAL_RULES/stack/` |\n\n---\n\n## Step 3 \u2014 Validate\n\n```bash\nbash bin/validate.sh <ProjectName>       # from repo root\nbash bin/validate.sh                     # from within the project directory\nbash bin/validate.sh <ProjectName> --verbose\n```\n\nExit 0 = ready. Exit 1 = errors to fix.\n\n| Check | Condition |\n|-------|-----------|\n| Required files | `METADATA.md`, `README.md`, `INTENT.md`, `ARCHITECTURE.md` exist |\n| METADATA fields | Fields required at the project's current `status:` level are set |\n| INTENT.md | Has content \u2014 not still the template placeholder |\n| Naming | Spec files use `SCREEN-*` or `FEATURE-*` prefix |\n| Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` have been renamed or deleted |\n| Open Questions | All applicable files have `## Open Questions` section |\n| Stack files | If `stack:` is declared, `GLOBAL_RULES/stack/<component>.md` exists for each component |\n\n---\n\n## Step 4 \u2014 Convert  *(optional)*\n\n```bash\nbash bin/convert.sh <ProjectName> > convert-prompt.md\nbash bin/convert.sh               > convert-prompt.md    # from within project directory\n```\n\nGenerates: `CONVERT.md` expansion rules + stack references + concise spec files.\nFeed to an AI agent to produce detailed, implementation-ready specs.\nReplace the concise spec files with the expanded output, then proceed to Step 5.\n\n`build.sh` includes `CONVERT.md` inline \u2014 the AI can expand during build without this step.\n\n---\n\n## Step 5 \u2014 Build\n\n```bash\nbash bin/build.sh <ProjectName> > build-prompt.md\nbash bin/build.sh               > build-prompt.md    # from within project directory\n```\n\nCreates annotated git tag `build/<ProjectName>/YYYY-MM-DD.N` and generates the build prompt.\nFeed `build-prompt.md` to an AI agent to build the application.\n\n| Flag | Effect |\n|------|--------|\n| `--no-tag` | Generate prompt without creating a tag |\n| `--tag-only` | Tag the commit without generating a prompt |\n\n```bash\ngit tag -l \"build/<Project>/*\"\ngit diff build/<Project>/2026-03-19.1..build/<Project>/2026-03-20.1 -- <Project>/\ngit checkout build/<Project>/2026-03-19.1 -- <Project>/DATABASE.md\n```\n\n---\n\n## Step 6 \u2014 Iterate\n\nEdit spec files \u2192 validate \u2192 build. Each build creates a permanent git tag.\n\n---\n\n## Step 7 \u2014 Promote\n\n```bash\ncp -r Specifications/<ProjectName> ~/projects/<ProjectName>\ncd ~/projects/<ProjectName>\ngit init && git add -A && git commit -m \"Initial spec\"\ngit remote add origin <url>\n```\n\nRun `python3 bin/create_project.py <ProjectName>` from `Specifications/` to scaffold the code project.\n",
 };
 
 marked.setOptions({ gfm: true, breaks: false });
@@ -256,6 +336,15 @@ function showGuide(key) {
 function scrollAnchor(id) {
   var el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleDetail(sid) {
+  var el = document.getElementById('sd-' + sid);
+  var toggle = el && el.previousElementSibling && el.previousElementSibling.querySelector('.sc-toggle');
+  if (!el) return;
+  var open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  if (toggle) toggle.innerHTML = open ? '&#9656;' : '&#9662;';
 }
 
 // Init from hash

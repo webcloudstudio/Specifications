@@ -1,7 +1,6 @@
 # Specification Process
 
 Prototyper converts concise specification files into AI agent build prompts.
-Input: a directory of `.md` spec files. Output: a prompt that builds a working application.
 
 ---
 
@@ -11,94 +10,72 @@ Input: a directory of `.md` spec files. Output: a prompt that builds a working a
 bash bin/create_spec.sh <ProjectName>
 ```
 
-Creates `Specifications/<ProjectName>/` from `GLOBAL_RULES/spec_template/`.
+Creates `Specifications/<ProjectName>/` with template files from `GLOBAL_RULES/spec_template/`.
 
-**Generated files:**
+Edit `METADATA.md` immediately. The only field required to proceed is `name:`.
+Additional fields are required by `validate.sh` as the project progresses to higher status levels:
 
-| File | Required | Action |
-|------|----------|--------|
-| `METADATA.md` | Yes | Fill in required fields (see below) |
-| `README.md` | Yes | One sentence: what this project is |
-| `INTENT.md` | Yes | Why it exists, who it's for, what it is not |
-| `ARCHITECTURE.md` | Yes | Modules, routes, directory layout |
-| `DATABASE.md` | If has DB | Tables, columns, types — delete if no database |
-| `UI.md` | If has UI | Shared patterns across screens — delete if no UI |
-| `SCREEN-Example.md` | Rename | Rename to `SCREEN-<Name>.md` for each screen |
-| `FEATURE-Example.md` | Rename | Rename to `FEATURE-<Name>.md` for cross-cutting behavior |
-
-**Required METADATA.md fields:**
-
-```
-name:              ProjectName
-display_name:      Project Name
-short_description: One sentence description.
-status:            IDEA
-```
-
-**Optional METADATA.md fields:**
-
-```
-stack:     flask/sqlite
-port:      5000
-tags:      dashboard, admin
-```
+| Field | Required at | Description |
+|-------|-------------|-------------|
+| `name:` | always | Directory name and slug |
+| `display_name:` | PROTOTYPE | Human-readable name |
+| `short_description:` | PROTOTYPE | One sentence summary |
+| `status:` | PROTOTYPE | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |
+| `stack:` | ACTIVE | Technology stack, slash-delimited: `flask/sqlite` |
+| `port:` | ACTIVE | Service port |
+| `tags:` | ACTIVE | Category tags, comma-delimited |
 
 ---
 
 ## Step 2 — Write the Spec Files
 
-Edit each file in `<ProjectName>/`. Delete `DATABASE.md` or `UI.md` if not applicable.
-Rename `SCREEN-Example.md` → `SCREEN-<Name>.md` and `FEATURE-Example.md` → `FEATURE-<Name>.md`.
+Edit each file. Delete `DATABASE.md` or `UI.md` if not applicable.
+Rename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.
 
-**Conventions:**
-
-| Rule | Detail |
-|------|--------|
-| `## Open Questions` | Required at end of all files except `README.md`, `METADATA.md`, `INTENT.md` |
-| SCREEN files | `SCREEN-<Name>.md` — route, layout, columns, interactions |
-| FEATURE files | `FEATURE-<Name>.md` — trigger, sequence, reads, writes |
-| Spec style | Write concise specs: tables, bullets, short descriptions. `CONVERT.md` rules expand them. |
-| Stack patterns | Do not repeat stack patterns in specs — they come from `GLOBAL_RULES/stack/` |
+| Convention | Rule |
+|------------|------|
+| Scope | Concise specs only: tables, bullets, short descriptions. `CONVERT.md` expands them. |
+| Screens | `SCREEN-<Name>.md` — route, layout, columns, interactions |
+| Features | `FEATURE-<Name>.md` — trigger, sequence, reads, writes |
+| End section | All files except `README.md`, `METADATA.md`, `INTENT.md` must end with `## Open Questions` |
+| Stack | Do not repeat stack patterns — they come from `GLOBAL_RULES/stack/` |
 
 ---
 
 ## Step 3 — Validate
 
 ```bash
-bash bin/validate.sh <ProjectName>    # from repo root
-bash bin/validate.sh                  # from within the project directory
+bash bin/validate.sh <ProjectName>       # from repo root
+bash bin/validate.sh                     # from within the project directory
 bash bin/validate.sh <ProjectName> --verbose
 ```
 
-Exit 0 = ready to build. Exit 1 = errors (must fix before proceeding).
-
-**Checks:**
+Exit 0 = ready. Exit 1 = errors to fix.
 
 | Check | Condition |
 |-------|-----------|
-| Required files | `METADATA.md`, `README.md`, `INTENT.md`, `ARCHITECTURE.md` |
-| METADATA fields | `name`, `display_name`, `short_description`, `status` must be set |
-| Status value | Must be one of: `IDEA` `PROTOTYPE` `ACTIVE` `PRODUCTION` `ARCHIVED` |
-| INTENT.md | Must have content — not the template placeholder |
-| Naming | Spec files must use `SCREEN-*` or `FEATURE-*` prefix |
-| Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` must not remain |
-| Open Questions | All applicable files must have `## Open Questions` section |
-| Stack files | If `stack:` declared in METADATA.md, `GLOBAL_RULES/stack/<component>.md` must exist |
+| Required files | `METADATA.md`, `README.md`, `INTENT.md`, `ARCHITECTURE.md` exist |
+| METADATA fields | Fields required at the project's current `status:` level are set |
+| INTENT.md | Has content — not still the template placeholder |
+| Naming | Spec files use `SCREEN-*` or `FEATURE-*` prefix |
+| Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` have been renamed or deleted |
+| Open Questions | All applicable files have `## Open Questions` section |
+| Stack files | If `stack:` is declared, `GLOBAL_RULES/stack/<component>.md` exists for each component |
 
 ---
 
-## Step 4 — Convert (Optional)
+## Step 4 — Convert  *(optional)*
 
 ```bash
 bash bin/convert.sh <ProjectName> > convert-prompt.md
-bash bin/convert.sh                > convert-prompt.md    # from within project directory
+bash bin/convert.sh               > convert-prompt.md    # from within project directory
 ```
 
-Generates an expansion prompt: `CONVERT.md` rules + stack reference files + concise spec files.
-Feed `convert-prompt.md` to an AI agent to produce expanded, implementation-ready specs.
-Replace concise spec files with the expanded versions, then proceed to Step 5.
+Generates: `CONVERT.md` expansion rules + stack references + concise spec files.
+Feed to an AI agent to produce detailed, implementation-ready specs.
+Replace the concise spec files with the expanded output, then proceed to Step 5.
 
-> This step is optional. `build.sh` includes `CONVERT.md` inline — the AI can expand during build.
+`build.sh` includes `CONVERT.md` inline — the AI can expand during build without this step.
 
 ---
 
@@ -109,36 +86,29 @@ bash bin/build.sh <ProjectName> > build-prompt.md
 bash bin/build.sh               > build-prompt.md    # from within project directory
 ```
 
-Creates an annotated git tag `build/<ProjectName>/YYYY-MM-DD.N` and generates a complete build prompt.
+Creates annotated git tag `build/<ProjectName>/YYYY-MM-DD.N` and generates the build prompt.
 Feed `build-prompt.md` to an AI agent to build the application.
-
-**Flags:**
 
 | Flag | Effect |
 |------|--------|
-| `--no-tag` | Generate prompt without creating a git tag |
-| `--tag-only` | Tag the current commit without generating a prompt |
-
-**Build tags** are annotated git objects — not pruned by `git gc`.
+| `--no-tag` | Generate prompt without creating a tag |
+| `--tag-only` | Tag the commit without generating a prompt |
 
 ```bash
-git tag -l "build/<Project>/*"                                                # list all build tags
-git show build/<Project>/2026-03-20.1                                         # inspect a tag
-git diff build/<Project>/2026-03-19.1..build/<Project>/2026-03-20.1 -- <Project>/  # compare specs
-git checkout build/<Project>/2026-03-19.1 -- <Project>/DATABASE.md           # restore one file
+git tag -l "build/<Project>/*"
+git diff build/<Project>/2026-03-19.1..build/<Project>/2026-03-20.1 -- <Project>/
+git checkout build/<Project>/2026-03-19.1 -- <Project>/DATABASE.md
 ```
 
 ---
 
 ## Step 6 — Iterate
 
-Edit spec files → re-validate → re-build. Repeat until the build prompt produces the desired result.
+Edit spec files → validate → build. Each build creates a permanent git tag.
 
 ---
 
 ## Step 7 — Promote
-
-When the application works, promote the spec directory to its own repository:
 
 ```bash
 cp -r Specifications/<ProjectName> ~/projects/<ProjectName>
@@ -147,5 +117,4 @@ git init && git add -A && git commit -m "Initial spec"
 git remote add origin <url>
 ```
 
-The spec directory becomes the project's authoritative specification.
 Run `python3 bin/create_project.py <ProjectName>` from `Specifications/` to scaffold the code project.

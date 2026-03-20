@@ -6,172 +6,132 @@
 <title>GAME — Specification</title>
 <link rel="stylesheet" href="../doc/styles/gem.css">
 <style>
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 body {
   display: flex; flex-direction: column; height: 100vh; margin: 0; overflow: hidden;
   background: var(--c-bg); color: var(--c-text);
-  font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.5;
+  font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif; font-size: 14px; line-height: 1.5;
 }
 
-/* ── Topbar ──────────────────────────────── */
+/* ── Topbar ── */
 #topbar {
-  display: flex; align-items: center; gap: 0;
+  display: flex; align-items: center;
   background: var(--c-topbar-bg); border-bottom: 1px solid var(--c-side-border);
-  height: 42px; flex-shrink: 0; padding: 0;
+  height: 40px; flex-shrink: 0;
 }
 .tb-brand {
   font-size: 13px; font-weight: 700; color: #fff;
-  padding: 0 18px; height: 100%; display: flex; align-items: center;
-  border-right: 1px solid var(--c-side-border); text-decoration: none;
-  white-space: nowrap;
-}
-.tb-brand:hover { background: rgba(255,255,255,.07); }
-.tb-brand span { color: var(--c-accent); margin-right: 6px; font-size: 15px; }
-.tb-project {
-  font-size: 13px; font-weight: 600; color: var(--c-side-link);
   padding: 0 16px; height: 100%; display: flex; align-items: center;
+  border-right: 1px solid var(--c-side-border); text-decoration: none; white-space: nowrap;
+}
+.tb-brand b { color: var(--c-accent); margin-right: 5px; }
+.tb-brand:hover { background: rgba(255,255,255,.07); }
+.tb-crumb {
+  font-size: 12.5px; color: var(--c-side-link);
+  padding: 0 14px; height: 100%; display: flex; align-items: center; gap: 5px;
   border-right: 1px solid var(--c-side-border);
 }
-.tb-sep { color: var(--c-side-section); padding: 0 4px; }
-.tb-project-name { color: #fff; }
+.tb-crumb-sep { color: var(--c-side-section); }
+.tb-crumb-name { color: #fff; font-weight: 600; }
 .tb-spacer { flex: 1; }
 .tb-btn {
-  font-size: 12px; font-weight: 500; color: var(--c-side-link);
-  padding: 0 16px; height: 100%; display: flex; align-items: center; gap: 6px;
-  border-left: 1px solid var(--c-side-border); text-decoration: none;
-  transition: color .1s, background .1s; white-space: nowrap;
+  font-size: 12px; color: var(--c-side-link);
+  padding: 0 14px; height: 100%; display: flex; align-items: center;
+  border-left: 1px solid var(--c-side-border); text-decoration: none; white-space: nowrap;
+  transition: color .1s, background .1s;
 }
 .tb-btn:hover { color: #fff; background: rgba(255,255,255,.07); }
-.tb-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-/* ── Main layout ─────────────────────────── */
+/* ── Main ── */
 #main { display: flex; flex: 1; overflow: hidden; }
 
-/* ── Sidebar ─────────────────────────────── */
+/* ── Sidebar ── */
 #sidebar {
-  width: 220px; min-width: 220px; background: var(--c-side-bg);
+  width: 210px; min-width: 210px; background: var(--c-side-bg);
   border-right: 1px solid var(--c-side-border);
   overflow-y: auto; display: flex; flex-direction: column;
 }
 #sidebar::-webkit-scrollbar { width: 4px; }
 #sidebar::-webkit-scrollbar-thumb { background: var(--c-side-border); border-radius: 2px; }
-.nav-group { padding: 8px 0 2px; }
+.nav-sep { border-top: 1px solid var(--c-side-border); margin: 5px 0; }
 .nav-group-label {
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-side-section); padding: 0 14px 3px;
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-side-section); padding: 8px 14px 3px;
 }
 .nav-item {
-  display: block; padding: 5px 14px 5px 16px; font-size: 12.5px;
+  display: block; padding: 4px 14px 4px 16px;
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   color: var(--c-side-link); cursor: pointer;
   border-left: 3px solid transparent; transition: all .1s; text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .nav-item:hover { color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }
-.nav-item.active { color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(255,255,255,.04); }
+.nav-item.active { color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(44,182,125,.06); }
 
-/* ── Content ─────────────────────────────── */
-#content { flex: 1; overflow-y: auto; padding: 24px 36px 40px; }
+/* ── Content ── */
+#content { flex: 1; overflow-y: auto; padding: 20px 30px 40px; }
 
-/* Project info card */
-.project-info {
+/* ── Project info card (always visible) ── */
+.project-card {
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
-  border-radius: 7px; padding: 18px 22px; margin-bottom: 20px;
+  border-radius: 6px; padding: 16px 20px; margin-bottom: 18px;
 }
-.project-info h1 {
-  color: #fff; font-size: 20px; margin: 0 0 3px 0; border: none;
-  display: flex; align-items: center; gap: 10px;
-}
-.status {
-  display: inline-block; padding: 2px 9px; border-radius: 10px;
-  font-size: 10px; font-weight: 600; color: #fff;
-}
-.project-info .desc { font-size: 13px; margin: 5px 0 0; color: var(--c-side-link); line-height: 1.5; }
-.meta-row {
-  font-size: 11.5px; color: var(--c-side-section); margin-top: 8px;
-  display: flex; gap: 14px; flex-wrap: wrap;
-}
-.meta-row span { white-space: nowrap; }
+.pc-name { color: #fff; font-size: 20px; font-weight: 700; margin: 0 0 2px; }
+.pc-title { color: var(--c-accent); font-size: 13px; font-weight: 500; margin: 0 0 6px; }
+.pc-desc { color: var(--c-side-link); font-size: 13px; line-height: 1.5; margin: 0 0 8px; }
+.pc-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+.pc-meta span { font-size: 11.5px; color: var(--c-side-section); white-space: nowrap; }
 
+/* ── File grid ── */
 .group-label {
   font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-h3); margin: 16px 0 6px;
+  letter-spacing: 1px; color: var(--c-h3); margin: 14px 0 5px;
   padding-bottom: 3px; border-bottom: 1px solid var(--c-td-border);
 }
-.file-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 6px; margin-bottom: 4px;
-}
+.file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 5px; margin-bottom: 4px; }
 .file-card {
-  background: #fff; border: 1px solid var(--c-td-border); border-radius: 5px;
-  padding: 8px 12px; cursor: pointer; transition: all .12s; text-decoration: none;
-  display: flex; align-items: center; gap: 7px;
+  background: var(--c-bg); border: 1px solid var(--c-td-border); border-radius: 4px;
+  padding: 6px 10px; cursor: pointer; transition: border-color .12s; text-decoration: none;
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
+  color: var(--c-h2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.file-card:hover { border-color: var(--c-accent); background: var(--c-tr-hover); }
-.file-card .icon { font-size: 14px; flex-shrink: 0; }
-.file-card .name { font-size: 12.5px; font-weight: 600; color: var(--c-h1); }
+.file-card:hover { border-color: var(--c-accent); color: var(--c-accent); }
+.file-card.active { border-color: var(--c-accent); background: var(--c-callout-bg); color: var(--c-accent); }
 
-/* Doc panel */
-#doc-panel { display: none; }
-.back-link {
-  color: var(--c-accent); text-decoration: none; font-size: 12px;
-  display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px;
-}
-.back-link:hover { text-decoration: underline; }
-
-/* Rendered markdown */
+/* ── Rendered markdown ── */
+#doc-content { display: none; }
 .md h1 { font-size: 22px; font-weight: 700; color: var(--c-h1); border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin: 20px 0 12px; }
-.md h2 { font-size: 17px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 16px 0 8px; }
-.md h3 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 6px; }
+.md h1:first-child { margin-top: 0; }
+.md h2 { font-size: 16px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 16px 0 8px; }
+.md h3 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 5px; }
 .md h4 { font-size: 13px; font-weight: 600; color: var(--c-h3); margin: 10px 0 4px; }
-.md p { margin: 8px 0; line-height: 1.6; }
-.md ul, .md ol { margin: 6px 0 6px 18px; line-height: 1.6; }
-.md li { margin: 3px 0; }
+.md p { margin: 7px 0; line-height: 1.65; }
+.md ul, .md ol { margin: 5px 0 5px 18px; line-height: 1.65; }
+.md li { margin: 2px 0; }
+.md a { color: #1565C0; text-decoration: underline; }
+.md a:visited { color: #1565C0; }
 .md table { border-collapse: collapse; margin: 10px 0; font-size: 13px; width: 100%; }
-.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 6px 12px; text-align: left; }
-.md td { padding: 5px 12px; border-bottom: 1px solid var(--c-td-border); background: #fff; }
+.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 5px 12px; text-align: left; }
+.md td { padding: 4px 12px; border-bottom: 1px solid var(--c-td-border); }
 .md tr:nth-child(even) td { background: var(--c-tr-alt); }
 .md tr:hover td { background: var(--c-tr-hover); }
-.md pre {
-  background: var(--c-pre-bg); color: var(--c-pre-text);
-  border: 1px solid var(--c-side-border); border-radius: 5px;
-  padding: 12px 14px; overflow-x: auto; margin: 10px 0; font-size: 12.5px; line-height: 1.5;
-}
-.md code {
-  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
-  background: var(--c-code-bg); color: var(--c-code-text);
-  padding: 1px 4px; border-radius: 3px; border: 1px solid var(--c-td-border);
-}
-.md pre code { background: none; border: none; padding: 0; color: inherit; }
-.md blockquote {
-  border-left: 3px solid var(--c-accent); padding: 8px 14px; margin: 10px 0;
-  background: var(--c-callout-bg); border-radius: 0 4px 4px 0; font-size: 13px;
-}
-.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 16px 0; }
+.md pre { background: var(--c-pre-bg); color: var(--c-pre-text); border: 1px solid var(--c-side-border); border-radius: 4px; padding: 10px 12px; overflow-x: auto; margin: 8px 0; font-size: 12.5px; line-height: 1.5; }
+.md code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px; background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }
+.md pre code { background: none; padding: 0; color: inherit; }
+.md blockquote { border-left: 3px solid var(--c-accent); padding: 6px 12px; margin: 8px 0; background: var(--c-callout-bg); border-radius: 0 4px 4px 0; }
+.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 14px 0; }
 </style>
 </head>
 <body>
 
 <div id="topbar">
-  <a class="tb-brand" href="../doc/index.html">
-    <span>&#9654;</span>Prototyper
-  </a>
-  <div class="tb-project">
-    <span class="tb-sep">&#47;</span>&nbsp;<span class="tb-project-name">GAME</span>
+  <a class="tb-brand" href="../doc/index.html"><b>&#9654;</b>Prototyper</a>
+  <div class="tb-crumb">
+    <span class="tb-crumb-sep">/</span>
+    <span class="tb-crumb-name">GAME</span>
   </div>
   <div class="tb-spacer"></div>
-  <a class="tb-btn" href="../doc/index.html#projects">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-      <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-    </svg>
-    All Projects
-  </a>
-  <a class="tb-btn" href="../doc/index.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-    </svg>
-    Documentation
-  </a>
+  <a class="tb-btn" href="../doc/index.html">Documentation</a>
 </div>
 
 <div id="main">
@@ -180,11 +140,9 @@ body {
   </div>
 
   <div id="content">
-    <div id="home-panel"></div>
-    <div id="doc-panel">
-      <a href="javascript:showHome()" class="back-link">&#8592; Back to overview</a>
-      <div id="doc-content" class="md"></div>
-    </div>
+    <div id="project-card" class="project-card"></div>
+    <div id="file-grid-area"></div>
+    <div id="doc-content" class="md"></div>
   </div>
 </div>
 
@@ -211,156 +169,103 @@ const DOCS = {
 
 marked.setOptions({ gfm: true, breaks: false });
 
-const STATUS_COLORS = {
-  IDEA: '#94a3b8', PROTOTYPE: '#fdab3d', ACTIVE: '#0073ea',
-  PRODUCTION: '#00c875', ARCHIVED: '#4a5568'
-};
-
-const FILE_ICONS = {
-  METADATA: '\u{1F4CB}', README: '\u{1F4D6}', INTENT: '\u{1F3AF}',
-  ARCHITECTURE: '\u{1F3D7}', DATABASE: '\u{1F5C4}', UI: '\u{1F3A8}',
-  'UI-GENERAL': '\u{1F3A8}', 'FEATURE_MAP': '\u26A1', FUNCTIONALITY: '\u{1F504}',
-};
-
-function getIcon(name) {
-  if (name.startsWith('SCREEN-')) return '\u{1F5A5}';
-  if (name.startsWith('FEATURE-')) return '\u26A1';
-  return FILE_ICONS[name] || '\u{1F4C4}';
-}
-
-function displayName(key) {
-  if (key === 'METADATA') return 'Metadata';
-  if (key === 'README') return 'Overview';
-  if (key === 'INTENT') return 'Intent';
-  if (key === 'ARCHITECTURE') return 'Architecture';
-  if (key === 'DATABASE') return 'Database';
-  if (key === 'UI' || key === 'UI-GENERAL') return 'UI Standards';
-  if (key === 'FEATURE_MAP') return 'Feature Map';
-  if (key === 'FUNCTIONALITY') return 'Functionality';
-  if (key.startsWith('SCREEN-')) return key.slice(7).replace(/-/g, ' ');
-  if (key.startsWith('FEATURE-')) return key.slice(8).replace(/-/g, ' ');
-  return key.replace(/-/g, ' ').replace(/_/g, ' ');
-}
-
+// Group keys into sections. METADATA excluded from nav (used for project card only).
 function groupFiles(keys) {
-  const groups = { Core: [], Design: [], Screens: [], Features: [], Other: [] };
-  const core = new Set(['METADATA', 'README', 'INTENT']);
-  const design = new Set(['ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL', 'FEATURE_MAP', 'FUNCTIONALITY']);
+  const coreSet = new Set(['README', 'INTENT', 'ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL']);
+  const featureSet = new Set(['FEATURE_MAP', 'FUNCTIONALITY']);
+  const groups = { 'Project Core': [], 'Project Features': [], 'Screens': [], 'Other': [] };
   keys.forEach(k => {
-    if (core.has(k)) groups.Core.push(k);
-    else if (design.has(k)) groups.Design.push(k);
+    if (k === 'METADATA') return;
+    if (coreSet.has(k)) groups['Project Core'].push(k);
+    else if (featureSet.has(k) || k.startsWith('FEATURE-')) groups['Project Features'].push(k);
     else if (k.startsWith('SCREEN-')) groups.Screens.push(k);
-    else if (k.startsWith('FEATURE-')) groups.Features.push(k);
     else groups.Other.push(k);
   });
   return groups;
 }
 
 function parseMeta(text) {
-  const fields = {};
+  const f = {};
   text.split('\n').forEach(line => {
-    const m = line.match(/^(\w[\w_]*):\s*(.+)/);
-    if (m) fields[m[1]] = m[2].trim();
+    const m = line.match(/^([\w]+):\s*(.*)/);
+    if (m) f[m[1]] = m[2].trim();
   });
-  return fields;
+  return f;
 }
 
 function buildNav(groups) {
   const nav = document.getElementById('nav');
-  const labels = { Core: 'Core', Design: 'Design', Screens: 'Screens', Features: 'Features', Other: 'Other' };
-  const order = ['Core', 'Design', 'Screens', 'Features', 'Other'];
-  // Home link first
-  const homeDiv = document.createElement('div');
-  homeDiv.className = 'nav-group';
-  const homeA = document.createElement('a');
-  homeA.className = 'nav-item active';
-  homeA.id = 'nav-home';
-  homeA.textContent = 'Overview';
-  homeA.onclick = showHome;
-  homeDiv.appendChild(homeA);
-  nav.appendChild(homeDiv);
-
+  const order = ['Project Core', 'Project Features', 'Screens', 'Other'];
   order.forEach(group => {
-    const files = groups[group].filter(k => k !== 'METADATA');
+    const files = groups[group];
     if (!files.length) return;
     const div = document.createElement('div');
-    div.className = 'nav-group';
-    div.innerHTML = '<div class="nav-group-label">' + labels[group] + '</div>';
+    div.innerHTML = '<div class="nav-group-label">' + group + '</div>';
     files.forEach(key => {
       const a = document.createElement('a');
       a.className = 'nav-item';
-      a.textContent = displayName(key);
+      a.textContent = key + '.md';
       a.dataset.key = key;
       a.onclick = () => showDoc(key);
       div.appendChild(a);
     });
     nav.appendChild(div);
+    nav.appendChild(Object.assign(document.createElement('div'), { className: 'nav-sep' }));
   });
 }
 
-function buildHome(groups, meta) {
-  const home = document.getElementById('home-panel');
-  let html = '';
-
-  const statusColor = STATUS_COLORS[meta.status] || '#94a3b8';
-  html += '<div class="project-info">';
-  html += '<h1>' + (meta.display_name || meta.name || '');
-  if (meta.status) html += ' <span class="status" style="background:' + statusColor + '">' + meta.status + '</span>';
-  html += '</h1>';
-  if (meta.short_description) html += '<p class="desc">' + meta.short_description + '</p>';
+function buildProjectCard(meta) {
+  const card = document.getElementById('project-card');
+  const name = meta.display_name || meta.name || '';
+  const title = meta.title || '';
+  const desc = meta.short_description || '';
   const metaItems = [];
-  if (meta.stack) metaItems.push('Stack: ' + meta.stack);
+  if (meta.stack) metaItems.push(meta.stack);
   if (meta.port) metaItems.push('Port: ' + meta.port);
-  if (meta.namespace && meta.namespace !== 'development') metaItems.push('Namespace: ' + meta.namespace);
-  if (metaItems.length) {
-    html += '<div class="meta-row">' + metaItems.map(i => '<span>' + i + '</span>').join('') + '</div>';
-  }
-  html += '</div>';
+  card.innerHTML =
+    '<div class="pc-name">' + name + '</div>' +
+    (title ? '<div class="pc-title">' + title + '</div>' : '') +
+    (desc  ? '<div class="pc-desc">'  + desc  + '</div>' : '') +
+    (metaItems.length ? '<div class="pc-meta">' + metaItems.map(i => '<span>' + i + '</span>').join('') + '</div>' : '');
+}
 
-  const order = ['Core', 'Design', 'Screens', 'Features', 'Other'];
-  const labels = { Core: 'Core', Design: 'Architecture & Data', Screens: 'Screens', Features: 'Features', Other: 'Other' };
+function buildFileGrid(groups) {
+  const area = document.getElementById('file-grid-area');
+  const order = ['Project Core', 'Project Features', 'Screens', 'Other'];
+  let html = '';
   order.forEach(group => {
-    const files = groups[group].filter(k => k !== 'METADATA');
+    const files = groups[group];
     if (!files.length) return;
-    html += '<div class="group-label">' + labels[group] + '</div>';
-    html += '<div class="file-grid">';
+    html += '<div class="group-label">' + group + '</div><div class="file-grid">';
     files.forEach(key => {
-      html += '<a class="file-card" onclick="showDoc(\'' + key + '\')">';
-      html += '<span class="icon">' + getIcon(key) + '</span>';
-      html += '<span class="name">' + displayName(key) + '</span>';
-      html += '</a>';
+      html += '<div class="file-card" data-key="' + key + '" onclick="showDoc(\'' + key + '\')">' + key + '.md</div>';
     });
     html += '</div>';
   });
-
-  home.innerHTML = html;
+  area.innerHTML = html;
 }
 
 function showDoc(key) {
   if (!DOCS[key]) return;
-  document.getElementById('home-panel').style.display = 'none';
-  document.getElementById('doc-panel').style.display = 'block';
-  document.getElementById('doc-content').innerHTML = marked.parse(DOCS[key]);
+  document.getElementById('file-grid-area').style.display = 'none';
+  const dc = document.getElementById('doc-content');
+  dc.style.display = 'block';
+  dc.innerHTML = marked.parse(DOCS[key]);
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  const link = document.querySelector('.nav-item[data-key="' + key + '"]');
-  if (link) link.classList.add('active');
-  document.getElementById('content').scrollTop = 0;
-}
-
-function showHome() {
-  document.getElementById('home-panel').style.display = 'block';
-  document.getElementById('doc-panel').style.display = 'none';
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  const h = document.getElementById('nav-home');
-  if (h) h.classList.add('active');
+  document.querySelectorAll('.file-card').forEach(el => el.classList.remove('active'));
+  const navLink = document.querySelector('.nav-item[data-key="' + key + '"]');
+  if (navLink) navLink.classList.add('active');
+  const card = document.querySelector('.file-card[data-key="' + key + '"]');
+  if (card) card.classList.add('active');
   document.getElementById('content').scrollTop = 0;
 }
 
 const keys = Object.keys(DOCS).sort();
 const groups = groupFiles(keys);
 const meta = DOCS['METADATA'] ? parseMeta(DOCS['METADATA']) : {};
+buildProjectCard(meta);
 buildNav(groups);
-buildHome(groups, meta);
+buildFileGrid(groups);
 </script>
 </body>
 </html>
