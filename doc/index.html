@@ -3,37 +3,128 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Specifications — Documentation</title>
+<title>Specifications</title>
 <link rel="stylesheet" type="text/css" href="styles/gem.css">
 <style>
-.spec-intro { color: var(--c-h3); font-size: 15px; margin: 0 0 24px 0; line-height: 1.6; }
-.spec-projects { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 16px 0 28px; }
-.spec-project-card {
+/* ── Hero ───────────────────────────── */
+.hero {
+  position: relative; overflow: hidden;
+  background: var(--c-side-bg); border: 1px solid var(--c-side-border);
+  border-radius: 10px; margin-bottom: 32px;
+}
+.hero-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+.hero-content {
+  position: relative; padding: 36px 32px 30px;
+}
+.hero h1 {
+  color: #fff; font-size: 28px; margin: 0 0 8px; border: none;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.hero p {
+  color: var(--c-side-link); font-size: 15px; line-height: 1.6; margin: 0;
+}
+
+/* ── Workflow steps ──────────────────── */
+.steps { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+.step {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--c-td-border);
+}
+.step:last-child { border-bottom: none; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--c-accent); color: var(--c-side-bg);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.step-icon {
+  width: 22px; height: 22px; color: var(--c-h3); flex-shrink: 0; margin-top: 3px;
+}
+.step-icon svg { width: 100%; height: 100%; }
+.step-body { flex: 1; }
+.step-label { font-weight: 700; color: var(--c-h1); font-size: 14px; margin-bottom: 2px; }
+.step-cmd {
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
+  background: var(--c-code-bg); color: var(--c-code-text);
+  padding: 2px 8px; border-radius: 4px; border: 1px solid var(--c-td-border);
+  display: inline-block; margin-bottom: 3px;
+}
+.step-desc { font-size: 13px; color: var(--c-h3); }
+.step-note {
+  font-size: 13px; color: var(--c-h3); margin-top: 12px;
+  padding: 10px 14px; background: var(--c-callout-bg);
+  border-left: 3px solid var(--c-accent); border-radius: 0 4px 4px 0;
+}
+
+/* ── File reference ──────────────────── */
+.file-group-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-h3); margin: 16px 0 8px;
+}
+.file-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px; margin-bottom: 16px;
+}
+.file-card {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: #fff; border: 1px solid var(--c-td-border); border-radius: 6px;
+  padding: 12px 14px; transition: border-color .15s;
+}
+.file-card:hover { border-color: var(--c-accent); }
+.file-card-icon { width: 20px; height: 20px; color: var(--c-accent); flex-shrink: 0; margin-top: 1px; }
+.file-card-icon svg { width: 100%; height: 100%; }
+.file-card-name { font-weight: 700; font-size: 13px; color: var(--c-h1); }
+.file-card-desc { font-size: 12px; color: var(--c-h3); margin-top: 1px; }
+
+/* ── Conventions ─────────────────────── */
+.conv-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px; margin-top: 12px;
+}
+.conv-item {
+  background: var(--c-callout-bg); border: 1px solid var(--c-callout-border);
+  border-radius: 6px; padding: 12px 14px;
+}
+.conv-title { font-weight: 700; font-size: 13px; color: var(--c-h2); margin-bottom: 3px; }
+.conv-body { font-size: 12.5px; color: var(--c-text); line-height: 1.5; }
+.conv-body code {
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
+  background: var(--c-code-bg); color: var(--c-code-text);
+  padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Project cards ───────────────────── */
+.proj-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+.proj-card {
   display: block; background: #fff; border: 1px solid var(--c-td-border);
   border-radius: 8px; padding: 18px 20px; text-decoration: none;
-  transition: border-color .15s, box-shadow .15s; cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
 }
-.spec-project-card:hover {
-  border-color: var(--c-accent);
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-.spec-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.spec-card-name { font-size: 17px; font-weight: 700; color: var(--c-h1); }
-.spec-status {
+.proj-card:hover { border-color: var(--c-accent); box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+.proj-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.proj-name { font-size: 17px; font-weight: 700; color: var(--c-h1); }
+.proj-status {
   display: inline-block; padding: 2px 10px; border-radius: 12px;
   font-size: 10px; font-weight: 600; color: #fff;
 }
-.spec-card-desc { font-size: 13px; color: var(--c-h3); margin: 0 0 8px; line-height: 1.5; }
-.spec-file-list { display: flex; flex-wrap: wrap; gap: 5px; }
-.spec-file-pill {
+.proj-desc { font-size: 13px; color: var(--c-h3); margin-bottom: 6px; }
+.proj-stack { font-size: 11px; color: var(--c-h3); margin-bottom: 6px; font-style: italic; }
+.proj-files { display: flex; flex-wrap: wrap; gap: 4px; }
+.file-pill {
   background: var(--c-code-bg); color: var(--c-code-text);
-  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  font-size: 10.5px; padding: 2px 7px; border-radius: 10px;
   border: 1px solid var(--c-td-border);
 }
-.spec-divider {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-h3); margin: 28px 0 10px;
-  padding-bottom: 4px; border-bottom: 1px solid var(--c-td-border);
+
+/* ── Section headings ────────────────── */
+section h2 {
+  font-size: 20px; color: var(--c-h1); font-weight: 700;
+  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 6px;
+  margin: 28px 0 14px;
 }
 </style>
 </head>
@@ -43,105 +134,183 @@
 <div class="gem-toc-subtitle">Spec-Driven Build System</div>
 <div class="gem-toc-section">Documentation</div>
 <a href="#workflow">Workflow</a>
-<a href="#setup">Project Setup</a>
-<div class="gem-toc-section">Projects</div>
-<a href="../GAME/index.html">GAME</a>
+<a href="#files">File Reference</a>
+<a href="#conventions">Conventions</a>
+<div class="gem-toc-section">Projects</div><a href="../GAME/index.html">GAME</a>
 </nav>
 <main class="gem-content-panel">
+<div class="hero">
+<svg class="hero-bg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--c-accent)" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="var(--c-accent)" stop-opacity=".03"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" fill="url(#hg)"/>
+  <circle cx="680" cy="40" r="80" fill="var(--c-accent)" opacity=".06"/>
+  <circle cx="740" cy="120" r="50" fill="var(--c-accent)" opacity=".04"/>
+  <circle cx="60" cy="160" r="60" fill="var(--c-accent)" opacity=".05"/>
+  <path d="M0 180 Q200 140 400 160 T800 130 L800 200 L0 200Z" fill="var(--c-accent)" opacity=".04"/>
+</svg>
+<div class="hero-content">
 <h1>Specifications</h1>
-
-<p class="spec-intro">Write concise markdown specs. Expand them with AI. Build the application in one shot. Iterate by editing specs and rebuilding.</p>
-
-<section id="workflow">
-<h1>Specification Process</h1>
-<p>Write concise specs. Expand them. Build the application. Each step has one command.</p>
-<ol>
-<li><code>bash bin/create_spec.sh MyProject &quot;Short description&quot;</code> — creates <code>Specifications/MyProject/</code> with template files</li>
-<li>Edit the spec files in <code>MyProject/</code> — fill in INTENT.md, ARCHITECTURE.md, add SCREEN and FEATURE files as needed. Delete DATABASE.md or UI.md if not applicable.</li>
-<li><code>bash bin/validate.sh MyProject</code> — checks required files, naming, fields. Exit 0 = ready.</li>
-<li><code>bash bin/convert.sh MyProject &gt; convert-prompt.md</code> — generates expansion prompt. Feed to an AI agent to produce detailed specs.</li>
-<li><code>bash bin/build.sh MyProject &gt; build-prompt.md</code> — tags the commit, generates a complete build prompt. Feed to an AI agent to build the application.</li>
-<li>Promote: copy the spec directory to its own repo when the application works.</li>
-</ol>
-<p>After a build, iterate: edit specs, re-validate, re-build. Each build creates a new annotated git tag (<code>build/MyProject/2026-03-20.1</code>) that permanently records the exact spec state used.</p>
-<pre><code># Diff specs between builds
-git diff build/MyProject/2026-03-19.1..build/MyProject/2026-03-20.1 -- MyProject/</code></pre>
-</section>
-
-<section id="setup">
-<h1>Project Setup</h1>
-<p>Every spec directory needs these four files. <code>bin/create_spec.sh</code> generates them from templates.</p>
-<h2>Required Files</h2>
-<table><thead><tr>
-<th>File</th>
-<th>Purpose</th>
-</tr></thead><tbody>
-<tr>
-<td><code>METADATA.md</code></td>
-<td>Identity: name, display_name, short_description, status (IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED)</td>
-</tr>
-<tr>
-<td><code>README.md</code></td>
-<td>One-line project description</td>
-</tr>
-<tr>
-<td><code>INTENT.md</code></td>
-<td>Why this project exists, who it's for, scope boundaries</td>
-</tr>
-<tr>
-<td><code>ARCHITECTURE.md</code></td>
-<td>Modules, routes, directory layout</td>
-</tr>
-</tbody></table>
-<h2>Conditional Files</h2>
-<p>Add what applies. Delete the rest.</p>
-<table><thead><tr>
-<th>File</th>
-<th>When</th>
-</tr></thead><tbody>
-<tr>
-<td><code>DATABASE.md</code></td>
-<td>Project has a database — tables and columns only</td>
-</tr>
-<tr>
-<td><code>UI.md</code></td>
-<td>Project has a UI — shared patterns across screens</td>
-</tr>
-<tr>
-<td><code>SCREEN-{Name}.md</code></td>
-<td>One per screen: route, layout, columns, interactions</td>
-</tr>
-<tr>
-<td><code>FEATURE-{Name}.md</code></td>
-<td>Cross-cutting behavior: trigger, sequence, reads, writes</td>
-</tr>
-</tbody></table>
-<h2>Conventions</h2>
-<ul>
-<li>All spec files except README, METADATA, and INTENT end with <code>## Open Questions</code></li>
-<li>File names use uppercase with hyphens: <code>SCREEN-Dashboard.md</code>, <code>FEATURE-Scan.md</code></li>
-<li>Write concise specs (tables, bullets). CONVERT.md rules expand them during conversion.</li>
-<li>Stack-specific patterns come from <code>GLOBAL_RULES/stack/</code> files — don't repeat them in specs.</li>
-</ul>
-<h2>Global Rules</h2>
-<pre><code>GLOBAL_RULES/
-  CONVERT.md           How concise specs expand into detailed specs
-  CLAUDE_RULES.md      Agent behavior contract (injected into projects)
-  stack/               Technology patterns (flask.md, sqlite.md, ...)
-  spec_template/       Template files used by create_spec.sh</code></pre>
-</section>
-
-<div class="spec-divider">Projects</div>
-
-<div class="spec-projects">
-
-<a href="../GAME/index.html" class="spec-project-card">
-<div class="spec-card-header"><span class="spec-card-name">GAME</span><span class="spec-status" style="background:#0073ea">ACTIVE</span></div>
-<p class="spec-card-desc">Dashboard for managing local AI-assisted projects</p>
-<div class="spec-file-list"><span class="spec-file-pill">Metadata</span> <span class="spec-file-pill">Architecture</span> <span class="spec-file-pill">Database</span> <span class="spec-file-pill">Feature Map</span> <span class="spec-file-pill">Functionality</span> <span class="spec-file-pill">Overview</span> <span class="spec-file-pill">Screen: CONFIGURATION</span> <span class="spec-file-pill">Ui General</span></div>
-</a>
-
+<p>Write concise markdown specs. Expand them with AI.<br>Build the application in one shot.</p>
 </div>
+</div>
+<section id="workflow"><h2>Workflow</h2>
+<div class="steps">
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+<div class="step-body">
+<div class="step-label">Create</div>
+<code class="step-cmd">bin/create_spec.sh MyProject</code>
+<div class="step-desc">Scaffolds a spec directory with all template files</div>
+</div>
+</div>
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+<div class="step-body">
+<div class="step-label">Edit</div>
+<code class="step-cmd">Edit files in MyProject/</code>
+<div class="step-desc">Fill in INTENT, ARCHITECTURE, add SCREEN and FEATURE files</div>
+</div>
+</div>
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+<div class="step-body">
+<div class="step-label">Validate</div>
+<code class="step-cmd">bin/validate.sh MyProject</code>
+<div class="step-desc">Checks required files, naming, fields. Exit 0 = ready</div>
+</div>
+</div>
+<div class="step">
+<div class="step-num">4</div>
+<div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></div>
+<div class="step-body">
+<div class="step-label">Convert</div>
+<code class="step-cmd">bin/convert.sh MyProject</code>
+<div class="step-desc">Generates expansion prompt for AI agent</div>
+</div>
+</div>
+<div class="step">
+<div class="step-num">5</div>
+<div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+<div class="step-body">
+<div class="step-label">Build</div>
+<code class="step-cmd">bin/build.sh MyProject</code>
+<div class="step-desc">Tags commit, generates complete build prompt</div>
+</div>
+</div>
+<div class="step">
+<div class="step-num">6</div>
+<div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+<div class="step-body">
+<div class="step-label">Promote</div>
+<code class="step-cmd">Copy to own repo</code>
+<div class="step-desc">Spec directory becomes the project&#x27;s documentation</div>
+</div>
+</div>
+</div>
+<p class="step-note">After a build, iterate: edit specs &rarr; validate &rarr; build. Each build creates an annotated git tag that permanently records the spec state.</p>
+</section>
+<section id="files"><h2>File Reference</h2>
+<div class="file-group-label">Required</div>
+<div class="file-grid">
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">METADATA.md</div>
+<div class="file-card-desc">Project identity: name, status, description</div>
+</div>
+</div>
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">README.md</div>
+<div class="file-card-desc">One-line project description</div>
+</div>
+</div>
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">INTENT.md</div>
+<div class="file-card-desc">Why this project exists, scope boundaries</div>
+</div>
+</div>
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">ARCHITECTURE.md</div>
+<div class="file-card-desc">Modules, routes, directory layout</div>
+</div>
+</div>
+</div>
+<div class="file-group-label">Conditional</div>
+<div class="file-grid">
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">DATABASE.md</div>
+<div class="file-card-desc">Tables and columns (if project has a DB)</div>
+</div>
+</div>
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">UI.md</div>
+<div class="file-card-desc">Shared UI patterns (if project has a UI)</div>
+</div>
+</div>
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">SCREEN-{Name}.md</div>
+<div class="file-card-desc">Per-screen: route, layout, interactions</div>
+</div>
+</div>
+<div class="file-card">
+<div class="file-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+<div class="file-card-body">
+<div class="file-card-name">FEATURE-{Name}.md</div>
+<div class="file-card-desc">Cross-cutting behavior: trigger, sequence</div>
+</div>
+</div>
+</div>
+</section>
+<section id="conventions"><h2>Conventions</h2>
+<div class="conv-grid">
+<div class="conv-item">
+<div class="conv-title">Open Questions</div>
+<div class="conv-body">All spec files except README, METADATA, INTENT end with <code>## Open Questions</code></div>
+</div>
+<div class="conv-item">
+<div class="conv-title">Naming</div>
+<div class="conv-body">Uppercase with hyphens: <code>SCREEN-Dashboard.md</code>, <code>FEATURE-Scan.md</code></div>
+</div>
+<div class="conv-item">
+<div class="conv-title">Concise Specs</div>
+<div class="conv-body">Write tables and bullets. CONVERT.md rules expand them during conversion.</div>
+</div>
+<div class="conv-item">
+<div class="conv-title">Stack Patterns</div>
+<div class="conv-body"><code>GLOBAL_RULES/stack/</code> has technology patterns &mdash; don&rsquo;t repeat in specs.</div>
+</div>
+</div>
+</section>
+<section id="projects"><h2>Projects</h2>
+<div class="proj-grid">
+<a href="../GAME/index.html" class="proj-card">
+<div class="proj-header"><span class="proj-name">GAME</span><span class="proj-status" style="background:#0073ea">ACTIVE</span></div>
+<div class="proj-desc">Dashboard for managing local AI-assisted projects</div>
+<div class="proj-stack">Python/Flask/SQLite/Bootstrap5</div>
+<div class="proj-files"><span class="file-pill">Metadata</span> <span class="file-pill">Architecture</span> <span class="file-pill">Database</span> <span class="file-pill">Feature Map</span> <span class="file-pill">Functionality</span> <span class="file-pill">Overview</span> <span class="file-pill">Screen: CONFIGURATION</span> <span class="file-pill">Ui General</span></div>
+</a>
+</div>
+</section>
 <div class="gem-page-footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies. All rights reserved.</div>
 </main>
 </body>

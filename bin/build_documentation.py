@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """
-Build doc/index.html — single-page documentation for the Specifications repo.
-
-Renders the workflow (SPECIFICATION-PROCESS.md), setup guide (PROJECT-SETUP.md),
-and links to discovered project spec directories.
+Build doc/index.html — polished single-page documentation for the Specifications repo.
 """
-import html as html_lib
+import html as h
 import re
 import sys
 from pathlib import Path
@@ -13,19 +10,59 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).parent.parent
 DOC_DIR = PROJECT_DIR / "doc"
 
-SKIP_DIRS = {
-    'archive', 'bin', 'doc', 'GLOBAL_RULES', 'logs', 'venv',
-    '__pycache__', '.git',
-}
+SKIP_DIRS = {'archive', 'bin', 'doc', 'GLOBAL_RULES', 'logs', 'venv', '__pycache__', '.git'}
 
 STATUS_COLORS = {
     'IDEA': '#94a3b8', 'PROTOTYPE': '#fdab3d', 'ACTIVE': '#0073ea',
     'PRODUCTION': '#00c875', 'ARCHIVED': '#4a5568',
 }
 
+# ── SVG graphics ─────────────────────────────────────────────────────────────
+
+HERO_SVG = '''<svg class="hero-bg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--c-accent)" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="var(--c-accent)" stop-opacity=".03"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" fill="url(#hg)"/>
+  <circle cx="680" cy="40" r="80" fill="var(--c-accent)" opacity=".06"/>
+  <circle cx="740" cy="120" r="50" fill="var(--c-accent)" opacity=".04"/>
+  <circle cx="60" cy="160" r="60" fill="var(--c-accent)" opacity=".05"/>
+  <path d="M0 180 Q200 140 400 160 T800 130 L800 200 L0 200Z" fill="var(--c-accent)" opacity=".04"/>
+</svg>'''
+
+STEP_ICONS = [
+    # 1: scaffold
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+    # 2: edit
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    # 3: validate
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    # 4: convert
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>',
+    # 5: build
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    # 6: promote
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+]
+
+FILE_ICONS = {
+    'METADATA': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>',
+    'README': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+    'INTENT': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    'ARCHITECTURE': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>',
+    'DATABASE': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+    'UI': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    'SCREEN': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    'FEATURE': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+}
+
+
+# ── Discovery ────────────────────────────────────────────────────────────────
 
 def read_meta(path):
-    """Parse key: value fields from a METADATA.md file."""
     fields = {}
     if path.exists():
         for line in path.read_text(encoding='utf-8', errors='replace').splitlines():
@@ -36,12 +73,9 @@ def read_meta(path):
 
 
 def discover_projects():
-    """Find real project spec directories (not build artifacts, proposed, etc.)."""
     projects = []
     for entry in sorted(PROJECT_DIR.iterdir()):
-        if not entry.is_dir():
-            continue
-        if entry.name.startswith('.') or entry.name.startswith('Proposed'):
+        if not entry.is_dir() or entry.name.startswith('.') or entry.name.startswith('Proposed'):
             continue
         if entry.name in SKIP_DIRS:
             continue
@@ -49,248 +83,312 @@ def discover_projects():
         if not meta.exists():
             continue
         fields = read_meta(meta)
-        # Skip build pipeline artifacts
         if fields.get('type', '').lower() in ('build', 'build-artifact'):
             continue
-        display = fields.get('display_name', entry.name)
-        status = fields.get('status', '')
-        desc = fields.get('short_description', '')
         md_files = sorted(
             [f.name for f in entry.iterdir()
-             if f.suffix == '.md'
-             and not f.name.startswith('PROPOSED')
-             and not f.name.startswith('UNUSED')],
+             if f.suffix == '.md' and not f.name.startswith('PROPOSED') and not f.name.startswith('UNUSED')],
             key=lambda n: (0 if n == 'METADATA.md' else 1, n)
         )
         if md_files:
-            projects.append((entry.name, display, status, desc, md_files))
+            projects.append((entry.name, fields.get('display_name', entry.name),
+                             fields.get('status', ''), fields.get('short_description', ''),
+                             fields.get('stack', ''), md_files))
     return projects
 
 
-# ── Markdown → HTML ──────────────────────────────────────────────────────────
+# ── HTML generation ──────────────────────────────────────────────────────────
 
-def inline(text):
-    parts = re.split(r'(`[^`]+`)', text)
-    out = []
-    for p in parts:
-        if p.startswith('`') and p.endswith('`') and len(p) > 2:
-            out.append(f'<code>{html_lib.escape(p[1:-1])}</code>')
-        else:
-            p = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', p)
-            p = re.sub(r'(?<!\w)\*([^*\n]+?)\*(?!\w)', r'<em>\1</em>', p)
-            p = re.sub(r'\[([^\]]+)\]\(([^)]+)\)',
-                       lambda m: f'<a href="{html_lib.escape(m.group(2))}">{m.group(1)}</a>', p)
-            out.append(p)
-    return ''.join(out)
+def file_icon(fname):
+    name = fname.replace('.md', '')
+    if name.startswith('SCREEN-'): return FILE_ICONS['SCREEN']
+    if name.startswith('FEATURE-'): return FILE_ICONS['FEATURE']
+    return FILE_ICONS.get(name, FILE_ICONS['README'])
 
-
-def md_to_html(text):
-    lines = text.splitlines()
-    out = []
-    i = 0
-    in_list = None
-    para = []
-
-    def flush():
-        nonlocal para
-        if para:
-            out.append(f'<p>{inline(" ".join(para))}</p>')
-            para = []
-
-    def close_list():
-        nonlocal in_list
-        if in_list:
-            out.append(f'</{in_list}>')
-            in_list = None
-
-    while i < len(lines):
-        line = lines[i]
-        if line.startswith('```'):
-            flush(); close_list(); i += 1
-            code = []
-            while i < len(lines) and not lines[i].startswith('```'):
-                code.append(lines[i]); i += 1
-            i += 1
-            out.append(f'<pre><code>{html_lib.escape(chr(10).join(code))}</code></pre>')
-            continue
-        m = re.match(r'^(#{1,6})\s+(.*)', line)
-        if m:
-            flush(); close_list()
-            out.append(f'<h{len(m.group(1))}>{inline(m.group(2).strip())}</h{len(m.group(1))}>')
-            i += 1; continue
-        if re.match(r'^(?:---+|\*\*\*+|___+)\s*$', line):
-            flush(); close_list(); out.append('<hr>'); i += 1; continue
-        if line.lstrip().startswith('|') and '|' in line:
-            flush(); close_list()
-            rows = []
-            while i < len(lines) and lines[i].lstrip().startswith('|'):
-                rows.append(lines[i]); i += 1
-            if len(rows) >= 2:
-                cells = lambda r: [c.strip() for c in r.strip().strip('|').split('|')]
-                out.append('<table><thead><tr>')
-                for h in cells(rows[0]):
-                    out.append(f'<th>{inline(h)}</th>')
-                out.append('</tr></thead><tbody>')
-                for row in rows[2:]:
-                    if re.match(r'^[\s|:-]+$', row): continue
-                    out.append('<tr>')
-                    for c in cells(row):
-                        out.append(f'<td>{inline(c)}</td>')
-                    out.append('</tr>')
-                out.append('</tbody></table>')
-            continue
-        if line.startswith('>'):
-            flush(); close_list()
-            out.append(f'<blockquote><p>{inline(line[1:].strip())}</p></blockquote>')
-            i += 1; continue
-        m = re.match(r'^[-*+]\s+(.*)', line)
-        if m:
-            flush()
-            if in_list != 'ul': close_list(); out.append('<ul>'); in_list = 'ul'
-            out.append(f'<li>{inline(m.group(1))}</li>'); i += 1; continue
-        m = re.match(r'^\d+\.\s+(.*)', line)
-        if m:
-            flush()
-            if in_list != 'ol': close_list(); out.append('<ol>'); in_list = 'ol'
-            out.append(f'<li>{inline(m.group(1))}</li>'); i += 1; continue
-        if line.strip() == '':
-            flush(); close_list(); i += 1; continue
-        close_list(); para.append(line); i += 1
-
-    flush(); close_list()
-    return '\n'.join(out)
-
-
-# ── HTML assembly ────────────────────────────────────────────────────────────
 
 def file_label(fname):
     name = fname.replace('.md', '')
     if name.startswith('SCREEN-'): return 'Screen: ' + name[7:]
     if name.startswith('FEATURE-'): return 'Feature: ' + name[8:]
-    labels = {
-        'METADATA': 'Metadata', 'README': 'Overview', 'INTENT': 'Intent',
-        'ARCHITECTURE': 'Architecture', 'DATABASE': 'Database', 'UI': 'UI Standards',
-    }
-    return labels.get(name, name.replace('_', ' ').replace('-', ' ').title())
+    return {'METADATA': 'Metadata', 'README': 'Overview', 'INTENT': 'Intent',
+            'ARCHITECTURE': 'Architecture', 'DATABASE': 'Database', 'UI': 'UI Standards',
+            }.get(name, name.replace('_', ' ').replace('-', ' ').title())
 
 
-def build_sidebar(projects):
-    s = [
-        '<nav class="gem-sidebar-panel">',
-        '<div class="gem-toc-title">Specifications</div>',
-        '<div class="gem-toc-subtitle">Spec-Driven Build System</div>',
-        '<div class="gem-toc-section">Documentation</div>',
-        '<a href="#workflow">Workflow</a>',
-        '<a href="#setup">Project Setup</a>',
-    ]
+WORKFLOW_STEPS = [
+    ("Create", "bin/create_spec.sh MyProject", "Scaffolds a spec directory with all template files"),
+    ("Edit", "Edit files in MyProject/", "Fill in INTENT, ARCHITECTURE, add SCREEN and FEATURE files"),
+    ("Validate", "bin/validate.sh MyProject", "Checks required files, naming, fields. Exit 0 = ready"),
+    ("Convert", "bin/convert.sh MyProject", "Generates expansion prompt for AI agent"),
+    ("Build", "bin/build.sh MyProject", "Tags commit, generates complete build prompt"),
+    ("Promote", "Copy to own repo", "Spec directory becomes the project's documentation"),
+]
+
+FILE_REF = [
+    ("Required", [
+        ("METADATA.md", "Project identity: name, status, description"),
+        ("README.md", "One-line project description"),
+        ("INTENT.md", "Why this project exists, scope boundaries"),
+        ("ARCHITECTURE.md", "Modules, routes, directory layout"),
+    ]),
+    ("Conditional", [
+        ("DATABASE.md", "Tables and columns (if project has a DB)"),
+        ("UI.md", "Shared UI patterns (if project has a UI)"),
+        ("SCREEN-{Name}.md", "Per-screen: route, layout, interactions"),
+        ("FEATURE-{Name}.md", "Cross-cutting behavior: trigger, sequence"),
+    ]),
+]
+
+
+def build_page(projects):
+    # ── Sidebar ──
+    sidebar = f'''<nav class="gem-sidebar-panel">
+<div class="gem-toc-title">Specifications</div>
+<div class="gem-toc-subtitle">Spec-Driven Build System</div>
+<div class="gem-toc-section">Documentation</div>
+<a href="#workflow">Workflow</a>
+<a href="#files">File Reference</a>
+<a href="#conventions">Conventions</a>
+{"".join(f'<div class="gem-toc-section">Projects</div>' + "".join(f'<a href="../{h.escape(slug)}/index.html">{h.escape(display)}</a>' for slug, display, *_ in projects) if projects else "")}
+</nav>'''
+
+    # ── Hero banner ──
+    hero = f'''<div class="hero">
+{HERO_SVG}
+<div class="hero-content">
+<h1>Specifications</h1>
+<p>Write concise markdown specs. Expand them with AI.<br>Build the application in one shot.</p>
+</div>
+</div>'''
+
+    # ── Workflow steps ──
+    steps_html = '<section id="workflow"><h2>Workflow</h2>\n<div class="steps">\n'
+    for i, (label, cmd, desc) in enumerate(WORKFLOW_STEPS):
+        icon = STEP_ICONS[i] if i < len(STEP_ICONS) else ''
+        steps_html += f'''<div class="step">
+<div class="step-num">{i+1}</div>
+<div class="step-icon">{icon}</div>
+<div class="step-body">
+<div class="step-label">{h.escape(label)}</div>
+<code class="step-cmd">{h.escape(cmd)}</code>
+<div class="step-desc">{h.escape(desc)}</div>
+</div>
+</div>\n'''
+    steps_html += '</div>\n'
+    steps_html += '<p class="step-note">After a build, iterate: edit specs &rarr; validate &rarr; build. '
+    steps_html += 'Each build creates an annotated git tag that permanently records the spec state.</p>\n'
+    steps_html += '</section>'
+
+    # ── File reference ──
+    files_html = '<section id="files"><h2>File Reference</h2>\n'
+    for group_label, files in FILE_REF:
+        files_html += f'<div class="file-group-label">{h.escape(group_label)}</div>\n'
+        files_html += '<div class="file-grid">\n'
+        for fname, fdesc in files:
+            icon = file_icon(fname)
+            files_html += f'''<div class="file-card">
+<div class="file-card-icon">{icon}</div>
+<div class="file-card-body">
+<div class="file-card-name">{h.escape(fname)}</div>
+<div class="file-card-desc">{h.escape(fdesc)}</div>
+</div>
+</div>\n'''
+        files_html += '</div>\n'
+    files_html += '</section>'
+
+    # ── Conventions ──
+    conv_html = '''<section id="conventions"><h2>Conventions</h2>
+<div class="conv-grid">
+<div class="conv-item">
+<div class="conv-title">Open Questions</div>
+<div class="conv-body">All spec files except README, METADATA, INTENT end with <code>## Open Questions</code></div>
+</div>
+<div class="conv-item">
+<div class="conv-title">Naming</div>
+<div class="conv-body">Uppercase with hyphens: <code>SCREEN-Dashboard.md</code>, <code>FEATURE-Scan.md</code></div>
+</div>
+<div class="conv-item">
+<div class="conv-title">Concise Specs</div>
+<div class="conv-body">Write tables and bullets. CONVERT.md rules expand them during conversion.</div>
+</div>
+<div class="conv-item">
+<div class="conv-title">Stack Patterns</div>
+<div class="conv-body"><code>GLOBAL_RULES/stack/</code> has technology patterns &mdash; don&rsquo;t repeat in specs.</div>
+</div>
+</div>
+</section>'''
+
+    # ── Projects ──
+    proj_html = ''
     if projects:
-        s.append('<div class="gem-toc-section">Projects</div>')
-        for slug, display, status, desc, _ in projects:
-            s.append(f'<a href="../{html_lib.escape(slug)}/index.html">{html_lib.escape(display)}</a>')
-    s.append('</nav>')
-    return '\n'.join(s)
+        proj_html = '<section id="projects"><h2>Projects</h2>\n<div class="proj-grid">\n'
+        for slug, display, status, desc, stack, md_files in projects:
+            color = STATUS_COLORS.get(status, '#94a3b8')
+            badge = f'<span class="proj-status" style="background:{color}">{h.escape(status)}</span>' if status else ''
+            stack_html = f'<div class="proj-stack">{h.escape(stack)}</div>' if stack else ''
+            pills = ' '.join(f'<span class="file-pill">{h.escape(file_label(f))}</span>' for f in md_files)
+            proj_html += f'''<a href="../{h.escape(slug)}/index.html" class="proj-card">
+<div class="proj-header"><span class="proj-name">{h.escape(display)}</span>{badge}</div>
+<div class="proj-desc">{h.escape(desc)}</div>
+{stack_html}
+<div class="proj-files">{pills}</div>
+</a>\n'''
+        proj_html += '</div>\n</section>'
 
+    # ── Footer ──
+    footer = '<div class="gem-page-footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies. All rights reserved.</div>'
 
-def build_project_card(slug, display, status, desc, md_files):
-    color = STATUS_COLORS.get(status, '#94a3b8')
-    badge = f'<span class="spec-status" style="background:{color}">{html_lib.escape(status)}</span>' if status else ''
-    desc_html = f'<p class="spec-card-desc">{html_lib.escape(desc)}</p>' if desc else ''
-    pills = ' '.join(
-        f'<span class="spec-file-pill">{html_lib.escape(file_label(f))}</span>'
-        for f in md_files
-    )
-    return f'''<a href="../{html_lib.escape(slug)}/index.html" class="spec-project-card">
-<div class="spec-card-header"><span class="spec-card-name">{html_lib.escape(display)}</span>{badge}</div>
-{desc_html}
-<div class="spec-file-list">{pills}</div>
-</a>'''
-
-
-def build_page(sidebar, body):
-    return f"""<!DOCTYPE html>
+    return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Specifications — Documentation</title>
+<title>Specifications</title>
 <link rel="stylesheet" type="text/css" href="styles/gem.css">
 <style>
-.spec-intro {{ color: var(--c-h3); font-size: 15px; margin: 0 0 24px 0; line-height: 1.6; }}
-.spec-projects {{ display: grid; grid-template-columns: 1fr; gap: 16px; margin: 16px 0 28px; }}
-.spec-project-card {{
+/* ── Hero ───────────────────────────── */
+.hero {{
+  position: relative; overflow: hidden;
+  background: var(--c-side-bg); border: 1px solid var(--c-side-border);
+  border-radius: 10px; margin-bottom: 32px;
+}}
+.hero-bg {{
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}}
+.hero-content {{
+  position: relative; padding: 36px 32px 30px;
+}}
+.hero h1 {{
+  color: #fff; font-size: 28px; margin: 0 0 8px; border: none;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}}
+.hero p {{
+  color: var(--c-side-link); font-size: 15px; line-height: 1.6; margin: 0;
+}}
+
+/* ── Workflow steps ──────────────────── */
+.steps {{ display: flex; flex-direction: column; gap: 0; margin: 16px 0; }}
+.step {{
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--c-td-border);
+}}
+.step:last-child {{ border-bottom: none; }}
+.step-num {{
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--c-accent); color: var(--c-side-bg);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}}
+.step-icon {{
+  width: 22px; height: 22px; color: var(--c-h3); flex-shrink: 0; margin-top: 3px;
+}}
+.step-icon svg {{ width: 100%; height: 100%; }}
+.step-body {{ flex: 1; }}
+.step-label {{ font-weight: 700; color: var(--c-h1); font-size: 14px; margin-bottom: 2px; }}
+.step-cmd {{
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
+  background: var(--c-code-bg); color: var(--c-code-text);
+  padding: 2px 8px; border-radius: 4px; border: 1px solid var(--c-td-border);
+  display: inline-block; margin-bottom: 3px;
+}}
+.step-desc {{ font-size: 13px; color: var(--c-h3); }}
+.step-note {{
+  font-size: 13px; color: var(--c-h3); margin-top: 12px;
+  padding: 10px 14px; background: var(--c-callout-bg);
+  border-left: 3px solid var(--c-accent); border-radius: 0 4px 4px 0;
+}}
+
+/* ── File reference ──────────────────── */
+.file-group-label {{
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-h3); margin: 16px 0 8px;
+}}
+.file-grid {{
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px; margin-bottom: 16px;
+}}
+.file-card {{
+  display: flex; align-items: flex-start; gap: 12px;
+  background: #fff; border: 1px solid var(--c-td-border); border-radius: 6px;
+  padding: 12px 14px; transition: border-color .15s;
+}}
+.file-card:hover {{ border-color: var(--c-accent); }}
+.file-card-icon {{ width: 20px; height: 20px; color: var(--c-accent); flex-shrink: 0; margin-top: 1px; }}
+.file-card-icon svg {{ width: 100%; height: 100%; }}
+.file-card-name {{ font-weight: 700; font-size: 13px; color: var(--c-h1); }}
+.file-card-desc {{ font-size: 12px; color: var(--c-h3); margin-top: 1px; }}
+
+/* ── Conventions ─────────────────────── */
+.conv-grid {{
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px; margin-top: 12px;
+}}
+.conv-item {{
+  background: var(--c-callout-bg); border: 1px solid var(--c-callout-border);
+  border-radius: 6px; padding: 12px 14px;
+}}
+.conv-title {{ font-weight: 700; font-size: 13px; color: var(--c-h2); margin-bottom: 3px; }}
+.conv-body {{ font-size: 12.5px; color: var(--c-text); line-height: 1.5; }}
+.conv-body code {{
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
+  background: var(--c-code-bg); color: var(--c-code-text);
+  padding: 1px 4px; border-radius: 3px;
+}}
+
+/* ── Project cards ───────────────────── */
+.proj-grid {{ display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }}
+.proj-card {{
   display: block; background: #fff; border: 1px solid var(--c-td-border);
   border-radius: 8px; padding: 18px 20px; text-decoration: none;
-  transition: border-color .15s, box-shadow .15s; cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
 }}
-.spec-project-card:hover {{
-  border-color: var(--c-accent);
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}}
-.spec-card-header {{ display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }}
-.spec-card-name {{ font-size: 17px; font-weight: 700; color: var(--c-h1); }}
-.spec-status {{
+.proj-card:hover {{ border-color: var(--c-accent); box-shadow: 0 2px 12px rgba(0,0,0,.06); }}
+.proj-header {{ display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }}
+.proj-name {{ font-size: 17px; font-weight: 700; color: var(--c-h1); }}
+.proj-status {{
   display: inline-block; padding: 2px 10px; border-radius: 12px;
   font-size: 10px; font-weight: 600; color: #fff;
 }}
-.spec-card-desc {{ font-size: 13px; color: var(--c-h3); margin: 0 0 8px; line-height: 1.5; }}
-.spec-file-list {{ display: flex; flex-wrap: wrap; gap: 5px; }}
-.spec-file-pill {{
+.proj-desc {{ font-size: 13px; color: var(--c-h3); margin-bottom: 6px; }}
+.proj-stack {{ font-size: 11px; color: var(--c-h3); margin-bottom: 6px; font-style: italic; }}
+.proj-files {{ display: flex; flex-wrap: wrap; gap: 4px; }}
+.file-pill {{
   background: var(--c-code-bg); color: var(--c-code-text);
-  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  font-size: 10.5px; padding: 2px 7px; border-radius: 10px;
   border: 1px solid var(--c-td-border);
 }}
-.spec-divider {{
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-h3); margin: 28px 0 10px;
-  padding-bottom: 4px; border-bottom: 1px solid var(--c-td-border);
+
+/* ── Section headings ────────────────── */
+section h2 {{
+  font-size: 20px; color: var(--c-h1); font-weight: 700;
+  border-bottom: 2px solid var(--c-h1-border); padding-bottom: 6px;
+  margin: 28px 0 14px;
 }}
 </style>
 </head>
 <body class="gem-page">
 {sidebar}
 <main class="gem-content-panel">
-{body}
-<div class="gem-page-footer">Copyright &copy; 2026 Ed Barlow / SQL Technologies. All rights reserved.</div>
+{hero}
+{steps_html}
+{files_html}
+{conv_html}
+{proj_html}
+{footer}
 </main>
 </body>
-</html>"""
+</html>'''
 
 
 def main():
     DOC_DIR.mkdir(exist_ok=True)
     projects = discover_projects()
-    body = []
-
-    # Intro
-    body.append('<h1>Specifications</h1>')
-    body.append('<p class="spec-intro">Write concise markdown specs. '
-                'Expand them with AI. Build the application in one shot. '
-                'Iterate by editing specs and rebuilding.</p>')
-
-    # Workflow
-    process_path = DOC_DIR / "SPECIFICATION-PROCESS.md"
-    if process_path.exists():
-        body.append(f'<section id="workflow">\n{md_to_html(process_path.read_text(encoding="utf-8", errors="replace"))}\n</section>')
-        print(f"  [ok] SPECIFICATION-PROCESS.md")
-
-    # Setup
-    setup_path = DOC_DIR / "PROJECT-SETUP.md"
-    if setup_path.exists():
-        body.append(f'<section id="setup">\n{md_to_html(setup_path.read_text(encoding="utf-8", errors="replace"))}\n</section>')
-        print(f"  [ok] PROJECT-SETUP.md")
-
-    # Projects
-    if projects:
-        body.append('<div class="spec-divider">Projects</div>')
-        body.append('<div class="spec-projects">')
-        for slug, display, status, desc, md_files in projects:
-            body.append(build_project_card(slug, display, status, desc, md_files))
-            print(f"  [ok] {slug}/ ({len(md_files)} files)")
-        body.append('</div>')
-
-    sidebar = build_sidebar(projects)
+    for slug, display, *_ in projects:
+        print(f"  [ok] {slug}/")
     out_path = DOC_DIR / "index.html"
-    out_path.write_text(build_page(sidebar, '\n\n'.join(body)), encoding='utf-8')
+    out_path.write_text(build_page(projects), encoding='utf-8')
     print(f"\nWrote {out_path}  ({out_path.stat().st_size // 1024} KB)")
 
 
