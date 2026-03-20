@@ -247,6 +247,9 @@ def create_project(name: str, dry_run: bool) -> None:
     copy_template("common.sh", project_dir / "bin" / "common.sh")
     copy_template("common.py", project_dir / "bin" / "common.py")
 
+    # root index.html — redirect to doc/index.html
+    copy_template("index.html", project_dir / "index.html")
+
     # .env.sample
     (project_dir / ".env.sample").write_text("# Required environment variables\n", encoding="utf-8")
 
@@ -327,6 +330,11 @@ def update_projects(project_filter, dry_run: bool) -> None:
                     dest = project_dir / "bin" / tmpl_name
                     if dest.exists() and copy_template(tmpl_name, dest):
                         changed = True
+
+                # root index.html — propagate redirect template
+                ix = project_dir / "index.html"
+                if copy_template("index.html", ix):
+                    changed = True
 
                 # Verify/update git_repo in METADATA.md
                 meta = project_dir / "METADATA.md"

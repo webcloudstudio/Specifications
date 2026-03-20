@@ -45,6 +45,7 @@ RULES_BY_LEVEL = {
         "metadata_has_description",
         "has_claude_md",
         "claude_md_has_dev_commands",
+        "has_root_index_html",
     ],
     "ACTIVE": [
         "metadata_has_port",
@@ -260,6 +261,10 @@ def check(rule: str, project_path: str, metadata: dict, scripts: list, registere
     if rule == "claude_md_has_dev_commands":
         ok = bool(re.search(r'^## Dev Commands', claude_md, re.MULTILINE | re.IGNORECASE))
         return CheckResult(rule, ok, "" if ok else "AGENTS.md (or CLAUDE.md) missing '## Dev Commands' section")
+
+    if rule == "has_root_index_html":
+        exists = os.path.isfile(os.path.join(project_path, "index.html"))
+        return CheckResult(rule, exists, "" if exists else "index.html not found — run: python3 bin/create_project.py --update --project <name>")
 
     # -- ACTIVE level --
     if rule == "metadata_has_port":
