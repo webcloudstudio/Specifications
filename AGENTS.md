@@ -44,12 +44,12 @@ Specifications/
     CONVERT.md                     Specification expansion rules (global methodology)
     DOCUMENTATION_BRANDING.md      Documentation theming and color standards
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
-    spec_template/                 Template files for create_spec.sh
+    spec_template/                 Template files for setup_prototype.sh
     templates/                     Canonical common.sh and common.py (code projects)
     gitignore                      Standard .gitignore distributed to projects
 
   bin/                             Spec tooling — all scripts work on Specifications/<ProjectName>/
-    create_spec.sh                 Scaffold new spec directory from templates
+    setup_prototype.sh                 Scaffold new spec directory from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
     build.sh                       Tag commit + generate build prompt
@@ -92,7 +92,7 @@ Spec files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Q
 
 ```bash
 # Scaffold a new spec directory from templates
-bash bin/create_spec.sh <project-name>
+bash bin/setup_prototype.sh <project-name>
 
 # Validate spec completeness and correctness
 bash bin/validate.sh <project-name> [--verbose]
@@ -143,7 +143,7 @@ spec state used for each build, enabling spec-to-spec diffs between builds.
 
 ## Architecture
 
-### bin/create_spec.sh
+### bin/setup_prototype.sh
 Scaffolds a new specification directory from `GLOBAL_RULES/spec_template/`. Substitutes
 project name, slug, description, and date into template placeholders. Creates all required
 and optional template files.

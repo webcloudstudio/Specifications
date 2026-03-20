@@ -82,11 +82,11 @@ echo ""
 
 # --- Bin scripts ---
 echo "Bin scripts:"
-for script in bin/create_spec.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh; do
+for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh; do
     assert_file "$script"
 done
 # Verify CommandCenter headers
-for script in bin/create_spec.sh bin/validate.sh bin/convert.sh bin/build.sh; do
+for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh; do
     assert_contains "$script" "CommandCenter Operation"
     assert_contains "$script" "# Name:"
     assert_contains "$script" "# Category:"
@@ -95,7 +95,7 @@ echo ""
 
 # --- Script executability ---
 echo "Script executability:"
-for script in bin/create_spec.sh bin/validate.sh bin/convert.sh bin/build.sh; do
+for script in bin/setup_prototype.sh bin/validate.sh bin/convert.sh bin/build.sh; do
     assert "$script is executable" test -x "$script"
 done
 echo ""
@@ -108,8 +108,8 @@ if [ -d "$TEST_DIR" ]; then
 fi
 
 # Create a test project
-bash bin/create_spec.sh __test_project__ "Test project for validation" > /dev/null 2>&1
-assert "create_spec.sh creates directory" test -d "$TEST_DIR"
+bash bin/setup_prototype.sh __test_project__ "Test project for validation" > /dev/null 2>&1
+assert "setup_prototype.sh creates directory" test -d "$TEST_DIR"
 assert "created METADATA.md" test -f "$TEST_DIR/METADATA.md"
 assert "created README.md" test -f "$TEST_DIR/README.md"
 assert "created INTENT.md" test -f "$TEST_DIR/INTENT.md"

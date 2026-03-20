@@ -1,12 +1,12 @@
 #!/bin/bash
 # CommandCenter Operation
-# Name: Create Spec
+# Name: Setup Prototype
 # Category: maintenance
 
 # Scaffolds a new specification directory from templates.
 #
 # Usage:
-#   bash bin/create_spec.sh <project-name>
+#   bash bin/setup_prototype.sh <project-name>
 #
 # Arguments:
 #   $1  Project name (required) — becomes directory name and METADATA slug
@@ -21,7 +21,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_NAME="${1:?Usage: bash bin/create_spec.sh <project-name>}"
+PROJECT_NAME="${1:?Usage: bash bin/setup_prototype.sh <project-name>}"
 SHORT_DESC="TODO: add short description"
 PROJECT_DIR="$REPO_DIR/$PROJECT_NAME"
 TEMPLATE_DIR="$REPO_DIR/GLOBAL_RULES/spec_template"

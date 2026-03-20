@@ -11,7 +11,7 @@ Prototyper converts concise specification files into AI agent build prompts.
 ## Step 1 — Create the Spec Directory
 
 ```bash
-bash bin/create_spec.sh <ProjectName>
+bash bin/setup_prototype.sh <ProjectName>
 ```
 
 Creates `Specifications/<ProjectName>/` with template files from `GLOBAL_RULES/spec_template/`.

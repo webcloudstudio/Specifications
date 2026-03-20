@@ -151,13 +151,13 @@ git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Bu
 ## Pipeline
 
 ```
-create_spec.sh  →  (author edits)  →  validate.sh  →  convert.sh  →  build.sh
+setup_prototype.sh  →  (author edits)  →  validate.sh  →  convert.sh  →  build.sh
    CREATE             DRAFT            VALIDATED       CONVERTED       BUILT
 ```
 
 | Step | Script | Output |
 |------|--------|--------|
-| CREATE | `bin/create_spec.sh <name> ["desc"]` | Spec directory with template files |
+| CREATE | `bin/setup_prototype.sh <name> ["desc"]` | Spec directory with template files |
 | DRAFT | (author edits files) | Concise specs |
 | VALIDATED | `bin/validate.sh <name>` | Exit 0 = ready, exit 1 = fix issues |
 | CONVERTED | `bin/convert.sh <name> > convert-prompt.md` | Detailed specs (optional — build handles inline) |

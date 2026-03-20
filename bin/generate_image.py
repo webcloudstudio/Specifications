@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
-"""Generate the Prototyper mad-scientist card image (400x300 WebP).
-
-Saves to:
-  doc/images/prototyper.webp  (Specifications repo)
-  ../GAME/static/images/Specifications.webp
-"""
+# CommandCenter Operation
+# Name: Generate Image
+# Category: maintenance
+#
+# Generate the Prototyper project card image (400x300 WebP).
+#
+# Usage:
+#   python3 bin/generate_image.py
+#
+# Output:
+#   doc/images/prototyper.webp        — used in the Prototyper sidebar header
+#   ../GAME/static/images/Specifications.webp — used on the GAME portfolio card
+#
+# Re-run any time the image_description in METADATA.md changes and you want
+# a fresh illustration. The image generator is in bin/generate_image.py;
+# edit draw_brain(), draw_face(), etc. to adjust the art.
+"""Generate the Prototyper mad-scientist card image (400x300 WebP)."""
 
 import math
 import os

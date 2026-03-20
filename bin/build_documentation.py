@@ -24,7 +24,7 @@ SKIP_DIRS = {
 }
 
 # Scripts that appear in the sidebar as Workflow Scripts (in this order)
-WF_SCRIPTS = ['create_spec.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
+WF_SCRIPTS = ['setup_prototype.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
 
 # Scripts that appear as indented children of another script in Other Scripts
 SCRIPT_CHILDREN = {
@@ -33,7 +33,7 @@ SCRIPT_CHILDREN = {
 
 # Human-readable descriptions override auto-detected ones
 SCRIPT_DESCRIPTIONS = {
-    'create_spec.sh':          'Scaffold a new spec directory from templates',
+    'setup_prototype.sh':      'Scaffold a new spec directory from templates',
     'validate.sh':             'Check a spec directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise spec files',
     'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
@@ -53,6 +53,9 @@ GUIDE_TITLES = {
 
 # Scripts whose usage block is always shown (no expand toggle)
 ALWAYS_EXPANDED = {'test.sh'}
+
+# Scripts hidden from the Administrator Scripts list (documented elsewhere)
+SCRIPTS_HIDDEN = {'generate_image.py'}
 
 
 # ── Discover scripts ──────────────────────────────────────────────────────────
@@ -224,7 +227,7 @@ def build_page(scripts, projects, guides):
     # ── Sidebar: steps with sub-items (script or guide) ──────────────────────
     # Each entry: (step_num, label, [(sub_label, 'script'|'guide', target), ...])
     STEP_NAV = [
-        (1, 'Step 1 — Create',   [('create_spec.sh',      'script', 'create_spec.sh'),
+        (1, 'Step 1 — Setup',    [('setup_prototype.sh',   'script', 'setup_prototype.sh'),
                                    ('Create Image (AI)',   'guide',  'CREATE-IMAGE')]),
         (2, 'Step 2 — Create',   [('Project Creation',    'guide',  'PROJECT-SETUP')]),
         (3, 'Step 3 — Validate', [('validate.sh',       'script', 'validate.sh')]),
@@ -260,20 +263,22 @@ def build_page(scripts, projects, guides):
             inner += f'<span class="wf-path">{h.escape(path)}</span>'
         return f'<div class="{cls}">{inner}</div>'
 
-    ARR = '<span class="wf-arr">&#8594;</span>'
+    ARR  = '<span class="wf-arr">&#8594;</span>'
+    LARR = '<span class="wf-arr">&#8592;</span>'
     DOWN = '<span class="wf-arr">&#8595;</span>'
 
     row1 = ARR.join([
-        wf_box('Create', 'create_spec.sh', './<PROJECT>'),
+        wf_box('Setup', 'setup_prototype.sh', './<PROJECT>'),
         wf_box('Validate', 'validate.sh'),
         wf_box('Convert', 'convert.sh'),
         wf_box('Build', 'build.sh'),
         wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
     ])
-    row2 = ARR.join([
-        wf_box('PROTOTYPE', terminal=True),
-        wf_box('Promote', 'create_project.py'),
+    # Row 2 is right-aligned and reversed so PROTOTYPE aligns under row-1's PROTOTYPE
+    row2 = LARR.join([
         wf_box('Project', '', '../<PROJECT>', terminal=True),
+        wf_box('Promote', 'create_project.py'),
+        wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
     ])
 
     wf_diagram = (f'<div class="wf-diagram">'
@@ -284,7 +289,7 @@ def build_page(scripts, projects, guides):
 
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
-        (1, 'bin/create_spec.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
+        (1, 'bin/setup_prototype.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
         (2, 'bin/validate.sh &lt;Project&gt;', 'Check required files, naming, fields — exit 0 = ready'),
         (3, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', 'Expand to detailed specs with AI — optional'),
         (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Tag commit, generate build prompt — feed to AI agent'),
@@ -317,7 +322,7 @@ def build_page(scripts, projects, guides):
 
     other_parts = []
     for s in other_scripts:
-        if s['file'] in all_children:
+        if s['file'] in all_children or s['file'] in SCRIPTS_HIDDEN:
             continue
         other_parts.append(sc_entry(s))
         for child_file in SCRIPT_CHILDREN.get(s['file'], []):
@@ -386,7 +391,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 /* ── Two-row workflow diagram ── */
 .wf-diagram {{ display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }}
 .wf-row {{ display: flex; align-items: stretch; flex-wrap: nowrap; gap: 0; }}
-.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-start; }}
+.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-end; }}
 .wf-box {{
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
   border-radius: 4px; padding: 5px 10px; text-align: center;
