@@ -1,7 +1,7 @@
 # Documentation Branding Standards
 
 **Version:** 1.1 — 2026-03-17
-**Maintainer:** Ed Barlow / SQL Technologies
+**Maintainer:** Ed Barlow / Web Cloud Studio
 **Reference implementation:** `/mnt/c/Users/barlo/projects/gem/doc/`
 
 ---
@@ -328,7 +328,7 @@ To port to a new project, copy both scripts and adjust the nav links in `process
 
 Copyright notices appear in two places:
 1. **Top bar** — extracted verbatim from the source `top.htm` file. Never modified by the build script.
-2. **Page footer** — injected before `</body>` if not already present. Text is extracted from the page's own content, or falls back to `Copyright © 1994–2012 SQL Technologies. All rights reserved.`
+2. **Page footer** — injected before `</body>` if not already present. Text is extracted from the page's own content, or falls back to `Copyright © 2026 Web Cloud Studio. All rights reserved.`
 
 For new projects, put the copyright in the sidebar header or page footer as appropriate.
 
