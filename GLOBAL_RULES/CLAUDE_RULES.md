@@ -45,15 +45,23 @@ All scripts live in `bin/` — bash (`.sh`) or Python (`.py`). The `# CommandCen
 
 **Standard script names** (only create what the project needs):
 
-| Script | Purpose |
+| Script | Purpose | Name String
 |--------|---------|
-| `bin/start.sh` | Start service — service projects only |
-| `bin/stop.sh` | Stop service — service projects only |
-| `bin/build.sh` | Build / compile / package |
-| `bin/daily.sh` | Daily maintenance |
-| `bin/weekly.sh` | Weekly maintenance |
-| `bin/build_documentation.sh` | Generate doc/ output |
-| `bin/deploy.sh` | Deploy to environment |
+| `bin/start.sh` | Start service — service projects only | Stop Service |
+| `bin/stop.sh` | Stop service — service projects only | Stop Service |
+| `bin/build.sh` | Build / compile / package | Build |
+| `bin/daily.sh` | Daily maintenance | Daily Batch |
+| `bin/weekly.sh` | Weekly maintenance | Weekly Batch |
+| `bin/build_documentation.sh` | Generate doc/ output | Build Doc |
+| `bin/deploy.sh` | Deploy to environment | Deploy |
+
+If the script name matches a Standard Script Name the following header should exist with a Name: field matching the Name String.  If possible
+these should be the first lines of the file and there should be no other "# Name:" or "# Category:" fields.
+
+#!/bin/bash
+# CommandCenter Operation
+# Name: {Name String}
+# Category: Operations
 
 **Bash** — source `common.sh` then add functionality:
 

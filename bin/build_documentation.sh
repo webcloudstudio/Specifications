@@ -1,6 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
-# Category: documentation
+# Name: Build Doc
+# Category: Operations
 set -euo pipefail
 SCRIPT_NAME="$(basename "$0" .sh)"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
