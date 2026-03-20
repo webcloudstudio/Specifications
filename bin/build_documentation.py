@@ -43,11 +43,15 @@ SCRIPT_DESCRIPTIONS = {
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
 }
 
-GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP']
+GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE']
 GUIDE_TITLES = {
     'SPECIFICATION-PROCESS': 'Specification Process',
-    'PROJECT-SETUP': 'Setup a Project',
+    'PROJECT-SETUP':         'Project Creation',
+    'PROMOTE':               'Promote',
 }
+
+# Scripts whose usage block is always shown (no expand toggle)
+ALWAYS_EXPANDED = {'test.sh'}
 
 
 # ── Discover scripts ──────────────────────────────────────────────────────────
@@ -234,7 +238,7 @@ def build_page(scripts, projects, guides):
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
-    step_nav += f'  <a class="sn" data-step="7" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 7)">Promote</a>\n'
+    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -294,9 +298,14 @@ def build_page(scripts, projects, guides):
 
     def sc_entry(s, child=False):
         sid = s['file'].replace('.', '-')
+        always = s['file'] in ALWAYS_EXPANDED
         if s.get('details'):
-            detail = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
-            toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
+            if always:
+                detail = f'<div class="sc-detail-open"><pre>{h.escape(s["details"])}</pre></div>'
+                toggle = ''
+            else:
+                detail = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
+                toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
         else:
             detail = toggle = ''
         extra = ' sc-child' if child else ''
@@ -333,8 +342,8 @@ body {{ display: flex; height: 100vh; overflow: hidden;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }}
 
-.sidebar-header {{ background: var(--c-topbar-bg); padding: 10px 8px 8px;
-  border-bottom: 2px solid var(--c-accent); flex-shrink: 0; cursor: pointer; text-align: center; }}
+.sidebar-header {{ background: var(--c-topbar-bg); padding: 8px 8px 6px;
+  flex-shrink: 0; cursor: pointer; text-align: center; }}
 .sidebar-header:hover {{ background: rgba(255,255,255,.04); }}
 .sidebar-header h1 {{ color: #fff; font-size: 17px; font-weight: 700; line-height: 1; letter-spacing: .3px; }}
 
@@ -442,7 +451,8 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   border-radius: 3px; white-space: nowrap; flex-shrink: 0; }}
 .sc-desc {{ font-size: 12.5px; color: var(--c-h3); }}
 .sc-detail {{ display: none; margin: 0 0 6px 22px; }}
-.sc-detail pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
+.sc-detail-open {{ margin: 0 0 6px 0; }}
+.sc-detail pre, .sc-detail-open pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
   font-family: 'Cascadia Code', Consolas, monospace; padding: 8px 12px;
   border-radius: 4px; line-height: 1.5; white-space: pre; overflow-x: auto; }}
 
@@ -489,7 +499,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     {wf_diagram}
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Scripts</p>
+    <p class="wf-section-h">Administrator Scripts</p>
     {other_html}
   </div>
 
