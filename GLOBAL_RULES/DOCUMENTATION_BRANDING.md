@@ -163,7 +163,7 @@ font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
 | h2 | 20px | 600 | Theme h2 color + thin underline |
 | h3 | 17px | 600 | Theme h3 color, no decoration |
 | h4–h6 | 15–13px | 600 | Theme h3 color |
-| Sidebar links | 13.5px | 400 | `--c-side-link` color |
+| Sidebar links | 13.5px | 400 | White (`#FFFFFF`) — always white on dark chrome |
 | Sidebar section labels | 9.5px | 700 | `--c-side-section` color, uppercase, `letter-spacing: 1px` |
 | Top bar title | 15px | 500 | White (`#FFFFFF`) always |
 | Top bar nav links | 13px | 600 | White (`#FFFFFF`) always |
@@ -182,7 +182,7 @@ font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
 | Content body (`<a>`) | `color: #1565C0; text-decoration: underline` | Standard web hyperlink convention |
 | Content visited | Same blue `#1565C0` | Prevents the default browser purple, which clashes with dark themes |
 | Content hover | Darker blue `#0D3B8E`, still underlined | Feedback without color drama |
-| Sidebar nav links | `--c-side-link` color, no underline | Navigation item, not a body link |
+| Sidebar nav links | White (`#FFFFFF`), no underline | Navigation item, not a body link — white text on dark chrome |
 | Sidebar nav hover | White text + subtle bg + 3px accent left border | Conquer 2026 / ezdocs pattern |
 | Top bar nav links | Same as sidebar links | Unified chrome |
 | Top bar nav hover | White text + subtle bg + 2px accent bottom border | Horizontal nav variant |
