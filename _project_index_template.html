@@ -13,7 +13,7 @@ body {
   font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif; font-size: 14px; line-height: 1.5;
 }
 
-/* ── Topbar ── */
+/* ── Topbar (hidden in iframe embed) ── */
 #topbar {
   display: flex; align-items: center;
   background: var(--c-topbar-bg); border-bottom: 1px solid var(--c-side-border);
@@ -29,7 +29,6 @@ body {
 .tb-crumb {
   font-size: 12.5px; color: var(--c-side-link);
   padding: 0 14px; height: 100%; display: flex; align-items: center; gap: 5px;
-  border-right: 1px solid var(--c-side-border);
 }
 .tb-crumb-sep { color: var(--c-side-section); }
 .tb-crumb-name { color: #fff; font-weight: 600; }
@@ -45,9 +44,9 @@ body {
 /* ── Main ── */
 #main { display: flex; flex: 1; overflow: hidden; }
 
-/* ── Sidebar ── */
+/* ── Sidebar (hidden in iframe embed) ── */
 #sidebar {
-  width: 210px; min-width: 210px; background: var(--c-side-bg);
+  width: 200px; min-width: 200px; background: var(--c-side-bg);
   border-right: 1px solid var(--c-side-border);
   overflow-y: auto; display: flex; flex-direction: column;
 }
@@ -55,71 +54,76 @@ body {
 #sidebar::-webkit-scrollbar-thumb { background: var(--c-side-border); border-radius: 2px; }
 .nav-sep { border-top: 1px solid var(--c-side-border); margin: 5px 0; }
 .nav-group-label {
-  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--c-side-section); padding: 8px 14px 3px;
 }
 .nav-item {
-  display: block; padding: 4px 14px 4px 16px;
-  font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
-  color: var(--c-side-link); cursor: pointer;
+  display: block; padding: 3px 12px 3px 14px;
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 11px;
+  color: #fff; cursor: pointer;
   border-left: 3px solid transparent; transition: all .1s; text-decoration: none;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }
-.nav-item.active { color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(44,182,125,.06); }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.06); border-left-color: var(--c-accent); }
+.nav-item.active { color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(44,182,125,.07); }
 
 /* ── Content ── */
-#content { flex: 1; overflow-y: auto; padding: 20px 30px 40px; }
+#content { flex: 1; overflow-y: auto; padding: 16px 20px 32px; }
 
-/* ── Project info card (always visible) ── */
+/* ── Project info card ── */
 .project-card {
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
-  border-radius: 6px; padding: 16px 20px; margin-bottom: 18px;
+  border-radius: 5px; padding: 10px 14px; margin-bottom: 10px;
 }
-.pc-name { color: #fff; font-size: 20px; font-weight: 700; margin: 0 0 2px; }
-.pc-title { color: var(--c-accent); font-size: 13px; font-weight: 500; margin: 0 0 6px; }
-.pc-desc { color: var(--c-side-link); font-size: 13px; line-height: 1.5; margin: 0 0 8px; }
-.pc-meta { display: flex; gap: 14px; flex-wrap: wrap; }
-.pc-meta span { font-size: 11.5px; color: var(--c-side-section); white-space: nowrap; }
+.pc-name { color: #fff; font-size: 18px; font-weight: 700; margin: 0 0 1px; }
+.pc-title { color: var(--c-accent); font-size: 12px; font-weight: 500; margin: 0 0 3px; }
+.pc-desc { color: var(--c-side-link); font-size: 12px; line-height: 1.4; margin: 0; }
 
 /* ── File grid ── */
 .group-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-h3); margin: 14px 0 5px;
-  padding-bottom: 3px; border-bottom: 1px solid var(--c-td-border);
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--c-accent);
+  margin: 10px 0 3px; padding-bottom: 2px;
+  border-bottom: 1px solid rgba(44,182,125,0.25);
 }
-.file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 5px; margin-bottom: 4px; }
+.file-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 3px; margin-bottom: 3px;
+}
 .file-card {
-  background: var(--c-bg); border: 1px solid var(--c-td-border); border-radius: 4px;
-  padding: 6px 10px; cursor: pointer; transition: border-color .12s; text-decoration: none;
-  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
+  background: var(--c-bg); border: 1px solid var(--c-td-border); border-radius: 3px;
+  padding: 4px 8px; cursor: pointer; transition: border-color .12s; text-decoration: none;
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   color: var(--c-h2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .file-card:hover { border-color: var(--c-accent); color: var(--c-accent); }
 .file-card.active { border-color: var(--c-accent); background: var(--c-callout-bg); color: var(--c-accent); }
 
+/* ── Doc separator ── */
+.doc-sep { border: none; border-top: 1px solid var(--c-td-border); margin: 12px 0 16px; display: none; }
+.doc-sep.visible { display: block; }
+
 /* ── Rendered markdown ── */
 #doc-content { display: none; }
-.md h1 { font-size: 22px; font-weight: 700; color: var(--c-h1); border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin: 20px 0 12px; }
+.md h1 { font-size: 20px; font-weight: 700; color: var(--c-h1); border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin: 16px 0 10px; }
 .md h1:first-child { margin-top: 0; }
-.md h2 { font-size: 16px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 16px 0 8px; }
-.md h3 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 5px; }
-.md h4 { font-size: 13px; font-weight: 600; color: var(--c-h3); margin: 10px 0 4px; }
-.md p { margin: 7px 0; line-height: 1.65; }
-.md ul, .md ol { margin: 5px 0 5px 18px; line-height: 1.65; }
+.md h2 { font-size: 14px; font-weight: 600; color: var(--c-h2); border-bottom: 1px solid var(--c-h2-border); padding-bottom: 3px; margin: 14px 0 6px; }
+.md h3 { font-size: 13px; font-weight: 600; color: var(--c-h3); margin: 10px 0 4px; }
+.md h4 { font-size: 12px; font-weight: 600; color: var(--c-h3); margin: 8px 0 3px; }
+.md p { margin: 6px 0; line-height: 1.6; }
+.md ul, .md ol { margin: 4px 0 4px 16px; line-height: 1.6; }
 .md li { margin: 2px 0; }
 .md a { color: #1565C0; text-decoration: underline; }
 .md a:visited { color: #1565C0; }
-.md table { border-collapse: collapse; margin: 10px 0; font-size: 13px; width: 100%; }
-.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 5px 12px; text-align: left; }
-.md td { padding: 4px 12px; border-bottom: 1px solid var(--c-td-border); }
+.md table { border-collapse: collapse; margin: 8px 0; font-size: 13px; width: 100%; }
+.md th { background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 4px 10px; text-align: left; }
+.md td { padding: 3px 10px; border-bottom: 1px solid var(--c-td-border); }
 .md tr:nth-child(even) td { background: var(--c-tr-alt); }
-.md tr:hover td { background: var(--c-tr-hover); }
-.md pre { background: var(--c-pre-bg); color: var(--c-pre-text); border: 1px solid var(--c-side-border); border-radius: 4px; padding: 10px 12px; overflow-x: auto; margin: 8px 0; font-size: 12.5px; line-height: 1.5; }
-.md code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px; background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }
+.md pre { background: var(--c-pre-bg); color: var(--c-pre-text); border: 1px solid var(--c-side-border); border-radius: 4px; padding: 10px 12px; overflow-x: auto; margin: 6px 0; font-size: 12px; line-height: 1.5; }
+.md code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }
 .md pre code { background: none; padding: 0; color: inherit; }
-.md blockquote { border-left: 3px solid var(--c-accent); padding: 6px 12px; margin: 8px 0; background: var(--c-callout-bg); border-radius: 0 4px 4px 0; }
-.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 14px 0; }
+.md blockquote { border-left: 3px solid var(--c-accent); padding: 5px 10px; margin: 6px 0; background: var(--c-callout-bg); border-radius: 0 4px 4px 0; }
+.md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 12px 0; }
 </style>
 </head>
 <body>
@@ -142,6 +146,7 @@ body {
   <div id="content">
     <div id="project-card" class="project-card"></div>
     <div id="file-grid-area"></div>
+    <hr class="doc-sep" id="doc-sep">
     <div id="doc-content" class="md"></div>
   </div>
 </div>
@@ -152,7 +157,6 @@ const DOCS = {};
 
 marked.setOptions({ gfm: true, breaks: false });
 
-// Group keys into sections. METADATA excluded from nav (used for project card only).
 function groupFiles(keys) {
   const coreSet = new Set(['README', 'INTENT', 'ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL']);
   const featureSet = new Set(['FEATURE_MAP', 'FUNCTIONALITY']);
@@ -202,14 +206,10 @@ function buildProjectCard(meta) {
   const name = meta.display_name || meta.name || '';
   const title = meta.title || '';
   const desc = meta.short_description || '';
-  const metaItems = [];
-  if (meta.stack) metaItems.push(meta.stack);
-  if (meta.port) metaItems.push('Port: ' + meta.port);
   card.innerHTML =
     '<div class="pc-name">' + name + '</div>' +
     (title ? '<div class="pc-title">' + title + '</div>' : '') +
-    (desc  ? '<div class="pc-desc">'  + desc  + '</div>' : '') +
-    (metaItems.length ? '<div class="pc-meta">' + metaItems.map(i => '<span>' + i + '</span>').join('') + '</div>' : '');
+    (desc  ? '<div class="pc-desc">'  + desc  + '</div>' : '');
 }
 
 function buildFileGrid(groups) {
@@ -230,17 +230,18 @@ function buildFileGrid(groups) {
 
 function showDoc(key) {
   if (!DOCS[key]) return;
-  document.getElementById('file-grid-area').style.display = 'none';
+  // File grid stays visible as navigation header
   const dc = document.getElementById('doc-content');
   dc.style.display = 'block';
   dc.innerHTML = marked.parse(DOCS[key]);
+  document.getElementById('doc-sep').className = 'doc-sep visible';
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.file-card').forEach(el => el.classList.remove('active'));
   const navLink = document.querySelector('.nav-item[data-key="' + key + '"]');
-  if (navLink) navLink.classList.add('active');
+  if (navLink) { navLink.classList.add('active'); navLink.scrollIntoView({ block: 'nearest' }); }
   const card = document.querySelector('.file-card[data-key="' + key + '"]');
   if (card) card.classList.add('active');
-  document.getElementById('content').scrollTop = 0;
+  dc.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 const keys = Object.keys(DOCS).sort();
@@ -249,6 +250,12 @@ const meta = DOCS['METADATA'] ? parseMeta(DOCS['METADATA']) : {};
 buildProjectCard(meta);
 buildNav(groups);
 buildFileGrid(groups);
+
+// Iframe embed mode — hide navigation chrome, content fills full width
+if (window !== window.top) {
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'none';
+}
 </script>
 </body>
 </html>

@@ -6,8 +6,8 @@
 Build doc/index.html — single-page documentation for the Prototyper system.
 
 Layout: sidebar (dark chrome) + content (light).
-Default view: Specification Process guide.
-Sidebar: Overview | Guides | Reference | Projects
+Default view: Workflow pipeline.
+Sidebar: Workflow (+ step sub-items) | Workflow Scripts | Setup A Project | Current Projects
 """
 import html as h
 import json
@@ -21,10 +21,10 @@ SKIP_DIRS = {
     '__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates',
     'doc', 'logs', 'GLOBAL_RULES',
 }
-STATUS_COLORS = {
-    'IDEA': '#94a3b8', 'PROTOTYPE': '#fdab3d', 'ACTIVE': '#0073ea',
-    'PRODUCTION': '#00c875', 'ARCHIVED': '#4a5568',
-}
+
+# Scripts that appear in the sidebar as Workflow Scripts (in this order)
+WF_SCRIPTS = ['create_spec.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
+
 # Human-readable descriptions override auto-detected ones
 SCRIPT_DESCRIPTIONS = {
     'create_spec.sh':          'Scaffold a new spec directory from templates',
@@ -32,10 +32,10 @@ SCRIPT_DESCRIPTIONS = {
     'convert.sh':              'Generate an AI expansion prompt from concise spec files',
     'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
     'generate_prompt.sh':      'Generate a build prompt without creating a git tag (legacy)',
-    'rebuild_index.sh':        'Rebuild the HTML spec viewers (index.html) in each project directory',
+    'rebuild_index.sh':        'Rebuild the standalone HTML spec viewers (GAME/index.html etc.)',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
-    'build_documentation.sh':  'Wrapper — runs build_documentation.py with the correct theme',
+    'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
 }
 
 GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP']
@@ -80,7 +80,6 @@ def discover_scripts():
             if not desc and detail_lines:
                 desc = detail_lines[0]
             details = '\n'.join(l for l in detail_lines if l).strip()
-            # Use human-readable override if available
             desc = SCRIPT_DESCRIPTIONS.get(path.name, desc or label)
             scripts.append({
                 'file': path.name, 'label': label,
@@ -120,8 +119,6 @@ def discover_projects():
             'display': fields.get('display_name') or fields.get('name') or entry.name,
             'status': fields.get('status', ''),
             'desc': fields.get('short_description', ''),
-            'stack': fields.get('stack', ''),
-            'port': fields.get('port', ''),
         })
     return projects
 
@@ -131,7 +128,6 @@ def discover_projects():
 def discover_guides():
     found = {f.stem: f for f in DOC_DIR.glob('*.md')}
     guides = []
-    # Emit in defined order first, then any extras
     for key in GUIDE_ORDER:
         if key in found:
             title = GUIDE_TITLES.get(key, key.replace('-', ' ').replace('_', ' ').title())
@@ -147,55 +143,100 @@ def discover_guides():
 
 def build_page(scripts, projects, guides):
 
-    # ── Guide nav + JS data ───────────────────────────────────────────────────
+    # ── Guide JS data ──────────────────────────────────────────────────────────
     guides_js = 'const GUIDES = {\n'
-    guide_nav = ''
     for g in guides:
         guides_js += f'  {json.dumps(g["key"])}: {json.dumps(g["content"])},\n'
-        guide_nav += f'  <a class="sn" data-sec="guide" data-key="{g["key"]}" onclick="showGuide(\'{g["key"]}\')">{h.escape(g["title"])}</a>\n'
     guides_js += '};'
 
-    # ── Script list (flat — no categories) ───────────────────────────────────
-    entries = ''
+    # ── Script JS data ─────────────────────────────────────────────────────────
+    scripts_js = 'const SCRIPTS = {\n'
     for s in scripts:
-        sid = s['file'].replace('.', '-')
-        detail_html = ''
-        if s.get('details'):
-            detail_html = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
-            toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
-        else:
-            toggle = ''
-        entries += (
-            f'<div class="sc-entry">'
-            f'<div class="sc-head">{toggle}<code class="sc-name">{h.escape(s["file"])}</code>'
-            f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>'
-            f'{detail_html}</div>\n'
-        )
-    scripts_html = f'<div class="sc-group">{entries}</div>'
+        scripts_js += f'  {json.dumps(s["file"])}: {json.dumps({"desc": s["desc"], "details": s.get("details", "")})},\n'
+    scripts_js += '};'
 
-    # ── Workflow steps ────────────────────────────────────────────────────────
-    wf_steps = [
-        (1, 'bin/create_spec.sh &lt;Project&gt;',                           'Scaffold spec directory from templates'),
-        (2, 'bin/validate.sh &lt;Project&gt;',                               'Check required files, naming, fields'),
-        (3, '(edit spec files)',                                              'Write concise specs: INTENT, ARCHITECTURE, SCREEN-*, FEATURE-*'),
-        (4, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md',                 'Generate AI expansion prompt — feed to AI agent'),
-        (5, 'bin/build.sh &lt;Project&gt; &gt; prompt.md',                   'Tag commit, generate build prompt — feed to AI agent'),
+    # ── Separate workflow vs other scripts ────────────────────────────────────
+    wf_set = set(WF_SCRIPTS)
+    wf_order = {f: i for i, f in enumerate(WF_SCRIPTS)}
+    wf_scripts = sorted([s for s in scripts if s['file'] in wf_set],
+                        key=lambda s: wf_order.get(s['file'], 999))
+    other_scripts = [s for s in scripts if s['file'] not in wf_set]
+
+    # ── Sidebar: workflow script items ────────────────────────────────────────
+    wf_script_nav = ''
+    for s in wf_scripts:
+        wf_script_nav += f'  <a class="sn" data-script="{h.escape(s["file"])}" onclick="showScript(\'{s["file"]}\')">{h.escape(s["file"])}</a>\n'
+
+    # ── Sidebar: step sub-items ───────────────────────────────────────────────
+    step_labels = [
+        'Step 1 — Create the Spec Directory',
+        'Step 2 — Write the Spec Files',
+        'Step 3 — Validate',
+        'Step 4 — Convert',
+        'Step 5 — Build',
+        'Step 6 — Iterate',
+        'Step 7 — Promote',
     ]
-    wf_rows = ''
-    for n, cmd, desc in wf_steps:
-        num_cell = f'<td class="wn">{n}</td>'
-        if n == 3:
-            wf_rows += f'<tr class="wedit"><td class="wn">—</td><td class="wcmd">{cmd}</td><td class="wdesc">{desc}</td></tr>\n'
-        else:
-            wf_rows += f'<tr>{num_cell}<td class="wcmd"><code>{cmd}</code></td><td class="wdesc">{desc}</td></tr>\n'
+    step_nav = ''
+    for i, label in enumerate(step_labels, 1):
+        step_nav += f'  <a class="sn-sub" data-step="{i}" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', {i})">{h.escape(label)}</a>\n'
 
-    # ── Projects sidebar ──────────────────────────────────────────────────────
+    # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
     for p in projects:
-        proj_nav += f'  <a class="sn" href="../{p["name"]}/index.html" target="_blank">{h.escape(p["display"])}</a>\n'
+        url = f'../{p["name"]}/index.html'
+        proj_nav += (f'  <a class="sn" data-project="{h.escape(p["name"])}" '
+                     f'onclick="showProject(\'{h.escape(p["name"])}\', \'{url}\')">'
+                     f'{h.escape(p["display"])}</a>\n')
 
-    # default: first guide key (or empty)
-    default_guide = guides[0]['key'] if guides else ''
+    # ── Pipeline (7 steps) ────────────────────────────────────────────────────
+    pip_steps = [
+        ('Create', 'create_spec.sh'),
+        ('Write', 'spec files'),
+        ('Validate', 'validate.sh'),
+        ('Convert', 'convert.sh'),
+        ('Build', 'build.sh'),
+        ('Iterate', 'edit → validate → build'),
+        ('Promote', 'create_project.py'),
+    ]
+    pip_html = ''
+    for i, (label, cmd) in enumerate(pip_steps):
+        if i > 0:
+            pip_html += '<span class="pip-arr">&#8594;</span>'
+        pip_html += (f'<div class="pip-step">'
+                     f'<span class="pl">{h.escape(label)}</span>'
+                     f'<span class="pc">{h.escape(cmd)}</span>'
+                     f'</div>')
+
+    # ── Workflow steps table ──────────────────────────────────────────────────
+    wf_step_data = [
+        (1, 'bin/create_spec.sh &lt;Project&gt;', True, 'Scaffold spec directory from templates'),
+        (2, '(edit spec files)', False, 'Write concise specs: INTENT, ARCHITECTURE, SCREEN-*, FEATURE-*'),
+        (3, 'bin/validate.sh &lt;Project&gt;', True, 'Check required files, naming, fields — exit 0 = ready'),
+        (4, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', True, 'Expand to detailed specs with AI — optional'),
+        (5, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', True, 'Tag commit, generate build prompt — feed to AI agent'),
+        (6, '(edit → validate → build)', False, 'Repeat until the spec is complete'),
+        (7, 'python3 bin/create_project.py &lt;Project&gt;', True, 'Scaffold code project — run from GAME/'),
+    ]
+    wf_rows = ''
+    for n, cmd, is_code, desc in wf_step_data:
+        cmd_cell = f'<code>{cmd}</code>' if is_code else cmd
+        row_class = '' if is_code else ' class="wedit"'
+        wf_rows += f'<tr{row_class}><td class="wn">{n}</td><td class="wcmd">{cmd_cell}</td><td class="wdesc">{desc}</td></tr>\n'
+
+    # ── Other scripts (non-workflow, shown on Workflow page) ──────────────────
+    def sc_entry(s):
+        sid = s['file'].replace('.', '-')
+        if s.get('details'):
+            detail = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
+            toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
+        else:
+            detail = toggle = ''
+        return (f'<div class="sc-entry"><div class="sc-head">{toggle}'
+                f'<code class="sc-name">{h.escape(s["file"])}</code>'
+                f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>{detail}</div>\n')
+
+    other_html = f'<div class="sc-group">{"".join(sc_entry(s) for s in other_scripts)}</div>'
 
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -209,79 +250,100 @@ def build_page(scripts, projects, guides):
 
 body {{ display: flex; height: 100vh; overflow: hidden;
   background: var(--c-bg); color: var(--c-text);
-  font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif; font-size: 15px; line-height: 1.7; }}
+  font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif; font-size: 14px; line-height: 1.65; }}
 
-/* ── Sidebar ── */
-.sidebar {{ width: 210px; min-width: 210px; display: flex; flex-direction: column;
+/* ── Sidebar — invariant ── */
+.sidebar {{ width: 220px; min-width: 220px; display: flex; flex-direction: column;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }}
 
-.sidebar-header {{ background: var(--c-topbar-bg); padding: 14px 16px 12px;
-  border-bottom: 1px solid var(--c-side-border); }}
-.sidebar-header h1 {{ color: #fff; font-size: 15px; font-weight: 600; line-height: 1.2; }}
+.sidebar-header {{ background: var(--c-topbar-bg); padding: 12px 16px;
+  border-bottom: 1px solid var(--c-side-border); flex-shrink: 0; }}
+.sidebar-header h1 {{ color: #fff; font-size: 14px; font-weight: 600; line-height: 1; }}
 
-.nav-section {{ font-size: 9.5px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--c-side-section);
-  padding: 10px 16px 3px; }}
-.nav-sep {{ border-top: 1px solid var(--c-side-border); margin: 6px 0; }}
+.nav-section {{ font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--c-side-section); padding: 10px 16px 3px; }}
+.nav-sep {{ border-top: 1px solid var(--c-side-border); margin: 5px 0; }}
 
-.sn {{ display: flex; align-items: center; padding: 5px 16px;
+/* Primary nav items */
+.sn {{ display: block; padding: 5px 16px;
   font-size: 13px; font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
-  color: #fff; cursor: pointer;
-  border-left: 3px solid transparent; text-decoration: none;
-  transition: background .1s, border-color .1s; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; }}
+  color: #fff; cursor: pointer; border-left: 3px solid transparent;
+  text-decoration: none; transition: background .1s, border-color .1s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
 .sn:hover {{ background: rgba(255,255,255,.07); border-left-color: var(--c-accent); }}
 .sn.active {{ color: var(--c-accent); border-left-color: var(--c-accent); background: rgba(44,182,125,.08); }}
 
+/* Sub-nav items (steps under Workflow) */
+.sn-sub {{ display: block; padding: 3px 16px 3px 28px;
+  font-size: 11px; font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
+  color: rgba(255,255,255,.55); cursor: pointer; border-left: 3px solid transparent;
+  text-decoration: none; transition: background .1s, border-color .1s, color .1s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+.sn-sub:hover {{ color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }}
+.sn-sub.active {{ color: var(--c-accent); border-left-color: var(--c-accent); }}
+
 /* ── Content ── */
-main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; }}
-.content-section {{ display: none; max-width: 840px; }}
+main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; position: relative; }}
+main.project-mode {{ padding: 0; overflow: hidden; }}
+.content-section {{ display: none; max-width: 860px; }}
 .content-section.active {{ display: block; }}
+#project {{ max-width: none; height: 100%; }}
+#project.active {{ display: flex; }}
+#project-frame {{ flex: 1; border: none; width: 100%; height: 100%; display: block; }}
 
 /* ── Pipeline ── */
-.pipeline {{ display: flex; align-items: center; gap: 0; margin-bottom: 22px; flex-wrap: wrap; }}
+.pipeline {{ display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 20px; }}
 .pip-step {{ background: var(--c-side-bg); border: 1px solid var(--c-side-border);
-  border-radius: 4px; padding: 4px 11px; text-align: center; }}
-.pip-step .pl {{ font-size: 12px; color: #fff; font-weight: 600; white-space: nowrap; display: block; }}
-.pip-step .pc {{ font-size: 10.5px; color: var(--c-side-section);
+  border-radius: 4px; padding: 4px 10px; text-align: center; }}
+.pip-step .pl {{ font-size: 11.5px; color: #fff; font-weight: 600; white-space: nowrap; display: block; }}
+.pip-step .pc {{ font-size: 10px; color: var(--c-side-section);
   font-family: 'Cascadia Code', Consolas, monospace; display: block; }}
-.pip-arr {{ color: var(--c-side-section); padding: 0 6px; font-size: 16px; }}
+.pip-arr {{ color: var(--c-side-section); padding: 0 5px; font-size: 14px; line-height: 1; }}
 
 /* ── Rendered markdown ── */
 .md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-accent);
   border-bottom: 2px solid var(--c-accent); padding-bottom: 5px; margin: 24px 0 10px; }}
 .md h1:first-child {{ margin-top: 0; }}
-.md h2 {{ font-size: 15px; font-weight: 700; color: #fff;
+.md h2 {{ font-size: 14px; font-weight: 700; color: #fff;
   background: var(--c-side-bg); border-left: 3px solid var(--c-accent);
-  padding: 6px 12px; margin: 20px 0 10px; border-radius: 0 4px 4px 0; }}
-.md h3 {{ font-size: 15px; font-weight: 600; color: var(--c-h3); margin: 14px 0 6px; }}
-.md p {{ margin: 8px 0; line-height: 1.7; }}
-.md ul, .md ol {{ margin: 6px 0 6px 20px; }}
-.md li {{ margin: 3px 0; }}
+  padding: 5px 12px; margin: 18px 0 9px; border-radius: 0 4px 4px 0; }}
+.md h3 {{ font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 12px 0 5px; }}
+.md p {{ margin: 7px 0; line-height: 1.65; }}
+.md ul, .md ol {{ margin: 5px 0 5px 18px; }}
+.md li {{ margin: 2px 0; }}
 .md a {{ color: #1565C0; text-decoration: underline; }}
 .md a:visited {{ color: #1565C0; }}
-.md table {{ border-collapse: collapse; margin: 10px 0; font-size: 14px; width: 100%; }}
-.md th {{ background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 6px 12px; text-align: left; }}
-.md td {{ padding: 5px 12px; border-bottom: 1px solid var(--c-td-border); }}
+.md table {{ border-collapse: collapse; margin: 8px 0; font-size: 13px; width: 100%; }}
+.md th {{ background: var(--c-th-bg); color: var(--c-th-text); font-weight: 600; padding: 5px 12px; text-align: left; }}
+.md td {{ padding: 4px 12px; border-bottom: 1px solid var(--c-td-border); }}
 .md tr:nth-child(even) td {{ background: var(--c-tr-alt); }}
 .md pre {{ background: var(--c-pre-bg); color: var(--c-pre-text);
   border: 1px solid var(--c-side-border); border-radius: 4px;
-  padding: 12px 14px; overflow-x: auto; margin: 10px 0;
-  font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px; line-height: 1.5; }}
-.md code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px;
+  padding: 10px 14px; overflow-x: auto; margin: 8px 0;
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px; line-height: 1.5; }}
+.md code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
   background: var(--c-code-bg); color: var(--c-code-text);
   padding: 1px 5px; border-radius: 3px; }}
 .md pre code {{ background: none; padding: 0; color: inherit; }}
-.md blockquote {{ border-left: 3px solid var(--c-accent); padding: 8px 14px;
-  margin: 10px 0; background: var(--c-callout-bg); border-radius: 0 4px 4px 0; }}
-.md hr {{ border: none; border-top: 1px solid var(--c-td-border); margin: 18px 0; }}
+.md blockquote {{ border-left: 3px solid var(--c-accent); padding: 6px 14px;
+  margin: 8px 0; background: var(--c-callout-bg); border-radius: 0 4px 4px 0; }}
+.md hr {{ border: none; border-top: 1px solid var(--c-td-border); margin: 16px 0; }}
 
-/* ── Scripts ── */
-.cat-label {{ font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--c-h3); margin: 22px 0 4px; padding-bottom: 3px;
+/* ── Script man page ── */
+.sd-title {{ font-size: 18px; font-weight: 700; color: var(--c-h1); margin: 0 0 6px;
+  font-family: 'Cascadia Code', Consolas, monospace; }}
+.sd-desc-p {{ font-size: 14px; color: var(--c-h3); margin: 0 0 14px; }}
+.sd-pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12.5px;
+  font-family: 'Cascadia Code', Consolas, monospace; padding: 12px 16px;
+  border-radius: 4px; line-height: 1.5; white-space: pre-wrap;
+  border: 1px solid var(--c-side-border); }}
+.sd-none {{ font-size: 13px; color: var(--c-h3); font-style: italic; }}
+
+/* ── Scripts (expandable, for Other Scripts section) ── */
+.sc-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--c-h3); margin: 22px 0 6px; padding-bottom: 3px;
   border-bottom: 1px solid var(--c-td-border); }}
-.cat-label:first-child {{ margin-top: 0; }}
 .sc-group {{ margin-bottom: 6px; }}
 .sc-entry {{ border-bottom: 1px solid var(--c-td-border); }}
 .sc-entry:last-child {{ border-bottom: none; }}
@@ -299,25 +361,26 @@ main {{ flex: 1; overflow-y: auto; padding: 28px 36px 48px; }}
   border-radius: 4px; line-height: 1.5; white-space: pre-wrap; }}
 
 /* ── Workflow table ── */
-.wf-section-h {{ font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--c-h3); margin: 22px 0 8px; }}
+.wf-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--c-h3); margin: 20px 0 8px; padding-bottom: 3px;
+  border-bottom: 1px solid var(--c-td-border); }}
 .wf-section-h:first-child {{ margin-top: 0; }}
-.wf-table {{ width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }}
-.wf-table th {{ background: var(--c-th-bg); color: var(--c-th-text); padding: 6px 10px;
-  text-align: left; font-weight: 600; font-size: 12.5px; }}
-.wf-table td {{ padding: 6px 10px; border-bottom: 1px solid var(--c-td-border); vertical-align: top; }}
+.wf-table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 14px; }}
+.wf-table th {{ background: var(--c-th-bg); color: var(--c-th-text); padding: 5px 10px;
+  text-align: left; font-weight: 600; font-size: 12px; }}
+.wf-table td {{ padding: 5px 10px; border-bottom: 1px solid var(--c-td-border); vertical-align: top; }}
 .wf-table tr:last-child td {{ border-bottom: none; }}
-.wn {{ width: 28px; color: var(--c-accent); font-weight: 700; }}
-.wcmd {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px; white-space: nowrap; }}
-.wcmd code {{ background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 5px; border-radius: 3px; }}
+.wn {{ width: 24px; color: var(--c-accent); font-weight: 700; font-size: 12px; }}
+.wcmd {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; white-space: nowrap; }}
+.wcmd code {{ background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
 .wedit td {{ color: var(--c-h3); font-style: italic; }}
-.wdesc {{ color: var(--c-h3); font-size: 13px; }}
-.note {{ font-size: 13px; color: var(--c-h3); padding: 8px 12px; margin-top: 12px;
+.wdesc {{ color: var(--c-h3); font-size: 12.5px; }}
+.note {{ font-size: 12.5px; color: var(--c-h3); padding: 7px 12px; margin-top: 10px;
   background: var(--c-callout-bg); border-left: 3px solid var(--c-accent); border-radius: 0 4px 4px 0; }}
 .note code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
   background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
 
-section h2 {{ font-size: 19px; font-weight: 700; color: var(--c-h1);
+section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin-bottom: 12px; }}
 </style>
 </head>
@@ -329,8 +392,13 @@ section h2 {{ font-size: 19px; font-weight: 700; color: var(--c-h1);
   </div>
 
   <div class="nav-sep"></div>
-{guide_nav}
   <a class="sn" data-sec="workflow" onclick="show('workflow')">Workflow</a>
+{step_nav}
+  <div class="nav-sep"></div>
+  <div class="nav-section">Workflow Scripts</div>
+{wf_script_nav}
+  <div class="nav-sep"></div>
+  <a class="sn" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Setup a Project</a>
 
   <div class="nav-sep"></div>
   <div class="nav-section">Current Projects</div>
@@ -339,36 +407,39 @@ section h2 {{ font-size: 19px; font-weight: 700; color: var(--c-h1);
 
 <main>
 
-  <!-- ── Guide viewer ──────────────────────────── -->
-  <div id="guide" class="content-section">
-    <div id="guide-content" class="md"></div>
-  </div>
-
-  <!-- ── Workflow + Scripts ────────────────────── -->
+  <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
     <p class="wf-section-h">The Pipeline</p>
-    <div class="pipeline">
-      <div class="pip-step"><span class="pl">Create</span><span class="pc">create_spec.sh</span></div>
-      <span class="pip-arr">&#8594;</span>
-      <div class="pip-step"><span class="pl">Validate</span><span class="pc">validate.sh</span></div>
-      <span class="pip-arr">&#8594;</span>
-      <div class="pip-step"><span class="pl">Edit</span><span class="pc">spec files</span></div>
-      <span class="pip-arr">&#8594;</span>
-      <div class="pip-step"><span class="pl">Convert</span><span class="pc">convert.sh</span></div>
-      <span class="pip-arr">&#8594;</span>
-      <div class="pip-step"><span class="pl">Build</span><span class="pc">build.sh</span></div>
-    </div>
+    <div class="pipeline">{pip_html}</div>
 
     <p class="wf-section-h">Steps</p>
     <table class="wf-table">
       <thead><tr><th>#</th><th>Command</th><th>Purpose</th></tr></thead>
       <tbody>{wf_rows}</tbody>
     </table>
-    <p class="note">Each <code>build.sh</code> run creates a git tag: <code>build/PROJECT/YYYY-MM-DD.N</code><br>
+    <p class="note">Each <code>build.sh</code> run creates a permanent git tag: <code>build/PROJECT/YYYY-MM-DD.N</code><br>
     Diff between builds: <code>git diff build/GAME/2026-03-19.1..build/GAME/2026-03-20.1 -- GAME/</code></p>
 
-    <p class="wf-section-h" style="margin-top:28px">Scripts</p>
-    {scripts_html}
+    <p class="wf-section-h" style="margin-top:28px">Other Scripts</p>
+    {other_html}
+  </div>
+
+  <!-- ── Guide viewer ──────────────────────────── -->
+  <div id="guide" class="content-section">
+    <div id="guide-content" class="md"></div>
+  </div>
+
+  <!-- ── Script man page ───────────────────────── -->
+  <div id="script-detail" class="content-section">
+    <h2 id="sd-file" class="sd-title"></h2>
+    <p id="sd-desc" class="sd-desc-p"></p>
+    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:0 0 14px;">
+    <pre id="sd-usage" class="sd-pre"></pre>
+  </div>
+
+  <!-- ── Project viewer (iframe) ───────────────── -->
+  <div id="project" class="content-section">
+    <iframe id="project-frame" src="" title="Project viewer"></iframe>
   </div>
 
 </main>
@@ -376,16 +447,22 @@ section h2 {{ font-size: 19px; font-weight: 700; color: var(--c-h1);
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 {guides_js}
+{scripts_js}
 
 marked.setOptions({{ gfm: true, breaks: false }});
+
+function clearActive() {{
+  document.querySelectorAll('.sn, .sn-sub').forEach(a => a.classList.remove('active'));
+}}
 
 function show(id) {{
   document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
   var sec = document.getElementById(id);
   if (sec) sec.classList.add('active');
-  document.querySelectorAll('.sn').forEach(a => a.classList.remove('active'));
+  document.querySelector('main').classList.toggle('project-mode', id === 'project');
+  clearActive();
   document.querySelectorAll('[data-sec="' + id + '"]').forEach(a => a.classList.add('active'));
-  if (history.pushState) history.pushState(null, '', '#' + id);
+  if (id !== 'project') document.querySelector('main').scrollTop = 0;
 }}
 
 function showGuide(key) {{
@@ -393,10 +470,56 @@ function showGuide(key) {{
   if (!content) return;
   document.getElementById('guide-content').innerHTML = marked.parse(content);
   show('guide');
-  document.querySelectorAll('.sn').forEach(a => a.classList.remove('active'));
-  var link = document.querySelector('[data-key="' + key + '"]');
-  if (link) link.classList.add('active');
-  document.querySelector('main').scrollTop = 0;
+  clearActive();
+  var el = document.querySelector('[data-key="' + key + '"]');
+  if (el) el.classList.add('active');
+}}
+
+function showGuideStep(key, step) {{
+  var content = GUIDES[key];
+  if (!content) return;
+  document.getElementById('guide-content').innerHTML = marked.parse(content);
+  show('guide');
+  clearActive();
+  var el = document.querySelector('[data-step="' + step + '"]');
+  if (el) el.classList.add('active');
+  setTimeout(function() {{
+    var headings = document.querySelectorAll('#guide-content h2, #guide-content h3');
+    var label = 'Step ' + step;
+    for (var i = 0; i < headings.length; i++) {{
+      if (headings[i].textContent.trim().indexOf(label) === 0) {{
+        headings[i].scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+        break;
+      }}
+    }}
+  }}, 80);
+}}
+
+function showScript(file) {{
+  var s = SCRIPTS[file];
+  document.getElementById('sd-file').textContent = file;
+  document.getElementById('sd-desc').textContent = s ? s.desc : '';
+  var pre = document.getElementById('sd-usage');
+  if (s && s.details) {{
+    pre.textContent = s.details;
+    pre.className = 'sd-pre';
+  }} else {{
+    pre.textContent = '(no usage documentation available)';
+    pre.className = 'sd-pre sd-none';
+  }}
+  show('script-detail');
+  clearActive();
+  var el = document.querySelector('[data-script="' + file + '"]');
+  if (el) el.classList.add('active');
+}}
+
+function showProject(name, url) {{
+  var frame = document.getElementById('project-frame');
+  if (!frame.src || !frame.src.endsWith(url.replace('../', ''))) frame.src = url;
+  show('project');
+  clearActive();
+  var el = document.querySelector('[data-project="' + name + '"]');
+  if (el) el.classList.add('active');
 }}
 
 function toggleDetail(sid) {{
@@ -408,14 +531,8 @@ function toggleDetail(sid) {{
   if (toggle) toggle.innerHTML = open ? '&#9656;' : '&#9662;';
 }}
 
-// Init from hash
 (function() {{
-  var hash = location.hash.replace('#', '');
-  if (hash && hash !== 'guide' && document.getElementById(hash)) {{
-    show(hash);
-  }} else {{
-    {f"showGuide('{default_guide}');" if default_guide else "show('workflow');"}
-  }}
+  show('workflow');
 }})();
 </script>
 </body>
