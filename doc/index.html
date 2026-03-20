@@ -17,10 +17,10 @@ body { display: flex; height: 100vh; overflow: hidden;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }
 
-.sidebar-header { background: var(--c-topbar-bg); padding: 7px 14px;
-  border-bottom: 2px solid var(--c-accent); flex-shrink: 0; cursor: pointer; }
+.sidebar-header { background: var(--c-topbar-bg); padding: 10px 8px 8px;
+  border-bottom: 2px solid var(--c-accent); flex-shrink: 0; cursor: pointer; text-align: center; }
 .sidebar-header:hover { background: rgba(255,255,255,.04); }
-.sidebar-header h1 { color: #fff; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .3px; }
+.sidebar-header h1 { color: #fff; font-size: 17px; font-weight: 700; line-height: 1; letter-spacing: .3px; }
 
 .nav-section { font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--c-side-section); padding: 10px 16px 3px; }
@@ -38,7 +38,7 @@ body { display: flex; height: 100vh; overflow: hidden;
 /* Sub-nav items (steps under Workflow) */
 .sn-sub { display: block; padding: 3px 16px 3px 28px;
   font-size: 11px; font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
-  color: rgba(255,255,255,.55); cursor: pointer; border-left: 3px solid transparent;
+  color: rgba(255,255,255,.8); cursor: pointer; border-left: 3px solid transparent;
   text-decoration: none; transition: background .1s, border-color .1s, color .1s;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sn-sub:hover { color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }
@@ -56,16 +56,16 @@ main.project-mode { padding: 0; overflow: hidden; }
 /* ── Two-row workflow diagram ── */
 .wf-diagram { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
 .wf-row { display: flex; align-items: stretch; flex-wrap: nowrap; gap: 0; }
-.wf-row-r { display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-end; }
+.wf-row-r { display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-start; }
 .wf-box {
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
   border-radius: 4px; padding: 5px 10px; text-align: center;
   display: inline-flex; flex-direction: column; gap: 2px; align-items: center; }
-.wf-terminal { border-color: var(--c-accent); background: rgba(44,182,125,.28); }
+.wf-terminal { border-color: var(--c-accent); background: #0a5c38; }
 .wf-label { font-size: 12px; color: #fff; font-weight: 700; white-space: nowrap; display: block; }
-.wf-script { font-size: 10px; color: var(--c-side-section);
+.wf-script { font-size: 10px; color: #fff;
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }
-.wf-path { font-size: 9.5px; color: var(--c-accent);
+.wf-path { font-size: 9.5px; color: #fff;
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }
 .wf-arr { color: var(--c-side-section); padding: 0 5px; font-size: 14px; align-self: center;
   display: inline-block; }
@@ -159,23 +159,18 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
   <div class="sidebar-header" onclick="show('workflow')">
     <h1>&#9654; Prototyper</h1>
   </div>
-
-  <div class="nav-sep"></div>
-  <div class="nav-section">Steps</div>
   <a class="sn" data-step="1" onclick="showGuideStep('SPECIFICATION-PROCESS', 1)">Step 1 — Create</a>
   <a class="sn-sub" data-script="create_spec.sh" onclick="showScript('create_spec.sh')">create_spec.sh</a>
-  <a class="sn" data-step="2" onclick="showGuideStep('SPECIFICATION-PROCESS', 2)">Step 2 — Write</a>
+  <a class="sn" data-step="2" onclick="showGuideStep('SPECIFICATION-PROCESS', 2)">Step 2 — Create</a>
+  <a class="sn-sub" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Project Creation</a>
   <a class="sn" data-step="3" onclick="showGuideStep('SPECIFICATION-PROCESS', 3)">Step 3 — Validate</a>
   <a class="sn-sub" data-script="validate.sh" onclick="showScript('validate.sh')">validate.sh</a>
   <a class="sn" data-step="4" onclick="showGuideStep('SPECIFICATION-PROCESS', 4)">Step 4 — Convert</a>
   <a class="sn-sub" data-script="convert.sh" onclick="showScript('convert.sh')">convert.sh</a>
   <a class="sn" data-step="5" onclick="showGuideStep('SPECIFICATION-PROCESS', 5)">Step 5 — Build</a>
   <a class="sn-sub" data-script="build.sh" onclick="showScript('build.sh')">build.sh</a>
-  <a class="sn" data-step="6" onclick="showGuideStep('SPECIFICATION-PROCESS', 6)">Step 6 — Iterate</a>
-  <a class="sn" data-step="7" onclick="showGuideStep('SPECIFICATION-PROCESS', 7)">Step 7 — Promote</a>
-
   <div class="nav-sep"></div>
-  <a class="sn" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Setup a Project</a>
+  <a class="sn" data-step="7" onclick="showGuideStep('SPECIFICATION-PROCESS', 7)">Promote</a>
 
   <div class="nav-sep"></div>
   <div class="nav-section">Current Projects</div>
@@ -190,20 +185,8 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
     <p class="wf-section-h">Workflows</p>
     <div class="wf-diagram"><div class="wf-row"><div class="wf-box"><span class="wf-label">Create</span><span class="wf-script">create_spec.sh</span><span class="wf-path">./&lt;PROJECT&gt;</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Validate</span><span class="wf-script">validate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Convert</span><span class="wf-script">convert.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Build</span><span class="wf-script">build.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span><span class="wf-path">./&lt;PROJECT&gt;_build</span></div></div><div class="wf-row-r"><span class="wf-arr">&#8595;</span></div><div class="wf-row-r"><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Promote</span><span class="wf-script">create_project.py</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">Project</span><span class="wf-path">../&lt;PROJECT&gt;</span></div></div></div>
 
-    <p class="wf-section-h">Steps</p>
-    <table class="wf-table">
-      <thead><tr><th>#</th><th>Command</th><th>Purpose</th></tr></thead>
-      <tbody><tr><td class="wn">1</td><td class="wcmd"><code>bin/create_spec.sh &lt;Project&gt;</code></td><td class="wdesc">Scaffold spec directory from templates</td></tr>
-<tr><td class="wn">2</td><td class="wcmd"><code>bin/validate.sh &lt;Project&gt;</code></td><td class="wdesc">Check required files, naming, fields — exit 0 = ready</td></tr>
-<tr><td class="wn">3</td><td class="wcmd"><code>bin/convert.sh &lt;Project&gt; &gt; prompt.md</code></td><td class="wdesc">Expand to detailed specs with AI — optional</td></tr>
-<tr><td class="wn">4</td><td class="wcmd"><code>bin/build.sh &lt;Project&gt; &gt; prompt.md</code></td><td class="wdesc">Tag commit, generate build prompt — feed to AI agent</td></tr>
-<tr><td class="wn">5</td><td class="wcmd"><code>python3 bin/create_project.py &lt;Project&gt;</code></td><td class="wdesc">Scaffold code project — run from GAME/</td></tr>
-</tbody>
-    </table>
-    <p class="note">Each <code>build.sh</code> run creates a permanent git tag: <code>build/PROJECT/YYYY-MM-DD.N</code><br>
-    Diff between builds: <code>git diff build/GAME/2026-03-19.1..build/GAME/2026-03-20.1 -- GAME/</code></p>
-
-    <p class="wf-section-h" style="margin-top:28px">Other Scripts</p>
+    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
+    <p class="wf-section-h">Scripts</p>
     <div class="sc-group"><div class="sc-entry"><div class="sc-head"><code class="sc-name">build_documentation.sh</code><span class="sc-desc">Wrapper — runs build_documentation.py with the slate theme</span></div></div>
 <div class="sc-entry sc-child"><div class="sc-head"><code class="sc-name">build_documentation.py</code><span class="sc-desc">Build this documentation page (doc/index.html)</span></div></div>
 <div class="sc-entry"><div class="sc-head"><span class="sc-toggle" onclick="toggleDetail('test-sh')" title="Show usage">&#9656;</span><code class="sc-name">test.sh</code><span class="sc-desc">Run self-tests on the specification system</span></div><div class="sc-detail" id="sd-test-sh"><pre>Runs unit tests on the specification system itself.

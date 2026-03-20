@@ -216,21 +216,25 @@ def build_page(scripts, projects, guides):
                         key=lambda s: wf_order.get(s['file'], 999))
     other_scripts = [s for s in scripts if s['file'] not in wf_set]
 
-    # ── Sidebar: steps with optional script sub-items ────────────────────────
+    # ── Sidebar: steps with sub-items (script or guide) ──────────────────────
+    # Each entry: (step_num, label, [(sub_label, 'script'|'guide', target), ...])
     STEP_NAV = [
-        (1, 'Step 1 — Create',   'create_spec.sh'),
-        (2, 'Step 2 — Write',    None),
-        (3, 'Step 3 — Validate', 'validate.sh'),
-        (4, 'Step 4 — Convert',  'convert.sh'),
-        (5, 'Step 5 — Build',    'build.sh'),
-        (6, 'Step 6 — Iterate',  None),
-        (7, 'Step 7 — Promote',  None),
+        (1, 'Step 1 — Create',   [('create_spec.sh',   'script', 'create_spec.sh')]),
+        (2, 'Step 2 — Create',   [('Project Creation', 'guide',  'PROJECT-SETUP')]),
+        (3, 'Step 3 — Validate', [('validate.sh',       'script', 'validate.sh')]),
+        (4, 'Step 4 — Convert',  [('convert.sh',        'script', 'convert.sh')]),
+        (5, 'Step 5 — Build',    [('build.sh',          'script', 'build.sh')]),
     ]
     step_nav = ''
-    for num, label, script in STEP_NAV:
+    for num, label, subs in STEP_NAV:
         step_nav += f'  <a class="sn" data-step="{num}" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', {num})">{h.escape(label)}</a>\n'
-        if script:
-            step_nav += f'  <a class="sn-sub" data-script="{h.escape(script)}" onclick="showScript(\'{script}\')">{h.escape(script)}</a>\n'
+        for sub_label, sub_type, sub_target in subs:
+            if sub_type == 'script':
+                step_nav += f'  <a class="sn-sub" data-script="{h.escape(sub_target)}" onclick="showScript(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
+            else:
+                step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
+    step_nav += '  <div class="nav-sep"></div>\n'
+    step_nav += f'  <a class="sn" data-step="7" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 7)">Promote</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -329,10 +333,10 @@ body {{ display: flex; height: 100vh; overflow: hidden;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }}
 
-.sidebar-header {{ background: var(--c-topbar-bg); padding: 7px 14px;
-  border-bottom: 2px solid var(--c-accent); flex-shrink: 0; cursor: pointer; }}
+.sidebar-header {{ background: var(--c-topbar-bg); padding: 10px 8px 8px;
+  border-bottom: 2px solid var(--c-accent); flex-shrink: 0; cursor: pointer; text-align: center; }}
 .sidebar-header:hover {{ background: rgba(255,255,255,.04); }}
-.sidebar-header h1 {{ color: #fff; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .3px; }}
+.sidebar-header h1 {{ color: #fff; font-size: 17px; font-weight: 700; line-height: 1; letter-spacing: .3px; }}
 
 .nav-section {{ font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--c-side-section); padding: 10px 16px 3px; }}
@@ -350,7 +354,7 @@ body {{ display: flex; height: 100vh; overflow: hidden;
 /* Sub-nav items (steps under Workflow) */
 .sn-sub {{ display: block; padding: 3px 16px 3px 28px;
   font-size: 11px; font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
-  color: rgba(255,255,255,.55); cursor: pointer; border-left: 3px solid transparent;
+  color: rgba(255,255,255,.8); cursor: pointer; border-left: 3px solid transparent;
   text-decoration: none; transition: background .1s, border-color .1s, color .1s;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
 .sn-sub:hover {{ color: #fff; background: rgba(255,255,255,.05); border-left-color: var(--c-accent); }}
@@ -368,16 +372,16 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 /* ── Two-row workflow diagram ── */
 .wf-diagram {{ display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }}
 .wf-row {{ display: flex; align-items: stretch; flex-wrap: nowrap; gap: 0; }}
-.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-end; }}
+.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-start; }}
 .wf-box {{
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
   border-radius: 4px; padding: 5px 10px; text-align: center;
   display: inline-flex; flex-direction: column; gap: 2px; align-items: center; }}
-.wf-terminal {{ border-color: var(--c-accent); background: rgba(44,182,125,.28); }}
+.wf-terminal {{ border-color: var(--c-accent); background: #0a5c38; }}
 .wf-label {{ font-size: 12px; color: #fff; font-weight: 700; white-space: nowrap; display: block; }}
-.wf-script {{ font-size: 10px; color: var(--c-side-section);
+.wf-script {{ font-size: 10px; color: #fff;
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
-.wf-path {{ font-size: 9.5px; color: var(--c-accent);
+.wf-path {{ font-size: 9.5px; color: #fff;
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
 .wf-arr {{ color: var(--c-side-section); padding: 0 5px; font-size: 14px; align-self: center;
   display: inline-block; }}
@@ -471,13 +475,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   <div class="sidebar-header" onclick="show('workflow')">
     <h1>&#9654; Prototyper</h1>
   </div>
-
-  <div class="nav-sep"></div>
-  <div class="nav-section">Steps</div>
 {step_nav}
-  <div class="nav-sep"></div>
-  <a class="sn" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Setup a Project</a>
-
   <div class="nav-sep"></div>
   <div class="nav-section">Current Projects</div>
 {proj_nav}
@@ -490,15 +488,8 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <p class="wf-section-h">Workflows</p>
     {wf_diagram}
 
-    <p class="wf-section-h">Steps</p>
-    <table class="wf-table">
-      <thead><tr><th>#</th><th>Command</th><th>Purpose</th></tr></thead>
-      <tbody>{wf_rows}</tbody>
-    </table>
-    <p class="note">Each <code>build.sh</code> run creates a permanent git tag: <code>build/PROJECT/YYYY-MM-DD.N</code><br>
-    Diff between builds: <code>git diff build/GAME/2026-03-19.1..build/GAME/2026-03-20.1 -- GAME/</code></p>
-
-    <p class="wf-section-h" style="margin-top:28px">Other Scripts</p>
+    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
+    <p class="wf-section-h">Scripts</p>
     {other_html}
   </div>
 
