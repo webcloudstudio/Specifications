@@ -1,6 +1,6 @@
 # Screen: Monitoring [ROADMAP]
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Spec for the Monitoring screen
 
 Health status and event timeline for all monitored projects.

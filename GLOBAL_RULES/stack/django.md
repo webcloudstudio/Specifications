@@ -1,6 +1,6 @@
 # Django Best Practices
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Django web framework patterns: models, views, URLs, and admin
 
 Technology reference for Django web applications. This file does not change between projects.

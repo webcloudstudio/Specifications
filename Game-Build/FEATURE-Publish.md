@@ -1,6 +1,6 @@
 # Feature: Portfolio Publishing
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Spec for the Portfolio Publishing feature
 
 Builds a static portfolio site from project metadata and publishes to GitHub Pages.

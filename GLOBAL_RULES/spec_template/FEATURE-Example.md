@@ -1,6 +1,6 @@
 # Feature: Example
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Template: per-feature spec — trigger, sequence, reads, and writes
 
 <!-- One file per cross-cutting behavior. Rename to describe capability: FEATURE-Scan.md -->

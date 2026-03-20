@@ -1,6 +1,6 @@
 # Database
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Database schema: tables, columns, and types
 
 **SQLite with WAL mode.** Single file at `data/prototyper.db`.

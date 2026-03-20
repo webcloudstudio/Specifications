@@ -1,6 +1,6 @@
 # Feature: Operations
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Spec for the Operations feature
 
 Run, stop, and monitor bin/ script execution.

@@ -1,6 +1,6 @@
 # Screen: Portfolio
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Spec for the Portfolio screen
 
 **Portfolio site management.** Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields.

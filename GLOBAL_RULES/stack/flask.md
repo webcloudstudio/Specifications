@@ -1,6 +1,6 @@
 # Flask Best Practices
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Flask web framework patterns: routes, blueprints, templates, and error handling
 
 Technology reference for Flask web applications. This file does not change between projects.

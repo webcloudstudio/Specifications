@@ -1,6 +1,6 @@
 # Screen: Configuration
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Spec for the Configuration screen
 
 Edit project metadata across all projects in a single list.

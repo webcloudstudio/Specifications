@@ -1,6 +1,6 @@
 # Intent
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Project intent: why it exists, who it serves, and scope
 
 ## Who

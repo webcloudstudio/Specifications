@@ -1,6 +1,6 @@
 # UI General Standards
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Shared UI patterns and conventions across all screens
 
 **Shared UI patterns, components, and conventions used across all screens.**

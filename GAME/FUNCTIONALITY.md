@@ -1,6 +1,6 @@
 # Functionality: End-to-End Flows
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Core functionality specification
 
 **How things actually work, step by step.** This document bridges FEATURE_MAP (what exists) and ARCHITECTURE (how code is organized) by describing the major workflows from trigger to completion.

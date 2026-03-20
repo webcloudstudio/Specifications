@@ -1,6 +1,6 @@
 # Specification Process
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Step-by-step guide to the Prototyper specification workflow
 
 Prototyper converts concise specification files into AI agent build prompts.

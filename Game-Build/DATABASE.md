@@ -1,6 +1,6 @@
 # Database
 
-**Version:** 20260320 V1
+**Version:** 20260320 V1  
 **Description:** Database schema: tables, columns, and types
 
 SQLite at `data/game.db`. Stack conventions (WAL, FK pragma, migrations) per `stack/sqlite.md`.
