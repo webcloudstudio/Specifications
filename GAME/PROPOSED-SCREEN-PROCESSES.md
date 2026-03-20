@@ -6,13 +6,14 @@
 
 ## Layout
 
-Process list (most recent first) with expandable log viewer.
+Normal Project list with expander
+    If a program is running show with a button (to see the log)
+When expanded you can see prior run logs
 
 ## Process List
 
-| Column | Description |
-|--------|-------------|
-| Project name | From METADATA.md |
+Normal header from SCREEN-DEFAULT.md
+
 | Operation | Derived from script filename |
 | Status badge | RUNNING / DONE / ERROR / STOPPED |
 | Start time | yyyymmdd_hhmmss format |

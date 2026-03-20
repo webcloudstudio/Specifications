@@ -1,4 +1,4 @@
-# Screen: Publisher
+# Screen: Portfolio
 
 **Portfolio site management.** Builds and publishes a static GitHub Pages portfolio from METADATA.md.
 

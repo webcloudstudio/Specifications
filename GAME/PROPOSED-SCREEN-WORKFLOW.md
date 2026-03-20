@@ -1,4 +1,4 @@
-# Screen: Workflow [ROADMAP]
+# Screen: Ticketing [ROADMAP]
 
 **Kanban board for feature tickets.** Structured lifecycle from idea to done with AI audit trail.
 
@@ -18,7 +18,13 @@ Kanban columns (one per state) across all projects. Filter by project or tag.
 | IN DEVELOPMENT | AI session running or recently finished |
 | TESTING | Work complete, human validating |
 | DONE | Accepted |
-| ARCHIVED | Archived possibly Removed from disk |
+
+STATES should be configurable and easily added
+
+## Features 
+
+Tickets that are READY can be submitted to claude automatically for implemenation
+Tickets are merged into the specifcation file when Done
 
 ## Transitions
 
