@@ -1,4 +1,4 @@
-# AGENTS.md — Specifications Repository
+# AGENTS.md — Prototyper (Specifications Repository)
 
 > **This is the source repository for platform standards. It is exempt from CLAUDE_RULES
 > injection — it does not contain `CLAUDE_RULES_START` and must never receive it.**
@@ -11,18 +11,18 @@ This repository has two roles:
 1. **Global standards** (`GLOBAL_RULES/`) — distributing CLAUDE_RULES.md, CONVERT.md,
    templates (common.sh, common.py), stack reference patterns, and branding standards
    to every project via `bin/create_project.py`.
-2. **Project specifications** (`Prototyper/`, `AlexaPrototypeOne/`, etc.) — concise
+2. **Project specifications** (`GAME/`, `AlexaPrototypeOne/`, etc.) — concise
    specs organized by screen, feature, and component that define what to build.
 
 Tooling in `bin/` creates projects, validates compliance, propagates standards, converts
 concise specs, and generates build prompts. Operational tasks (push all repos, start
-services, etc.) live in the Prototyper project, not here.
+services, etc.) live in the GAME project, not here.
 
 ## Design Intent
 
 The rules system exists so that any AI agent, given CLAUDE_RULES.md and a project's
 spec files, can build, operate, and maintain that project without additional context.
-The platform (Prototyper) then discovers and integrates projects automatically by reading
+The platform (GAME) then discovers and integrates projects automatically by reading
 the same standards (METADATA.md, bin/ headers, AGENTS.md).
 
 **Specification methodology:** You write concise specs (tables, bullets, short descriptions).
@@ -61,7 +61,7 @@ Specifications/
     rebuild_index.sh               Regenerate browsable HTML indexes
     build_documentation.sh         Generate doc/ output
 
-  Prototyper/                      Project specification (Prototyper UI)
+  GAME/                            Project specification (GAME dashboard)
   AlexaPrototypeOne/               Project specification (numbered sequence)
   archive/                         Superseded documents — not current spec
   doc/                             Documentation: process guide, project setup guide
@@ -72,7 +72,7 @@ Specifications/
 - `{ProjectName}/` = what a specific project should be and do
 - `bin/` = tooling that enforces standards and generates artifacts
 - `doc/` = documentation about the specification system itself
-- Prototyper project (separate repo) = operational tasks (push repos, start services, etc.)
+- GAME project (separate repo) = operational tasks (push repos, start services, etc.)
 
 ## Specification File Types
 
@@ -115,10 +115,10 @@ bash bin/test.sh
 ### Build tag operations
 
 ```bash
-git tag -l "build/Prototyper/*"
-git diff build/Prototyper/2026-03-19.1..build/Prototyper/2026-03-20.1 -- Prototyper/
-git show build/Prototyper/2026-03-19.1
-git checkout build/Prototyper/2026-03-19.1 -- Prototyper/DATABASE.md
+git tag -l "build/GAME/*"
+git diff build/GAME/2026-03-19.1..build/GAME/2026-03-20.1 -- GAME/
+git show build/GAME/2026-03-19.1
+git checkout build/GAME/2026-03-19.1 -- GAME/DATABASE.md
 ```
 
 ### Project management (code projects, not specs)

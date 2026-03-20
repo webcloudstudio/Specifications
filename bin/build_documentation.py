@@ -203,8 +203,8 @@ def build_page(scripts, projects):
         proj_links += f'<a class="side-link side-sub-link" href="../{proj["name"]}/index.html" target="_blank">{h.escape(proj["display_name"])}</a>\n'
 
     sidebar = f'''<nav class="side">
-<div class="side-title">Specifications</div>
-<div class="side-sub">Project Manual</div>
+<div class="side-title">Prototyper</div>
+<div class="side-sub">Specification System</div>
 <a class="side-link active" onclick="show('workflow')">Workflow</a>
 <a class="side-link" onclick="show('files')">File Architecture</a>
 <a class="side-link" onclick="show('scripts')">Scripts</a>
@@ -215,8 +215,8 @@ def build_page(scripts, projects):
     hero = f'''<div class="hero">
 {HERO_SVG}
 <div class="hero-text">
-<h1>Specifications</h1>
-<p>Write concise specs. Expand with AI. Build in one shot.</p>
+<h1>Prototyper</h1>
+<p>Write concise specs. Expand with AI. Build in one shot. &mdash; <strong>Rapid Project Development</strong></p>
 </div>
 </div>'''
 

@@ -24,10 +24,12 @@ Single blueprint `cc` registered on `/`. All routes live in `routes.py`.
 Scans `$PROJECTS_DIR` for project directories. For each:
 1. Read METADATA.md → parse key:value fields
 2. Read AGENTS.md / CLAUDE.md → extract endpoints, bookmarks
-3. Read bin/ scripts → parse CommandCenter headers
+3. Read bin/ scripts → parse CommandCenter headers (any language: sh, py, js, pl)
 4. Upsert into `projects` and `operations` tables
 
 Runs asynchronously on startup (not blocking first page load). Triggered manually by rescan button.
+
+**Script header detection:** The scanner reads the first 20 lines of every executable file in `bin/`. Any script containing `# CommandCenter Operation` is registered as an operation. Supported languages: Bash, Python, Perl, JavaScript, Ruby — any language using `#` comments. This enables self-documentation as a core platform feature.
 
 ### Process Engine (`ops.py` + `spawn.py`)
 
@@ -35,7 +37,7 @@ Launches bin/ scripts as background subprocesses.
 
 1. Receive launch request (project_id, operation_id)
 2. Create `runs` record with status STARTING
-3. Fork subprocess: `bash bin/{script}.sh` from project root
+3. Fork subprocess: execute script from project root
 4. Capture stdout/stderr to log file: `logs/{project}_{script}_{yyyymmdd_hhmmss}.log`
 5. Parse `[$PROJECT_NAME]` lines from output for status transitions
 6. Update `runs` record on exit (status, exit_code, finished_at)
@@ -52,14 +54,6 @@ Builds static portfolio site from METADATA.md fields.
 4. Write static site to output directory
 5. Optionally push to GitHub Pages
 
-### Usage Analyzer (`usage_analyzer.py`)
-
-Reads AI session JSONL logs (produced by ai engine, not produced by GAME).
-
-A mechanism to scan the ai agent logs or to poll the ai agent to see
-information similar to the anthropic /usage command so we can display
-data to the user.  At present I have not found a solution.
-
 ## Routes (HTMX)
 
 All screen interactions use HTMX for partial page updates. Server returns HTML fragments, not JSON.
@@ -67,20 +61,19 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | Method | Path | Returns | Trigger |
 |--------|------|---------|---------|
 | GET | `/` | Full dashboard page | Page load |
-| POST | `/api/sync` | Status message | Rescan button |
+| POST | `/api/scan` | Status message | Rescan button |
 | POST | `/api/run/{op_id}` | Updated button state | Operation click |
 | POST | `/api/stop/{run_id}` | Updated button state | Stop click |
 | POST | `/api/push/{project_id}` | Git status fragment | Push button |
-| GET | `/api/project/{id}` | Project detail fragment | Row click |
+| GET | `/project/{id}` | Project detail page | Name/cog click |
 | GET | `/processes` | Process list page | Nav link |
 | GET | `/processes/{run_id}/log` | Log content fragment | View Log click |
 | GET | `/publisher` | Publisher page | Nav link |
 | POST | `/publisher/build` | Build status | Rebuild button |
 | POST | `/publisher/publish` | Publish status | Publish button |
-| GET | `/config` | Config page | Nav link |
-| POST | `/config/deploy/{profile}` | Deploy status | Deploy button |
-| POST | `/config/rollback/{id}` | Rollback status | Rollback button |
-| GET | `/usage` | Usage page | Nav link |
+| GET | `/project-config` | Configuration list | Nav link |
+| GET | `/monitoring` | Monitoring page | Nav link |
+| GET | `/workflow` | Workflow board | Nav link |
 | GET | `/health` | `{"status":"ok"}` | Health check |
 
 ## Directory Layout
@@ -93,7 +86,6 @@ GAME/
   ops.py                 Operation launch/stop/status
   spawn.py               Subprocess management
   publisher.py           Portfolio builder
-  usage_analyzer.py      Token analytics
   models.py              PROJECT_TYPES registry
   db.py                  Database access helpers
   claude_convention.py   CLAUDE.md / AGENTS.md parsing
@@ -104,11 +96,16 @@ GAME/
     style.css            Custom styles (Bootstrap 5 dark theme)
   bin/
     common.sh            Shared script functions
+    common.py            Shared Python functions
     start.sh             Start Flask dev server
     stop.sh              Stop server
     build_documentation.sh  Generate docs/
   data/
-    cc.db                SQLite database
+    game.db        SQLite database
   docs/                  Generated documentation
   logs/                  Operation log files
 ```
+
+## Open Questions
+
+- Should routes.py be split into per-screen blueprint modules as the app grows?

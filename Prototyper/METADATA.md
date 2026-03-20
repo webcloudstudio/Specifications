@@ -1,8 +1,9 @@
-# Prototyper
+# Prototyper (naming error — see GAME/ for correct spec)
 
-Project management dashboard for rapid AI-assisted prototype development.
+This directory was created by a naming mistake. The GAME project spec is in GAME/.
 
 name: Prototyper
+type: build-artifact
 display_name: Prototyper
 title: Prototyper — Rapid Project Development
 git_repo: Prototyper

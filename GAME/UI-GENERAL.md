@@ -27,7 +27,7 @@ Fixed top bar present on all screens. Components left to right:
 | Element | Behavior |
 |---------|----------|
 | **Brand** (`cc-brand`) | App name with command icon. Click --> project list. |
-| **Tab links** | Projects, Configuration, GIT-Homepage, Processes, Monitoring, Workflow. Active tab highlighted. |
+| **Tab links** | Projects, Configuration, Processes, Publisher, Monitoring, Workflow. Active tab highlighted. |
 | **Documentation button** | Opens `doc/index.html` in new tab. |
 | **Settings dropdown** | Hamburger icon. Contains: Settings, Tags, Help. |
 | **Running badges** | Green pill badges for each currently-running project. Click --> project detail. |

@@ -1,6 +1,6 @@
 # Database
 
-**SQLite with WAL mode.** Single file at `data/cc.db`.
+**SQLite with WAL mode.** Single file at `data/game.db`.
 
 ---
 
@@ -15,7 +15,7 @@
 
 **Page rendering reads the database only.** No template, route, or partial reads a file from disk during a normal page load.
 
-**Writes go to both.** When the UI changes a value (status badge click, port inline edit, etc.), GAME writes to the DB immediately and then patches the same value into the project's `METADATA.md`. This keeps the file current so git history tracks changes.
+**Writes go to both.** When the UI changes a value (status badge click, port inline edit, etc.), Prototyper writes to the DB immediately and then patches the same value into the project's `METADATA.md`. This keeps the file current so git history tracks changes.
 
 ```
 Startup / Refresh (slow path — filesystem I/O)
