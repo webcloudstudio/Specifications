@@ -1,38 +1,46 @@
-/* GEM Theme: Evergreen  |  gem-base.css must follow this file */
+/* GEM Theme: Midnight Blue  |  gem-base.css must follow this file */
 :root {
-  --c-topbar-bg:     #071208;
-  --c-side-bg:       #0C1E10;
-  --c-side-border:   #1A4828;
-  --c-side-section:  #5A9868;   /* muted but readable on dark bg — was too dark */
-  --c-side-link:     #90C898;
+  /* Structural */
+  --c-topbar-bg:     #071420;   /* top bar + sidebar title — same color */
+  --c-side-bg:       #0F1C2E;   /* sidebar body — slightly lighter */
+  --c-side-border:   #1E3A5F;
+  --c-side-section:  #4A7898;   /* muted section labels */
+  --c-side-link:     #A8C8E0;   /* sidebar link text */
 
-  --c-accent:        #7AE890;   /* lighter bright green — badge + hover indicator */
-  --c-accent-text:   #071208;
+  /* Accent — used for: badge, h1, sidebar hover border, section divider accent */
+  --c-accent:        #4DA8FF;
+  --c-accent-text:   #05111E;   /* text ON the badge */
 
-  --c-h1:            #1B5E20;
-  --c-h1-border:     #B8DFC0;
-  --c-h2:            #2E7D32;
-  --c-h2-border:     #C8EAC8;
-  --c-h3:            #388E3C;
+  /* Content headings (on light bg — must be dark enough) */
+  --c-h1:            #0D3B8E;
+  --c-h1-border:     #C0D5F0;
+  --c-h2:            #1565C0;
+  --c-h2-border:     #D0E4F8;
+  --c-h3:            #1E88E5;
 
-  --c-bg:            #F4FAF4;
-  --c-text:          #0D2010;
+  /* Content area */
+  --c-bg:            #F7FAFF;
+  --c-text:          #1A2840;
 
-  --c-th-bg:         #1B5E20;
-  --c-th-text:       #E8F5E9;
-  --c-td-border:     #B8DFC0;
-  --c-tr-alt:        #EDF7EE;
-  --c-tr-hover:      #D4EDDA;
+  /* Tables */
+  --c-th-bg:         #0D3B8E;
+  --c-th-text:       #E8F4FF;
+  --c-td-border:     #C0D8F0;
+  --c-tr-alt:        #EEF4FF;
+  --c-tr-hover:      #DAE8FF;
 
-  --c-code-bg:       #DFF0E0;
-  --c-code-text:     #1B5E20;
-  --c-pre-bg:        #071208;
-  --c-pre-text:      #90C898;
+  /* Code */
+  --c-code-bg:       #EAF0FF;
+  --c-code-text:     #0D3B8E;
+  --c-pre-bg:        #071420;
+  --c-pre-text:      #A8C8E0;
 
-  --c-callout-bg:    rgba(74,200,112,0.07);
-  --c-callout-border:rgba(74,200,112,0.25);
+  /* Callout */
+  --c-callout-bg:    rgba(77,168,255,0.07);
+  --c-callout-border:rgba(77,168,255,0.25);
 
-  --c-foot-text:     #6A9F72;
+  /* Footer */
+  --c-foot-text:     #7A9AB8;
 }
 /* ================================================================
    GEM Documentation — Base Structural CSS
