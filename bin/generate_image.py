@@ -50,67 +50,40 @@ def draw_glow(img, cx, cy, radius, color, alpha=60):
 
 
 def draw_brain(draw, cx, top_y):
-    """Draw an oversized lumpy brain centered at cx, starting at top_y."""
-    bw, bh = 180, 140   # brain bounding box
+    """Draw an oversized brain: single smooth ellipse + fissure + horizontal sulci."""
+    bw, bh = 180, 120
 
-    # Main lobes — two big hemispheres side by side
-    lobe_top = top_y
-    lobe_bot = top_y + bh
-    lobe_mid_x = cx
-    half = bw // 2
+    # Outer shape — one smooth ellipse, no bumps
+    draw.ellipse([cx - bw // 2, top_y, cx + bw // 2, top_y + bh],
+                 fill=BRAIN_BASE, outline=BRAIN_RIDGE, width=3)
 
-    # Left hemisphere
-    draw.ellipse([lobe_mid_x - half, lobe_top,
-                  lobe_mid_x + 10,   lobe_bot],
-                 fill=BRAIN_BASE, outline=BRAIN_RIDGE, width=2)
-    # Right hemisphere
-    draw.ellipse([lobe_mid_x - 10,   lobe_top,
-                  lobe_mid_x + half, lobe_bot],
-                 fill=BRAIN_BASE, outline=BRAIN_RIDGE, width=2)
+    # Highlight on upper-left to give roundness
+    draw.ellipse([cx - bw // 2 + 12, top_y + 8, cx - 10, top_y + 40],
+                 fill=(225, 170, 175))
 
-    # Central groove line
-    draw.line([(cx, lobe_top + 10), (cx, lobe_bot - 10)],
+    # Central interhemispheric fissure (vertical)
+    draw.line([(cx, top_y + 6), (cx, top_y + bh - 6)],
               fill=BRAIN_RIDGE, width=3)
 
-    # Ridges — left lobe
-    for i, (dx, dy, ex, ey) in enumerate([
-        (-70, 20, -20, 15),
-        (-75, 45, -15, 40),
-        (-70, 70, -20, 65),
-        (-60, 95, -18, 90),
-        (-50, 115, -20, 110),
-    ]):
-        draw.arc([cx + dx - 18, lobe_top + dy,
-                  cx + ex + 18, lobe_top + ey + 20],
-                 start=200, end=340, fill=BRAIN_RIDGE, width=2)
+    # Horizontal sulci — left hemisphere (drawn as concave arcs, open upward)
+    for i in range(6):
+        y = top_y + 18 + i * 17
+        shrink = i * 3
+        x1 = cx - bw // 2 + 10 + shrink
+        x2 = cx - 10
+        draw.arc([x1, y - 6, x2, y + 6], start=0, end=180,
+                 fill=BRAIN_RIDGE, width=2)
 
-    # Ridges — right lobe
-    for i, (dx, dy, ex, ey) in enumerate([
-        (20, 20, 70, 15),
-        (15, 45, 75, 40),
-        (20, 70, 70, 65),
-        (18, 95, 60, 90),
-        (20, 115, 50, 110),
-    ]):
-        draw.arc([cx + dx - 18, lobe_top + dy,
-                  cx + ex + 18, lobe_top + ey + 20],
-                 start=200, end=340, fill=BRAIN_RIDGE, width=2)
+    # Horizontal sulci — right hemisphere
+    for i in range(6):
+        y = top_y + 18 + i * 17
+        shrink = i * 3
+        x1 = cx + 10
+        x2 = cx + bw // 2 - 10 - shrink
+        draw.arc([x1, y - 6, x2, y + 6], start=0, end=180,
+                 fill=BRAIN_RIDGE, width=2)
 
-    # Bumpy top protrusions (lumpy effect)
-    bump_positions = [
-        (cx - 70, lobe_top + 5, 22),
-        (cx - 40, lobe_top - 8, 28),
-        (cx - 10, lobe_top - 12, 26),
-        (cx + 20, lobe_top - 6, 27),
-        (cx + 50, lobe_top + 8, 22),
-        (cx + 72, lobe_top + 20, 18),
-        (cx - 82, lobe_top + 25, 18),
-    ]
-    for bx, by, br in bump_positions:
-        draw.ellipse([bx - br, by - br, bx + br, by + br],
-                     fill=BRAIN_BASE, outline=BRAIN_RIDGE, width=2)
-
-    return lobe_bot  # bottom of brain
+    return top_y + bh  # bottom of brain
 
 
 def draw_sparks(img, cx, brain_top, brain_bot):

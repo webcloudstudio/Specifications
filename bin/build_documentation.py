@@ -344,12 +344,13 @@ body {{ display: flex; height: 100vh; overflow: hidden;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
   overflow-y: auto; flex-shrink: 0; }}
 
-.sidebar-header {{ background: var(--c-topbar-bg); padding: 0;
-  flex-shrink: 0; cursor: pointer; text-align: center; overflow: hidden; }}
-.sidebar-header:hover {{ opacity: .9; }}
-.sidebar-header img {{ width: 100%; height: 88px; object-fit: cover; object-position: center top; display: block; }}
-.sidebar-header h1 {{ color: #fff; font-size: 15px; font-weight: 700; line-height: 1;
-  letter-spacing: .5px; padding: 5px 0 6px; background: var(--c-topbar-bg); }}
+.sidebar-header {{ background: var(--c-topbar-bg); padding: 6px 10px;
+  flex-shrink: 0; cursor: pointer; display: flex; align-items: center; gap: 9px; }}
+.sidebar-header:hover {{ opacity: .88; }}
+.sidebar-header img {{ width: 100px; height: 75px; object-fit: contain; display: block;
+  flex-shrink: 0; border-radius: 3px; }}
+.sidebar-header h1 {{ color: #fff; font-size: 15px; font-weight: 700; line-height: 1.2;
+  letter-spacing: .4px; }}
 
 .nav-section {{ font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--c-side-section); padding: 10px 16px 3px; }}
