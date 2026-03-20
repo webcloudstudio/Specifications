@@ -17,3 +17,7 @@ show_on_homepage: true
 tags: dashboard, tool, platform
 desired_state: on-demand
 namespace: development
+
+## Agent Instructions
+
+When working on this specification, add unresolved questions to the `## Open Questions` section at the bottom of the relevant spec file. Do not create new files for questions — append to the file the question pertains to.

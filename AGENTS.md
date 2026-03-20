@@ -44,14 +44,18 @@ Specifications/
     CONVERT.md                     Specification expansion rules (global methodology)
     DOCUMENTATION_BRANDING.md      Documentation theming and color standards
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
-    templates/                     Canonical common.sh and common.py
+    spec_template/                 Template files for create_spec.sh
+    templates/                     Canonical common.sh and common.py (code projects)
     gitignore                      Standard .gitignore distributed to projects
 
   bin/                             Tooling: create, validate, convert, build, update
+    create_spec.sh                 Scaffold new spec directory from templates
+    validate.sh                    Validate spec completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
     build.sh                       Tag commit + generate build prompt
+    test.sh                        Test the specification system itself
     generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md)
-    create_project.py              Scaffold new projects / update existing ones
+    create_project.py              Scaffold new code projects / update existing ones
     validate_project.py            Compliance checker per status level
     update_projects.sh             Push latest rules + templates to all set-up projects
     rebuild_index.sh               Regenerate browsable HTML indexes
@@ -73,52 +77,58 @@ Specifications/
 
 ## Specification File Types
 
-| Prefix | Purpose |
-|--------|---------|
-| `METADATA.md` | Project identity (name, stack, port, status) |
-| `README.md` | Intent, stack summary, build instructions |
-| `DATABASE.md` | Tables, columns, types (schema only) |
-| `UI.md` | Shared UI patterns across screens |
-| `ARCHITECTURE.md` | Modules, routes, directory layout |
-| `SCREEN-{Name}.md` | Per-screen: route, layout, interactions |
-| `FEATURE-{Name}.md` | Per-feature: trigger, sequence, reads, writes |
+| Prefix | Purpose | Required |
+|--------|---------|----------|
+| `METADATA.md` | Project identity (name, display_name, short_description, status) | Yes |
+| `README.md` | One-line project description | Yes |
+| `INTENT.md` | Why the project exists, who it's for | Yes |
+| `ARCHITECTURE.md` | Modules, routes, directory layout | Yes |
+| `DATABASE.md` | Tables, columns, types (schema only) | If has DB |
+| `UI.md` | Shared UI patterns across screens | If has UI |
+| `SCREEN-{Name}.md` | Per-screen: route, layout, interactions | If has UI |
+| `FEATURE-{Name}.md` | Per-feature: trigger, sequence, reads, writes | As needed |
 
-Every spec file ends with `## Open Questions` for unresolved decisions.
+Spec files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README, METADATA, and INTENT do not.
 
 ## Dev Commands
 
+### Specification workflow (all take `<project-name>` as $1)
+
 ```bash
-# Convert concise specs → AI expansion prompt
-bash bin/convert.sh Game-Build > convert-prompt.md
+# Scaffold a new spec directory from templates
+bash bin/create_spec.sh <project-name> ["Short description"]
 
-# Build: tag commit + generate complete build prompt
-bash bin/build.sh Game-Build > build-prompt.md
+# Validate spec completeness and correctness
+bash bin/validate.sh <project-name> [--verbose]
 
-# Build without tagging
-bash bin/build.sh Game-Build --no-tag > build-prompt.md
+# Generate conversion prompt (concise → detailed specs)
+bash bin/convert.sh <project-name> > convert-prompt.md
 
-# Tag only (no prompt output)
-bash bin/build.sh Game-Build --tag-only
+# Tag commit + generate complete build prompt
+bash bin/build.sh <project-name> > build-prompt.md
+bash bin/build.sh <project-name> --no-tag > build-prompt.md
+bash bin/build.sh <project-name> --tag-only
 
-# List build tags for a project
+# Test the specification system itself
+bash bin/test.sh
+```
+
+### Build tag operations
+
+```bash
 git tag -l "build/Game-Build/*"
+git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-20.1 -- Game-Build/
+git show build/Game-Build/2026-03-19.1
+git checkout build/Game-Build/2026-03-19.1 -- Game-Build/DATABASE.md
+```
 
-# Diff between builds
-git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Build/
+### Project management (code projects, not specs)
 
-# Legacy: generate prompt without CONVERT.md or tagging
-bash bin/generate_prompt.sh GAME > build-prompt.md
-
-# Create a new project
+```bash
 python3 bin/create_project.py <name>
-
-# Update all set-up projects with latest rules and templates
-bash bin/update_projects.sh
-
-# Validate a single project against compliance rules
-bash bin/validate_project.sh <name>
-
-# Regenerate browsable HTML index
+bash bin/update_projects.sh [--dry-run]
+bash bin/validate_project.sh <name> [--verbose]
+bash bin/generate_prompt.sh <name> > build-prompt.md
 bash bin/rebuild_index.sh
 ```
 
@@ -131,6 +141,15 @@ spec state used for each build, enabling spec-to-spec diffs between builds.
 
 ## Architecture
 
+### bin/create_spec.sh
+Scaffolds a new specification directory from `GLOBAL_RULES/spec_template/`. Substitutes
+project name, slug, description, and date into template placeholders. Creates all required
+and optional template files.
+
+### bin/validate.sh
+Validates a specification directory: required files, METADATA fields, naming conventions,
+Open Questions sections, stack file existence, template cleanup. Exit 0 = valid, exit 1 = errors.
+
 ### bin/convert.sh
 Generates a conversion prompt: CONVERT.md expansion rules + stack reference files + all
 concise spec files from the project directory. Output is fed to an AI agent for expansion.
@@ -139,6 +158,10 @@ concise spec files from the project directory. Output is fed to an AI agent for 
 Tags the current commit with an annotated build tag, then generates a complete build prompt:
 CONVERT.md + CLAUDE_RULES.md + stack files + all project spec files. Warns if uncommitted
 changes exist. Shows diff stat from previous build tag.
+
+### bin/test.sh
+Tests the specification system: verifies global rules, stack files, templates, script headers,
+and runs a create+validate round-trip on a temporary project.
 
 ### bin/create_project.py
 Creates new projects and updates existing ones.

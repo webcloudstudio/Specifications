@@ -101,7 +101,8 @@ These rules are global — they apply to all projects regardless of stack. Stack
 | Prefix | Contains | Example |
 |--------|----------|---------|
 | `METADATA.md` | Project identity fields | Always present |
-| `README.md` | Intent, stack, build instructions | Always present |
+| `README.md` | One-line project description | Always present |
+| `INTENT.md` | Why the project exists | Always present |
 | `DATABASE.md` | Tables and columns | If project has a database |
 | `UI.md` | Shared visual patterns | If project has a UI |
 | `ARCHITECTURE.md` | Code organization | Always present |
@@ -116,7 +117,7 @@ These rules are global — they apply to all projects regardless of stack. Stack
 
 ## Open Questions Section
 
-Every spec file ends with:
+Spec files end with `## Open Questions` — except README.md, METADATA.md, and INTENT.md which do not have this section.
 
 ```markdown
 ## Open Questions
@@ -124,7 +125,7 @@ Every spec file ends with:
 - Question about scope or approach
 ```
 
-Open Questions are preserved through conversion. They signal to the builder "ask the human before deciding."
+Open Questions are preserved through conversion. They signal to the builder "ask the human before deciding." Agents add new questions to this section rather than creating new files.
 
 ---
 
@@ -147,11 +148,17 @@ git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Bu
 ## Pipeline
 
 ```
-1. Author writes concise specs
-2. bin/convert.sh {project}    → conversion prompt (specs + CONVERT.md + stack rules)
-3. Feed to AI                  → detailed specs (review, commit)
-4. bin/build.sh {project}      → tags commit + build prompt (specs + stack + CLAUDE_RULES)
-5. Feed to AI                  → built application
+create_spec.sh  →  (author edits)  →  validate.sh  →  convert.sh  →  build.sh
+   CREATE             DRAFT            VALIDATED       CONVERTED       BUILT
 ```
 
-Or one-shot: `bin/build.sh` includes CONVERT.md in the build prompt so the AI agent handles expansion and building in a single pass.
+| Step | Script | Output |
+|------|--------|--------|
+| CREATE | `bin/create_spec.sh <name> ["desc"]` | Spec directory with template files |
+| DRAFT | (author edits files) | Concise specs |
+| VALIDATED | `bin/validate.sh <name>` | Exit 0 = ready, exit 1 = fix issues |
+| CONVERTED | `bin/convert.sh <name> > convert-prompt.md` | Detailed specs (optional — build handles inline) |
+| BUILT | `bin/build.sh <name> > build-prompt.md` | Tagged commit + complete build prompt |
+| PROMOTED | (copy spec dir to own repo) | Independent project |
+
+One-shot path: skip CONVERTED, go straight from VALIDATED to BUILT. `bin/build.sh` includes CONVERT.md so the AI agent handles expansion and building in a single pass.

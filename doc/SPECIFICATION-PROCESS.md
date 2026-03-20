@@ -1,163 +1,219 @@
 # Specification Process
 
-How the spec-driven build system works. This is the methodology for one-shotting applications from specifications.
+Contract and state machine for the spec-driven build system.
 
 ---
 
-## Pipeline Overview
+## State Machine
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  You write   │     │  convert.sh  │     │  build.sh   │
-│ concise specs│────>│  (optional)  │────>│  (tag+prompt)│───> AI builds app
-│              │     │  AI expands  │     │             │
-└─────────────┘     └─────────────┘     └─────────────┘
+CREATE ──> DRAFT ──> VALIDATED ──> CONVERTED ──> BUILT ──> PROMOTED
+                        │                          │
+                        └──────── (iterate) ───────┘
 ```
 
-**Phase 1: Write** — You write concise markdown in a project specification directory (e.g., `Game-Build/`). Tables, bullet points, short descriptions. You define WHAT, not HOW.
+| State | Entry Condition | Exit Condition |
+|-------|----------------|----------------|
+| **CREATE** | `bin/create_spec.sh` runs | Directory exists with template files |
+| **DRAFT** | Author edits spec files | Author decides specs are complete enough |
+| **VALIDATED** | `bin/validate.sh` exits 0 | Required files present, naming correct, fields set |
+| **CONVERTED** | `bin/convert.sh` output reviewed | Detailed specs committed (or skipped — build handles inline) |
+| **BUILT** | `bin/build.sh` tags commit + generates prompt | Build prompt fed to AI agent, application produced |
+| **PROMOTED** | Spec directory copied to own repo (`../ProjectName/`) | Project lives independently with its own git history |
 
-**Phase 2: Convert (optional)** — `bin/convert.sh Game-Build` generates a prompt that includes your concise specs + GLOBAL_RULES/CONVERT.md expansion rules + stack files. Feed this to an AI agent. It outputs detailed specs. Review, edit, commit.
-
-**Phase 3: Build** — `bin/build.sh Game-Build` creates an annotated git tag preserving the exact commit, then generates a complete build prompt (CONVERT rules + CLAUDE_RULES + stack files + all specs). Feed to an AI agent. It builds the app.
-
-You can skip Phase 2 and go straight to Phase 3. The build prompt includes CONVERT.md so the AI can expand and build in one pass.
+Iteration: after a build, edit specs → re-validate → re-build. Each build creates a new tag. Diff between tags to see what changed.
 
 ---
 
-## File Types
+## Scripts
 
-| Prefix | What you write | What conversion expands |
-|--------|---------------|------------------------|
-| `METADATA.md` | Project identity fields | (not expanded) |
-| `README.md` | Intent, stack, build instructions | (not expanded) |
-| `DATABASE.md` | Table names, columns, types, notes | Full CREATE TABLE with defaults, constraints, indexes, migration list |
-| `UI.md` | Component names, purposes, key visuals | Bootstrap classes, CSS variables, HTMX attributes |
-| `ARCHITECTURE.md` | Module names, responsibilities, layout | Import relationships, function signatures, data flow |
-| `SCREEN-{Name}.md` | Route, columns, interactions | HTMX attributes, server response types, component references |
-| `FEATURE-{Name}.md` | Trigger, sequence, reads, writes | Route signatures, event emissions, error handling, concurrency |
+All scripts take the project specification directory name as the first argument.
 
-Every file ends with `## Open Questions` for unresolved decisions.
+### `bin/create_spec.sh`
+
+```
+bash bin/create_spec.sh <project-name> ["Short description"]
+```
+
+| Arg | Required | Description |
+|-----|----------|-------------|
+| `$1` | yes | Project name — becomes directory name and METADATA slug |
+| `$2` | no | Short description — populates METADATA and README |
+
+Creates `<project-name>/` from `GLOBAL_RULES/spec_template/`. Substitutes project name, slug, description, and date into templates.
+
+**Produces:** METADATA.md, README.md, INTENT.md, ARCHITECTURE.md, DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md
+
+### `bin/validate.sh`
+
+```
+bash bin/validate.sh <project-name> [--verbose]
+```
+
+| Arg | Required | Description |
+|-----|----------|-------------|
+| `$1` | yes | Project name — specification directory to validate |
+| `--verbose` | no | Show passing checks (default: errors and warnings only) |
+
+**Exit 0** = valid. **Exit 1** = errors found.
+
+Checks:
+- Required files: METADATA.md, README.md, INTENT.md, ARCHITECTURE.md
+- Required METADATA fields: name, display_name, short_description, status
+- Status value is valid enum
+- Stack files exist in GLOBAL_RULES/stack/ (if stack declared)
+- INTENT.md has real content (not template placeholder)
+- File naming conventions (SCREEN-*, FEATURE-* prefixes)
+- Open Questions section in spec files (not README, METADATA, INTENT)
+- No leftover template files (SCREEN-Example.md, FEATURE-Example.md)
+
+### `bin/convert.sh`
+
+```
+bash bin/convert.sh <project-name> > convert-prompt.md
+```
+
+| Arg | Required | Description |
+|-----|----------|-------------|
+| `$1` | yes | Project name — specification directory to convert |
+
+Generates a prompt to stdout. Contents: GLOBAL_RULES/CONVERT.md expansion rules + stack reference files + all concise spec files from the project directory. Feed to an AI agent for expansion into detailed specs.
+
+**Requires:** METADATA.md with `stack:` field.
+
+### `bin/build.sh`
+
+```
+bash bin/build.sh <project-name> [--no-tag] [--tag-only] > build-prompt.md
+```
+
+| Arg | Required | Description |
+|-----|----------|-------------|
+| `$1` | yes | Project name — specification directory to build from |
+| `--no-tag` | no | Generate prompt without creating a build tag |
+| `--tag-only` | no | Create build tag without generating prompt |
+
+Creates annotated git tag `build/{project}/{YYYY-MM-DD.N}`, then generates a complete build prompt to stdout. Contents: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.
+
+Warns on uncommitted changes. Shows diff stat from previous build tag.
+
+### `bin/test.sh`
+
+```
+bash bin/test.sh
+```
+
+No arguments. Tests the specification system itself: verifies templates exist, scripts have correct headers, global rules are intact, and runs a create+validate round-trip.
 
 ---
 
 ## Build Tags
 
-Every build creates an annotated git tag:
+Every `bin/build.sh` run creates an annotated git tag:
 
 ```
 build/{project}/{YYYY-MM-DD.N}
 ```
 
-Example: `build/Game-Build/2026-03-19.1`
+**Properties:**
+- Annotated tags are full git objects — never pruned by `git gc`
+- Include metadata: commit SHA, commit message, build timestamp
+- Auto-increment: `.1`, `.2`, `.3` within same day
 
-**Why annotated tags:**
-- They are full git objects (not just pointers)
-- Never pruned by `git gc` or `git prune`
-- Include metadata: who built, when, commit SHA, commit message
-- Can be listed: `git tag -l "build/Game-Build/*"`
-- Can be diffed: `git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Build/`
+**Operations:**
 
-**This enables spec iteration:** after building, you can see exactly what changed in the specs between builds. If something broke, diff the tags to find which spec change caused it.
+```bash
+# List builds for a project
+git tag -l "build/Game-Build/*"
+
+# Diff specs between builds
+git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-20.1 -- Game-Build/
+
+# See what commit a build used
+git show build/Game-Build/2026-03-19.1
+
+# Restore a spec file from a previous build
+git checkout build/Game-Build/2026-03-19.1 -- Game-Build/DATABASE.md
+```
 
 ---
 
 ## Git Strategy
 
-This is a single repo with a solo developer autocommitting.
+Single repo, solo developer, autocommitting.
 
-- **Branch:** Stay on `main`. No feature branches needed.
-- **Commits:** Autocommit as you work. Git is for rollback and safety.
-- **Tags:** Build tags are the stable reference points. Commits flow continuously; tags mark "I built from this."
-- **Rollback:** To see what changed: `git diff build/Game-Build/1..build/Game-Build/2 -- Game-Build/`. To revert a spec: `git checkout build/Game-Build/1 -- Game-Build/DATABASE.md`.
-- **Never force-push.** Never rebase. Linear history, tags are immutable anchors.
+| Concern | Approach |
+|---------|----------|
+| Branching | Stay on `main`. No feature branches. |
+| Commits | Autocommit as you work. Git is for rollback and safety. |
+| Stable points | Build tags mark "I built from this state." |
+| Rollback | `git checkout build/{tag} -- {file}` to restore a spec. |
+| Diff | `git diff build/{old}..build/{new} -- {project}/` for spec-to-spec comparison. |
+| Push | Never force-push. Never rebase. Linear history. |
 
 ---
 
-## Directory Structure
+## File Contract
+
+### Required (every spec directory)
+
+| File | Purpose | Has Open Questions |
+|------|---------|-------------------|
+| `METADATA.md` | Project identity fields | No |
+| `README.md` | One-line description | No |
+| `INTENT.md` | Why this project exists | No |
+| `ARCHITECTURE.md` | Modules, routes, directory layout | Yes |
+
+### Conditional
+
+| File | When | Has Open Questions |
+|------|------|-------------------|
+| `DATABASE.md` | Project has a database | Yes |
+| `UI.md` | Project has a user interface | Yes |
+| `SCREEN-{Name}.md` | One per UI screen | Yes |
+| `FEATURE-{Name}.md` | One per cross-cutting behavior | Yes |
+
+### Required METADATA.md Fields
+
+| Field | Description |
+|-------|-------------|
+| `name` | Machine slug, matches directory name |
+| `display_name` | Human-readable name |
+| `short_description` | One sentence |
+| `status` | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |
+
+All other METADATA fields are optional. `stack:` is needed for convert/build but not required at IDEA status.
+
+### Naming Rules
+
+| Pattern | Use for |
+|---------|---------|
+| `SCREEN-{NavLabel}.md` | Screen specs — name matches nav bar label |
+| `FEATURE-{Capability}.md` | Feature specs — name describes the capability |
+| Uppercase with hyphens | All spec files |
+
+---
+
+## Global Rules Location
 
 ```
-Specifications/
-  GLOBAL_RULES/
-    CONVERT.md              ← Expansion rules (global methodology)
-    CLAUDE_RULES.md         ← Agent behavior contract
-    stack/                  ← Technology patterns (flask.md, sqlite.md, ...)
-    templates/              ← Canonical common.sh, common.py
-
-  bin/
-    convert.sh              ← Generate conversion prompt for AI expansion
-    build.sh                ← Tag commit + generate build prompt
-    generate_prompt.sh      ← Legacy build prompt generator (no tagging)
-    create_project.py       ← Scaffold new projects
-    validate_project.py     ← Compliance checker
-    update_projects.sh      ← Propagate rules to all projects
-    rebuild_index.sh        ← Regenerate HTML indexes
-
-  Game-Build/               ← Project specification directory
-    METADATA.md             Identity
-    README.md               Intent + stack + build instructions
-    DATABASE.md             Schema
-    UI.md                   Shared UI patterns
-    ARCHITECTURE.md         Code organization
-    SCREEN-Dashboard.md     Per-screen specs
-    SCREEN-Configuration.md
-    SCREEN-Processes.md
-    SCREEN-Publisher.md
-    SCREEN-Monitoring.md
-    SCREEN-Workflow.md
-    FEATURE-Scan.md         Per-feature specs
-    FEATURE-Operations.md
-    FEATURE-Publish.md
-    FEATURE-Heartbeat.md
-    FEATURE-Schedule.md
+GLOBAL_RULES/
+  CONVERT.md           Expansion methodology (how concise → detailed)
+  CLAUDE_RULES.md      Agent behavior contract (injected into project AGENTS.md)
+  stack/               Technology patterns (flask.md, sqlite.md, ...)
+  spec_template/       Template files for create_spec.sh
+  templates/           Code templates (common.sh, common.py)
 ```
 
----
-
-## Naming Conventions
-
-**Directories:** PascalCase or hyphenated. Match METADATA.md `name` field. Example: `Game-Build`.
-
-**Spec files:**
-
-| Pattern | Purpose | Example |
-|---------|---------|---------|
-| `METADATA.md` | Identity | Always present |
-| `README.md` | Overview | Always present |
-| `DATABASE.md` | Schema | One per project (if it has a DB) |
-| `UI.md` | Shared visuals | One per project (if it has a UI) |
-| `ARCHITECTURE.md` | Code organization | Always present |
-| `SCREEN-{NavLabel}.md` | One per screen | `SCREEN-Dashboard.md` |
-| `FEATURE-{Capability}.md` | One per feature | `FEATURE-Scan.md` |
-
-Screen names match the navigation label. Feature names describe the capability.
+CONVERT.md is global, not per-project. The methodology is shared. Project-specific decisions live in the spec files themselves.
 
 ---
 
-## What Goes Where
+## Promotion
 
-| Content | File | NOT in |
-|---------|------|--------|
-| Table columns and types | DATABASE.md | Architecture, Feature files |
-| Startup/refresh behavior | FEATURE-Scan.md | DATABASE.md |
-| Route table | ARCHITECTURE.md | Feature files (they reference routes, don't list them all) |
-| Shared UI components | UI.md | Screen files (they reference UI.md) |
-| Per-screen layout | SCREEN-*.md | UI.md, Architecture |
-| Cross-cutting behavior | FEATURE-*.md | Screen files, Database |
-| Stack conventions (WAL, etc.) | stack/*.md | DATABASE.md, Architecture |
+When a spec is built and the application works, promote the spec directory to its own repo:
 
-**Rule:** If you're writing something that appears in two files, it's in the wrong place. Each fact lives in one file. Other files reference it.
-
----
-
-## Quick Start: New Project
-
-1. Create directory: `mkdir Specifications/MyProject`
-2. Create METADATA.md with identity fields (name, display_name, stack, port, status)
-3. Create README.md with intent and stack
-4. Create DATABASE.md with tables (if applicable)
-5. Create SCREEN-*.md for each screen
-6. Create FEATURE-*.md for cross-cutting behaviors
-7. Create UI.md for shared patterns (if applicable)
-8. Create ARCHITECTURE.md for code organization
-9. Run `bash bin/build.sh MyProject > build-prompt.md`
-10. Feed to AI agent
+1. `cp -r Game-Build/ ../Game-Build/` (or wherever the project lives)
+2. The spec files become the project's documentation
+3. The Specifications repo retains the build tags — they remain valid for diffing
+4. The project repo gets its own git history from that point forward

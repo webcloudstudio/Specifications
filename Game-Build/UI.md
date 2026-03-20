@@ -72,3 +72,8 @@ Server returns HTML fragments, never JSON (except `/health`). Patterns: `hx-get`
 System font stack. Monospace for logs. Body 14px, headings 16-20px, badges 11px.
 
 Desktop-first. Minimum 1024px width.
+
+## Open Questions
+
+- Mobile/tablet support needed or strictly desktop?
+- Custom CSS variables vs Bootstrap defaults?

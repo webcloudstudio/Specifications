@@ -4,7 +4,7 @@
 
 **Version:** 2026-03-16.1
 
-Full specification: `Specifications/CLAUDE_RULES.md`. This condensed version covers agent behavior only.
+Full specification and methodology: `Specifications/AGENTS.md` in the Specifications repository. This condensed version covers agent behavior only.
 
 ---
 

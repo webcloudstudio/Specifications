@@ -1,238 +1,62 @@
 # Project Setup Guide
 
-How to create the required files for a new project specification. This is the technical reference for setting up each file.
+Technical reference for the files in a specification directory. For the overall process, see `SPECIFICATION-PROCESS.md`.
 
 ---
 
 ## Required Files
 
-Every project specification directory needs at minimum:
+| File | Purpose |
+|------|---------|
+| `METADATA.md` | Project identity: name, display_name, short_description, status, and optional fields |
+| `README.md` | Project name and one-line description |
+| `INTENT.md` | Why this project exists, who it's for, what problem it solves |
+| `ARCHITECTURE.md` | Modules, routes, directory layout |
 
-| File | Required | Purpose |
-|------|----------|---------|
-| `METADATA.md` | Yes | Project identity — name, stack, port, status |
-| `README.md` | Yes | Intent, stack summary, build instructions |
-| `ARCHITECTURE.md` | Yes | Modules, directory layout, routes |
-| `DATABASE.md` | If has DB | Tables, columns, types |
-| `UI.md` | If has UI | Shared visual patterns |
-| `SCREEN-*.md` | If has UI | One per screen |
-| `FEATURE-*.md` | As needed | One per cross-cutting behavior |
+**METADATA.md required fields:** `name`, `display_name`, `short_description`, `status`.
+All other METADATA fields are documented in `GLOBAL_RULES/CLAUDE_RULES.md` — not repeated here.
 
----
+## Conditional Files
 
-## METADATA.md
-
-Key-value format (not YAML). Parsed with grep/cut.
-
-```markdown
-# ProjectName
-
-One-line description.
-
-name: my-project
-display_name: My Project
-git_repo: my-project
-short_description: One sentence describing the project.
-port: 8080
-status: PROTOTYPE
-version: 2026-03-19.1
-updated: 20260319
-stack: Python/Flask/SQLite/Bootstrap5
-health: /health
-tags: tool, dashboard
-desired_state: on-demand
-namespace: development
-```
-
-**Required fields:** `name`, `display_name`, `short_description`, `stack`, `status`.
-
-**Optional fields:** `port` (services only), `health` (services only), `git_repo`, `version`, `tags`, `desired_state`, `namespace`, `show_on_homepage`, `card_*` overrides.
-
-The `stack:` field is slash-separated and maps to `GLOBAL_RULES/stack/*.md` files. Available: python, flask, django, sqlite, postgres, bootstrap5, alexa-skills-kit, aws-lambda, aws-api-gateway, aws-sqs.
+| File | Include when | Delete when |
+|------|-------------|-------------|
+| `DATABASE.md` | Project has a database | No database |
+| `UI.md` | Project has a user interface | No UI (CLI, library, API-only) |
+| `SCREEN-{Name}.md` | One per screen in the UI | No UI |
+| `FEATURE-{Name}.md` | Cross-cutting behavior not tied to one screen | Not needed |
 
 ---
 
-## README.md
+## INTENT.md
 
-Short. Three sections:
-
-```markdown
-# Project Name — Subtitle
-
-What this project does in 1-2 sentences.
-
-## Intent
-
-Why this project exists. Who it's for. What problem it solves.
-
-## Stack
-
-- **Language:** Python
-- **Framework:** Flask
-- **Database:** SQLite
-- **Frontend:** Bootstrap 5, HTMX
-- **Port:** 8080
-
-## Building From This Specification
-
-\```bash
-bash bin/build.sh ProjectName > build-prompt.md
-\```
-```
-
----
-
-## DATABASE.md
-
-Tables and columns only. Stack conventions are applied during conversion — don't repeat them.
+Why the project exists. Written by the author, not generated.
 
 ```markdown
-# Database
+# Intent
 
-SQLite at `data/app.db`. Stack conventions per `stack/sqlite.md`.
+Who this is for and what problem it solves.
 
-## table_name
+## Core Principle
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INTEGER PK | |
-| name | TEXT | unique, machine slug |
-| status | TEXT | active / archived |
-| extra | JSON | |
-| created_at | TEXT | timestamp |
-| updated_at | TEXT | timestamp |
+The main design idea or philosophy.
 
-## Open Questions
+## What This Is Not
 
-- Should X be its own table or a JSON field in extra?
+Explicit scope boundaries.
 ```
 
-**Types:** `INTEGER`, `TEXT`, `INTEGER PK`, `FK` (references another table), `JSON` (stored as TEXT).
-
-**Notes column:** constraints (unique, nullable), allowed values, defaults, or brief description.
-
----
-
-## SCREEN-*.md
-
-One file per screen. Name matches the nav bar label.
-
-```markdown
-# Screen: ScreenName
-
-One-line description.
-
-## Route
-
-\```
-GET /path
-\```
-
-## Layout
-
-Description of major sections/areas.
-
-## Columns
-
-| Column | Content |
-|--------|---------|
-| Name | What's in this column |
-
-## Interactions
-
-| Action | Trigger | Effect |
-|--------|---------|--------|
-| Do thing | Click button | POST /path → result |
-
-## Open Questions
-
-- Unresolved design decisions
-```
-
-**Reference UI.md** for shared components (e.g., "Uses Standard Row Header — see UI.md"). Don't redefine shared patterns.
-
----
-
-## FEATURE-*.md
-
-One file per cross-cutting behavior that isn't tied to a single screen.
-
-```markdown
-# Feature: FeatureName
-
-One-line description.
-
-## Trigger
-
-What starts this feature (user action, timer, startup).
-
-## Sequence
-
-1. Step one
-2. Step two
-3. Step three
-
-## Reads
-
-What data sources are consumed.
-
-## Writes
-
-What data stores are modified.
-
-## Key Behaviors
-
-- Important behavior that isn't obvious from the sequence
-
-## Open Questions
-
-- Unresolved decisions
-```
-
-Mark roadmap features: `# Feature: FeatureName [ROADMAP]`
-
----
-
-## UI.md
-
-Shared visual patterns referenced by SCREEN-* files.
-
-```markdown
-# UI Standards
-
-Shared patterns. Screen specs reference this for shared components.
-
-## Theme
-
-Framework, theme, CSS approach.
-
-## Navigation Bar
-
-What's in the nav, left to right.
-
-## Shared Components
-
-Table of reusable components (row headers, buttons, filters, modals).
-
-## Conventions
-
-HTMX patterns, typography, responsive behavior.
-```
+No Open Questions section. This file is the author's declaration, not a spec to expand.
 
 ---
 
 ## ARCHITECTURE.md
 
-Code organization. Modules, routes, directory layout.
+Code organization. Keep it concise — conversion expands it.
 
 ```markdown
 # Architecture
 
-One-line summary of the pattern (e.g., "Flask app factory with blueprints").
-
-## App Factory / Entry Point
-
-How the app starts.
+One-line pattern summary.
 
 ## Modules
 
@@ -245,32 +69,165 @@ How the app starts.
 | Method | Path | Returns |
 |--------|------|---------|
 | GET | / | Full page |
-| POST | /api/action | HTML fragment |
 
 ## Directory Layout
 
-\```
-Project/
-  app.py
-  routes.py
-  ...
-\```
+{tree}
 
 ## Open Questions
 
-- Architectural decisions not yet made
+- Unresolved architectural decisions
 ```
 
 ---
 
-## Validation
+## DATABASE.md
 
-After creating files, validate:
+Tables and columns only. Stack conventions (WAL, migrations, etc.) are applied during conversion from `stack/*.md` files — do not repeat them here.
+
+```markdown
+# Database
+
+SQLite at `data/app.db`. Stack conventions per `stack/sqlite.md`.
+
+## table_name
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | |
+| name | TEXT | unique |
+| extra | JSON | |
+| created_at | TEXT | timestamp |
+
+## Open Questions
+
+- Schema decisions not yet resolved
+```
+
+**Type shorthand:** `INTEGER PK`, `TEXT`, `FK` (→ references), `JSON` (stored as TEXT), `INTEGER` (booleans use 0/1).
+
+---
+
+## SCREEN-*.md
+
+One per screen. File name matches the nav bar label.
+
+```markdown
+# Screen: ScreenName
+
+One-line description.
+
+## Route
+
+GET /path
+
+## Layout
+
+Major sections/areas.
+
+## Columns
+
+| Column | Content |
+|--------|---------|
+
+## Interactions
+
+| Action | Trigger | Effect |
+|--------|---------|--------|
+
+## Open Questions
+
+-
+```
+
+Reference `UI.md` for shared components — don't redefine shared patterns in screen files.
+
+---
+
+## FEATURE-*.md
+
+One per cross-cutting behavior that spans multiple screens or has no screen.
+
+```markdown
+# Feature: FeatureName
+
+One-line description.
+
+## Trigger
+
+What starts this.
+
+## Sequence
+
+1. Step one
+2. Step two
+
+## Reads
+
+Data sources consumed.
+
+## Writes
+
+Data stores modified.
+
+## Open Questions
+
+-
+```
+
+Mark roadmap features: `# Feature: Name [ROADMAP]`. Conversion preserves intent without expanding implementation detail.
+
+---
+
+## UI.md
+
+Shared visual patterns. Screen files reference this instead of repeating.
+
+```markdown
+# UI Standards
+
+## Theme
+
+Framework, color scheme, CSS approach.
+
+## Navigation
+
+What's in the nav bar.
+
+## Shared Components
+
+Reusable pieces: row headers, buttons, filters, modals.
+
+## Open Questions
+
+-
+```
+
+---
+
+## Open Questions Convention
+
+All spec files except README.md, METADATA.md, and INTENT.md end with:
+
+```markdown
+## Open Questions
+
+- Unresolved design decision
+- Another question
+```
+
+These signal to the builder: "ask the human before deciding." Preserved through conversion and build. Agents add questions here rather than creating new files.
+
+---
+
+## Scaffolding
 
 ```bash
-# Check that all stack files referenced in METADATA.md exist
-bash bin/validate_project.sh ProjectName
+bash bin/create_spec.sh <project-name> ["Short description"]
+```
 
-# Generate the build prompt to verify everything assembles correctly
-bash bin/build.sh ProjectName --no-tag > /dev/null && echo "OK"
+Creates the directory with all template files. Edit, rename, and delete as needed. Then validate:
+
+```bash
+bash bin/validate.sh <project-name>
 ```
