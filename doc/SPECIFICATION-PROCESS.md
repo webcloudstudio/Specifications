@@ -12,18 +12,8 @@ bash bin/create_spec.sh <ProjectName>
 
 Creates `Specifications/<ProjectName>/` with template files from `GLOBAL_RULES/spec_template/`.
 
-Edit `METADATA.md` immediately. The only field required to proceed is `name:`.
-Additional fields are required by `validate.sh` as the project progresses to higher status levels:
-
-| Field | Required at | Description |
-|-------|-------------|-------------|
-| `name:` | always | Directory name and slug |
-| `display_name:` | PROTOTYPE | Human-readable name |
-| `short_description:` | PROTOTYPE | One sentence summary |
-| `status:` | PROTOTYPE | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |
-| `stack:` | ACTIVE | Technology stack, slash-delimited: `flask/sqlite` |
-| `port:` | ACTIVE | Service port |
-| `tags:` | ACTIVE | Category tags, comma-delimited |
+Edit `METADATA.md` immediately. `validate.sh` requires all four fields to be set:
+`name`, `display_name`, `short_description`, `status`.
 
 ---
 
@@ -55,7 +45,7 @@ Exit 0 = ready. Exit 1 = errors to fix.
 | Check | Condition |
 |-------|-----------|
 | Required files | `METADATA.md`, `README.md`, `INTENT.md`, `ARCHITECTURE.md` exist |
-| METADATA fields | Fields required at the project's current `status:` level are set |
+| METADATA fields | `name`, `display_name`, `short_description`, `status` are all set |
 | INTENT.md | Has content — not still the template placeholder |
 | Naming | Spec files use `SCREEN-*` or `FEATURE-*` prefix |
 | Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` have been renamed or deleted |
@@ -117,4 +107,4 @@ git init && git add -A && git commit -m "Initial spec"
 git remote add origin <url>
 ```
 
-Run `python3 bin/create_project.py <ProjectName>` from `Specifications/` to scaffold the code project.
+Run `python3 bin/create_project.py <ProjectName>` from `GAME/` to scaffold the code project.

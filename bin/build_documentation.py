@@ -25,10 +25,17 @@ STATUS_COLORS = {
     'IDEA': '#94a3b8', 'PROTOTYPE': '#fdab3d', 'ACTIVE': '#0073ea',
     'PRODUCTION': '#00c875', 'ARCHIVED': '#4a5568',
 }
-SCRIPT_CATEGORIES = {
-    'spec-workflow':       'Spec Workflow',
-    'project-management':  'Project Management',
-    'maintenance':         'Maintenance',
+# Human-readable descriptions override auto-detected ones
+SCRIPT_DESCRIPTIONS = {
+    'create_spec.sh':          'Scaffold a new spec directory from templates',
+    'validate.sh':             'Check a spec directory for required files, naming, and completeness',
+    'convert.sh':              'Generate an AI expansion prompt from concise spec files',
+    'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
+    'generate_prompt.sh':      'Generate a build prompt without creating a git tag (legacy)',
+    'rebuild_index.sh':        'Rebuild the HTML spec viewers (index.html) in each project directory',
+    'test.sh':                 'Run self-tests on the specification system',
+    'build_documentation.py':  'Build this documentation page (doc/index.html)',
+    'build_documentation.sh':  'Wrapper — runs build_documentation.py with the correct theme',
 }
 
 GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP']
@@ -73,10 +80,11 @@ def discover_scripts():
             if not desc and detail_lines:
                 desc = detail_lines[0]
             details = '\n'.join(l for l in detail_lines if l).strip()
+            # Use human-readable override if available
+            desc = SCRIPT_DESCRIPTIONS.get(path.name, desc or label)
             scripts.append({
                 'file': path.name, 'label': label,
-                'category': category or 'maintenance',
-                'desc': desc or label,
+                'desc': desc,
                 'details': details,
             })
     return scripts
@@ -147,35 +155,23 @@ def build_page(scripts, projects, guides):
         guide_nav += f'  <a class="sn" data-sec="guide" data-key="{g["key"]}" onclick="showGuide(\'{g["key"]}\')">{h.escape(g["title"])}</a>\n'
     guides_js += '};'
 
-    # ── Script table ──────────────────────────────────────────────────────────
-    grouped = {}
+    # ── Script list (flat — no categories) ───────────────────────────────────
+    entries = ''
     for s in scripts:
-        grouped.setdefault(s['category'], []).append(s)
-
-    scripts_html = ''
-    cat_order = ['spec-workflow', 'project-management', 'maintenance']
-    for cat in cat_order:
-        items = grouped.get(cat)
-        if not items:
-            continue
-        label = SCRIPT_CATEGORIES.get(cat, cat.title())
-        anchor = f'cat-{cat}'
-        entries = ''
-        for s in items:
-            sid = s['file'].replace('.', '-')
-            detail_html = ''
-            if s.get('details'):
-                detail_html = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
-                toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
-            else:
-                toggle = ''
-            entries += (
-                f'<div class="sc-entry">'
-                f'<div class="sc-head">{toggle}<code class="sc-name">{h.escape(s["file"])}</code>'
-                f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>'
-                f'{detail_html}</div>\n'
-            )
-        scripts_html += f'<h3 id="{anchor}" class="cat-label">{label}</h3>\n<div class="sc-group">{entries}</div>\n'
+        sid = s['file'].replace('.', '-')
+        detail_html = ''
+        if s.get('details'):
+            detail_html = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
+            toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
+        else:
+            toggle = ''
+        entries += (
+            f'<div class="sc-entry">'
+            f'<div class="sc-head">{toggle}<code class="sc-name">{h.escape(s["file"])}</code>'
+            f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>'
+            f'{detail_html}</div>\n'
+        )
+    scripts_html = f'<div class="sc-group">{entries}</div>'
 
     # ── Workflow steps ────────────────────────────────────────────────────────
     wf_steps = [
