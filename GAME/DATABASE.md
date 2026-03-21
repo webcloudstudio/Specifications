@@ -197,7 +197,10 @@ On startup, the scan runs in a **background thread** so the server is immediatel
 | is_url | INTEGER | Open URL rather than run command |
 | default_port | INTEGER | From `# Port:` header |
 | health_path | TEXT | From `# Health:` header |
-| schedule | TEXT | From `# Schedule:` header |
+| schedule | TEXT | From `# Schedule:` header (cron expression) |
+| last_scheduled_run | TEXT | Last time the scheduler fired this operation |
+| next_scheduled_run | TEXT | Calculated next fire time |
+| schedule_enabled | INTEGER | 1 = active; allows pausing without removing the header |
 | timeout | INTEGER | From `# Timeout:` header |
 | sort_order | INTEGER | Display order |
 
@@ -231,6 +234,62 @@ On startup, the scan runs in a **background thread** so the server is immediatel
 | created_at | TEXT | datetime |
 | updated_at | TEXT | datetime |
 
+### heartbeats
+
+One row per project per heartbeat type. Overwritten on each poll (no history; rolling window only).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Auto-increment |
+| project_id | INTEGER FK | References projects.id |
+| heartbeat_type | TEXT | service_health / process_state / git_state / compliance |
+| current_state | TEXT | Current state value (e.g. UP, DOWN, RUNNING, CLEAN, COMPLIANT) |
+| last_checked | TEXT | Timestamp of last poll (yyyymmdd_hhmmss) |
+| response_ms | INTEGER | Response time in ms (service_health only; NULL otherwise) |
+| uptime_pct | REAL | Rolling 24h uptime percentage (service_health only; NULL otherwise) |
+
+### events
+
+Append-only log. Rows are never updated or deleted.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Auto-increment |
+| project_id | INTEGER FK | References projects.id; NULL for platform-level events |
+| event_type | TEXT | See FEATURE_MAP.md → Events catalog for valid values |
+| timestamp | TEXT | When it happened (yyyymmdd_hhmmss) |
+| summary | TEXT | Human-readable one-liner |
+| detail | TEXT | JSON event-specific payload |
+| source | TEXT | Subsystem that generated the event |
+
+### transaction_log
+
+Spec decision log. One row per decision, change, question, or rationale entry.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Sequential entry number |
+| project_id | INTEGER FK | References projects.id |
+| timestamp | TEXT | When the decision was made (yyyymmdd_hhmmss) |
+| category | TEXT | decision / change / question / rationale |
+| title | TEXT | One-line summary |
+| body | TEXT | Full description, context, alternatives considered |
+| files_affected | TEXT | JSON array of spec file paths modified |
+| ticket_id | INTEGER FK | Optional link to tickets.id |
+
+### ai_decisions
+
+Per-ticket AI decision log. Written when a ticket enters IN DEVELOPMENT.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Auto-increment |
+| ticket_id | INTEGER FK | References tickets.id |
+| timestamp | TEXT | When the work happened (yyyymmdd_hhmmss) |
+| decision | TEXT | What was decided and why |
+| alternatives | TEXT | What was considered but rejected |
+| files_changed | TEXT | JSON array of files modified |
+
 ---
 
 ## Conventions
@@ -248,5 +307,5 @@ On startup, the scan runs in a **background thread** so the server is immediatel
 - **`title` column**: Duplicated by `display_name`. Candidate for removal once all templates consistently use `display_name`.
 - **WAL PRAGMA per connection**: Harmless (WAL is persistent) but wasteful — should move to `init_db()` only.
 - **Tag colors**: Currently in `data/tag_colors.json` (file, not DB). Should be promoted to a `tag_colors` table to stay consistent with the DB-as-UI-source model.
-- **`has_docs`, `has_tests`, `has_specs` flags**: `has_docs` is now implemented. `has_tests` and `has_specs` are roadmap items for contract-earns-capability (see FEATURE_MAP.md).
+- **`has_docs`, `has_tests`, `has_specs` flags**: `has_docs` is implemented. `has_tests` and `has_specs` are roadmap items for contract-earns-capability (see FEATURE_MAP.md → Auto-Detected Flags).
 - **`git_last_commit_date`**: Not yet implemented. Would replace `version` date as the `LastUpdate` source — requires running `git log` during scan and storing the result.

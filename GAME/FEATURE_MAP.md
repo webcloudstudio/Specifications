@@ -1,11 +1,11 @@
 # GAME Feature Map
 
-**Version:** 20260320 V1  
+**Version:** 20260320 V2
 **Description:** Feature map: complete list of system features
 
 **Complete catalog of project attributes, platform features, and operational capabilities.**
 
-This is the primary feature reference for GAME. It defines what the platform knows about projects, what it can do with them, and what capabilities it provides automatically. All SCREEN-*.md files reference features defined here; all DATABASE.md columns trace back to attributes listed here.
+This is the primary feature reference for GAME. It defines what the platform knows about projects, what it can do with them, and what capabilities it provides automatically. All SCREEN-*.md files reference features defined here. For field types, column definitions, and constraints, see DATABASE.md.
 
 ---
 
@@ -15,12 +15,12 @@ This is the primary feature reference for GAME. It defines what the platform kno
 
 The platform has too many name/description fields. The canonical model:
 
-| Field | Source | Purpose | Required |
-|-------|--------|---------|----------|
-| `name` | METADATA.md | Machine slug, matches directory name | Yes |
-| `display_name` | METADATA.md | Human-readable name for all UI display | Yes |
-| `short_description` | METADATA.md | One sentence, shown in lists and cards | Yes |
-| `git_repo` | METADATA.md | Full HTTPS URL to repository | Yes |
+| Field | Source | Purpose |
+|-------|--------|---------|
+| `name` | METADATA.md | Machine slug, matches directory name |
+| `display_name` | METADATA.md | Human-readable name for all UI display |
+| `short_description` | METADATA.md | One sentence, shown in lists and cards |
+| `git_repo` | METADATA.md | Full HTTPS URL to repository |
 
 **Derived / Override fields** (should default from the above, only stored separately when user explicitly overrides):
 
@@ -35,11 +35,11 @@ The platform has too many name/description fields. The canonical model:
 
 ### Visual Identity (NEW)
 
-| Field | Type | Source | Purpose |
-|-------|------|--------|---------|
-| `color` | hex string | METADATA.md | Project accent color for dashboard cards, charts, badges |
-| `icon` | string | METADATA.md | Emoji or icon identifier for quick visual scanning |
-| `logo` | path | METADATA.md | Path to project logo image (relative to project dir) |
+| Field | Source | Purpose |
+|-------|--------|---------|
+| `color` | METADATA.md | Project accent color for dashboard cards, charts, badges |
+| `icon` | METADATA.md | Emoji or icon identifier for quick visual scanning |
+| `logo` | METADATA.md | Path to project logo image (relative to project dir) |
 
 **Usage:** The dashboard row shows the icon next to the project name. The color tints the project's card border, tag pills, and chart segments. The logo appears in the project detail view and on portfolio cards (falls back to a colored initial if missing).
 
@@ -47,31 +47,31 @@ The platform has too many name/description fields. The canonical model:
 
 ### Classification
 
-| Field | Type | Values | Purpose |
-|-------|------|--------|---------|
-| `project_type` | enum | `software`, `book`, custom | Determines UI template and default operations |
-| `category` | string | `infrastructure`, `client`, `tool`, `library`, `experiment` | High-level grouping for filtering/reporting |
-| `owner` | string | Name or handle | Who maintains this project |
-| `tags` | csv | Freeform | Cross-cutting labels for filtering |
+| Field | Values | Purpose |
+|-------|--------|---------|
+| `project_type` | `software`, `book`, custom | Determines UI template and default operations |
+| `category` | `infrastructure`, `client`, `tool`, `library`, `experiment` | High-level grouping for filtering/reporting |
+| `owner` | Name or handle | Who maintains this project |
+| `tags` | Freeform csv | Cross-cutting labels for filtering |
 
 ### Lifecycle
 
-| Field | Type | Values | Purpose |
-|-------|------|--------|---------|
-| `status` | enum | IDEA, PROTOTYPE, ACTIVE, PRODUCTION, ARCHIVED | Development phase |
-| `is_active` | boolean | Auto | false = removed from disk |
-| `desired_state` | enum | running, on-demand | Service always-on vs. manual start |
-| `namespace` | string | development, qa, production, custom | Environment segregation |
+| Field | Values | Purpose |
+|-------|--------|---------|
+| `status` | IDEA, PROTOTYPE, ACTIVE, PRODUCTION, ARCHIVED | Development phase |
+| `is_active` | Auto | false = removed from disk |
+| `desired_state` | running, on-demand | Service always-on vs. manual start |
+| `namespace` | development, qa, production, custom | Environment segregation |
 
 ### Technology & Infrastructure
 
-| Field | Type | Source | Purpose |
-|-------|------|--------|---------|
-| `stack` | string | METADATA.md | Slash-separated tech summary |
-| `port` | integer | METADATA.md | Service port (if applicable) |
-| `health_endpoint` | string | METADATA.md | Health check path (default `/health`) |
-| `deploy_url` | string | METADATA.md | Production/live URL |
-| `version` | string | METADATA.md | YYYY-MM-DD.N format |
+| Field | Source | Purpose |
+|-------|--------|---------|
+| `stack` | METADATA.md | Slash-separated tech summary |
+| `port` | METADATA.md | Service port (if applicable) |
+| `health_endpoint` | METADATA.md | Health check path (default `/health`) |
+| `deploy_url` | METADATA.md | Production/live URL |
+| `version` | METADATA.md | YYYY-MM-DD.N format |
 
 ### Auto-Detected Flags (Scanner)
 
@@ -97,28 +97,9 @@ The platform has too many name/description fields. The canonical model:
 | `card_url` | `deploy_url` or `git_repo` | Override link URL |
 | `card_image` | `logo` | Override card thumbnail |
 
-### Git State (Auto-Detected)
+### Git State, Timestamps, and Extensions
 
-| Field | Type | Source | Purpose |
-|-------|------|--------|---------|
-| `git_branch` | string | Scanner | Current branch name |
-| `git_dirty` | boolean | Scanner | Uncommitted changes |
-| `git_unpushed` | integer | Scanner | Commits ahead of remote |
-| `git_last_commit` | string | Scanner | Last commit message |
-
-### Timestamps
-
-| Field | Format | Purpose |
-|-------|--------|---------|
-| `created_at` | ISO 8601 | First scan / record creation |
-| `updated_at` | ISO 8601 | Last database modification |
-| `last_scanned` | yyyymmdd_hhmmss | Last scanner pass |
-
-### Type-Specific Extension
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `extra` | JSON blob | Type-specific fields, no migration needed |
+Git state (`git_branch`, `git_dirty`, `git_unpushed`, `git_last_commit`), timestamps (`created_at`, `updated_at`, `last_scanned`), and the `extra` JSON blob are scanner-populated fields. See DATABASE.md → `projects` for column definitions.
 
 The type registry (`models.py`) defines which fields each type uses. New types add entries to `PROJECT_TYPES` and two HTML partials.
 
@@ -143,6 +124,8 @@ Scripts in `bin/` with the `# CommandCenter Operation` marker in the first 20 li
 | `schedule` | `# Schedule:` | Cron expression for automated runs |
 | `timeout` | `# Timeout:` | Max execution seconds |
 
+See DATABASE.md → `operations` for the full schema.
+
 ### Default Operations (by stack)
 
 | Stack | Operation | Command |
@@ -155,14 +138,7 @@ Scripts in `bin/` with the `# CommandCenter Operation` marker in the first 20 li
 
 ### Run Records
 
-| Field | Type | Values |
-|-------|------|--------|
-| `status` | enum | STARTING, RUNNING, DONE, ERROR, STOPPED |
-| `pid` | integer | OS process ID |
-| `exit_code` | integer | null while running |
-| `started_at` | yyyymmdd_hhmmss | Launch time |
-| `finished_at` | yyyymmdd_hhmmss | Completion time |
-| `log_path` | string | `logs/{project}_{script}_{yyyymmdd_hhmmss}.log` |
+Operation runs are tracked per-execution. See DATABASE.md → `op_runs` for the schema.
 
 ### Process State Machine
 
@@ -187,19 +163,12 @@ Operations declare schedules via the `# Schedule:` header in bin/ scripts:
 # Schedule: 0 2 * * *
 ```
 
-### Schedule Attributes
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `schedule` | cron expr | When to run (standard 5-field cron) |
-| `last_scheduled_run` | yyyymmdd_hhmmss | Last time the scheduler fired this |
-| `next_scheduled_run` | yyyymmdd_hhmmss | Calculated next fire time |
-| `schedule_enabled` | boolean | Can be paused without removing the header |
+Schedule tracking fields (`last_scheduled_run`, `next_scheduled_run`, `schedule_enabled`) are stored alongside the cron expression. See DATABASE.md → `operations`.
 
 ### Standard Scheduled Scripts
 
 | Script | Convention | Typical Schedule |
-|--------|------------|------------------|
+|--------|------------|-----------------|
 | `bin/daily.sh` | Daily maintenance | `0 2 * * *` |
 | `bin/weekly.sh` | Weekly maintenance | `0 3 * * 0` |
 | `bin/build.sh` | Rebuild on schedule | Project-specific |
@@ -225,21 +194,12 @@ Heartbeats are periodic polls that produce a current state. They have no history
 | **Git State** | Scanner | CLEAN / DIRTY / UNPUSHED | `git status` + `git log` |
 | **Compliance** | Scanner | COMPLIANT / GAPS / UNCHECKED | Check required files exist |
 
-**Heartbeat record:**
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `project_id` | FK | Which project |
-| `heartbeat_type` | enum | service_health, process_state, git_state, compliance |
-| `current_state` | string | Current state value |
-| `last_checked` | yyyymmdd_hhmmss | When last polled |
-| `response_ms` | integer | Response time (service health only) |
-| `uptime_pct` | float | Rolling 24h percentage (service health only) |
-
 **Aggregate indicators:**
 - **UP** = all heartbeats healthy
 - **DOWN** = any heartbeat in failure state
 - **MIXED** = some up, some down (multi-service projects)
+
+See DATABASE.md → `heartbeats` for the record schema.
 
 ### Events (Discrete Occurrences)
 
@@ -263,19 +223,9 @@ Events are timestamped records of things that happened. They accumulate in a log
 | `alert_fired` | Monitoring | Health alert triggered |
 | `spec_updated` | Specification mgmt | Spec file committed via transaction log |
 
-**Event record:**
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | PK | Auto-increment |
-| `project_id` | FK | Which project (null for platform events) |
-| `event_type` | string | From the table above |
-| `timestamp` | yyyymmdd_hhmmss | When it happened |
-| `summary` | string | Human-readable one-liner |
-| `detail` | JSON | Event-specific payload |
-| `source` | string | Which subsystem generated it |
-
 **Platform-level event log** visible on the Monitoring screen as a timeline. Per-project event log visible on the project detail screen.
+
+See DATABASE.md → `events` for the record schema.
 
 ---
 
@@ -292,18 +242,7 @@ Projects with a corresponding directory in `Specifications/` (e.g., `Specificati
 | **Spec Files** | Markdown documents: README, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE_MAP, etc. |
 | **Versioning** | Spec changes committed to the Specifications repo with descriptive messages |
 
-### Transaction Log Record
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | PK | Sequential entry number |
-| `project_id` | FK | Which project |
-| `timestamp` | yyyymmdd_hhmmss | When the decision was made |
-| `category` | enum | `decision`, `change`, `question`, `rationale` |
-| `title` | string | One-line summary |
-| `body` | text | Full description, context, alternatives considered |
-| `files_affected` | JSON | List of spec files modified |
-| `ticket_id` | FK | Optional link to workflow ticket |
+See DATABASE.md → `transaction_log` for the record schema.
 
 ### Spec-to-Code Traceability
 
@@ -355,7 +294,7 @@ Features that GAME provides automatically for Claude-developed projects by readi
 ### Suggested Enhancements (Magic for Claude Users)
 
 | Feature | How It Works | Value |
-|---------|-------------|-------|
+|---------|--------------|-------|
 | **Auto-scaffold** | `create_project.py` generates all required files from a template | Zero-to-dashboard in one command |
 | **Spec generation** | Generate ARCHITECTURE.md from scanning code structure, imports, routes | Keep specs in sync with code |
 | **Dependency detection** | Scan imports and config for references to other managed projects | Dependency graph on dashboard |
@@ -421,20 +360,6 @@ Potential extension: mirror key HTMX routes as JSON endpoints under `/api/v1/` f
 
 ## IX. Workflow & Ticketing
 
-### Ticket Attributes
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | PK | Ticket identifier |
-| `project_id` | FK | Parent project |
-| `title` | string | One-line summary |
-| `description` | text | Full description, acceptance criteria |
-| `state` | enum | From workflow.json states |
-| `tags` | csv | Ticket-level tags |
-| `priority` | enum | Low, Medium, High, Critical |
-| `created_at` | yyyymmdd_hhmmss | Creation time |
-| `updated_at` | yyyymmdd_hhmmss | Last modification |
-
 ### Workflow States
 
 Default states from `workflow.json` (user-configurable):
@@ -445,18 +370,11 @@ IDEA --> PROPOSED --> READY --> IN DEVELOPMENT --> TESTING --> DONE
                                   READY <------------+  (rework)
 ```
 
-### AI Transaction Log (per ticket)
+### Ticket and AI Decision Log
 
-When a ticket enters IN DEVELOPMENT, the AI agent's decisions are logged:
+Ticket attributes and per-ticket AI decision log schema: see DATABASE.md → `tickets` and `ai_decisions`.
 
-| Field | Purpose |
-|-------|---------|
-| `decision` | What was decided and why |
-| `alternatives` | What was considered but rejected |
-| `files_changed` | Which files were modified |
-| `timestamp` | When the work happened |
-
-This creates an audit trail from idea through implementation.
+When a ticket enters IN DEVELOPMENT, the AI agent's decisions are logged to `ai_decisions`. This creates an audit trail from idea through implementation.
 
 ---
 
@@ -514,94 +432,7 @@ Composite score from multiple signals:
 
 ---
 
-## XII. Complete Attribute Matrix
-
-### All Project Fields
-
-| Category | Attribute | Type | Mutable | Source | Notes |
-|----------|-----------|------|---------|--------|-------|
-| **Identity** | name | string | No | METADATA.md | Machine slug |
-| | display_name | string | Yes | METADATA.md | Primary human name |
-| | short_description | string | Yes | METADATA.md | One-liner |
-| | git_repo | string | Yes | METADATA.md | HTTPS URL |
-| **Visual** | color | hex | Yes | METADATA.md | Accent color |
-| | icon | string | Yes | METADATA.md | Emoji or icon |
-| | logo | path | Yes | METADATA.md | Logo image path |
-| **Classification** | project_type | enum | Yes | METADATA.md | Type registry key |
-| | category | string | Yes | METADATA.md | High-level group |
-| | owner | string | Yes | METADATA.md | Maintainer |
-| | tags | csv | Yes | METADATA.md + UI | Cross-cutting labels |
-| **Lifecycle** | status | enum | Yes | METADATA.md | IDEA...ARCHIVED |
-| | is_active | boolean | Auto | Scanner | false if removed from disk |
-| | desired_state | enum | Yes | METADATA.md | running / on-demand |
-| | namespace | string | Yes | METADATA.md | Environment |
-| **Technology** | stack | string | Yes | METADATA.md | Tech summary |
-| | port | int | Yes | METADATA.md | Service port |
-| | health_endpoint | string | Yes | METADATA.md | Health path |
-| | deploy_url | string | Yes | METADATA.md | Live URL |
-| | version | string | Yes | METADATA.md | YYYY-MM-DD.N |
-| **Auto-Detect** | has_git | boolean | Auto | Scanner | .git/ exists |
-| | has_venv | boolean | Auto | Scanner | venv/ exists |
-| | has_node | boolean | Auto | Scanner | package.json exists |
-| | has_claude | boolean | Auto | Scanner | CLAUDE.md exists |
-| | has_tests | boolean | Auto | Scanner | tests/ or bin/test.sh |
-| | has_docs | boolean | Auto | Scanner | doc/index.html |
-| | has_specs | boolean | Auto | Scanner | Specifications/{name}/ |
-| **Git State** | git_branch | string | Auto | Scanner | Current branch |
-| | git_dirty | boolean | Auto | Scanner | Uncommitted changes |
-| | git_unpushed | int | Auto | Scanner | Commits ahead |
-| | git_last_commit | string | Auto | Scanner | Last commit msg |
-| **Portfolio** | show_on_homepage | boolean | Yes | UI | Portfolio inclusion |
-| | card_title | string | Yes | UI | Override display_name |
-| | card_desc | string | Yes | UI | Override short_description |
-| | card_tags | string | Yes | UI | Override tags |
-| | card_type | string | Yes | UI | Override project_type |
-| | card_url | string | Yes | UI | Override link target |
-| | card_image | string | Yes | UI | Override logo |
-| **Timestamps** | created_at | ISO8601 | No | DB | Record creation |
-| | updated_at | ISO8601 | Auto | DB | Last modification |
-| | last_scanned | yyyymmdd_hhmmss | Auto | Scanner | Last scan pass |
-| **Extension** | extra | JSON | Yes | METADATA.md | Type-specific overflow |
-
----
-
-## XIII. Specification Directory Organization
-
-Recommended structure for the `Specifications/GAME/` directory:
-
-```
-Specifications/GAME/
-  README.md                  Overview, intent, stack, how to build
-  METADATA.md                Project identity fields (the actual metadata)
-  FEATURE_MAP.md             THIS FILE — complete feature catalog (primary reference)
-  ARCHITECTURE.md            Backend modules, app factory, data flow, directory layout
-  DATABASE.md                Schema, tables, conventions
-  UI-GENERAL.md              Shared UI patterns: nav bar, standard headers, dark theme,
-                               modals, HTMX conventions, filter patterns
-  SCREEN-DASHBOARD.md        Dashboard screen spec (references UI-GENERAL + FEATURE_MAP)
-  SCREEN-PROCESSES.md        Process viewer screen spec
-  SCREEN-PUBLISHER.md        Publisher screen spec
-  SCREEN-CONFIGURATION.md    Configuration/metadata editor screen spec
-  SCREEN-MONITORING.md       Monitoring/heartbeat screen spec
-  SCREEN-WORKFLOW.md         Workflow/kanban screen spec
-  UNUSED-SCREEN-USAGE.md     Archived usage screen (deprecated)
-```
-
-### Document Responsibilities
-
-| Document | Answers | Does NOT Cover |
-|----------|---------|----------------|
-| **FEATURE_MAP** (this file) | What attributes exist? What features does the platform offer? What can it detect? | How the UI renders it. How the code implements it. |
-| **ARCHITECTURE** | How is the code organized? What are the modules? How does data flow? | What the user sees. What features exist. |
-| **DATABASE** | What tables exist? What columns? What constraints? | Why those columns exist (→ FEATURE_MAP). |
-| **UI-GENERAL** | What shared UI patterns exist? Nav bar, standard row header, dark theme, modals, HTMX. | Screen-specific layouts. |
-| **SCREEN-*** | What does this specific screen show? What can the user do? | Backend implementation. Full attribute definitions. |
-
-**Flow:** FEATURE_MAP defines features --> ARCHITECTURE describes modules --> DATABASE defines storage --> UI-GENERAL defines shared patterns --> SCREEN-* defines per-screen layout.
-
----
-
-## XIV. Summary: What Makes a Project Fully Managed
+## XII. Summary: What Makes a Project Fully Managed
 
 A project earns platform capabilities by adding files (contract-earns-capability):
 
@@ -624,8 +455,20 @@ A project earns platform capabilities by adding files (contract-earns-capability
 | Document | Location | Purpose |
 |----------|----------|---------|
 | ARCHITECTURE.md | This directory | Backend code structure |
-| DATABASE.md | This directory | Schema definition |
+| DATABASE.md | This directory | Schema definition — all field types, column definitions, constraints |
 | UI-GENERAL.md | This directory | Shared UI patterns |
 | SCREEN-*.md | This directory | Per-screen specifications |
 | CLAUDE_RULES.md | `../RulesEngine/CLAUDE_RULES.md` | Agent behavior contract |
 | DOCUMENTATION_BRANDING.md | `../RulesEngine/DOCUMENTATION_BRANDING.md` | Documentation theming standards |
+
+### Document Responsibilities
+
+| Document | Answers | Does NOT Cover |
+|----------|---------|----------------|
+| **FEATURE_MAP** (this file) | What features does the platform offer? What can it detect? What are the behavioral rules? | Field types, column constraints, schema details. |
+| **ARCHITECTURE** | How is the code organized? What are the modules? How does data flow? | What the user sees. What features exist. |
+| **DATABASE** | What tables exist? What columns, types, defaults, constraints? | Why those columns exist (→ FEATURE_MAP). |
+| **UI-GENERAL** | What shared UI patterns exist? Nav bar, standard row header, dark theme, modals, HTMX. | Screen-specific layouts. |
+| **SCREEN-*** | What does this specific screen show? What can the user do? | Backend implementation. Full attribute definitions. |
+
+**Flow:** FEATURE_MAP defines features → ARCHITECTURE describes modules → DATABASE defines storage → UI-GENERAL defines shared patterns → SCREEN-* defines per-screen layout.
