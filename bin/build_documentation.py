@@ -44,12 +44,13 @@ SCRIPT_DESCRIPTIONS = {
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
 }
 
-GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE', 'CREATE-IMAGE']
+GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
 GUIDE_TITLES = {
     'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
     'PROMOTE':               'Promote Prototype To Project',
     'CREATE-IMAGE':          'Create Image',
+    'ENGINEERING-RULES':     'Engineering Rules Framework',
 }
 
 # Scripts whose usage block is always shown (no expand toggle)
@@ -244,7 +245,8 @@ def build_page(scripts, projects, guides):
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
-    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote</a>\n'
+    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote Prototype</a>\n'
+    step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -337,7 +339,7 @@ def build_page(scripts, projects, guides):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prototyper — Documentation</title>
-<link rel="stylesheet" href="styles/gem.css">
+<link rel="stylesheet" href="styles/spec.css">
 <style>
 *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
 

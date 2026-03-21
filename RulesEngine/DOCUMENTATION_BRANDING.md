@@ -278,22 +278,22 @@ Or use a plain `<blockquote>` — both are styled identically:
 
 ### Option A — Modern single-page doc (recommended for new projects)
 
-1. Copy `gem/doc/styles/gem-base.css` to your project's `doc/styles/`.
+1. Copy `Specifications/doc/styles/spec-base.css` to your project's `doc/styles/`.
 2. Create `doc/styles/themes/` and copy the theme files you want.
 3. In your build script, concatenate theme + base:
    ```bash
-   cat doc/styles/themes/green.css doc/styles/gem-base.css > doc/styles/gem.css
+   cat doc/styles/themes/green.css doc/styles/spec-base.css > doc/styles/spec.css
    ```
-4. Reference `gem.css` in your HTML:
+4. Reference `spec.css` in your HTML:
    ```html
-   <link rel="stylesheet" href="styles/gem.css">
+   <link rel="stylesheet" href="styles/spec.css">
    ```
 5. Use `body` with no class for content pages. Classes `gem-topbar` and `gem-sidebar` are reserved for the navigation chrome.
 
 ### Option B — Legacy frameset project
 
-Use `bin/build_documentation.sh` from the GEM project as a reference. It:
-1. Generates `gem.css` from a theme file + base CSS.
+Use `bin/build_documentation.sh` from the Specifications project as a reference. It:
+1. Generates `spec.css` from a theme file + base CSS.
 2. Runs `bin/update_doc_theme.pl` to rebuild `top.htm`, `toc.htm`, update frameset heights, inject CSS + copyright footers into content files, and humanize CamelCase nav link text.
 
 To port to a new project, copy both scripts and adjust the nav links in `process_top()`.
@@ -316,12 +316,11 @@ To port to a new project, copy both scripts and adjust the nav links in `process
 
 | File | Location | Purpose |
 |---|---|---|
-| `gem-base.css` | `gem/doc/styles/gem-base.css` | All structural CSS rules (no colors) |
-| `themes/*.css` | `gem/doc/styles/themes/` | One file per theme — only `:root {}` variables |
-| `gem.css` | `gem/doc/styles/gem.css` | Generated active theme (do not edit) |
-| `build_documentation.sh` | `gem/bin/` | Build entry point |
-| `update_doc_theme.pl` | `gem/bin/` | HTML processor (frameset projects) |
-| `DOC_STANDARDS.md` | `gem/doc/DOC_STANDARDS.md` | GEM-specific build instructions |
+| `spec-base.css` | `Specifications/doc/styles/spec-base.css` | All structural CSS rules (no colors) |
+| `themes/*.css` | `Specifications/doc/styles/themes/` | One file per theme — only `:root {}` variables |
+| `spec.css` | `Specifications/doc/styles/spec.css` | Generated active theme (do not edit) |
+| `build_documentation.sh` | `Specifications/bin/` | Build entry point |
+| `update_doc_theme.pl` | (legacy, frameset projects only) | HTML processor |
 
 ---
 

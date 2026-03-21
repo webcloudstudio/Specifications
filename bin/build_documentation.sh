@@ -34,9 +34,9 @@ fi
 
 echo "[$PROJECT_NAME] Starting: $SCRIPT_NAME (theme: $THEME)"
 
-# Build gem.css = theme variables + base structural rules
-cat "$THEME_FILE" "$STYLES_DIR/gem-base.css" > "$STYLES_DIR/gem.css"
-echo "  CSS: themes/${THEME}.css + gem-base.css → styles/gem.css"
+# Build spec.css = theme variables + base structural rules
+cat "$THEME_FILE" "$STYLES_DIR/spec-base.css" > "$STYLES_DIR/spec.css"
+echo "  CSS: themes/${THEME}.css + spec-base.css → styles/spec.css"
 
 python3 "$SCRIPT_DIR/build_documentation.py"
 echo "[$PROJECT_NAME] Done: $SCRIPT_NAME"
