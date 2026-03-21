@@ -4,12 +4,11 @@
 
 Global agent behavior contracts, spec templates, and technology stack patterns — an agentic implementation of the GEM Enterprise Management Framework. Distribution/Observability/Control via GAME automation. Copyright © Web Cloud Studio.
 
-## Contents
+## Input File / Directory
 
-| File / Dir | Purpose |
-|-----------|---------|
-| `BUSINESS_RULES.md` | Source for agent behavior — edit here, then regenerate `CLAUDE_RULES.md` |
-| `CLAUDE_RULES.md` | Generated behavior contract injected into every project's `AGENTS.md` |
+| Input File / Directory | Purpose |
+|------------------------|---------|
+| `BUSINESS_RULES.md` | Engineering Rules Framework — edit here, then run the workflow |
 | `CONVERT.md` | Expansion rules: concise spec → implementation-ready spec |
 | `DOCUMENTATION_BRANDING.md` | Color palette, typography, and theme standards |
 | `stack/` (14 files) | Prescriptive technology patterns (Flask, SQLite, Bootstrap5, …) |
@@ -19,6 +18,12 @@ Global agent behavior contracts, spec templates, and technology stack patterns �
 ## Update Cycle
 
 Edit `BUSINESS_RULES.md` → run `bin/generate_claude_rules.sh` → paste AI output over `CLAUDE_RULES.md` → run `GAME/bin/update_projects.sh` to propagate to all projects.
+
+## Output File / Directory
+
+| Output File / Directory | Purpose |
+|-------------------------|---------|
+| `CLAUDE_RULES.md` | Generated behavior contract injected into every project's `AGENTS.md` |
 
 ## Conformity Levels
 
