@@ -138,7 +138,8 @@ def discover_projects():
 # ── Discover guides ───────────────────────────────────────────────────────────
 
 def discover_guides():
-    found = {f.stem: f for f in DOC_DIR.glob('*.md')}
+    # Source files are prefixed DOC- to avoid name collisions (e.g. DOC-ENGINEERING-RULES.md)
+    found = {f.stem[4:]: f for f in DOC_DIR.glob('DOC-*.md')}
     guides = []
     for key in GUIDE_ORDER:
         if key in found:
@@ -198,6 +199,13 @@ def generate_indexes():
         (entry / 'index.html').write_text(page_html, encoding='utf-8')
         print(f'  Generated {entry.name}/index.html ({len(docs)} docs)')
 
+        # Also write into doc/projects/<name>/ so doc/ is fully portable (self-contained)
+        portable_html = page_html.replace('../doc/styles/', '../../styles/')
+        proj_doc_dir = DOC_DIR / 'projects' / entry.name
+        proj_doc_dir.mkdir(parents=True, exist_ok=True)
+        (proj_doc_dir / 'index.html').write_text(portable_html, encoding='utf-8')
+        print(f'  Generated doc/projects/{entry.name}/index.html (portable copy)')
+
 
 # ── Build HTML ────────────────────────────────────────────────────────────────
 
@@ -256,7 +264,7 @@ def build_page(scripts, projects, guides):
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
     for p in projects:
-        url = f'../{p["name"]}/index.html'
+        url = f'projects/{p["name"]}/index.html'
         proj_nav += (f'  <a class="sn" data-project="{h.escape(p["name"])}" '
                      f'onclick="showProject(\'{h.escape(p["name"])}\', \'{url}\')">'
                      f'{h.escape(p["display"])}</a>\n')
@@ -607,7 +615,7 @@ function showScript(file) {{
 
 function showProject(name, url) {{
   var frame = document.getElementById('project-frame');
-  if (!frame.src || !frame.src.endsWith(url.replace('../', ''))) frame.src = url;
+  if (!frame.src || !frame.src.endsWith(url)) frame.src = url;
   show('project');
   clearActive();
   var el = document.querySelector('[data-project="' + name + '"]');

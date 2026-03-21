@@ -1,9 +1,8 @@
 # Documentation Branding Standards
 
-**Version:** 20260320 V1  
-**Description:** Color variables, sidebar colors, and typography standards for documentation themes
-**Maintainer:** Ed Barlow / Web Cloud Studio
-**Reference implementation:** `/mnt/c/Users/barlo/projects/gem/doc/`
+**Version:** 20260321 V2
+**Description:** Color variables, typography, and layout standards for project documentation
+**Reference implementation:** `Specifications/doc/` (Prototyper — process-based, slate theme)
 
 ---
 
@@ -11,337 +10,208 @@
 
 Documentation uses a **dark chrome / light content** split:
 
-- **Navigation chrome** (top bar, left sidebar) — dark background, light text. Always dark regardless of content mode.
-- **Content area** — light background (`#F4FAF4` tinted white), dark text. Optimised for reading long documents.
-- **Hyperlinks in content** — standard blue, always underlined. This is the web convention and should not be overridden for content links.
-- **Navigation links** — no underline. Hover shows a colored left border (accent color) and subtle background lift.
-
-The dark chrome and the content area create a natural frame. The sidebar and top bar read as **one continuous dark panel** — they use the same background color family, with the top bar slightly darker than the sidebar body.
+- **Sidebar** (220px) — dark background, white text. Always dark.
+- **Content area** — warm off-white background (`#FAFAF8`), dark text. Optimised for reading.
+- **Sidebar header** — slightly darker than the sidebar body; reads as one continuous dark panel.
+- **Navigation links** — no underline. Hover shows a 3px colored left border and subtle background lift.
+- **Content hyperlinks** — standard blue `#1565C0`, always underlined. Web convention; not theme-overridden.
 
 ---
 
-## The Four-Color System
+## Default Theme: Slate
 
-Every theme reduces to four visible color families:
+The default and reference theme. Charcoal sidebar, teal accent, warm off-white content.
 
-| # | Role | Where used | Example (Evergreen) |
-|---|---|---|---|
-| 1 | **Top bar** (darkest) | `body.gem-topbar` background | `#071208` |
-| 2 | **Sidebar + section banners** (slightly lighter) | `body.gem-sidebar`, content `<h1>` section dividers | `#0C1E10` |
-| 3 | **Light text on dark** | Sidebar links, top bar text, GEM badge text, version, copyright | `#90C898` |
-| 4 | **Accent** | GEM badge bg, sidebar hover indicator (3px left border), h1 underline, callout borders | `#7AE890` |
+```css
+/* Theme: Slate — charcoal sidebar, warm cream content, teal accent */
+:root {
+  /* Sidebar — neutral charcoal */
+  --c-topbar-bg:     #1A1D23;   /* sidebar header (darkest) */
+  --c-side-bg:       #22262E;   /* sidebar body */
+  --c-side-border:   #363B44;   /* chrome/content divider, scrollbar */
+  --c-side-section:  #8A8F9A;   /* muted section label text (uppercase, 9px) */
+  --c-side-link:     #FFFFFF;   /* sidebar link text — always white */
 
-Content headings (h1/h2/h3) use progressively lighter shades of the theme's base hue on the light content background. Hyperlinks are always `#1565C0` blue regardless of theme.
+  /* Accent — warm teal */
+  --c-accent:        #2CB67D;   /* hover border, arrows, callout borders, active indicator */
+  --c-accent-text:   #0E1012;   /* text on accent-colored elements */
 
-**Rule:** If two things are in the dark chrome zone, they must either be the same color or clearly different shades of the same family. Never place dark green text on a dark green background.
+  /* Content headings (on light bg) */
+  --c-h1:            #1E2328;
+  --c-h1-border:     #D0D4DA;
+  --c-h2:            #2E3640;   /* also used as dark banner background for h2 in markdown */
+  --c-h2-border:     #DDE0E5;
+  --c-h3:            #505A68;
+
+  /* Content area */
+  --c-bg:            #FAFAF8;   /* warm off-white — not pure white */
+  --c-text:          #2A2E35;   /* near-black body text */
+
+  /* Tables */
+  --c-th-bg:         #2E3640;
+  --c-th-text:       #F0F1F3;
+  --c-td-border:     #D5D8DE;
+  --c-tr-alt:        #F3F4F2;
+  --c-tr-hover:      #E8EAE6;
+
+  /* Code */
+  --c-code-bg:       #EDEEE8;   /* inline code background */
+  --c-code-text:     #2E3640;   /* inline code text */
+  --c-pre-bg:        #1A1D23;   /* code block — matches topbar-bg */
+  --c-pre-text:      #C0C4CC;   /* code block text */
+
+  /* Callout / blockquote */
+  --c-callout-bg:    rgba(44,182,125,0.06);
+  --c-callout-border:rgba(44,182,125,0.2);
+
+  /* Footer */
+  --c-foot-text:     #8A8F9A;
+}
+```
 
 ---
 
 ## Available Themes
 
-Six themes ship with the reference implementation. Each is defined as a single `:root {}` CSS variable block.
+| Theme | Character | Sidebar bg | Accent |
+|-------|-----------|------------|--------|
+| `slate` *(default)* | Charcoal + teal | `#22262E` | `#2CB67D` |
+| `green` | Forest green | `#0C1E10` | `#7AE890` |
+| `midnight` | Corporate navy | `#0D1B3E` | `#5B8DEF` |
+| `purple` | Royal purple | `#2A1A4E` | `#B084F0` |
+| `midnight-green` | Deep teal | `#002B30` | `#2ECAD6` |
+| `mughal` | Rich forest | `#1E3A1E` | `#6ECF6E` |
+| `rainforest` | Warm teal-green | `#003D32` | `#3DD6A4` |
 
-| Theme name | Base color | Hex | Character |
-|---|---|---|---|
-| `green` *(default)* | Evergreen | `#1B5E20` | Forest green, clean |
-| `midnight` | Midnight Blue | `#0D3B8E` | Corporate navy |
-| `purple` | Royal Purple | `#4527A0` | Distinctive, dramatic |
-| `midnight-green` | Midnight Green | `#004953` | Deep teal |
-| `mughal` | Mughal Green | `#306030` | Rich forest |
-| `rainforest` | Tropical Rainforest | `#00755E` | Warm teal-green |
-
----
-
-## Theme Variable Reference
-
-The complete set of CSS custom properties required per theme. Copy this block and fill in values to create a new theme.
-
-```css
-/* GEM Theme: <Name>  |  gem-base.css must follow this file */
-:root {
-  /* ── Dark chrome (top bar + sidebar) ─────────────────── */
-  --c-topbar-bg:     ;   /* darkest — top bar background */
-  --c-side-bg:       ;   /* slightly lighter — sidebar body + content section banners */
-  --c-side-border:   ;   /* border between chrome and content, scrollbar */
-  --c-side-section:  ;   /* muted section label text (small uppercase in sidebar) */
-  --c-side-link:     ;   /* sidebar link text, top bar version + copyright text */
-
-  /* ── Accent ───────────────────────────────────────────── */
-  --c-accent:        ;   /* GEM badge bg, sidebar hover left border, callout borders */
-  --c-accent-text:   ;   /* text ON the GEM badge (usually very dark, matches topbar) */
-
-  /* ── Content headings (on light bg — must be ≥4.5:1 contrast) ─ */
-  --c-h1:            ;   /* darkest heading — close to base color */
-  --c-h1-border:     ;   /* h1 underline (light tint of theme color) */
-  --c-h2:            ;   /* medium heading */
-  --c-h2-border:     ;   /* h2 underline (lighter) */
-  --c-h3:            ;   /* lighter heading */
-
-  /* ── Content area ─────────────────────────────────────── */
-  --c-bg:            ;   /* page background (tinted white, not pure white) */
-  --c-text:          ;   /* body text (very dark, near-black, slight tint of theme) */
-
-  /* ── Tables ───────────────────────────────────────────── */
-  --c-th-bg:         ;   /* table header background (use h1 color or darker) */
-  --c-th-text:       ;   /* table header text (light) */
-  --c-td-border:     ;   /* cell borders (light tint) */
-  --c-tr-alt:        ;   /* alternating row background */
-  --c-tr-hover:      ;   /* row hover background */
-
-  /* ── Code ─────────────────────────────────────────────── */
-  --c-code-bg:       ;   /* inline code background (light tint) */
-  --c-code-text:     ;   /* inline code text (h1 or h2 color) */
-  --c-pre-bg:        ;   /* code block background (match topbar-bg) */
-  --c-pre-text:      ;   /* code block text (match side-link) */
-
-  /* ── Callout box ──────────────────────────────────────── */
-  --c-callout-bg:    ;   /* rgba(accent, 0.07) */
-  --c-callout-border:;   /* rgba(accent, 0.25) */
-
-  /* ── Footer ───────────────────────────────────────────── */
-  --c-foot-text:     ;   /* muted copyright footer text */
-}
-```
-
-### Evergreen (default) — complete example
-
-```css
-:root {
-  --c-topbar-bg:     #071208;
-  --c-side-bg:       #0C1E10;
-  --c-side-border:   #1A4828;
-  --c-side-section:  #5A9868;
-  --c-side-link:     #90C898;
-
-  --c-accent:        #7AE890;
-  --c-accent-text:   #071208;
-
-  --c-h1:            #1B5E20;
-  --c-h1-border:     #B8DFC0;
-  --c-h2:            #2E7D32;
-  --c-h2-border:     #C8EAC8;
-  --c-h3:            #388E3C;
-
-  --c-bg:            #F4FAF4;
-  --c-text:          #0D2010;
-
-  --c-th-bg:         #1B5E20;
-  --c-th-text:       #E8F5E9;
-  --c-td-border:     #B8DFC0;
-  --c-tr-alt:        #EDF7EE;
-  --c-tr-hover:      #D4EDDA;
-
-  --c-code-bg:       #DFF0E0;
-  --c-code-text:     #1B5E20;
-  --c-pre-bg:        #071208;
-  --c-pre-text:      #90C898;
-
-  --c-callout-bg:    rgba(74,200,112,0.07);
-  --c-callout-border:rgba(74,200,112,0.25);
-
-  --c-foot-text:     #6A9F72;
-}
-```
+All themes follow the same variable contract. To create a new theme, copy the slate block
+above and replace values.
 
 ---
 
 ## Typography
 
-No web fonts. Uses the OS system font stack — renders natively on Windows, Mac, and Linux.
+No web fonts. OS system font stack — renders natively on Windows, Mac, and Linux.
 
 ```css
-/* All text */
-font-family: 'Segoe UI', 'Trebuchet MS', Arial, Helvetica, sans-serif;
-
-/* Code and pre blocks */
-font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+font-family: 'Segoe UI', 'Trebuchet MS', Arial, Helvetica, sans-serif;  /* all text */
+font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;        /* code/pre */
 ```
 
 | Element | Size | Weight | Notes |
-|---|---|---|---|
-| Body | 16px | 400 | `line-height: 1.7` |
-| h1 | 26px | 700 | Theme h1 color + thin underline |
-| h2 | 20px | 600 | Theme h2 color + thin underline |
-| h3 | 17px | 600 | Theme h3 color, no decoration |
-| h4–h6 | 15–13px | 600 | Theme h3 color |
-| Sidebar links | 13.5px | 400 | White (`#FFFFFF`) — always white on dark chrome |
-| Sidebar section labels | 9.5px | 700 | `--c-side-section` color, uppercase, `letter-spacing: 1px` |
-| Top bar title | 15px | 500 | White (`#FFFFFF`) always |
-| Top bar nav links | 13px | 600 | White (`#FFFFFF`) always |
-| Version badge | 11px | 500 | `rgba(255,255,255,0.75)`, pill border |
-| Copyright | 11.5px | 400 | `rgba(255,255,255,0.65)` |
-| Code inline | 13px | 400 | Monospace, tinted bg |
-| Code block | 13px | 400 | Monospace, dark bg matching topbar |
-| Footer | 12.5px | 400 | `--c-foot-text` |
+|---------|------|--------|-------|
+| Body | **14px** | 400 | `line-height: 1.65` |
+| h1 (markdown) | 22px | 700 | `var(--c-accent)` color + 2px underline |
+| h2 (markdown) | 14px | 700 | Dark banner: `var(--c-side-bg)` bg, 3px accent left border |
+| h3 (markdown) | 14px | 600 | `var(--c-h3)` color, no decoration |
+| Sidebar primary links | 13px | 400 | White, `padding: 3px 16px` |
+| Sidebar sub-links | 11px | 400 | `rgba(255,255,255,.8)`, `padding: 2px 16px 2px 28px` |
+| Sidebar section labels | 9px | 700 | `var(--c-side-section)`, uppercase, `letter-spacing: 1px` |
+| Code inline | 12.5px | 400 | Monospace, `var(--c-code-bg)` background |
+| Code block | 12.5px | 400 | Monospace, `var(--c-pre-bg)` background |
+| Workflow box label | 12px | 700 | White |
+| Workflow box script | 10px | 400 | White, monospace |
+| Workflow box path | 9.5px | 400 | White, monospace |
+
+---
+
+## Page Structure: Single-Page Sidebar Layout
+
+The standard layout for all new projects. Used by Prototyper (process-based) and all
+new documentation builds.
+
+```html
+<body>                              <!-- bg: --c-bg, display:flex, height:100vh -->
+  <nav class="sidebar">             <!-- width:220px, bg:--c-side-bg, overflow-y:auto -->
+    <div class="sidebar-header">    <!-- bg:--c-topbar-bg, logo image + project name -->
+    </div>
+    <div class="nav-section">WORKFLOW</div>
+    <a class="sn" onclick="...">Step 1 — Setup</a>
+    <a class="sn-sub" onclick="...">setup.sh</a>
+    <div class="nav-sep"></div>
+    <div class="nav-section">CURRENT PROJECTS</div>
+    <a class="sn" onclick="...">GAME</a>
+  </nav>
+  <main>                            <!-- flex:1, overflow-y:auto, padding:28px 36px 48px -->
+    <!-- content sections, shown/hidden via JS -->
+  </main>
+</body>
+```
+
+Sidebar header uses `--c-topbar-bg` (darker than sidebar body) so it reads as a unified
+dark panel. Logo is a `<img>` (100px wide), not a text badge.
+
+---
+
+## Workflow Diagram (Process-Based Projects)
+
+For projects without a web server, the primary content is a workflow pipeline diagram.
+CSS classes (all in the inline `<style>` block of the generated page):
+
+```css
+.wf-diagram  — flex column, gap 2px, margin-bottom 20px
+.wf-row      — flex row, left-aligned, no wrap
+.wf-box      — dark sidebar-bg box: padding 5px 10px, border-radius 4px, centered
+.wf-terminal — green terminal box: border-color --c-accent, background #0a5c38
+.wf-label    — 12px bold white text
+.wf-script   — 10px white monospace (script name)
+.wf-path     — 9.5px white monospace (path)
+.wf-arr      — right arrow (→), 22px bold, --c-accent color, padding 0 6px
+```
+
+Two independent rows, both left-aligned, no connecting arrows between rows.
+
+---
+
+## CSS File Assembly
+
+```bash
+# Built at documentation build time — do not edit spec.css directly
+cat doc/styles/themes/slate.css doc/styles/spec-base.css > doc/styles/spec.css
+```
+
+| File | Location | Edit? |
+|------|----------|-------|
+| `spec.css` | `doc/styles/spec.css` | Never — generated |
+| `slate.css` (or other theme) | `doc/styles/themes/` | Yes — theme colors only |
+| `spec-base.css` | `doc/styles/` | Rarely — structural CSS, no colors |
+
+For a new project: copy `doc/styles/` from `Specifications/doc/styles/` and choose a theme.
+
+---
+
+## Logo / Sidebar Header
+
+The sidebar header contains a project logo image and a two-line project title:
+
+```html
+<div class="sidebar-header" onclick="show('workflow')">
+  <img src="images/prototyper.webp" alt="Prototyper" style="width:100px;height:75px;">
+  <h1>Project<br>Prototyper</h1>
+</div>
+```
+
+Logo image: `doc/images/<project>.webp`, 100×75px display, `object-fit:contain`.
+Generate with `bin/generate_image.py` (see `doc/DOC-CREATE-IMAGE.md`).
 
 ---
 
 ## Link Rules
 
-| Context | Style | Rationale |
-|---|---|---|
-| Content body (`<a>`) | `color: #1565C0; text-decoration: underline` | Standard web hyperlink convention |
-| Content visited | Same blue `#1565C0` | Prevents the default browser purple, which clashes with dark themes |
-| Content hover | Darker blue `#0D3B8E`, still underlined | Feedback without color drama |
-| Sidebar nav links | White (`#FFFFFF`), no underline | Navigation item, not a body link — white text on dark chrome |
-| Sidebar nav hover | White text + subtle bg + 3px accent left border | Conquer 2026 / ezdocs pattern |
-| Top bar nav links | Same as sidebar links | Unified chrome |
-| Top bar nav hover | White text + subtle bg + 2px accent bottom border | Horizontal nav variant |
-| Links inside section banners (dark bg) | `rgba(255,255,255,0.88)`, underlined | Must be readable on dark background |
-
----
-
-## Page Structure
-
-### Three-panel (frameset — legacy projects like GEM)
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  TOP BAR (top.htm) — 56px                               │
-│  [GEM] [Build/version] Title  │  Nav links  │ Copyright │
-│  bg: --c-topbar-bg             │             │           │
-├──────────────────┬───────────────────────────────────────┤
-│ SIDEBAR          │  CONTENT                              │
-│ (toc.htm) 24%   │  (readme.htm) 76%                    │
-│ bg: --c-side-bg  │  bg: --c-bg (light)                  │
-│                  │                                       │
-│ [Section label]  │  [dark banner — bg: --c-side-bg]     │
-│   Nav link       │    h1 heading (white on dark)         │
-│   Nav link       │  [dark banner ...]                    │
-│   Nav link ◀▌    │                                       │
-│   (hover: left   │  Body text, tables, code              │
-│    accent bar)   │                                       │
-│                  │  [footer — copyright]                 │
-└──────────────────┴───────────────────────────────────────┘
-```
-
-The sidebar title strip uses `--c-topbar-bg` — same as the top bar — so the top-left corner reads as one unified dark header.
-
-### Single-page (modern projects like ezdocs, conquer_2026, EdBarlowsStoredProcs)
-
-```html
-<body>                          <!-- bg: --c-bg -->
-  <nav class="sidebar">         <!-- bg: --c-side-bg, left border -->
-    <div class="sidebar-header"> <!-- bg: --c-topbar-bg -->
-      <h1>Project Name</h1>
-      <p>v1.0 — subtitle</p>
-    </div>
-    <div class="nav-section">SECTION</div>
-    <a href="#anchor">Link text</a>
-  </nav>
-  <main>                        <!-- max-width: 860px, padding -->
-    <h1>...</h1>
-    ...
-  </main>
-</body>
-```
-
----
-
-## Section Divider Banners (Legacy HTML)
-
-Legacy content files use `<TABLE BGCOLOR=#0066cc>` as section heading banners. The theme reskins these using `--c-side-bg` (sidebar color) so banners match the sidebar:
-
-```css
-table[bgcolor="#0066cc"] {
-  background: var(--c-side-bg) !important;
-  border: 1px solid var(--c-side-border) !important;
-  border-radius: 4px;
-  width: 100% !important;
-  margin: 20px 0 12px 0 !important;
-}
-table[bgcolor="#0066cc"] h1,
-table[bgcolor="#0066cc"] h2 {
-  color: #FFFFFF !important;   /* CRITICAL: must be white on dark bg */
-  border: none !important;
-}
-```
-
----
-
-## Callout / Note Boxes
-
-```html
-<div class="gem-note">
-  <strong>Note:</strong> important information here.
-</div>
-```
-
-Or use a plain `<blockquote>` — both are styled identically:
-- Background: `rgba(accent, 0.07)` tinted
-- Left border: `4px solid --c-accent`
-- Border: `1px solid rgba(accent, 0.25)`
-
----
-
-## Implementation for a New Project
-
-### Option A — Modern single-page doc (recommended for new projects)
-
-1. Copy `Specifications/doc/styles/spec-base.css` to your project's `doc/styles/`.
-2. Create `doc/styles/themes/` and copy the theme files you want.
-3. In your build script, concatenate theme + base:
-   ```bash
-   cat doc/styles/themes/green.css doc/styles/spec-base.css > doc/styles/spec.css
-   ```
-4. Reference `spec.css` in your HTML:
-   ```html
-   <link rel="stylesheet" href="styles/spec.css">
-   ```
-5. Use `body` with no class for content pages. Classes `gem-topbar` and `gem-sidebar` are reserved for the navigation chrome.
-
-### Option B — Legacy frameset project
-
-Use `bin/build_documentation.sh` from the Specifications project as a reference. It:
-1. Generates `spec.css` from a theme file + base CSS.
-2. Runs `bin/update_doc_theme.pl` to rebuild `top.htm`, `toc.htm`, update frameset heights, inject CSS + copyright footers into content files, and humanize CamelCase nav link text.
-
-To port to a new project, copy both scripts and adjust the nav links in `process_top()`.
-
-### Switching themes
-
-```bash
-./bin/build_documentation.sh --theme=green          # default
-./bin/build_documentation.sh --theme=midnight
-./bin/build_documentation.sh --theme=purple
-./bin/build_documentation.sh --theme=midnight-green
-./bin/build_documentation.sh --theme=mughal
-./bin/build_documentation.sh --theme=rainforest
-./bin/build_documentation.sh --theme=X --css-only   # rebuild CSS only, no HTML
-```
-
----
-
-## Reference Files
-
-| File | Location | Purpose |
-|---|---|---|
-| `spec-base.css` | `Specifications/doc/styles/spec-base.css` | All structural CSS rules (no colors) |
-| `themes/*.css` | `Specifications/doc/styles/themes/` | One file per theme — only `:root {}` variables |
-| `spec.css` | `Specifications/doc/styles/spec.css` | Generated active theme (do not edit) |
-| `build_documentation.sh` | `Specifications/bin/` | Build entry point |
-| `update_doc_theme.pl` | (legacy, frameset projects only) | HTML processor |
-
----
-
-## Copyright
-
-Copyright notices appear in two places:
-1. **Top bar** — extracted verbatim from the source `top.htm` file. Never modified by the build script.
-2. **Page footer** — injected before `</body>` if not already present. Text is extracted from the page's own content, or falls back to `Copyright © 2026 Web Cloud Studio. All rights reserved.`
-
-For new projects, put the copyright in the sidebar header or page footer as appropriate.
+| Context | Style |
+|---------|-------|
+| Content body `<a>` | `color: #1565C0; text-decoration: underline` |
+| Content visited | Same blue `#1565C0` — no purple |
+| Sidebar nav | White, no underline; hover: subtle bg + 3px `--c-accent` left border |
 
 ---
 
 ## What Not to Do
 
-| ❌ Don't | ✓ Do instead |
-|---|---|
-| Dark text on dark background | Always verify: `--c-side-section` must be lighter than `--c-side-bg` |
-| Purple visited links (`#6040a0`) | Keep `a:visited` the same blue as `a:link` |
-| Gradient on top bar that differs from sidebar | Flat `--c-topbar-bg`, no gradient |
-| Top bar background lighter than sidebar | Top bar = darkest shade; sidebar = slightly lighter |
-| CamelCase nav text (`TheWin32Process`) | Run through humanizer or write with spaces from the start |
-| Different link styles per theme | Links are always `#1565C0` blue + underlined in content |
-| Font size chaos (mixing 8pt/16pt/12px) | Use the type scale above; body = 16px base |
+| Don't | Do instead |
+|-------|------------|
+| Dark text on dark sidebar bg | `--c-side-section` must be lighter than `--c-side-bg` |
+| Purple visited links | Keep `a:visited` the same blue as `a:link` |
+| Arrows connecting separate workflow rows | Two independent left-to-right rows, no DOWN arrow |
+| Expand/collapse toggles for script details | Always show details inline |
+| Relative `../` paths escaping `doc/` | Copy project viewers into `doc/projects/` at build time |
+| Edit `spec.css` directly | Edit the theme file and rebuild |
