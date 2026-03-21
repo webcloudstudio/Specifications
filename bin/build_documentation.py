@@ -291,6 +291,16 @@ def build_page(scripts, projects, guides):
                   f'<div class="wf-row">{row2}</div>'
                   f'</div>')
 
+    eng_row = ARR.join([
+        wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
+        wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
+        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
+    ])
+    eng_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
+                   f'<div class="wf-row">{eng_row}</div>'
+                   f'</div>')
+    guide_diagrams_js = f'const GUIDE_DIAGRAMS = {{\n  "ENGINEERING-RULES": {json.dumps(eng_diagram)},\n}};'
+
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
         (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
@@ -527,6 +537,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 {guides_js}
+{guide_diagrams_js}
 {scripts_js}
 
 marked.setOptions({{ gfm: true, breaks: false }});
@@ -548,7 +559,8 @@ function show(id) {{
 function showGuide(key) {{
   var content = GUIDES[key];
   if (!content) return;
-  document.getElementById('guide-content').innerHTML = marked.parse(content);
+  var diagram = GUIDE_DIAGRAMS[key] || '';
+  document.getElementById('guide-content').innerHTML = diagram + marked.parse(content);
   show('guide');
   clearActive();
   var el = document.querySelector('[data-key="' + key + '"]');
