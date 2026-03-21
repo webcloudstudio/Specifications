@@ -51,7 +51,7 @@ Specifications/
     templates/                     Canonical common.sh and common.py (code projects)
     gitignore                      Standard .gitignore distributed to projects
 
-  bin/                             Spec tooling — scripts accept any directory path
+  bin/                             Tooling — spec scripts work on this repo only; Project* scripts push to code projects
     setup.sh                       Scaffold new spec directory (or update existing) from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
@@ -61,6 +61,9 @@ Specifications/
     generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md)
     rebuild_index.sh               Regenerate browsable HTML spec viewers
     build_documentation.sh         Build doc/index.html
+    project_manager.py             Python backend for project verify/update operations
+    ProjectValidate.sh             Verify a promoted code project against CLAUDE_RULES compliance
+    ProjectUpdate.sh               Update a promoted code project with latest rules and templates
 
   GAME/                            Project specification (GAME dashboard)
   AlexaPrototypeOne/               Project specification (numbered sequence)
@@ -74,10 +77,11 @@ Specifications/
 
 **Separation of concerns:**
 - `RulesEngine/` = what standards projects must follow + how specs expand
-- `{ProjectName}/` = what a specific project should be and do
-- `bin/` = spec tooling only — scripts accept any directory path (name, absolute, or relative)
+- `{ProjectName}/` = what a specific prototype spec should be and do
+- `bin/` spec scripts = work on prototype directories inside this repo only
+- `bin/` Project* scripts = push standards to promoted code projects (absolute path or project name)
 - `doc/` = documentation about the specification system itself
-- GAME project (`../GAME/bin/`) = code project management: `create_project.py`, `validate_project.py`, `update_projects.sh`, `migrate_projects.py`
+- GAME project (`../GAME/bin/`) = create_project.py (scaffold new projects); wrappers delegate validate/update to project_manager.py
 
 ## Specification File Types
 
@@ -103,27 +107,40 @@ bash bin/generate_claude_rules.sh > rules-prompt.md
 # Feed rules-prompt.md to an AI agent — paste output over RulesEngine/CLAUDE_RULES.md
 ```
 
-### Specification workflow (accept project name, absolute path, or relative path)
+### Specification workflow (spec names only — directories inside this repo)
 
 ```bash
 # Scaffold a new spec directory from templates (or update an existing one)
-bash bin/setup.sh <project-name>              # creates Specifications/<name>/
-bash bin/setup.sh /abs/path/to/project        # any directory
-bash bin/setup.sh <project-name> --update     # add new template files to existing dir
+bash bin/setup.sh <spec-name>              # creates Specifications/<name>/
+bash bin/setup.sh <spec-name> --update     # add new template files to existing dir
 
 # Validate spec completeness and correctness
-bash bin/validate.sh <project-name> [--verbose]
+bash bin/validate.sh <spec-name> [--verbose]
 
 # Generate conversion prompt (concise → detailed specs)
-bash bin/convert.sh <project-name> > convert-prompt.md
+bash bin/convert.sh <spec-name> > convert-prompt.md
 
 # Tag commit + generate complete build prompt
-bash bin/build.sh <project-name> > build-prompt.md
-bash bin/build.sh <project-name> --no-tag > build-prompt.md
-bash bin/build.sh <project-name> --tag-only
+bash bin/build.sh <spec-name> > build-prompt.md
+bash bin/build.sh <spec-name> --no-tag > build-prompt.md
+bash bin/build.sh <spec-name> --tag-only
 
 # Test the specification system itself
 bash bin/test.sh
+```
+
+### Promoted project management (code projects outside this repo)
+
+```bash
+# Verify a project against CLAUDE_RULES compliance (shows current status + next level preview)
+bash bin/ProjectValidate.sh <project-name>          # project name under ../projects/
+bash bin/ProjectValidate.sh /abs/path/to/project    # absolute path
+bash bin/ProjectValidate.sh <project-name> --verbose
+
+# Update a project with latest rules and templates
+bash bin/ProjectUpdate.sh <project-name>            # project name under ../projects/
+bash bin/ProjectUpdate.sh /abs/path/to/project      # absolute path
+bash bin/ProjectUpdate.sh <project-name> --dry-run  # preview without writing
 ```
 
 ### Build tag operations
@@ -142,13 +159,12 @@ bash bin/rebuild_index.sh
 bash bin/build_documentation.sh
 ```
 
-### Code project management (runs from GAME, not here)
+### Scaffold a new code project (runs from GAME)
 
 ```bash
 # These scripts live in ../GAME/bin/ — run from there
-python3 bin/create_project.py <name>
-bash bin/update_projects.sh [--dry-run]
-bash bin/validate_project.sh <name> [--verbose]
+python3 bin/create_project.py <name>          # scaffold new project with standard structure
+bash bin/update_projects.sh [--dry-run]       # push rules/templates to all set-up projects
 ```
 
 ## Build Tags
@@ -161,10 +177,10 @@ spec state used for each build, enabling spec-to-spec diffs between builds.
 ## Architecture
 
 ### bin/setup.sh
-Scaffolds a new specification directory from `RulesEngine/spec_template/`, or updates an existing one. Accepts any directory path (name in repo, absolute, or relative). `--update` copies only new template files; `--force` overwrites all. Substitutes project name, slug, description, and date into template placeholders.
+Scaffolds a new specification directory from `RulesEngine/spec_template/`, or updates an existing one. Accepts a spec name (created as `Specifications/<name>/`). `--update` copies only new template files; `--force` overwrites all. Substitutes project name, slug, description, and date into template placeholders.
 
 ### bin/validate.sh
-Validates a specification directory: required files, METADATA fields, conformity level, naming conventions, Open Questions sections, stack file existence, template cleanup. Accepts any directory path (name, absolute, or relative). Exit 0 = valid, exit 1 = errors.
+Validates a specification directory inside this repo: required files, METADATA fields, conformity level, naming conventions, Open Questions sections, stack file existence, template cleanup. Accepts a spec name only. Exit 0 = valid, exit 1 = errors.
 
 ### bin/convert.sh
 Generates a conversion prompt: CONVERT.md expansion rules + stack reference files + all
@@ -185,6 +201,17 @@ Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` f
 ### bin/generate_prompt.sh
 Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create build tags. Use `bin/build.sh` instead for new projects.
 
+### bin/project_manager.py
+Python backend for promoted project operations. Two subcommands:
+- `verify <project>` — runs CLAUDE_RULES compliance checks grouped by level (IDEA → PROTOTYPE → ACTIVE → PRODUCTION), shows "you are here" status from METADATA.md, and previews the next level's requirements. Accepts project name or absolute path.
+- `update <project>` — injects latest CLAUDE_RULES.md into AGENTS.md, copies template files (common.sh, common.py, index.html), adds missing METADATA.md default fields, and updates git_repo from the git remote. Supports `--dry-run`. Project must already have CLAUDE_RULES_START marker.
+
+### bin/ProjectValidate.sh
+Thin wrapper calling `project_manager.py verify`. Operates on promoted code projects only — not spec directories in this repo.
+
+### bin/ProjectUpdate.sh
+Thin wrapper calling `project_manager.py update`. Operates on promoted code projects only — not spec directories in this repo.
+
 ### RulesEngine/CONVERT.md
 Global specification expansion rules. Defines how each file type (DATABASE, SCREEN, FEATURE, UI, ARCHITECTURE) should be expanded from concise author input to detailed implementation-ready specs. Stack-specific expansion defers to `stack/*.md` files.
 
@@ -201,8 +228,9 @@ One file per technology (flask.md, sqlite.md, etc.). Prescriptive patterns inclu
 | `CLAUDE.md` | Generated by `create_project.py` | `@AGENTS.md` pointer |
 | `AGENTS.md` | Generated + injected | Dev commands + CLAUDE_RULES block |
 
-These are propagated to all set-up projects by `bash bin/update_projects.sh` (in `../GAME/bin/`).
-Validated at PROTOTYPE level by `bin/validate_project.py` (in `../GAME/bin/`).
+Propagated to a single project: `bash bin/ProjectUpdate.sh <project>`.
+Propagated to all set-up projects: `bash bin/update_projects.sh` (in `../GAME/bin/`).
+Validated at PROTOTYPE level: `bash bin/ProjectValidate.sh <project>`.
 
 ## Adding a New Standard Feature
 
@@ -210,8 +238,8 @@ The pattern for adding any new contract/file that all projects should have:
 
 1. **Add the template** — put the file in `RulesEngine/templates/`
 2. **Generate it** — in `../GAME/bin/create_project.py` `create_project()`, call `copy_template('myfile', dest)`
-3. **Propagate it** — in `../GAME/bin/create_project.py` `update_projects()`, add to the loop
-4. **Validate it** — add a rule name to `RULES_BY_LEVEL` in `../GAME/bin/validate_project.py` and implement its `check()` case
+3. **Propagate it** — in `bin/project_manager.py` `cmd_update()`, add to the template copy loop
+4. **Validate it** — add a rule name to `RULES_BY_LEVEL` in `bin/project_manager.py` and implement its `check()` case
 5. **Document it** — add a row to the table above in this file
 
 ## Key Conventions
@@ -220,6 +248,6 @@ The pattern for adding any new contract/file that all projects should have:
 - This repo's CLAUDE.md points here but carries NO injected CLAUDE_RULES block
 - `archive/` holds superseded documents — do not treat as current spec
 - `index.html` files are auto-generated — edit the templates, not the outputs
-- When changing `RulesEngine/` content, run `bash bin/update_projects.sh` from `../GAME/` to propagate
+- When changing `RulesEngine/` content: run `bash bin/ProjectUpdate.sh <project>` per project, or `bash bin/update_projects.sh` from `../GAME/` for all
 - CONVERT.md is global (in RulesEngine/), not per-project — methodology is shared
 - BUSINESS_RULES.md is the source of truth for agent behavioral rules; CLAUDE_RULES.md is generated — never edit CLAUDE_RULES.md directly

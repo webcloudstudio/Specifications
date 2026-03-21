@@ -17,27 +17,17 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Resolve project directory — accepts name, absolute path, relative path, or CWD
-_resolve_dir() {
-    local arg="$1"
-    if [[ "$arg" == /* ]]; then echo "$arg"
-    elif [[ "$arg" == ./* || "$arg" == ../* ]]; then cd "$arg" && pwd
-    elif [ -d "$REPO_DIR/$arg" ]; then echo "$REPO_DIR/$arg"
-    elif [ -d "$arg" ]; then cd "$arg" && pwd
-    else echo ""
-    fi
-}
+if [ -z "${1:-}" ] || [[ "${1:-}" == --* ]]; then
+    echo "Usage: bash bin/convert.sh <spec-name> [> convert-prompt.md]" >&2
+    exit 1
+fi
 
-if [ "${1:-}" = "" ] || [[ "${1:-}" == --* ]]; then
-    PROJECT_DIR="$(pwd)"
-    shift || true
-else
-    PROJECT_DIR="$(_resolve_dir "$1")"
-    shift || true
-    if [ -z "$PROJECT_DIR" ]; then
-        echo "Usage: bash bin/convert.sh <project-name-or-path>" >&2
-        exit 1
-    fi
+PROJECT_DIR="$REPO_DIR/$1"
+shift
+
+if [ ! -d "$PROJECT_DIR" ]; then
+    echo "ERROR: Spec directory not found: $PROJECT_DIR" >&2
+    exit 1
 fi
 
 METADATA_FILE="$PROJECT_DIR/METADATA.md"

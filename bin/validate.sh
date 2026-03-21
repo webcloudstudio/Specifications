@@ -3,18 +3,14 @@
 # Name: Validate Spec
 # Category: maintenance
 
-# Validates a specification directory for completeness and correctness.
-# Works on any directory — not limited to Specifications subdirectories.
+# Validates a specification directory inside this repo for completeness and correctness.
 #
 # Usage:
-#   bash bin/validate.sh <project-name>           # name relative to this repo root
-#   bash bin/validate.sh /abs/path/to/project     # absolute path
-#   bash bin/validate.sh ./relative/path          # relative to CWD
-#   bash bin/validate.sh                           # validate CWD
+#   bash bin/validate.sh <project-name>           # name of a spec dir in this repo
 #   bash bin/validate.sh <project-name> --verbose
 #
 # Arguments:
-#   $1        Directory to validate (name, path, or CWD default)
+#   $1        Spec directory name (required — must exist inside this repo)
 #   --verbose Show passing checks too (default: errors and warnings only)
 #
 # Exit codes:
@@ -35,23 +31,6 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RULES_DIR="$REPO_DIR/RulesEngine"
 
-# --- Resolve project directory ---
-# Accepts: no arg (CWD), absolute path, relative path (./ or ../), or project name
-_resolve_dir() {
-    local arg="$1"
-    if [[ "$arg" == /* ]]; then
-        echo "$arg"
-    elif [[ "$arg" == ./* || "$arg" == ../* ]]; then
-        cd "$arg" && pwd
-    elif [ -d "$REPO_DIR/$arg" ]; then
-        echo "$REPO_DIR/$arg"
-    elif [ -d "$arg" ]; then
-        cd "$arg" && pwd
-    else
-        echo ""
-    fi
-}
-
 VERBOSE=false
 POSITIONAL=""
 for arg in "$@"; do
@@ -63,19 +42,15 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    PROJECT_DIR="$(pwd)"
-else
-    PROJECT_DIR="$(_resolve_dir "$POSITIONAL")"
-    if [ -z "$PROJECT_DIR" ]; then
-        echo "ERROR: Directory not found: $POSITIONAL" >&2
-        exit 1
-    fi
+    echo "Usage: bash bin/validate.sh <spec-name> [--verbose]" >&2
+    exit 1
 fi
 
-PROJECT_NAME="$(basename "$PROJECT_DIR")"
+PROJECT_DIR="$REPO_DIR/$POSITIONAL"
+PROJECT_NAME="$POSITIONAL"
 
 if [ ! -d "$PROJECT_DIR" ]; then
-    echo "ERROR: Directory not found: $PROJECT_DIR" >&2
+    echo "ERROR: Spec directory not found: $PROJECT_DIR" >&2
     exit 1
 fi
 

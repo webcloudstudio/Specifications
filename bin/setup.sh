@@ -3,18 +3,16 @@
 # Name: Setup Spec
 # Category: maintenance
 
-# Scaffolds a new specification directory from templates, or updates an existing one.
-# Works on any directory — not limited to Specifications subdirectories.
+# Scaffolds a new specification directory inside this repo from templates,
+# or updates an existing one.
 #
 # Usage:
-#   bash bin/setup.sh <project-name>              # create in Specifications/<name>/
-#   bash bin/setup.sh /abs/path/to/project        # create or update absolute path
-#   bash bin/setup.sh ./relative/path             # create or update relative path
-#   bash bin/setup.sh <project-name> --update     # copy new template files into existing dir
-#   bash bin/setup.sh <project-name> --force      # overwrite existing files
+#   bash bin/setup.sh <spec-name>              # create Specifications/<name>/
+#   bash bin/setup.sh <spec-name> --update     # copy new template files into existing dir
+#   bash bin/setup.sh <spec-name> --force      # overwrite existing files
 #
 # Arguments:
-#   $1        Project name or directory path (required)
+#   $1        Spec name (required — created as a subdirectory of this repo)
 #   --update  If directory exists, copy template files that are not yet present (no overwrite)
 #   --force   If directory exists, overwrite all template files
 #
@@ -30,7 +28,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$REPO_DIR/RulesEngine/spec_template"
 
-ARG="${1:?Usage: bash bin/setup.sh <project-name-or-path> [--update|--force]}"
+ARG="${1:?Usage: bash bin/setup.sh <spec-name> [--update|--force]}"
 UPDATE=false
 FORCE=false
 for a in "$@"; do
@@ -40,18 +38,8 @@ for a in "$@"; do
     esac
 done
 
-# Resolve project directory
-if [[ "$ARG" == /* ]]; then
-    PROJECT_DIR="$ARG"
-elif [[ "$ARG" == ./* || "$ARG" == ../* ]]; then
-    PROJECT_DIR="$(cd "$ARG" 2>/dev/null && pwd || echo "$(pwd)/${ARG#./}")"
-elif [ -d "$ARG" ]; then
-    PROJECT_DIR="$(cd "$ARG" && pwd)"
-else
-    PROJECT_DIR="$REPO_DIR/$ARG"
-fi
-
-PROJECT_SLUG="$(basename "$PROJECT_DIR")"
+PROJECT_DIR="$REPO_DIR/$ARG"
+PROJECT_SLUG="$ARG"
 
 if [ ! -d "$TEMPLATE_DIR" ]; then
     echo "ERROR: Template directory not found: $TEMPLATE_DIR" >&2
