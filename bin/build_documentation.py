@@ -251,6 +251,7 @@ def build_page(scripts, projects, guides):
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote Prototype</a>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript(\'generate_claude_rules.sh\')">generate_claude_rules.sh</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -365,7 +366,7 @@ body {{ display: flex; height: 100vh; overflow: hidden;
 .nav-sep {{ border-top: 1px solid var(--c-side-border); margin: 5px 0; }}
 
 /* Primary nav items */
-.sn {{ display: block; padding: 5px 16px;
+.sn {{ display: block; padding: 3px 16px;
   font-size: 13px; font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
   color: #fff; cursor: pointer; border-left: 3px solid transparent;
   text-decoration: none; transition: background .1s, border-color .1s;
@@ -374,7 +375,7 @@ body {{ display: flex; height: 100vh; overflow: hidden;
 .sn.active {{ color: #fff; border-left-color: var(--c-accent); background: rgba(44,182,125,.12); }}
 
 /* Sub-nav items (steps under Workflow) */
-.sn-sub {{ display: block; padding: 3px 16px 3px 28px;
+.sn-sub {{ display: block; padding: 2px 16px 2px 28px;
   font-size: 11px; font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
   color: rgba(255,255,255,.8); cursor: pointer; border-left: 3px solid transparent;
   text-decoration: none; transition: background .1s, border-color .1s, color .1s;
