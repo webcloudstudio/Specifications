@@ -53,9 +53,6 @@ GUIDE_TITLES = {
     'ENGINEERING-RULES':     'Engineering Rules Framework',
 }
 
-# Scripts whose usage block is always shown (no expand toggle)
-ALWAYS_EXPANDED = {'test.sh'}
-
 # Scripts hidden from the Administrator Scripts list (documented elsewhere)
 SCRIPTS_HIDDEN = {'generate_image.py'}
 
@@ -311,19 +308,9 @@ def build_page(scripts, projects, guides):
     scripts_by_file = {s['file']: s for s in scripts}
 
     def sc_entry(s, child=False):
-        sid = s['file'].replace('.', '-')
-        always = s['file'] in ALWAYS_EXPANDED
-        if s.get('details'):
-            if always:
-                detail = f'<div class="sc-detail-open"><pre>{h.escape(s["details"])}</pre></div>'
-                toggle = ''
-            else:
-                detail = f'<div class="sc-detail" id="sd-{sid}"><pre>{h.escape(s["details"])}</pre></div>'
-                toggle = f'<span class="sc-toggle" onclick="toggleDetail(\'{sid}\')" title="Show usage">&#9656;</span>'
-        else:
-            detail = toggle = ''
+        detail = f'<div class="sc-detail-open"><pre>{h.escape(s["details"])}</pre></div>' if s.get('details') else ''
         extra = ' sc-child' if child else ''
-        return (f'<div class="sc-entry{extra}"><div class="sc-head">{toggle}'
+        return (f'<div class="sc-entry{extra}"><div class="sc-head">'
                 f'<code class="sc-name">{h.escape(s["file"])}</code>'
                 f'<span class="sc-desc">{h.escape(s["desc"])}</span></div>{detail}</div>\n')
 
@@ -460,14 +447,10 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .sc-entry:last-child {{ border-bottom: none; }}
 .sc-child {{ padding-left: 16px; background: rgba(255,255,255,.02); }}
 .sc-head {{ display: flex; align-items: baseline; gap: 10px; padding: 5px 4px; }}
-.sc-toggle {{ color: var(--c-accent); cursor: pointer; font-size: 11px; flex-shrink: 0;
-  width: 12px; user-select: none; }}
-.sc-toggle:hover {{ color: var(--c-h1); }}
 .sc-name {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
   color: var(--c-code-text); background: var(--c-code-bg); padding: 1px 5px;
   border-radius: 3px; white-space: nowrap; flex-shrink: 0; }}
 .sc-desc {{ font-size: 12.5px; color: var(--c-h3); }}
-.sc-detail {{ display: none; margin: 0 0 6px 22px; }}
 .sc-detail-open {{ margin: 0 0 6px 0; }}
 .sc-detail pre, .sc-detail-open pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
   font-family: 'Cascadia Code', Consolas, monospace; padding: 8px 12px;
@@ -617,15 +600,6 @@ function showProject(name, url) {{
   clearActive();
   var el = document.querySelector('[data-project="' + name + '"]');
   if (el) el.classList.add('active');
-}}
-
-function toggleDetail(sid) {{
-  var el = document.getElementById('sd-' + sid);
-  var toggle = el && el.previousElementSibling && el.previousElementSibling.querySelector('.sc-toggle');
-  if (!el) return;
-  var open = el.style.display === 'block';
-  el.style.display = open ? 'none' : 'block';
-  if (toggle) toggle.innerHTML = open ? '&#9656;' : '&#9662;';
 }}
 
 (function() {{
