@@ -274,9 +274,7 @@ def build_page(scripts, projects, guides):
             inner += f'<span class="wf-path">{h.escape(path)}</span>'
         return f'<div class="{cls}">{inner}</div>'
 
-    ARR  = '<span class="wf-arr">&#8594;</span>'
-    LARR = '<span class="wf-arr">&#8592;</span>'
-    DOWN = '<span class="wf-arr">&#8595;</span>'
+    ARR = '<span class="wf-arr">&#8594;</span>'
 
     row1 = ARR.join([
         wf_box('Setup', 'setup.sh', './<PROJECT>'),
@@ -285,17 +283,15 @@ def build_page(scripts, projects, guides):
         wf_box('Build', 'build.sh'),
         wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
     ])
-    # Row 2 is right-aligned and reversed so PROTOTYPE aligns under row-1's PROTOTYPE
-    row2 = LARR.join([
-        wf_box('Project', '', '../<PROJECT>', terminal=True),
-        wf_box('Promote', 'create_project.py'),
+    row2 = ARR.join([
         wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
+        wf_box('Promote', 'create_project.py'),
+        wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
 
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<div class="wf-row">{row1}</div>'
-                  f'<div class="wf-row-r">{DOWN}</div>'
-                  f'<div class="wf-row-r">{row2}</div>'
+                  f'<div class="wf-row">{row2}</div>'
                   f'</div>')
 
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
@@ -413,8 +409,8 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
 .wf-path {{ font-size: 9.5px; color: #fff;
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
-.wf-arr {{ color: var(--c-side-section); padding: 0 5px; font-size: 14px; align-self: center;
-  display: inline-block; }}
+.wf-arr {{ color: var(--c-accent); padding: 0 6px; font-size: 22px; font-weight: 700; align-self: center;
+  display: inline-block; line-height: 1; }}
 
 /* ── Rendered markdown ── */
 .md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-accent);
