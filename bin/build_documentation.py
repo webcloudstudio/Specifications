@@ -24,7 +24,7 @@ SKIP_DIRS = {
 }
 
 # Scripts that appear in the sidebar as Workflow Scripts (in this order)
-WF_SCRIPTS = ['setup.sh', 'validate.sh', 'convert.sh', 'build.sh', 'generate_prompt.sh']
+WF_SCRIPTS = ['setup.sh', 'validate.sh', 'convert.sh', 'build.sh']
 
 # Scripts that appear as indented children of another script in Other Scripts
 SCRIPT_CHILDREN = {
@@ -37,7 +37,6 @@ SCRIPT_DESCRIPTIONS = {
     'validate.sh':             'Check a spec directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise spec files',
     'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
-    'generate_prompt.sh':      'Generate a build prompt without creating a git tag (legacy)',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
