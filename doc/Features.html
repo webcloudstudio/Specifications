@@ -3,440 +3,634 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The GEM Rules Framework</title>
+<title>GEM Rules Framework — What It Does For You</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --c-bg:       #FAFAF8;
-  --c-text:     #2A2E35;
-  --c-accent:   #2CB67D;
-  --c-dark:     #1A1D23;
-  --c-mid:      #22262E;
-  --c-muted:    #505A68;
-  --c-border:   #D5D8DE;
-  --c-alt:      #F3F4F2;
-  --c-tag-bg:   #E8F5EE;
-  --c-tag:      #1A7A52;
+  --green:   #2CB67D;
+  --green-d: #1A8050;
+  --green-l: #E6F7F0;
+  --dark:    #1A1D23;
+  --body:    #2A2E35;
+  --muted:   #5A6170;
+  --border:  #DDE0E6;
+  --white:   #FFFFFF;
+  --off:     #F6F7F5;
 }
 
 body {
-  background: var(--c-bg);
-  color: var(--c-text);
   font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
+  color: var(--body);
+  background: var(--white);
+  font-size: 16px;
+  line-height: 1.65;
 }
 
-/* ── Hero ── */
-.hero {
-  background: var(--c-dark);
-  color: #fff;
-  padding: 56px 48px 48px;
+/* ── TOP NAV ── */
+.topnav {
+  background: var(--dark);
+  padding: 14px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
+.topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.topnav-gem { width: 28px; height: 28px; }
+.topnav-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: .3px;
+}
+.topnav-links { display: flex; gap: 28px; }
+.topnav-links a {
+  color: rgba(255,255,255,.65);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color .15s;
+}
+.topnav-links a:hover { color: var(--green); }
+
+/* ── HERO ── */
+.hero {
+  background: var(--dark);
+  color: var(--white);
+  padding: 80px 48px 72px;
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  max-width: 100%;
+}
+.hero-content { max-width: 620px; }
 .hero-eyebrow {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1.12;
+  margin-bottom: 22px;
+  letter-spacing: -.5px;
+}
+.hero h1 em {
+  color: var(--green);
+  font-style: normal;
+}
+.hero-sub {
+  font-size: 18px;
+  color: rgba(255,255,255,.78);
+  line-height: 1.7;
+  max-width: 540px;
+}
+.hero-gem {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 48px;
+}
+
+/* ── SECTIONS ── */
+.section { padding: 72px 48px; max-width: 1100px; margin: 0 auto; }
+.section-alt { background: var(--off); }
+.section-alt .section { background: transparent; }
+.section-green { background: var(--green-l); }
+.section-dark { background: var(--dark); }
+
+.label {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--c-accent);
-  margin-bottom: 14px;
-}
-.hero h1 {
-  font-size: 36px;
-  font-weight: 800;
-  line-height: 1.15;
-  margin-bottom: 18px;
-  letter-spacing: -.3px;
-}
-.hero-sub {
-  font-size: 17px;
-  color: rgba(255,255,255,.72);
-  max-width: 660px;
-  line-height: 1.6;
-  margin-bottom: 28px;
-}
-.origin-note {
-  display: inline-block;
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 6px;
-  padding: 10px 18px;
-  font-size: 13px;
-  color: rgba(255,255,255,.6);
-  line-height: 1.5;
-}
-.origin-note strong { color: rgba(255,255,255,.88); }
-
-/* ── Content wrapper ── */
-.content { max-width: 860px; margin: 0 auto; padding: 48px 48px 80px; }
-
-/* ── Section headers ── */
-.section-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--c-accent);
-  margin-bottom: 6px;
-  display: block;
+  color: var(--green);
+  margin-bottom: 10px;
 }
 .section-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--c-dark);
-  margin-bottom: 8px;
-  line-height: 1.25;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 14px;
+  line-height: 1.2;
+  letter-spacing: -.3px;
 }
-.section-desc {
-  font-size: 14.5px;
-  color: var(--c-muted);
-  margin-bottom: 28px;
-  max-width: 620px;
-}
-
-hr.section-sep {
-  border: none;
-  border-top: 1px solid var(--c-border);
-  margin: 44px 0;
+.section-sub {
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 48px;
 }
 
-/* ── Feature cards ── */
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 16px;
-  margin-bottom: 8px;
+/* ── PROBLEM BAND ── */
+.problem-band {
+  background: var(--green);
+  color: var(--white);
+  padding: 36px 48px;
+  text-align: center;
 }
-.feature-card {
-  background: #fff;
-  border: 1px solid var(--c-border);
-  border-radius: 8px;
-  padding: 20px 22px;
-  border-top: 3px solid var(--c-accent);
-}
-.feature-card h3 {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--c-dark);
-  margin-bottom: 6px;
-}
-.feature-card p {
-  font-size: 13.5px;
-  color: var(--c-muted);
+.problem-band p {
+  font-size: 19px;
+  font-weight: 500;
   line-height: 1.6;
+  max-width: 740px;
+  margin: 0 auto;
+  color: rgba(255,255,255,.92);
 }
-.feature-tag {
-  display: inline-block;
-  background: var(--c-tag-bg);
-  color: var(--c-tag);
-  font-size: 10px;
+.problem-band strong { color: var(--white); font-weight: 700; }
+
+/* ── BENEFIT GRID ── */
+.benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+.benefit-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 28px 26px;
+  transition: box-shadow .2s, transform .2s;
+}
+.benefit-card:hover {
+  box-shadow: 0 8px 28px rgba(44,182,125,.13);
+  transform: translateY(-2px);
+}
+.benefit-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--green-l);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.benefit-icon svg { width: 22px; height: 22px; }
+.benefit-card h3 {
+  font-size: 17px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  padding: 2px 7px;
-  border-radius: 3px;
+  color: var(--dark);
   margin-bottom: 8px;
+  line-height: 1.3;
 }
-
-/* ── What is a conformed project ── */
-.conform-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-  margin-bottom: 8px;
-}
-.conform-table th {
-  background: var(--c-mid);
-  color: #fff;
-  padding: 8px 14px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 12px;
-}
-.conform-table td {
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--c-border);
-  vertical-align: top;
-}
-.conform-table tr:nth-child(even) td { background: var(--c-alt); }
-.conform-table tr:last-child td { border-bottom: none; }
-.conform-table .endpoint {
-  font-family: 'Cascadia Code', Consolas, monospace;
-  font-size: 12px;
-  color: var(--c-tag);
-  background: var(--c-tag-bg);
-  padding: 1px 6px;
-  border-radius: 3px;
-}
-
-/* ── Quote callout ── */
-.callout {
-  border-left: 4px solid var(--c-accent);
-  background: var(--c-alt);
-  border-radius: 0 8px 8px 0;
-  padding: 16px 22px;
-  margin: 24px 0;
-  font-size: 14px;
-  color: var(--c-muted);
+.benefit-card p {
+  font-size: 14.5px;
+  color: var(--muted);
   line-height: 1.65;
 }
-.callout strong { color: var(--c-dark); }
 
-/* ── Footer ── */
-footer {
-  background: var(--c-dark);
-  color: rgba(255,255,255,.45);
+/* ── LARGE CALLOUT ── */
+.big-callout {
+  background: var(--dark);
+  border-radius: 16px;
+  padding: 52px 56px;
+  color: var(--white);
+  max-width: 860px;
+  margin: 0 auto;
   text-align: center;
-  font-size: 12px;
-  padding: 20px;
+}
+.big-callout h2 {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+.big-callout p {
+  font-size: 17px;
+  color: rgba(255,255,255,.72);
+  line-height: 1.7;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* ── STAT ROW ── */
+.stat-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+.stat-item {
+  flex: 1;
+  padding: 32px 24px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  background: var(--white);
+}
+.stat-item:last-child { border-right: none; }
+.stat-number {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: -.5px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── AUDIENCE ROW ── */
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.audience-card {
+  border-left: 4px solid var(--green);
+  background: var(--white);
+  border-radius: 0 10px 10px 0;
+  padding: 22px 24px;
+}
+.audience-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+.audience-card p {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--dark);
+  color: rgba(255,255,255,.4);
+  text-align: center;
+  font-size: 13px;
+  padding: 28px 48px;
   letter-spacing: .3px;
 }
-footer strong { color: rgba(255,255,255,.7); }
+footer strong { color: rgba(255,255,255,.65); }
+
+/* ── WRAPPER for alt sections ── */
+.alt-wrapper { background: var(--off); }
+.green-wrapper { background: var(--green-l); }
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-eyebrow">Platform Documentation</div>
-  <h1>The GEM Rules Framework</h1>
-  <p class="hero-sub">
-    A standard for building software projects that are observable, operable, and self-describing —
-    so that any tool, team member, or AI agent can find, run, and manage them without custom configuration.
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="topnav-brand" href="#">
+    <svg class="topnav-gem" viewBox="0 0 60 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="30,0 56,18 56,42 30,68 4,42 4,18" fill="#2CB67D"/>
+      <polygon points="30,0 56,18 30,28 4,18" fill="#4AE09A"/>
+      <polygon points="30,28 56,18 56,42 30,68" fill="#1A8050"/>
+      <polygon points="30,28 4,18 4,42 30,68" fill="#22A06B"/>
+      <polygon points="18,6 30,0 30,10" fill="rgba(255,255,255,0.35)"/>
+    </svg>
+    <span class="topnav-name">GEM Rules Framework</span>
+  </a>
+  <div class="topnav-links">
+    <a href="#benefits">Benefits</a>
+    <a href="#who">Who It's For</a>
+    <a href="#scale">At Scale</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="background: var(--dark);">
+  <div style="max-width:1100px;margin:0 auto;padding:80px 48px 72px;display:flex;align-items:center;gap:64px;flex-wrap:wrap;">
+    <div class="hero-content">
+      <div class="hero-eyebrow">Generic Enterprise Management</div>
+      <h1 style="font-size:46px;font-weight:800;line-height:1.12;margin-bottom:22px;letter-spacing:-.5px;color:#fff;">
+        Every project.<br>
+        <em style="color:#2CB67D;font-style:normal;">Always under control.</em>
+      </h1>
+      <p style="font-size:18px;color:rgba(255,255,255,.78);line-height:1.7;max-width:520px;">
+        GEM is a framework that makes every software project — no matter who built it or how —
+        instantly discoverable, manageable, and ready to hand off to anyone, including an AI.
+        No custom setup. No institutional knowledge required.
+      </p>
+    </div>
+    <div style="flex-shrink:0;margin-left:auto;">
+      <!-- Cartoon Gemstone -->
+      <svg width="160" height="186" viewBox="0 0 160 186" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 20px 40px rgba(44,182,125,0.35));">
+        <!-- Shadow -->
+        <ellipse cx="80" cy="180" rx="48" ry="7" fill="rgba(0,0,0,0.3)"/>
+        <!-- Pavilion (bottom) -->
+        <polygon points="80,172 16,88 144,88" fill="#1A8050"/>
+        <!-- Left pavilion face -->
+        <polygon points="80,172 16,88 48,112" fill="#167040"/>
+        <!-- Right pavilion face -->
+        <polygon points="80,172 144,88 112,112" fill="#1E9060"/>
+        <!-- Center pavilion -->
+        <polygon points="80,172 48,112 112,112" fill="#157548"/>
+        <!-- Crown base -->
+        <polygon points="16,88 144,88 128,60 32,60" fill="#2CB67D"/>
+        <!-- Crown left -->
+        <polygon points="16,88 32,60 12,54 6,72" fill="#24A870"/>
+        <!-- Crown right -->
+        <polygon points="144,88 128,60 148,54 154,72" fill="#26B075"/>
+        <!-- Crown top left face -->
+        <polygon points="32,60 12,54 44,28" fill="#3AC884"/>
+        <!-- Crown top right face -->
+        <polygon points="128,60 148,54 116,28" fill="#30BE7C"/>
+        <!-- Table (flat top center) -->
+        <polygon points="44,28 116,28 128,60 32,60" fill="#4AE09A"/>
+        <!-- Top peak left -->
+        <polygon points="44,28 80,10 60,32" fill="#58EAA4"/>
+        <!-- Top peak right -->
+        <polygon points="116,28 80,10 100,32" fill="#42D890"/>
+        <!-- Girdle highlight -->
+        <line x1="16" y1="88" x2="144" y2="88" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <!-- Sparkle 1 -->
+        <circle cx="52" cy="42" r="3.5" fill="white" opacity="0.55"/>
+        <!-- Sparkle 2 -->
+        <circle cx="110" cy="70" r="2" fill="white" opacity="0.40"/>
+        <!-- Sparkle 3 -->
+        <circle cx="80" cy="22" r="2.5" fill="white" opacity="0.45"/>
+        <!-- Main face highlight -->
+        <polygon points="56,38 80,18 88,46 68,52" fill="rgba(255,255,255,0.12)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM BAND -->
+<div class="problem-band">
+  <p>
+    <strong>How many projects are you running right now?</strong>
+    Which ones are healthy? Who can start one without reading a README first?
+    What happens when you hand it to an AI to work on?
+    GEM makes all of that irrelevant.
   </p>
-  <div class="origin-note">
-    <strong>Origin:</strong> The GEM (Generic Enterprise Management) Rules Framework was first defined circa 2012
-    to automate the management of large infrastructure estates — standardizing how services expose their operations,
-    health, and identity so that a central platform could monitor and control them at scale.
-    These same principles now govern every project built under this system.
+</div>
+
+<!-- BENEFITS -->
+<div id="benefits">
+  <div class="section" style="max-width:1100px;margin:0 auto;padding:72px 48px;">
+    <div class="label">Core Benefits</div>
+    <h2 class="section-title">What changes the day you adopt GEM</h2>
+    <p class="section-sub">
+      These aren't features you configure — they're capabilities that every project gets
+      automatically, from day one.
+    </p>
+
+    <div class="benefit-grid">
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h3>You always know what's running</h3>
+        <p>
+          A live dashboard shows every project — whether it's healthy, when it was last
+          updated, and where to reach it. No more hunting through terminals or asking colleagues.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+        <h3>Anyone can start or stop anything</h3>
+        <p>
+          Every project — regardless of what it's built with — starts and stops the same way.
+          A new team member can run any project on their first day without a runbook or a guide.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h3>Your AI assistant already knows the project</h3>
+        <p>
+          Every GEM project carries a built-in briefing document for AI tools.
+          Hand off to Claude, Copilot, or any AI agent at any point —
+          it reads the briefing and gets to work immediately.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+        <h3>Documentation that's never out of date</h3>
+        <p>
+          Documentation is generated directly from the project itself — not written separately
+          and forgotten. What you read is what the project actually does, right now.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h3>Every change is validated before it ships</h3>
+        <p>
+          Each project has a built-in test command. The dashboard, any CI pipeline, and
+          any team member all run the exact same check — so "it worked on my machine"
+          stops being a real conversation.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+            <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/>
+            <line x1="14" y1="1" x2="14" y2="4"/>
+          </svg>
+        </div>
+        <h3>Security and standards reach every project instantly</h3>
+        <p>
+          When a security rule changes or a shared component improves, one command
+          propagates it across your entire portfolio. No project gets left behind
+          because someone forgot to apply an update.
+        </p>
+      </div>
+
+    </div><!-- /grid -->
   </div>
 </div>
 
-<div class="content">
-
-  <!-- ── What the framework provides ── -->
-  <span class="section-label">The Framework</span>
-  <h2 class="section-title">What a Conformed Project Provides</h2>
-  <p class="section-desc">
-    Every project that follows GEM Rules exposes a standard set of endpoints and behaviours.
-    You don't configure the platform to understand your project — the project describes itself.
-  </p>
-
-  <table class="conform-table">
-    <thead>
-      <tr><th>Capability</th><th>What It Does</th><th>Why It Matters</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="endpoint">/health</span></td>
-        <td>Returns a live status check — is the service running and healthy?</td>
-        <td>The dashboard knows instantly if something is wrong, without polling logs</td>
-      </tr>
-      <tr>
-        <td><span class="endpoint">METADATA.md</span></td>
-        <td>Machine-readable identity: name, port, status, stack, description, git repository</td>
-        <td>The platform discovers and registers the project automatically — no manual entry</td>
-      </tr>
-      <tr>
-        <td><span class="endpoint">bin/start.sh</span></td>
-        <td>A single command to start the service, regardless of technology</td>
-        <td>Any operator — human or automated — can start the project the same way</td>
-      </tr>
-      <tr>
-        <td><span class="endpoint">bin/stop.sh</span></td>
-        <td>Graceful shutdown with signal handling</td>
-        <td>Clean stops prevent data corruption and port conflicts</td>
-      </tr>
-      <tr>
-        <td><span class="endpoint">bin/test.sh</span></td>
-        <td>Runs the project's test suite in a single command</td>
-        <td>Continuous integration and manual validation work identically</td>
-      </tr>
-      <tr>
-        <td><span class="endpoint">doc/</span></td>
-        <td>Auto-generated documentation available at a known URL</td>
-        <td>Documentation is always current — it is produced from the code, not written separately</td>
-      </tr>
-      <tr>
-        <td><span class="endpoint">AGENTS.md</span></td>
-        <td>Context file that tells an AI agent what the project does and how to work in it</td>
-        <td>Any AI agent can pick up and continue work on the project without briefing</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="callout">
-    <strong>The key insight:</strong> when every project uses the same layout, naming, and endpoints,
-    a single dashboard can manage all of them. You stop maintaining integration glue and start
-    managing outcomes.
+<!-- STAT ROW -->
+<div class="alt-wrapper">
+  <div style="max-width:900px;margin:0 auto;padding:0 48px 72px;">
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-number">1</div>
+        <div class="stat-label">command to start any project</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">0</div>
+        <div class="stat-label">custom integrations needed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">projects managed identically</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">of projects AI-ready from day one</div>
+      </div>
+    </div>
   </div>
-
-  <hr class="section-sep">
-
-  <!-- ── Features for software projects ── -->
-  <span class="section-label">For Software Projects</span>
-  <h2 class="section-title">What This Gives You</h2>
-  <p class="section-desc">
-    Built for teams who want consistency without bureaucracy. These features apply immediately
-    when a project adopts GEM Rules — no extra tooling required.
-  </p>
-
-  <div class="feature-grid">
-
-    <div class="feature-card">
-      <span class="feature-tag">Observability</span>
-      <h3>Dashboard Discovery</h3>
-      <p>The GAME dashboard scans your project folder and registers every conformed project automatically.
-         Name, description, status, and port appear in the UI without any configuration step.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Observability</span>
-      <h3>Live Health Monitoring</h3>
-      <p>Every project exposes a <code>/health</code> endpoint. The dashboard polls it and shows
-         a green or red status at a glance — you see what is running before you try to use it.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Operations</span>
-      <h3>One-Command Start and Stop</h3>
-      <p>No matter what language or framework the project uses, <code>bin/start.sh</code> and
-         <code>bin/stop.sh</code> work the same way. New team members and automated tools
-         never have to read a README to run something.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Operations</span>
-      <h3>Centralised Log Access</h3>
-      <p>Logs are written to a standard <code>logs/</code> directory with consistent naming.
-         Any monitoring tool can find and tail them without project-specific configuration.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Development</span>
-      <h3>AI-Ready Context</h3>
-      <p>Every project contains an <code>AGENTS.md</code> file that gives an AI assistant
-         full context about what the project does, how to run it, and what endpoints it exposes.
-         Hand off to an AI agent at any point without a lengthy briefing.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Development</span>
-      <h3>Feature Branch Builds</h3>
-      <p>New features are developed on an isolated branch, named and tracked by the platform.
-         You get a fully running version to test before anything reaches your main codebase.
-         Merge is a single action — the platform handles the git operations invisibly.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Quality</span>
-      <h3>Conformance Validation</h3>
-      <p>A built-in validator checks whether a project meets the platform standard at each level —
-         IDEA, PROTOTYPE, ACTIVE, PRODUCTION. You see exactly what is missing and what to fix,
-         in plain language.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Quality</span>
-      <h3>Consistent Testing Entry Point</h3>
-      <p><code>bin/test.sh</code> is required in every project. CI pipelines, the dashboard,
-         and manual validation all call the same script. A passing test on your machine
-         means the same thing everywhere.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Governance</span>
-      <h3>Spec-to-Build Traceability</h3>
-      <p>Every build is tagged in the specification repository with a timestamp and commit reference.
-         You can diff any two builds, restore a previous spec, or audit exactly what changed
-         between versions — without digging through commit history manually.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Governance</span>
-      <h3>Rules Propagation</h3>
-      <p>When platform standards change — security rules, shared utilities, documentation templates —
-         a single command pushes the update to every conformed project. No project falls behind
-         because someone forgot to apply a change.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Portability</span>
-      <h3>Self-Contained Documentation</h3>
-      <p>Each project generates its own browsable documentation in <code>doc/</code>.
-         It works from the file system, a local server, or a hosted URL — no build server required.
-         Documentation travels with the code.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Portability</span>
-      <h3>Stack-Agnostic Standard</h3>
-      <p>GEM Rules work across Python, Node, Go, shell scripts, or any other stack.
-         The standard describes behaviour, not implementation. A Python service and a shell
-         automation tool look identical to the platform.</p>
-    </div>
-
-  </div>
-
-  <hr class="section-sep">
-
-  <!-- ── Beyond software ── -->
-  <span class="section-label">Beyond Software</span>
-  <h2 class="section-title">Procedural and Non-Software Projects</h2>
-  <p class="section-desc">
-    GEM Rules were designed for infrastructure automation — not just web applications.
-    Any repeatable procedure can be a conformed project.
-  </p>
-
-  <div class="feature-grid">
-
-    <div class="feature-card">
-      <span class="feature-tag">Automation</span>
-      <h3>Scripted Workflows as First-Class Projects</h3>
-      <p>A data pipeline, a nightly report generator, or an infrastructure maintenance script
-         can all be conformed projects. They get a dashboard entry, a health check, a start command,
-         and version control — the same as any web service.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Automation</span>
-      <h3>Uniform Operational Interface</h3>
-      <p>Whether a "project" sends emails, processes files, or provisions cloud resources,
-         the operator interface is always the same: start, stop, test, check health.
-         No bespoke runbooks for each process.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Scale</span>
-      <h3>Platform-Level Visibility Across All Projects</h3>
-      <p>The dashboard lists everything — software, scripts, and procedures — in one place.
-         Status, port, description, and last-known state are visible without opening each project.
-         Managing twenty projects takes the same effort as managing two.</p>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-tag">Scale</span>
-      <h3>AI-Assisted Maintenance at Scale</h3>
-      <p>Because every project is self-describing, an AI agent can be pointed at any of them
-         and immediately understand what it does, how to run it, and how to modify it.
-         Maintenance work that would require a specialist for each system can be handled
-         by a single generalised agent.</p>
-    </div>
-
-  </div>
-
-  <hr class="section-sep">
-
-  <div class="callout">
-    <strong>In short:</strong> GEM Rules turn a collection of individual projects into a managed platform.
-    Each project contributes its identity, operations, and health to a shared system —
-    and the platform gives back visibility, automation, and AI-assisted development
-    that would otherwise require custom integration for each project.
-  </div>
-
 </div>
 
+<!-- WHO IT'S FOR -->
+<div id="who">
+  <div class="section" style="max-width:1100px;margin:0 auto;padding:72px 48px;">
+    <div class="label">Built For</div>
+    <h2 class="section-title">Who benefits most</h2>
+    <p class="section-sub">
+      GEM was designed for teams who build real things and need them to keep working —
+      without a dedicated platform team to hold it all together.
+    </p>
+
+    <div class="audience-grid">
+      <div class="audience-card">
+        <h3>Small engineering teams</h3>
+        <p>
+          You're building multiple projects with the same people.
+          GEM means nobody has to be the keeper of institutional knowledge
+          for how each one starts, stops, or gets tested.
+        </p>
+      </div>
+      <div class="audience-card">
+        <h3>Teams using AI assistants</h3>
+        <p>
+          AI tools are only as useful as the context they have.
+          GEM gives every AI assistant an up-to-date picture of what
+          each project does and how to work in it — without any extra setup.
+        </p>
+      </div>
+      <div class="audience-card">
+        <h3>Managers of many projects</h3>
+        <p>
+          When you have ten, twenty, or fifty projects to oversee,
+          GEM gives you a single dashboard that tells you the truth
+          about what's healthy, what's running, and what needs attention.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCALE SECTION -->
+<div class="green-wrapper" id="scale">
+  <div class="section" style="max-width:1100px;margin:0 auto;padding:72px 48px;">
+    <div class="label">At Scale</div>
+    <h2 class="section-title">A collection of projects becomes a managed platform</h2>
+    <p class="section-sub">
+      The real payoff isn't one project — it's what happens when you have many.
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:8px;">
+
+      <div style="background:white;border-radius:12px;padding:32px;">
+        <h3 style="font-size:18px;font-weight:700;color:var(--dark);margin-bottom:12px;">
+          Before GEM
+        </h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li style="color:var(--muted);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#e05a5a;">✗</span>
+            Each project has its own start sequence buried in a README
+          </li>
+          <li style="color:var(--muted);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#e05a5a;">✗</span>
+            You find out something's broken when a user reports it
+          </li>
+          <li style="color:var(--muted);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#e05a5a;">✗</span>
+            Handing a project to an AI means a lengthy briefing first
+          </li>
+          <li style="color:var(--muted);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#e05a5a;">✗</span>
+            A security update has to be applied to every project manually
+          </li>
+          <li style="color:var(--muted);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#e05a5a;">✗</span>
+            Documentation drifts out of date and nobody trusts it
+          </li>
+        </ul>
+      </div>
+
+      <div style="background:var(--dark);border-radius:12px;padding:32px;">
+        <h3 style="font-size:18px;font-weight:700;color:var(--white);margin-bottom:12px;">
+          With GEM
+        </h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li style="color:rgba(255,255,255,.78);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#2CB67D;">✓</span>
+            Every project starts the same way — always
+          </li>
+          <li style="color:rgba(255,255,255,.78);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#2CB67D;">✓</span>
+            The dashboard polls health continuously — you see problems first
+          </li>
+          <li style="color:rgba(255,255,255,.78);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#2CB67D;">✓</span>
+            Any AI agent picks up any project and works immediately
+          </li>
+          <li style="color:rgba(255,255,255,.78);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#2CB67D;">✓</span>
+            One command pushes an update to every project at once
+          </li>
+          <li style="color:rgba(255,255,255,.78);font-size:14.5px;padding-left:20px;position:relative;">
+            <span style="position:absolute;left:0;color:#2CB67D;">✓</span>
+            Documentation is generated — it cannot be wrong
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CLOSING CALLOUT -->
+<div style="padding:72px 48px;background:var(--white);">
+  <div class="big-callout">
+    <h2>Built for infrastructure. Refined for the AI era.</h2>
+    <p style="margin-top:16px;">
+      GEM was first developed in 2012 to automate the management of large infrastructure estates
+      — where the only way to stay sane at scale was to make every system look and behave identically.
+      Those same principles apply to software teams today, and they apply especially well when
+      AI assistants are part of the workflow.
+    </p>
+  </div>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  <strong>The GEM Rules Framework</strong> &nbsp;·&nbsp; Generic Enterprise Management &nbsp;·&nbsp; circa 2012 &nbsp;·&nbsp; Copyright © Web Cloud Studio
+  <strong>GEM Rules Framework</strong> &nbsp;·&nbsp; Generic Enterprise Management &nbsp;·&nbsp;
+  Established 2012 &nbsp;·&nbsp; Copyright © Web Cloud Studio
 </footer>
 
 </body>
