@@ -293,7 +293,6 @@ def build_page(scripts, projects, guides):
         wf_box('Validate', 'validate.sh'),
         wf_box('Convert', 'convert.sh'),
         wf_box('Build', 'build.sh'),
-        wf_box('AI', ai=True),
         wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
     ])
     row2 = ARR.join([
@@ -301,10 +300,24 @@ def build_page(scripts, projects, guides):
         wf_box('Promote', extra_label='Merge', script='merge.sh'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
+    row3 = ARR.join([
+        wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
+        wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
+        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
+    ])
+    row4 = ARR.join([
+        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
+        wf_box('ProjectUpdate.sh', 'bin/ProjectUpdate.sh'),
+        wf_box('Project', '', '../<PROJECT>', terminal=True),
+        wf_box('ProjectValidate.sh', 'bin/ProjectValidate.sh'),
+        wf_box('Project KPIs', terminal=True),
+    ])
 
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<div class="wf-row">{row1}</div>'
                   f'<div class="wf-row">{row2}</div>'
+                  f'<div class="wf-row">{row3}</div>'
+                  f'<div class="wf-row">{row4}</div>'
                   f'</div>')
 
     eng_row = ARR.join([
@@ -322,9 +335,8 @@ def build_page(scripts, projects, guides):
         (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
         (2, 'bin/validate.sh &lt;Project&gt;', 'Check spec files, naming, fields, BUILD_FEATURE_BRANCH_NAME'),
         (3, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', 'Expand to detailed specs with AI — optional'),
-        (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Clone/fetch project, create Feature Branch, generate AI prompt'),
-        (5, '(AI) Claude Code in ../&lt;Project&gt;', 'AI agent implements spec on Feature Branch'),
-        (6, 'Promote / Merge via GAME', 'Squash-merge Feature Branch → base branch'),
+        (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Clone/fetch project, create Feature Branch, generate build prompt'),
+        (5, 'bin/merge.sh &lt;Project&gt;', 'Squash-merge Feature Branch into base branch (or via GAME UI)'),
     ]
     wf_rows = ''
     for n, cmd, desc in wf_step_data:
@@ -425,6 +437,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
 .wf-arr {{ color: var(--c-accent); padding: 0 6px; font-size: 22px; font-weight: 700; align-self: center;
   display: inline-block; line-height: 1; }}
+.wf-ai {{ border-style: dashed; border-color: #d4a017; background: #2a2000; }}
 .wf-ai {{ border-style: dashed; border-color: #d4a017; background: #2a2000; }}
 
 /* ── Rendered markdown ── */
