@@ -119,6 +119,7 @@ All scripts live in `bin/` — bash (`.sh`) or Python (`.py`). The `# CommandCen
 | `bin/weekly.sh` | Weekly maintenance | Weekly Batch |
 | `bin/build_documentation.sh` | Generate doc/ output | Build Doc |
 | `bin/deploy.sh` | Deploy to environment | Deploy |
+| `bin/test.sh` | Run project tests — stub is acceptable | Test |
 
 If the script name matches a Standard Script Name the following header should exist with a Name: field matching the Name String.  If possible
 these should be the first lines of the file and there should be no other "# Name:" or "# Category:" fields.
@@ -127,6 +128,14 @@ these should be the first lines of the file and there should be no other "# Name
 # CommandCenter Operation
 # Name: {Name String}
 # Category: Operations
+
+### HAS_TEST_SCRIPT
+**Scope:** scripts
+**Applies at:** ACTIVE
+**Requirement:** Every project must have `bin/test.sh`.
+**Rationale:** A test entry point is required for CI and GAME to validate project health, even if initially empty.
+**Rule text:**
+All projects must have `bin/test.sh`. A minimal stub (`#!/bin/bash` + `exit 0`) is sufficient until real tests exist. The script must exist — GAME and the validation system check for it.
 
 ### SCRIPTS_BASH_PATTERN
 **Scope:** scripts

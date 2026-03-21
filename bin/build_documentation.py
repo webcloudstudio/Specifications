@@ -36,7 +36,8 @@ SCRIPT_DESCRIPTIONS = {
     'setup.sh':                'Scaffold a new spec directory from templates (or update existing)',
     'validate.sh':             'Check a spec directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise spec files',
-    'build.sh':                'Tag the commit and generate a build prompt for an AI agent',
+    'build.sh':                'Clone or fetch project, create Feature Branch, generate AI build prompt',
+    'merge.sh':                'Squash-merge a Feature Branch into base branch — called by GAME',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
@@ -47,7 +48,7 @@ GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE', 'CREATE-IMAG
 GUIDE_TITLES = {
     'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
-    'PROMOTE':               'Promote Prototype To Project',
+    'PROMOTE':               'Promote / Merge',
     'CREATE-IMAGE':          'Create Image',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
 }
@@ -257,7 +258,7 @@ def build_page(scripts, projects, guides):
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
-    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote Prototype</a>\n'
+    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript(\'generate_claude_rules.sh\')">generate_claude_rules.sh</a>\n'
 
@@ -270,9 +271,15 @@ def build_page(scripts, projects, guides):
                      f'{h.escape(p["display"])}</a>\n')
 
     # ── Two-row workflow diagram ───────────────────────────────────────────────
-    def wf_box(label, script='', path='', terminal=False):
-        cls = 'wf-box wf-terminal' if terminal else 'wf-box'
+    def wf_box(label, script='', path='', terminal=False, ai=False, extra_label='', feature=''):
+        cls = 'wf-box'
+        if terminal: cls += ' wf-terminal'
+        if ai:       cls += ' wf-ai'
         inner = f'<span class="wf-label">{h.escape(label)}</span>'
+        if extra_label:
+            inner += f'<span class="wf-label">{h.escape(extra_label)}</span>'
+        if feature:
+            inner += f'<span class="wf-script">Feature: {h.escape(feature)}</span>'
         if script:
             inner += f'<span class="wf-script">{h.escape(script)}</span>'
         if path:
@@ -282,15 +289,16 @@ def build_page(scripts, projects, guides):
     ARR = '<span class="wf-arr">&#8594;</span>'
 
     row1 = ARR.join([
-        wf_box('Setup', 'setup.sh', './<PROJECT>'),
+        wf_box('Setup', 'setup.sh'),
         wf_box('Validate', 'validate.sh'),
         wf_box('Convert', 'convert.sh'),
         wf_box('Build', 'build.sh'),
-        wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
+        wf_box('AI', ai=True),
+        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
     ])
     row2 = ARR.join([
-        wf_box('PROTOTYPE', '', './<PROJECT>_build', terminal=True),
-        wf_box('Promote', 'create_project.py'),
+        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
+        wf_box('Promote', extra_label='Merge', script='merge.sh'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
 
@@ -312,10 +320,11 @@ def build_page(scripts, projects, guides):
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
         (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
-        (2, 'bin/validate.sh &lt;Project&gt;', 'Check required files, naming, fields — exit 0 = ready'),
+        (2, 'bin/validate.sh &lt;Project&gt;', 'Check spec files, naming, fields, BUILD_FEATURE_BRANCH_NAME'),
         (3, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', 'Expand to detailed specs with AI — optional'),
-        (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Tag commit, generate build prompt — feed to AI agent'),
-        (5, 'python3 bin/create_project.py &lt;Project&gt;', 'Scaffold code project — run from GAME/'),
+        (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Clone/fetch project, create Feature Branch, generate AI prompt'),
+        (5, '(AI) Claude Code in ../&lt;Project&gt;', 'AI agent implements spec on Feature Branch'),
+        (6, 'Promote / Merge via GAME', 'Squash-merge Feature Branch → base branch'),
     ]
     wf_rows = ''
     for n, cmd, desc in wf_step_data:
@@ -416,6 +425,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
 .wf-arr {{ color: var(--c-accent); padding: 0 6px; font-size: 22px; font-weight: 700; align-self: center;
   display: inline-block; line-height: 1; }}
+.wf-ai {{ border-style: dashed; border-color: #d4a017; background: #2a2000; }}
 
 /* ── Rendered markdown ── */
 .md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-accent);
@@ -495,6 +505,14 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 
 section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin-bottom: 12px; }}
+/* ── Process definitions ── */
+.proc-defs {{ margin-bottom: 4px; }}
+.proc-item {{ display: flex; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--c-td-border); align-items: baseline; }}
+.proc-item:last-child {{ border-bottom: none; }}
+.proc-term {{ font-size: 12px; font-weight: 700; color: var(--c-accent); white-space: nowrap; min-width: 110px; }}
+.proc-def {{ font-size: 12.5px; color: var(--c-h3); }}
+.proc-def code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
+  background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
 </style>
 </head>
 <body>
@@ -517,6 +535,16 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <p class="wf-section-h">Workflows</p>
     {wf_diagram}
 
+    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
+    <p class="wf-section-h">Process</p>
+    <div class="proc-defs">
+      <div class="proc-item"><span class="proc-term">Spec</span><span class="proc-def">Markdown files in <code>Specifications/&lt;Name&gt;/</code> — concise tables and bullets defining what to build</span></div>
+      <div class="proc-item"><span class="proc-term">Project</span><span class="proc-def">A live git repository with <code>METADATA.md</code>, conforming to platform standards, discovered by GAME</span></div>
+      <div class="proc-item"><span class="proc-term">Prototype</span><span class="proc-def">A Project on a named Feature Branch — built by AI from the spec, runnable and testable before merge</span></div>
+      <div class="proc-item"><span class="proc-term">Feature Branch</span><span class="proc-def">Configured in <code>.env</code> as <code>BUILD_FEATURE_BRANCH_NAME=feature/name</code> — contains AI-built code pending merge</span></div>
+      <div class="proc-item"><span class="proc-term">Build</span><span class="proc-def">Clones or fetches the project, creates the Feature Branch from base code, generates the AI build prompt</span></div>
+      <div class="proc-item"><span class="proc-term">Merge</span><span class="proc-def">Squash-merges the Feature Branch into the base branch — triggered via GAME UI, hides all git from the user</span></div>
+    </div>
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
     <p class="wf-section-h">Administrator Scripts</p>
     {other_html}

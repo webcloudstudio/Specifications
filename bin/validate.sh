@@ -138,6 +138,23 @@ if [ -f "$PROJECT_DIR/METADATA.md" ]; then
             fi
         done
     fi
+
+    # --- Build configuration (oneshot projects) ---
+    TYPE=$(get_field "type")
+    if [ "${TYPE:-}" = "oneshot" ]; then
+        echo ""
+        echo "Build configuration (type: oneshot):"
+        FEATURE_BRANCH=""
+        if [ -f "$PROJECT_DIR/.env" ]; then
+            FEATURE_BRANCH=$(grep "^BUILD_FEATURE_BRANCH_NAME=" "$PROJECT_DIR/.env" 2>/dev/null | head -1 | sed 's/^BUILD_FEATURE_BRANCH_NAME=//' | tr -d '\r' || true)
+        fi
+        if [ -n "$FEATURE_BRANCH" ]; then
+            pass "BUILD_FEATURE_BRANCH_NAME: $FEATURE_BRANCH"
+        else
+            fail "BUILD_FEATURE_BRANCH_NAME missing — add to $PROJECT_DIR/.env:
+      BUILD_FEATURE_BRANCH_NAME=feature/my-feature-name"
+        fi
+    fi
 fi
 echo ""
 

@@ -1,9 +1,9 @@
 # Specification Process
 
-**Version:** 20260320 V3
+**Version:** 20260321 V4
 **Description:** Step-by-step guide to the Prototyper specification workflow
 
-Prototyper converts concise specification files into AI agent build prompts.
+Prototyper converts concise specification files into AI agent build prompts that run on a Feature Branch.
 
 ---
 
@@ -15,8 +15,8 @@ bash bin/setup.sh <ProjectName>
 
 Creates `Specifications/<ProjectName>/` with template files from `RulesEngine/spec_template/`.
 
-Edit `METADATA.md` immediately. `validate.sh` requires all four fields to be set:
-`name`, `display_name`, `short_description`, `status`.
+Edit `METADATA.md` immediately — set `name`, `display_name`, `short_description`, `status`.
+Set `git_repo:` to the remote URL of the project repository.
 
 ---
 
@@ -38,8 +38,7 @@ Rename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.
 ## Step 3 — Validate the Spec
 
 ```bash
-bash bin/validate.sh <ProjectName>       # from repo root
-bash bin/validate.sh                     # from within the project directory
+bash bin/validate.sh <ProjectName>
 bash bin/validate.sh <ProjectName> --verbose
 ```
 
@@ -54,6 +53,7 @@ Exit 0 = ready. Exit 1 = errors to fix.
 | Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` have been renamed or deleted |
 | Open Questions | All applicable files have `## Open Questions` section |
 | Stack files | If `stack:` is declared, `RulesEngine/stack/<component>.md` exists for each component |
+| Feature Branch | If `type: oneshot`, `BUILD_FEATURE_BRANCH_NAME` must be set in `.env` |
 
 ---
 
@@ -61,7 +61,6 @@ Exit 0 = ready. Exit 1 = errors to fix.
 
 ```bash
 bash bin/convert.sh <ProjectName> > convert-prompt.md
-bash bin/convert.sh               > convert-prompt.md    # from within project directory
 ```
 
 Generates: `CONVERT.md` expansion rules + stack references + concise spec files.
@@ -72,39 +71,39 @@ Replace the concise spec files with the expanded output, then proceed to Step 5.
 
 ---
 
-## Step 5 — Build the Prompt
+## Step 5 — Build
 
 ```bash
 bash bin/build.sh <ProjectName> > build-prompt.md
-bash bin/build.sh               > build-prompt.md    # from within project directory
 ```
 
-Creates annotated git tag `build/<ProjectName>/YYYY-MM-DD.N` and generates the build prompt.
-Feed `build-prompt.md` to an AI agent to build the application.
+Requires `BUILD_FEATURE_BRANCH_NAME=feature/my-name` in `Specifications/<ProjectName>/.env`.
 
-| Flag | Effect |
-|------|--------|
-| `--no-tag` | Generate prompt without creating a tag |
-| `--tag-only` | Tag the commit without generating a prompt |
+1. Clones `git_repo` into `../<ProjectName>/` if it does not exist, or fetches if it does
+2. Creates `feature/<name>` branch from `base_branch` (configured or auto-detected)
+3. Generates the build prompt — feed `build-prompt.md` to Claude Code running in `../<ProjectName>/`
 
-```bash
-git tag -l "build/<Project>/*"
-git diff build/<Project>/2026-03-19.1..build/<Project>/2026-03-20.1 -- <Project>/
-git checkout build/<Project>/2026-03-19.1 -- <Project>/DATABASE.md
 ```
+Feature Branch Created: feature/my-name
+Open Claude Code in: ../<ProjectName>/
+```
+
+The AI agent implements the spec on the feature branch. The project is immediately runnable and testable.
 
 ---
 
-## Promote — Create a Live Code Project
+## Step 6 — Merge
 
-Once the spec is built, promote it to a running project using the GAME `create_project.py` tool.
-See `PROMOTE.md` for the full step-by-step guide.
+Once the prototype is tested, merge via GAME UI (calls `bin/merge.sh` internally):
+
+- Squash-merges the Feature Branch into `base_branch`
+- Deletes the feature branch
+- Commit message references the spec tag
 
 ```bash
-cd ~/projects/GAME
-python3 bin/create_project.py <ProjectName>   # scaffold ~/projects/<ProjectName>/
-bash bin/update_projects.sh                   # propagate RulesEngine standards
-bash bin/validate_project.sh <ProjectName>    # check platform conformance
+# Direct invocation (GAME calls this automatically):
+bash bin/merge.sh <ProjectName>
+bash bin/merge.sh <ProjectName> --feature feature/name --base main --dry-run
 ```
 
 ---

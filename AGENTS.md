@@ -55,14 +55,15 @@ Specifications/
     setup.sh                       Scaffold new spec directory (or update existing) from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
-    oneshot.sh                     Tag commit + generate one-shot build prompt (--update for delta)
-    promote.sh                     Promote a _Build prototype to the project directory and commit
+    build.sh                       Clone/fetch project, create Feature Branch, generate build prompt
+    merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
+    oneshot.sh                     Internal: generate build prompt (called by build.sh)
     generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
     generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md) — use oneshot.sh instead
     rebuild_index.sh               Regenerate browsable HTML spec viewers
     build_documentation.sh         Build doc/index.html
-    project_manager.py             Python backend for project verify/update/promote operations
+    project_manager.py             Python backend for project verify/update operations
     ProjectValidate.sh             Verify a promoted code project against CLAUDE_RULES compliance
     ProjectUpdate.sh               Update a promoted code project with latest rules and templates
 
@@ -121,15 +122,14 @@ bash bin/validate.sh <spec-name> [--verbose]
 # Generate conversion prompt (concise → detailed specs)
 bash bin/convert.sh <spec-name> > convert-prompt.md
 
-# Tag commit + generate one-shot build prompt
-bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
-bash bin/oneshot.sh <spec-name> --no-tag > oneshot-prompt.md
-bash bin/oneshot.sh <spec-name> --tag-only
-bash bin/oneshot.sh <spec-name> --update > oneshot-prompt.md  # update existing build (not from scratch)
+# Build: clone/fetch project, create Feature Branch, generate build prompt
+bash bin/build.sh <spec-name> > build-prompt.md
+bash bin/build.sh <spec-name> --dry-run   # preview without git operations
+# Requires BUILD_FEATURE_BRANCH_NAME=feature/name in Specifications/<spec-name>/.env
 
-# Promote a _Build prototype to the project directory
-bash bin/promote.sh <spec-name>           # rsync ../Name_Build/ → ../Name/ + git commit
-bash bin/promote.sh <spec-name> --dry-run # preview without writing
+# Merge: squash-merge Feature Branch into base branch (GAME calls this automatically)
+bash bin/merge.sh <spec-name>
+bash bin/merge.sh <spec-name> --feature feature/name --base main --dry-run
 
 # Test the specification system itself
 bash bin/test.sh
@@ -207,6 +207,12 @@ Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` f
 
 ### bin/generate_prompt.sh
 Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create oneshot tags. Use `bin/oneshot.sh` instead.
+
+### bin/build.sh
+Reads `METADATA.md` and `.env` for the spec. Clones or fetches the project into `../<Name>/`, creates the feature branch, then calls `oneshot.sh` to generate the build prompt. Fails clearly if `BUILD_FEATURE_BRANCH_NAME` is not set in `.env`.
+
+### bin/merge.sh
+Squash-merges a feature branch into the base branch and deletes it. Reads feature branch from `.env` and base branch from `METADATA.md`. Accepts `--feature`, `--base`, and `--dry-run` overrides. Called by GAME UI — can also be run directly.
 
 ### bin/project_manager.py
 Python backend for promoted project operations. Two subcommands:

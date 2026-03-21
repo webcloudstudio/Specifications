@@ -596,6 +596,17 @@ def cmd_update(project_path: Path, dry_run: bool) -> int:
         else:
             log("·", dest_rel, f"skipped (template {tmpl_name} not found)")
 
+    # --- test.sh: copy stub only if missing ---
+    test_sh = project_path / "bin" / "test.sh"
+    if not test_sh.exists():
+        r = copy_template("test.sh", test_sh, dry_run)
+        if r == "updated":
+            log("✓", "bin/test.sh", "stub created")
+        elif r == "missing":
+            log("·", "bin/test.sh", "template not found")
+    else:
+        log("·", "bin/test.sh", "exists (not overwritten)")
+
     # --- METADATA: update git_repo ---
     meta_path = project_path / "METADATA.md"
     if meta_path.exists():

@@ -7,6 +7,7 @@ display_name: __PROJECT_NAME__
 short_description: __SHORT_DESCRIPTION__
 status: IDEA
 type: oneshot
+base_branch:
 version: __TODAY__.1
 updated: __TODAY_COMPACT__
 image_description:
