@@ -229,13 +229,21 @@ def build_page(scripts, projects, guides):
     # ── Sidebar: steps with sub-items (script or guide) ──────────────────────
     # Each entry: (step_num, label, [(sub_label, 'script'|'guide', target), ...])
     STEP_NAV = [
-        (1, 'Step 1 — Setup',    [('setup_prototype.sh',   'script', 'setup_prototype.sh'),
+        (1, 'Step 1 — Setup',    [('setup.sh',             'script', 'setup.sh'),
                                    ('Create Image (AI)',   'guide',  'CREATE-IMAGE')]),
         (2, 'Step 2 — Create',   [('Project Creation',    'guide',  'PROJECT-SETUP')]),
         (3, 'Step 3 — Validate', [('validate.sh',       'script', 'validate.sh')]),
         (4, 'Step 4 — Convert',  [('convert.sh',        'script', 'convert.sh')]),
         (5, 'Step 5 — Build',    [('build.sh',          'script', 'build.sh')]),
     ]
+
+    # Warn if STEP_NAV references a script not found in bin/ (catches renames)
+    scripts_found = {s['file'] for s in scripts}
+    for _, _, subs in STEP_NAV:
+        for sub_label, sub_type, sub_target in subs:
+            if sub_type == 'script' and sub_target not in scripts_found:
+                print(f"  WARNING: nav references '{sub_target}' — not found in bin/ (renamed?)")
+
     step_nav = ''
     for num, label, subs in STEP_NAV:
         step_nav += f'  <a class="sn" data-step="{num}" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', {num})">{h.escape(label)}</a>\n'
@@ -271,7 +279,7 @@ def build_page(scripts, projects, guides):
     DOWN = '<span class="wf-arr">&#8595;</span>'
 
     row1 = ARR.join([
-        wf_box('Setup', 'setup_prototype.sh', './<PROJECT>'),
+        wf_box('Setup', 'setup.sh', './<PROJECT>'),
         wf_box('Validate', 'validate.sh'),
         wf_box('Convert', 'convert.sh'),
         wf_box('Build', 'build.sh'),
@@ -292,7 +300,7 @@ def build_page(scripts, projects, guides):
 
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
-        (1, 'bin/setup_prototype.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
+        (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
         (2, 'bin/validate.sh &lt;Project&gt;', 'Check required files, naming, fields — exit 0 = ready'),
         (3, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', 'Expand to detailed specs with AI — optional'),
         (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Tag commit, generate build prompt — feed to AI agent'),
@@ -497,7 +505,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 <nav class="sidebar">
   <div class="sidebar-header" onclick="show('workflow')">
     <img src="images/prototyper.webp" alt="Prototyper">
-    <h1>Prototyper</h1>
+    <h1>Project<br>Prototyper</h1>
   </div>
 {step_nav}
   <div class="nav-sep"></div>
