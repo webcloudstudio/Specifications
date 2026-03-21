@@ -62,6 +62,7 @@ RULES_BY_LEVEL = {
         "metadata_has_tags",
         "has_bin_dir",
         "has_start_script",
+        "has_test_script",
         "start_script_has_commandcenter_header",
         "scripts_have_preamble",
         "scripts_emit_status",
@@ -351,6 +352,10 @@ def check(rule: str, project_path: Path, metadata: dict,
         except Exception:
             return CheckResult(rule, True, "could not check")
 
+    if rule == "has_test_script":
+        ok = (project_path / "bin" / "test.sh").is_file()
+        return CheckResult(rule, ok, "" if ok else "bin/test.sh not found")
+
     if rule == "start_script_has_sigterm_trap":
         content = read_file(project_path / "bin" / "start.sh") or ""
         ok = "trap" in content and "SIGTERM" in content
@@ -638,12 +643,123 @@ def cmd_update(project_path: Path, dry_run: bool) -> int:
 
 
 # ---------------------------------------------------------------------------
+# promote command
+# ---------------------------------------------------------------------------
+
+def cmd_promote(project_path: Path, dry_run: bool) -> int:
+    """Promote a _Build prototype to the project directory and commit."""
+    name     = project_path.name
+    metadata = parse_metadata(project_path)
+
+    proj_type = metadata.get("type", "")
+    git_repo  = metadata.get("git_repo", "")
+
+    print(f"\n{BOLD}Promote:{RESET} {name}")
+    print(f"  Spec:   {project_path}")
+    if dry_run:
+        print(f"  {YELLOW}dry-run — no files will be written{RESET}")
+
+    if proj_type and proj_type != "oneshot":
+        print(f"  {YELLOW}WARNING:{RESET} type is '{proj_type}', expected 'oneshot'")
+    elif not proj_type:
+        print(f"  {YELLOW}WARNING:{RESET} type field not set in METADATA.md")
+
+    # Gate: git_repo must look like a real path or URL (contains a slash)
+    if not git_repo or "/" not in git_repo:
+        print(f"\n  {RED}✗{RESET}  git_repo not set or not a valid path/URL")
+        print(f"      Set 'git_repo: https://github.com/user/{name}.git' in METADATA.md")
+        return 1
+
+    build_path  = PROJECTS_DIR / f"{name}_Build"
+    target_path = PROJECTS_DIR / name
+
+    # Gate: _Build must exist
+    if not build_path.is_dir():
+        print(f"\n  {RED}✗{RESET}  Build directory not found: {build_path}")
+        print(f"      Run oneshot.sh and build with an AI agent first.")
+        return 1
+
+    log_lines = []
+    staged_files: list[str] = []
+
+    def log(icon, label):
+        color = GREEN if icon == "✓" else DIM
+        log_lines.append(f"  {color}{icon}{RESET}  {label}")
+
+    # Initialize target git repo if needed
+    if not target_path.exists():
+        if not dry_run:
+            target_path.mkdir(parents=True)
+            subprocess.run(["git", "init"], cwd=target_path,
+                           check=True, capture_output=True)
+            subprocess.run(["git", "remote", "add", "origin", git_repo],
+                           cwd=target_path, check=True, capture_output=True)
+        log("✓", f"Initialized {target_path.name}/ (git init + remote add origin {git_repo})")
+
+    if dry_run:
+        print(f"\n  Would rsync: {build_path.name}/ → {target_path.name}/")
+    else:
+        # rsync _Build/ → target/
+        r = subprocess.run(
+            ["rsync", "-a", "--delete", "--exclude=.git",
+             f"{build_path}/", f"{target_path}/"],
+            capture_output=True, text=True
+        )
+        if r.returncode != 0:
+            print(f"\n  {RED}✗{RESET}  rsync failed: {r.stderr.strip()}")
+            return 1
+
+        # Find latest oneshot tag for commit message
+        latest_tag = ""
+        try:
+            r2 = subprocess.run(
+                ["git", "tag", "-l", f"oneshot/{name}/*", "--sort=-version:refname"],
+                cwd=SPEC_DIR, capture_output=True, text=True, timeout=5
+            )
+            tags = r2.stdout.strip().splitlines()
+            if tags:
+                latest_tag = tags[0]
+        except Exception:
+            pass
+
+        commit_msg = f"Promote: {name} from {latest_tag}" if latest_tag else f"Promote: {name}"
+
+        subprocess.run(["git", "add", "-A"], cwd=target_path,
+                       check=True, capture_output=True)
+        r3 = subprocess.run(["git", "diff", "--cached", "--name-only"],
+                             cwd=target_path, capture_output=True, text=True)
+        staged_files = [f for f in r3.stdout.strip().splitlines() if f]
+
+        if staged_files:
+            subprocess.run(["git", "commit", "-m", commit_msg],
+                           cwd=target_path, check=True, capture_output=True)
+            for f in staged_files[:20]:
+                log("✓", f)
+            if len(staged_files) > 20:
+                log("·", f"... and {len(staged_files) - 20} more files")
+        else:
+            log("·", "No changes to commit")
+
+    print()
+    for line in log_lines:
+        print(line)
+
+    print(f"\n{'─' * 45}")
+    if dry_run:
+        print(f"RESULT: {YELLOW}dry-run{RESET}  would sync {build_path.name}/ → {target_path.name}/")
+    else:
+        n = len(staged_files)
+        print(f"RESULT: {n} file{'s' if n != 1 else ''} changed — push with: git -C {target_path} push")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Verify and update promoted code projects.",
+        description="Verify, update, and promote code projects.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 commands:
@@ -651,21 +767,33 @@ commands:
            Shows pass/fail per rule, grouped by level, with next-level preview.
   update   Inject latest CLAUDE_RULES.md, copy templates, update METADATA.md.
            Project must already be set up (CLAUDE_RULES_START marker required).
+  promote  Sync a _Build prototype to the project directory and git commit.
+           Spec METADATA.md must have git_repo: set and type: oneshot.
 
 examples:
   python3 bin/project_manager.py verify MyProject
   python3 bin/project_manager.py verify /abs/path/to/MyProject --verbose
   python3 bin/project_manager.py update MyProject --dry-run
   python3 bin/project_manager.py update /abs/path/to/MyProject
+  python3 bin/project_manager.py promote MyProject
+  python3 bin/project_manager.py promote MyProject --dry-run
 """
     )
-    parser.add_argument("command", choices=["verify", "update"])
+    parser.add_argument("command", choices=["verify", "update", "promote"])
     parser.add_argument("project", help="Project name or absolute path")
     parser.add_argument("--verbose", "-v", action="store_true",
                         help="(verify) Show passing checks too")
     parser.add_argument("--dry-run", action="store_true",
-                        help="(update) Preview changes without writing")
+                        help="(update/promote) Preview changes without writing")
     args = parser.parse_args()
+
+    if args.command == "promote":
+        # promote reads the spec directory (inside Specifications/), not the code project
+        spec_path = SPEC_DIR / args.project
+        if not spec_path.is_dir():
+            print(f"ERROR: spec '{args.project}' not found in {SPEC_DIR}", file=sys.stderr)
+            sys.exit(1)
+        return cmd_promote(spec_path, args.dry_run)
 
     project_path = resolve_project(args.project)
 

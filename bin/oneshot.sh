@@ -25,18 +25,20 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 TAG_ONLY=false
 NO_TAG=false
+UPDATE=false
 POSITIONAL=""
 for arg in "$@"; do
     case "$arg" in
         --tag-only) TAG_ONLY=true ;;
         --no-tag)   NO_TAG=true ;;
+        --update)   UPDATE=true ;;
         --*)        ;;
         *)          [ -z "$POSITIONAL" ] && POSITIONAL="$arg" ;;
     esac
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/oneshot.sh <spec-name> [--no-tag|--tag-only]" >&2
+    echo "Usage: bash bin/oneshot.sh <spec-name> [--no-tag|--tag-only|--update]" >&2
     exit 1
 fi
 
@@ -76,12 +78,15 @@ if [ "$NO_TAG" = false ]; then
     COMMIT_SHA=$(git rev-parse HEAD)
     COMMIT_MSG=$(git log -1 --format='%s')
 
-    git tag -a "$TAG_NAME" -m "OneShot: ${PROJECT_NAME} ${TODAY}.${BUILD_NUM}
+    ONESHOT_MODE="build"
+    if [ "$UPDATE" = true ]; then ONESHOT_MODE="update"; fi
+
+    git tag -a "$TAG_NAME" -m "OneShot (${ONESHOT_MODE}): ${PROJECT_NAME} ${TODAY}.${BUILD_NUM}
 Commit: ${COMMIT_SHA}
 Message: ${COMMIT_MSG}
 Run: $(date '+%Y-%m-%d %H:%M:%S')"
 
-    echo "Tagged: $TAG_NAME → $(git rev-parse --short HEAD)" >&2
+    echo "OneShot (${ONESHOT_MODE}): $TAG_NAME → $(git rev-parse --short HEAD)" >&2
     echo "" >&2
 
     # Show diff from previous oneshot if one exists
@@ -140,6 +145,29 @@ if [ "$NO_TAG" = false ]; then
     BUILD_TAG_INFO="OneShot tag: \`$TAG_NAME\` (commit $(git rev-parse --short HEAD))"
 fi
 
+if [ "$UPDATE" = true ]; then
+cat <<HEADER
+# OneShot Prompt: $PROJECT_NAME (update)
+
+You are UPDATING **${DISPLAY_NAME:-$PROJECT_NAME}** — do not start from scratch.
+Read the spec changes and apply them to the existing code in this directory.
+${BUILD_TAG_INFO}
+
+## Stack
+$(for comp in "${COMPONENTS[@]}"; do echo "- $comp"; done)
+- Port: $PORT
+
+## Instructions
+1. Read the CONVERSION RULES — they explain how concise specs should be interpreted
+2. Read the INTEGRATION STANDARD (CLAUDE_RULES) — project structure requirements
+3. Read ALL technology references — they define HOW to implement (prescriptive)
+4. Read ALL specification files — they define WHAT has changed
+5. Apply changes to the existing application; do not rebuild from scratch
+
+---
+
+HEADER
+else
 cat <<HEADER
 # OneShot Prompt: $PROJECT_NAME
 
@@ -160,6 +188,7 @@ $(for comp in "${COMPONENTS[@]}"; do echo "- $comp"; done)
 ---
 
 HEADER
+fi
 
 # --- Conversion Rules ---
 if [ -f "$CONVERT_FILE" ]; then
@@ -213,6 +242,17 @@ for spec_file in $(find "$PROJECT_DIR" -maxdepth 1 -name '*.md' ! -name 'METADAT
 done
 
 # --- Footer ---
+if [ "$UPDATE" = true ]; then
+cat <<FOOTER
+---
+
+# END OF ONESHOT PROMPT
+
+Update this project following the conversion rules, integration standard, technology references, and specification files above.
+Apply spec changes to the existing codebase — do not rebuild from scratch.
+All patterns in the technology references are prescriptive — use them exactly as shown.
+FOOTER
+else
 cat <<FOOTER
 ---
 
@@ -222,3 +262,4 @@ Build this project following the conversion rules, integration standard, technol
 All patterns in the technology references are prescriptive — use them exactly as shown.
 Expand concise specifications inline according to the conversion rules during implementation.
 FOOTER
+fi

@@ -55,13 +55,14 @@ Specifications/
     setup.sh                       Scaffold new spec directory (or update existing) from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
-    oneshot.sh                     Tag commit + generate one-shot build prompt
+    oneshot.sh                     Tag commit + generate one-shot build prompt (--update for delta)
+    promote.sh                     Promote a _Build prototype to the project directory and commit
     generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
     generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md) — use oneshot.sh instead
     rebuild_index.sh               Regenerate browsable HTML spec viewers
     build_documentation.sh         Build doc/index.html
-    project_manager.py             Python backend for project verify/update operations
+    project_manager.py             Python backend for project verify/update/promote operations
     ProjectValidate.sh             Verify a promoted code project against CLAUDE_RULES compliance
     ProjectUpdate.sh               Update a promoted code project with latest rules and templates
 
@@ -124,6 +125,11 @@ bash bin/convert.sh <spec-name> > convert-prompt.md
 bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
 bash bin/oneshot.sh <spec-name> --no-tag > oneshot-prompt.md
 bash bin/oneshot.sh <spec-name> --tag-only
+bash bin/oneshot.sh <spec-name> --update > oneshot-prompt.md  # update existing build (not from scratch)
+
+# Promote a _Build prototype to the project directory
+bash bin/promote.sh <spec-name>           # rsync ../Name_Build/ → ../Name/ + git commit
+bash bin/promote.sh <spec-name> --dry-run # preview without writing
 
 # Test the specification system itself
 bash bin/test.sh

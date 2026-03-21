@@ -9,6 +9,7 @@ git_repo: GAME
 short_description: Dashboard for managing, monitoring, and operating AI-assisted projects
 port: 5001
 status: ACTIVE
+type: oneshot
 version: 2026-03-20.1
 updated: 20260320
 stack: Python/Flask/SQLite/Bootstrap5
