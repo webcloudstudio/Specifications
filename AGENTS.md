@@ -55,10 +55,10 @@ Specifications/
     setup.sh                       Scaffold new spec directory (or update existing) from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
-    build.sh                       Tag commit + generate build prompt
+    oneshot.sh                     Tag commit + generate one-shot build prompt
     generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
-    generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md)
+    generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md) — use oneshot.sh instead
     rebuild_index.sh               Regenerate browsable HTML spec viewers
     build_documentation.sh         Build doc/index.html
     project_manager.py             Python backend for project verify/update operations
@@ -120,10 +120,10 @@ bash bin/validate.sh <spec-name> [--verbose]
 # Generate conversion prompt (concise → detailed specs)
 bash bin/convert.sh <spec-name> > convert-prompt.md
 
-# Tag commit + generate complete build prompt
-bash bin/build.sh <spec-name> > build-prompt.md
-bash bin/build.sh <spec-name> --no-tag > build-prompt.md
-bash bin/build.sh <spec-name> --tag-only
+# Tag commit + generate one-shot build prompt
+bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
+bash bin/oneshot.sh <spec-name> --no-tag > oneshot-prompt.md
+bash bin/oneshot.sh <spec-name> --tag-only
 
 # Test the specification system itself
 bash bin/test.sh
@@ -146,10 +146,10 @@ bash bin/ProjectUpdate.sh <project-name> --dry-run  # preview without writing
 ### Build tag operations
 
 ```bash
-git tag -l "build/GAME/*"
-git diff build/GAME/2026-03-19.1..build/GAME/2026-03-20.1 -- GAME/
-git show build/GAME/2026-03-19.1
-git checkout build/GAME/2026-03-19.1 -- GAME/DATABASE.md
+git tag -l "oneshot/GAME/*"
+git diff oneshot/GAME/2026-03-19.1..oneshot/GAME/2026-03-20.1 -- GAME/
+git show oneshot/GAME/2026-03-19.1
+git checkout oneshot/GAME/2026-03-19.1 -- GAME/DATABASE.md
 ```
 
 ### Spec viewer
@@ -167,9 +167,9 @@ python3 bin/create_project.py <name>          # scaffold new project with standa
 bash bin/update_projects.sh [--dry-run]       # push rules/templates to all set-up projects
 ```
 
-## Build Tags
+## OneShot Tags
 
-Every `bin/build.sh` run creates an annotated git tag: `build/{project}/{YYYY-MM-DD.N}`.
+Every `bin/oneshot.sh` run creates an annotated git tag: `oneshot/{spec}/{YYYY-MM-DD.N}`.
 
 Annotated tags are permanent git objects — never pruned by `git gc`. They preserve the exact
 spec state used for each build, enabling spec-to-spec diffs between builds.
@@ -186,10 +186,11 @@ Validates a specification directory inside this repo: required files, METADATA f
 Generates a conversion prompt: CONVERT.md expansion rules + stack reference files + all
 concise spec files from the project directory. Output is fed to an AI agent for expansion.
 
-### bin/build.sh
-Tags the current commit with an annotated build tag, then generates a complete build prompt:
-CONVERT.md + CLAUDE_RULES.md + stack files + all project spec files. Warns if uncommitted
-changes exist. Shows diff stat from previous build tag.
+### bin/oneshot.sh
+Tags the current commit with an annotated oneshot tag, then generates a complete one-shot
+build prompt: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files. Feed the output
+to an AI agent to build the application in one pass. Warns if uncommitted changes exist.
+Shows diff stat from previous oneshot tag.
 
 ### bin/test.sh
 Tests the specification system: verifies global rules, stack files, templates, script headers,
@@ -199,7 +200,7 @@ and runs a create+validate round-trip on a temporary project.
 Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` from `RulesEngine/BUSINESS_RULES.md`. Auto-increments the version (date + sequence). Output is fed to an AI agent; the agent produces the new CLAUDE_RULES.md content.
 
 ### bin/generate_prompt.sh
-Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create build tags. Use `bin/build.sh` instead for new projects.
+Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create oneshot tags. Use `bin/oneshot.sh` instead.
 
 ### bin/project_manager.py
 Python backend for promoted project operations. Two subcommands:
@@ -216,7 +217,7 @@ Thin wrapper calling `project_manager.py update`. Operates on promoted code proj
 Global specification expansion rules. Defines how each file type (DATABASE, SCREEN, FEATURE, UI, ARCHITECTURE) should be expanded from concise author input to detailed implementation-ready specs. Stack-specific expansion defers to `stack/*.md` files.
 
 ### RulesEngine/stack/
-One file per technology (flask.md, sqlite.md, etc.). Prescriptive patterns included in build prompts and used during spec conversion.
+One file per technology (flask.md, sqlite.md, etc.). Prescriptive patterns included in oneshot prompts and used during spec conversion.
 
 ## Standard Files in Every Code Project
 

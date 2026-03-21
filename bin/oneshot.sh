@@ -1,23 +1,23 @@
 #!/bin/bash
 # CommandCenter Operation
-# Name: Build Prompt
+# Name: OneShot
 # Category: maintenance
 
-# Tags the current commit with an annotated build tag and generates a complete build prompt.
+# Tags the current commit and generates a complete one-shot build prompt for an AI agent.
 # Annotated tags are permanent git objects — never pruned by git gc.
 #
 # Usage:
-#   bash bin/build.sh <project-name>                    # Print prompt to stdout (also tags)
-#   bash bin/build.sh <project-name> > build-prompt.md  # Save to file
-#   bash bin/build.sh <project-name> --tag-only         # Tag without generating prompt
-#   bash bin/build.sh <project-name> --no-tag           # Generate prompt without tagging
+#   bash bin/oneshot.sh <spec-name>                     # Print prompt to stdout (also tags)
+#   bash bin/oneshot.sh <spec-name> > oneshot-prompt.md # Save to file
+#   bash bin/oneshot.sh <spec-name> --tag-only          # Tag without generating prompt
+#   bash bin/oneshot.sh <spec-name> --no-tag            # Generate prompt without tagging
 #
-# Build tags:
-#   build/{project}/{YYYY-MM-DD.N}
+# OneShot tags:
+#   oneshot/{spec}/{YYYY-MM-DD.N}
 #
 # Examples:
-#   bash bin/build.sh Game-Build > build-prompt.md
-#   git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Build/
+#   bash bin/oneshot.sh GAME > oneshot-prompt.md
+#   git diff oneshot/GAME/2026-03-19.1..oneshot/GAME/2026-03-19.2 -- GAME/
 
 set -euo pipefail
 
@@ -36,7 +36,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/build.sh <spec-name> [--no-tag|--tag-only]" >&2
+    echo "Usage: bash bin/oneshot.sh <spec-name> [--no-tag|--tag-only]" >&2
     exit 1
 fi
 
@@ -58,34 +58,34 @@ fi
 cd "$REPO_DIR"
 REL_PATH="$(realpath --relative-to="$REPO_DIR" "$PROJECT_DIR" 2>/dev/null || echo "$PROJECT_NAME")"
 if [ -n "$(git status --porcelain -- "$REL_PATH/" 2>/dev/null || true)" ]; then
-    echo "WARNING: Uncommitted changes in $PROJECT_NAME/. Commit before building for a clean tag." >&2
+    echo "WARNING: Uncommitted changes in $PROJECT_NAME/. Commit before running oneshot for a clean tag." >&2
     echo "         Proceeding anyway — tag will point to current HEAD." >&2
     echo "" >&2
 fi
 
-# --- Create build tag ---
+# --- Create oneshot tag ---
 if [ "$NO_TAG" = false ]; then
     TODAY=$(date '+%Y-%m-%d')
-    # Find next build number for today
+    # Find next sequence number for today
     BUILD_NUM=1
-    while git tag -l "build/${PROJECT_NAME}/${TODAY}.${BUILD_NUM}" | grep -q .; do
+    while git tag -l "oneshot/${PROJECT_NAME}/${TODAY}.${BUILD_NUM}" | grep -q .; do
         BUILD_NUM=$((BUILD_NUM + 1))
     done
 
-    TAG_NAME="build/${PROJECT_NAME}/${TODAY}.${BUILD_NUM}"
+    TAG_NAME="oneshot/${PROJECT_NAME}/${TODAY}.${BUILD_NUM}"
     COMMIT_SHA=$(git rev-parse HEAD)
     COMMIT_MSG=$(git log -1 --format='%s')
 
-    git tag -a "$TAG_NAME" -m "Build: ${PROJECT_NAME} ${TODAY}.${BUILD_NUM}
+    git tag -a "$TAG_NAME" -m "OneShot: ${PROJECT_NAME} ${TODAY}.${BUILD_NUM}
 Commit: ${COMMIT_SHA}
 Message: ${COMMIT_MSG}
-Built: $(date '+%Y-%m-%d %H:%M:%S')"
+Run: $(date '+%Y-%m-%d %H:%M:%S')"
 
     echo "Tagged: $TAG_NAME → $(git rev-parse --short HEAD)" >&2
     echo "" >&2
 
-    # Show diff from previous build if one exists
-    PREV_TAG=$(git tag -l "build/${PROJECT_NAME}/*" --sort=-version:refname | head -2 | tail -1)
+    # Show diff from previous oneshot if one exists
+    PREV_TAG=$(git tag -l "oneshot/${PROJECT_NAME}/*" --sort=-version:refname | head -2 | tail -1)
     if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG_NAME" ]; then
         DIFF_STAT=$(git diff --stat "$PREV_TAG".."$TAG_NAME" -- "$PROJECT_NAME/" 2>/dev/null || true)
         if [ -n "$DIFF_STAT" ]; then
@@ -100,8 +100,8 @@ if [ "$TAG_ONLY" = true ]; then
     exit 0
 fi
 
-# --- Generate build prompt (reuse generate_prompt.sh logic) ---
-# Include CONVERT.md in the build prompt so the AI can expand concise specs inline
+# --- Generate one-shot build prompt ---
+# Include CONVERT.md so the AI can expand concise specs inline during implementation
 CONVERT_FILE="$REPO_DIR/RulesEngine/CONVERT.md"
 
 get_metadata() {
@@ -137,11 +137,11 @@ emit_file() {
 # --- Header ---
 BUILD_TAG_INFO=""
 if [ "$NO_TAG" = false ]; then
-    BUILD_TAG_INFO="Build tag: \`$TAG_NAME\` (commit $(git rev-parse --short HEAD))"
+    BUILD_TAG_INFO="OneShot tag: \`$TAG_NAME\` (commit $(git rev-parse --short HEAD))"
 fi
 
 cat <<HEADER
-# Build Prompt: $PROJECT_NAME
+# OneShot Prompt: $PROJECT_NAME
 
 You are building **${DISPLAY_NAME:-$PROJECT_NAME}** — ${DESCRIPTION:-"(no description)"}.
 ${BUILD_TAG_INFO}
@@ -216,7 +216,7 @@ done
 cat <<FOOTER
 ---
 
-# END OF BUILD PROMPT
+# END OF ONESHOT PROMPT
 
 Build this project following the conversion rules, integration standard, technology references, and specification files above.
 All patterns in the technology references are prescriptive — use them exactly as shown.
