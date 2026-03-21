@@ -22,4 +22,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -z "${1:-}" ]; then
+    echo "Usage: bash bin/ProjectValidate.sh <project> [--verbose]" >&2
+    echo "  <project>  Project name under ../projects/, or absolute path" >&2
+    exit 1
+fi
+
 exec python3 "$SCRIPT_DIR/project_manager.py" verify "$@"
