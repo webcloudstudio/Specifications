@@ -1,0 +1,38 @@
+/* Theme: Clean — light warm-grey sidebar, pure white content, electric blue accent
+   The only light-sidebar theme. Professional, modern, maximum readability.
+   Sidebar is light grey (#E8EDF2) — colored but not dark. */
+:root {
+  --c-topbar-bg:     #CDD5DE;
+  --c-side-bg:       #E8EDF2;
+  --c-side-border:   #C4CDD6;
+  --c-side-section:  #6B7A8A;
+  --c-side-link:     #1A2A3A;
+
+  --c-accent:        #0066CC;
+  --c-accent-text:   #FFFFFF;
+
+  --c-h1:            #0A1628;
+  --c-h1-border:     #C4CDD6;
+  --c-h2:            #1A2A3A;
+  --c-h2-border:     #D8DFE6;
+  --c-h3:            #445566;
+
+  --c-bg:            #FFFFFF;
+  --c-text:          #1A2A3A;
+
+  --c-th-bg:         #D8DFE6;
+  --c-th-text:       #1A2A3A;
+  --c-td-border:     #D0D8E0;
+  --c-tr-alt:        #F4F6F8;
+  --c-tr-hover:      #EBF0F5;
+
+  --c-code-bg:       #EEF1F4;
+  --c-code-text:     #1A2A3A;
+  --c-pre-bg:        #1A2A3A;
+  --c-pre-text:      #C8D4DC;
+
+  --c-callout-bg:    rgba(0,102,204,0.05);
+  --c-callout-border:rgba(0,102,204,0.25);
+
+  --c-foot-text:     #7A8A9A;
+}
