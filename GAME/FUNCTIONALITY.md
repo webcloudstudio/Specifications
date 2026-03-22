@@ -3,7 +3,7 @@
 **Version:** 20260320 V1  
 **Description:** Core functionality specification
 
-**How things actually work, step by step.** This document bridges FEATURE_MAP (what exists) and ARCHITECTURE (how code is organized) by describing the major workflows from trigger to completion.
+**How things actually work, step by step.** This document bridges ARCHITECTURE (how code is organized) with DATABASE (what is stored) by describing the major workflows from trigger to completion.
 
 Each flow shows: what triggers it, what happens in sequence, what gets read, what gets written, and what the user sees.
 
@@ -505,6 +505,125 @@ AI AGENT FLOW (during ticket IN DEVELOPMENT):
 
 ---
 
+## 11. Script Endpoint API [ROADMAP]
+
+**Trigger:** External caller (agent, tool, or another service) POSTs to the script endpoint by project name and script name.
+
+```
+POST /api/{name}/run/{script}
+  |
+  v
+Resolve project by name slug --> projects.name == {name}
+  |  --> 404 if project not found or is_active = false
+  |
+  v
+Resolve operation by script name --> operations.cmd LIKE '%{script}%'
+  |  --> 404 if operation not registered (script missing # CommandCenter Operation header)
+  |
+  v
+Delegate to Run Operation flow (Flow 2)
+  |  Identical execution: subprocess, log file, op_runs record
+  |
+  v
+Return JSON: { "run_id": N, "status": "started", "log": "/api/{name}/runs/{run_id}/log" }
+
+GET /api/{name}/runs
+  |
+  v
+Query op_runs WHERE project_id = (SELECT id FROM projects WHERE name = {name})
+ORDER BY started_at DESC LIMIT 20
+  |
+  v
+Return JSON array of run records: run_id, script, status, started_at, finished_at, exit_code
+```
+
+**Reads:** `projects` table, `operations` table
+**Writes:** `op_runs` table, log file (via Flow 2)
+**Events emitted:** `operation_started`, `operation_completed` or `operation_failed`
+
+**Why MVP:** Reuses the entire operation engine — only new code is route parsing and the JSON response wrapper. Enables agents and external tools to trigger scripts without the UI. Required for "AI Agent Submission" (trigger build/test from a ticket).
+
+---
+
+## 12. Service Catalog API [ROADMAP]
+
+**Trigger:** External caller (another project, agent, or portfolio page) GETs the catalog.
+
+```
+GET /api/catalog
+  |
+  v
+SELECT name, display_name, short_description, status, port, health_endpoint,
+       stack, has_docs, card_show, deploy_url, git_repo
+FROM projects
+WHERE is_active = true
+ORDER BY display_name
+  |
+  v
+Return JSON array of project summaries
+
+GET /api/catalog/{name}
+  |
+  v
+Same fields for a single project
+  |  --> 404 if not found
+  |
+  v
+Return JSON object
+```
+
+**Reads:** `projects` table
+**Writes:** None
+**Events emitted:** None
+
+**Why MVP:** One SELECT, no logic. Makes the dashboard's project knowledge available to agents and inter-service calls. Backs the "Full Service Catalog" feature — a running service can discover what other services exist, their ports, and their health endpoints without any shared config.
+
+---
+
+## 13. Project Health API [ROADMAP]
+
+**Trigger:** External caller polls per-project health; also used by dashboard to render health badges without a full page load.
+
+```
+GET /api/{name}/health
+  |
+  v
+Resolve project by name slug
+  |  --> 404 if not found
+  |
+  v
+Query heartbeats WHERE project_id = {id}
+  |  One row per heartbeat_type: service_health, process_state, git_state, compliance
+  |
+  v
+Compute aggregate status:
+  |  ALL UP/CLEAN/COMPLIANT --> "healthy"
+  |  ANY DOWN/ERROR         --> "degraded"
+  |  ANY UNKNOWN            --> "unknown"
+  |
+  v
+Return JSON:
+{
+  "name": "MyProject",
+  "aggregate": "healthy" | "degraded" | "unknown",
+  "heartbeats": {
+    "service_health":  { "state": "UP", "uptime_pct": 99.8, "response_ms": 42 },
+    "process_state":   { "state": "RUNNING" },
+    "git_state":       { "state": "CLEAN" },
+    "compliance":      { "state": "COMPLIANT" }
+  },
+  "checked_at": "20260321_143000"
+}
+```
+
+**Reads:** `heartbeats` table, `projects` table
+**Writes:** None
+**Events emitted:** None
+
+**Why MVP:** Zero logic beyond a join — heartbeat poller already writes these rows (Flow 6). Feeds "Project Health KPIs" on the portfolio page and lets external monitors check project health without scraping the dashboard HTML.
+
+---
+
 ## Flow Summary
 
 | # | Flow | Trigger | Implemented |
@@ -519,6 +638,9 @@ AI AGENT FLOW (during ticket IN DEVELOPMENT):
 | 8 | Ticket Lifecycle | Create / drag ticket | Partial |
 | 9 | Configuration Edit | Cog icon / inline edit | Yes |
 | 10 | Specification Management | Spec link / agent commit | ROADMAP |
+| 11 | Script Endpoint API | External POST to /api/{name}/run/{script} | ROADMAP |
+| 12 | Service Catalog API | External GET /api/catalog | ROADMAP |
+| 13 | Project Health API | External GET /api/{name}/health | ROADMAP |
 
 ---
 
