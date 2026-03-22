@@ -256,7 +256,7 @@ Append-only log. Rows are never updated or deleted.
 |--------|------|-------------|
 | id | INTEGER PK | Auto-increment |
 | project_id | INTEGER FK | References projects.id; NULL for platform-level events |
-| event_type | TEXT | See FEATURE_MAP.md → Events catalog for valid values |
+| event_type | TEXT | Valid values: `operation_started`, `operation_completed`, `operation_failed`, `state_transition`, `git_push`, `git_commit`, `schedule_fired`, `schedule_missed`, `build_completed`, `deploy_completed`, `scan_completed`, `ticket_transition`, `metadata_changed`, `alert_fired`, `spec_updated` |
 | timestamp | TEXT | When it happened (yyyymmdd_hhmmss) |
 | summary | TEXT | Human-readable one-liner |
 | detail | TEXT | JSON event-specific payload |
@@ -307,5 +307,5 @@ Per-ticket AI decision log. Written when a ticket enters IN DEVELOPMENT.
 - **`title` column**: Duplicated by `display_name`. Candidate for removal once all templates consistently use `display_name`.
 - **WAL PRAGMA per connection**: Harmless (WAL is persistent) but wasteful — should move to `init_db()` only.
 - **Tag colors**: Currently in `data/tag_colors.json` (file, not DB). Should be promoted to a `tag_colors` table to stay consistent with the DB-as-UI-source model.
-- **`has_docs`, `has_tests`, `has_specs` flags**: `has_docs` is implemented. `has_tests` and `has_specs` are roadmap items for contract-earns-capability (see FEATURE_MAP.md → Auto-Detected Flags).
+- **`has_docs`, `has_tests`, `has_specs` flags**: `has_docs` is implemented. `has_tests` and `has_specs` are roadmap items for contract-earns-capability.
 - **`git_last_commit_date`**: Not yet implemented. Would replace `version` date as the `LastUpdate` source — requires running `git log` during scan and storing the result.

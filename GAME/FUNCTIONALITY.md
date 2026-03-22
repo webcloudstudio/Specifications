@@ -526,7 +526,7 @@ AI AGENT FLOW (during ticket IN DEVELOPMENT):
 
 ### Event Emission
 
-Every flow emits events (see FEATURE_MAP Section IV). Events are written to the `events` table and surfaced on:
+Every flow emits events (see DATABASE.md → events). Events are written to the `events` table and surfaced on:
 - Monitoring screen (platform-wide timeline)
 - Project detail (per-project event log)
 

@@ -47,14 +47,13 @@ All project integration standards are defined in `../RulesEngine/CLAUDE_RULES.md
 
 | Document | Answers |
 |----------|---------|
-| **FEATURE_MAP.md** | What attributes exist? What features? What can the platform detect? |
 | **FUNCTIONALITY.md** | End-to-end flows: trigger → sequence → result |
 | **ARCHITECTURE.md** | How is code organized? Modules, routes, data flow |
-| **DATABASE.md** | Tables, columns, constraints |
+| **DATABASE.md** | Tables, columns, constraints, field sources |
 | **UI-GENERAL.md** | Shared UI patterns: nav bar, headers, dark theme, HTMX |
 | **SCREEN-*.md** | Per-screen: route, layout, interactions |
 
-**Flow:** FEATURE_MAP defines features → ARCHITECTURE describes modules → DATABASE defines storage → UI-GENERAL defines shared patterns → SCREEN-* defines per-screen layout.
+**Flow:** ARCHITECTURE describes modules → DATABASE defines storage → UI-GENERAL defines shared patterns → SCREEN-* defines per-screen layout.
 
 ## Building From This Specification
 

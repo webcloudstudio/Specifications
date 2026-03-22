@@ -175,8 +175,8 @@ const DOCS = {
 marked.setOptions({ gfm: true, breaks: false });
 
 function groupFiles(keys) {
-  const coreSet = new Set(['README', 'INTENT', 'ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL']);
-  const featureSet = new Set(['FEATURE_MAP', 'FUNCTIONALITY']);
+  const coreSet = new Set(['README', 'ARCHITECTURE', 'DATABASE', 'UI', 'UI-GENERAL']);
+  const featureSet = new Set(['FUNCTIONALITY']);
   const groups = { 'Project Core': [], 'Project Features': [], 'Screens': [], 'Other': [] };
   keys.forEach(k => {
     if (k === 'METADATA') return;
