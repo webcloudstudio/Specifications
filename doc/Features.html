@@ -3,397 +3,231 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GEM — Feature Reference</title>
+<title>Ed Barlow — Build Framework</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:      #0f1117;
-  --surface: #161b22;
-  --border:  #21262d;
-  --hover:   #1c2128;
-  --text:    #cdd9e5;
-  --muted:   #768390;
-  --dim:     #444c56;
-  --green:   #2CB67D;
-  --green-bg: rgba(44,182,125,.1);
-  --mono: 'Cascadia Code','Fira Code','Consolas',monospace;
+  --green:  #16A34A;
+  --green-l:#DCFCE7;
+  --bg:     #FFFFFF;
+  --surface:#F8FAFC;
+  --border: #E2E8F0;
+  --text:   #0F172A;
+  --muted:  #64748B;
   --sans: 'Inter','Segoe UI',system-ui,sans-serif;
 }
 
-body {
+html, body {
+  height: 100%;
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  padding: 36px 52px 28px;
+  gap: 32px;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 /* ── HEADER ── */
-.header {
-  max-width: 1060px;
-  margin: 0 auto;
-  padding: 52px 40px 0;
-}
-
-.brand {
+header {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 44px;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
 }
 
-.gem-svg { flex-shrink: 0; }
+.header-left { display: flex; flex-direction: column; gap: 4px; }
 
-.brand-text { display: flex; flex-direction: column; gap: 2px; }
-.brand-name { font-size: 17px; font-weight: 700; color: var(--text); }
-.brand-sub  { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
 
 h1 {
-  font-size: 40px;
+  font-size: 28px;
   font-weight: 800;
-  letter-spacing: -.6px;
+  letter-spacing: -.4px;
+  color: var(--text);
   line-height: 1.15;
-  color: #e6edf3;
-  margin-bottom: 14px;
 }
 
-h1 .accent { color: var(--green); }
-
-.lead {
-  color: var(--muted);
-  font-size: 16px;
-  max-width: 560px;
-  margin-bottom: 56px;
-}
-
-/* ── SECTION LABELS ── */
-.section-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.8px;
+h1 em {
+  font-style: normal;
   color: var(--green);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-  margin-bottom: 16px;
 }
 
-/* ── FEATURE GRID ── */
-.grid-wrapper {
-  max-width: 1060px;
-  margin: 0 auto;
-  padding: 0 40px 80px;
+.header-right {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.7;
 }
 
-.group { margin-bottom: 48px; }
-
+/* ── GRID ── */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  flex: 1;
 }
 
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px 22px;
-  transition: border-color .15s;
+  border-radius: 10px;
+  padding: 22px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .15s, box-shadow .15s;
 }
 
-.card:hover { border-color: var(--green); background: var(--hover); }
+.card:hover {
+  border-color: var(--green);
+  box-shadow: 0 2px 12px rgba(22,163,74,.1);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--green-l);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--green);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 .card h3 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 6px;
+  color: var(--text);
+  line-height: 1.25;
 }
 
 .card p {
   font-size: 13px;
   color: var(--muted);
   line-height: 1.6;
-}
-
-.card code {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  background: var(--green-bg);
-  color: var(--green);
-  padding: 1px 5px;
-  border-radius: 3px;
-}
-
-/* ── FULL-WIDTH CARD ── */
-.card-wide {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.card-wide-pane {
-  padding: 20px 22px;
-  border-right: 1px solid var(--border);
-}
-.card-wide-pane:last-child { border-right: none; }
-
-.card-wide-pane h3 {
-  font-size: 14px;
-  font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 6px;
-}
-
-.card-wide-pane p {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
+  margin: 0;
 }
 
 /* ── FOOTER ── */
 footer {
-  border-top: 1px solid var(--border);
-  padding: 20px 40px;
+  font-size: 12px;
+  color: var(--border);
   text-align: center;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--dim);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="brand">
-    <svg class="gem-svg" width="34" height="38" viewBox="0 0 60 68" fill="none">
-      <polygon points="30,0 56,18 56,42 30,68 4,42 4,18" fill="#2CB67D"/>
-      <polygon points="30,0 56,18 30,28 4,18" fill="#4AE09A"/>
-      <polygon points="30,28 56,18 56,42 30,68" fill="#1A8050"/>
-      <polygon points="30,28 4,18 4,42 30,68" fill="#22A06B"/>
-      <polygon points="18,6 30,0 30,10" fill="rgba(255,255,255,0.3)"/>
-    </svg>
-    <div class="brand-text">
-      <span class="brand-name">GEM</span>
-      <span class="brand-sub">Generic Enterprise Management</span>
+<header>
+  <div class="header-left">
+    <span class="name">Ed Barlow</span>
+    <h1>One framework. Every project.<br><em>Automatically.</em></h1>
+  </div>
+  <div class="header-right">
+    Service catalog &nbsp;·&nbsp; Health monitoring &nbsp;·&nbsp; Scheduler<br>
+    Event system &nbsp;·&nbsp; Logging &nbsp;·&nbsp; Rules propagation
+  </div>
+</header>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-top">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h3>One-Shot Project Prototypes</h3>
     </div>
+    <p>Write a structured spec. One AI pass produces a complete, running application — wired to the platform from the first commit.</p>
   </div>
 
-  <h1>One platform.<br><span class="accent">Every project.</span></h1>
-  <p class="lead">
-    GEM enforces a standard contract across every project you run.
-    In return, the platform manages operations, scheduling, health, logging,
-    and AI context automatically — with no per-project configuration.
-  </p>
-</div>
-
-<div class="grid-wrapper">
-
-  <!-- CONTROL PANEL -->
-  <div class="group">
-    <div class="section-label">Control Panel</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Project Dashboard</h3>
-        <p>Real-time view of every project — service state, git status, compliance level, last run, health. One screen for the entire portfolio.</p>
+  <div class="card">
+    <div class="card-top">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <div class="card">
-        <h3>One-click Operations</h3>
-        <p>Every script registered with <code># CommandCenter Operation</code> appears as a button. Start, stop, build, deploy — same UI for every stack.</p>
-      </div>
-      <div class="card">
-        <h3>Run History &amp; Logs</h3>
-        <p>Execution history with exit codes, timestamps, and stdout/stderr. Logs are persisted to <code>logs/</code> and accessible from the dashboard.</p>
-      </div>
-      <div class="card">
-        <h3>Inline Config Editing</h3>
-        <p>Edit project metadata fields directly in the UI. Changes sync bidirectionally between the database and <code>METADATA.md</code> on disk.</p>
-      </div>
+      <h3>Seamless Business Rules Integration</h3>
     </div>
+    <p>Rules defined once propagate to every project automatically. Compliance is the default — not something to maintain per project.</p>
   </div>
 
-  <!-- SERVICE CATALOG -->
-  <div class="group">
-    <div class="section-label">Service Catalog</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Auto-Discovery</h3>
-        <p>Drop a <code>METADATA.md</code> in a directory. The platform discovers the project, reads its port, stack, status, and health endpoint — no registration step.</p>
+  <div class="card">
+    <div class="card-top">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
-      <div class="card">
-        <h3>Health Monitoring</h3>
-        <p>Continuous HTTP polling of every service's <code>/health</code> endpoint. Response time tracked. State transitions (UP/DOWN/MIXED) surfaced immediately.</p>
-      </div>
-      <div class="card">
-        <h3>Uptime Tracking</h3>
-        <p>Rolling uptime percentage per service. Alerts with snooze. You see the failure before a user does.</p>
-      </div>
-      <div class="card">
-        <h3>Endpoint Registry</h3>
-        <p>Service endpoints declared in <code>AGENTS.md</code> are extracted and indexed. Services discover each other through the catalog — no hardcoded URLs.</p>
-      </div>
+      <h3>Simple Workflow, Always Current</h3>
     </div>
+    <p>Specifications stay linked to running code through every change. What was planned and what shipped are the same thing.</p>
   </div>
 
-  <!-- SCHEDULING -->
-  <div class="group">
-    <div class="section-label">Scheduler</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Cron-based Scheduling</h3>
-        <p>Add a <code># Schedule: 0 2 * * *</code> header to any script. The platform registers it, fires it on time, and tracks last/next run — no system cron needed.</p>
+  <div class="card">
+    <div class="card-top">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       </div>
-      <div class="card">
-        <h3>Missed-run Recovery</h3>
-        <p>On startup, the scheduler catches up any jobs that fired while the platform was down. No silent missed runs.</p>
-      </div>
-      <div class="card">
-        <h3>Standard Maintenance Hooks</h3>
-        <p><code>bin/daily.sh</code> and <code>bin/weekly.sh</code> are the standard slots for recurring work. Platform discovers and runs them — they appear in the schedule view.</p>
-      </div>
+      <h3>Common Project Documentation</h3>
     </div>
+    <p>Every project produces identical documentation structure — generated, not written. It cannot go out of date.</p>
   </div>
 
-  <!-- LOGGING -->
-  <div class="group">
-    <div class="section-label">Integrated Logging</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Zero-config Log Files</h3>
-        <p>Source <code>bin/common.sh</code> (or import <code>common.py</code>) and every script gets a timestamped log file in <code>logs/</code> automatically.</p>
+  <div class="card">
+    <div class="card-top">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
       </div>
-      <div class="card">
-        <h3>Structured Start/Stop Markers</h3>
-        <p>Every script logs <code>[ProjectName] Starting: script.sh</code> and a completion marker with exit status. No log archaeology required.</p>
-      </div>
-      <div class="card">
-        <h3>Signal Handling</h3>
-        <p>SIGTERM trap is wired automatically. Graceful shutdown, cleanup, and final log entry happen without any script-level code.</p>
-      </div>
-      <div class="card">
-        <h3>Env &amp; Secrets Loading</h3>
-        <p><code>common.sh</code> loads <code>.env</code> and <code>.secrets</code> before execution. Scripts get their config — no boilerplate, no drift between scripts.</p>
-      </div>
+      <h3>Personal Portfolio Page</h3>
     </div>
+    <p>Every project appears on a published portfolio site — curated, current, and built from the same metadata that runs the platform.</p>
   </div>
 
-  <!-- EVENT SYSTEM -->
-  <div class="group">
-    <div class="section-label">Event System</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Operation Events</h3>
-        <p>Every script execution emits started, completed, and failed events — available on the monitoring timeline in real time.</p>
+  <div class="card">
+    <div class="card-top">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
-      <div class="card">
-        <h3>Service State Events</h3>
-        <p>Health transitions (UP↔DOWN) fire events. Downstream consumers — alerts, dashboards, webhooks — react without polling.</p>
-      </div>
-      <div class="card">
-        <h3>Git Events</h3>
-        <p>Push and commit events from the dashboard are logged to the event stream and linked to tickets and transaction log entries.</p>
-      </div>
-      <div class="card">
-        <h3>Scheduler Events</h3>
-        <p>Fired and missed-run events per job. Visible in the platform event timeline alongside service and operation events.</p>
-      </div>
+      <h3>One Framework to Rule Them All</h3>
     </div>
-  </div>
-
-  <!-- COMPLIANCE -->
-  <div class="group">
-    <div class="section-label">Compliance &amp; Governance</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Conformity Levels</h3>
-        <p>IDEA → PROTOTYPE → ACTIVE → PRODUCTION. Each level has enforced requirements. <code>bin/validate.sh</code> checks them — same check locally and in CI.</p>
-      </div>
-      <div class="card">
-        <h3>Rules Propagation</h3>
-        <p>Update a rule or template once in <code>RulesEngine/</code>. <code>bin/update_projects.sh</code> pushes the change to every registered project.</p>
-      </div>
-      <div class="card">
-        <h3>Auto-detection Flags</h3>
-        <p>Platform detects <code>has_git</code>, <code>has_venv</code>, <code>has_tests</code>, <code>has_docs</code>, <code>has_specs</code> from file presence. Features enable themselves.</p>
-      </div>
-      <div class="card">
-        <h3>Project Health Score</h3>
-        <p>Composite score from compliance level, git activity, service health, test presence, docs, and env drift. One number per project.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- WORKFLOW -->
-  <div class="group">
-    <div class="section-label">Development Workflow</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Feature Branch Pipeline</h3>
-        <p><code>bin/build.sh</code> clones the repo, creates the feature branch, and generates the build prompt. <code>bin/merge.sh</code> squash-merges it back. Same flow for every project.</p>
-      </div>
-      <div class="card">
-        <h3>Kanban Tickets</h3>
-        <p>Per-project ticket board with configurable states (IDEA → IN DEVELOPMENT → DONE). State transitions have validation rules. Tickets link to git commits and spec changes.</p>
-      </div>
-      <div class="card">
-        <h3>Transaction Log</h3>
-        <p>Immutable log linking spec commits, code changes, and ticket transitions. Full traceability from idea to deployed change.</p>
-      </div>
-      <div class="card">
-        <h3>Spec-to-Code Traceability</h3>
-        <p>Spec directories in <code>Specifications/</code> are linked to their code projects. The platform knows which spec version drove which build.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI CONTEXT -->
-  <div class="group">
-    <div class="section-label">AI Agent Context</div>
-    <div class="grid">
-      <div class="card">
-        <h3>AGENTS.md Contract</h3>
-        <p>Every project carries <code>AGENTS.md</code>: dev commands, endpoints, architecture, and the full CLAUDE_RULES block. Any AI agent reads it and starts working.</p>
-      </div>
-      <div class="card">
-        <h3>Injected Rules Block</h3>
-        <p>Platform-wide behavioral rules are injected into <code>AGENTS.md</code> as a versioned block. Rules update automatically when <code>bin/ProjectUpdate.sh</code> runs.</p>
-      </div>
-      <div class="card">
-        <h3>Bookmark Extraction</h3>
-        <p>Links declared under <code>## Bookmarks</code> in <code>AGENTS.md</code> are surfaced in the dashboard alongside the project — no duplication needed.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- PUBLISHING -->
-  <div class="group">
-    <div class="section-label">Publishing</div>
-    <div class="grid">
-      <div class="card">
-        <h3>Portfolio Site Generation</h3>
-        <p>Projects with <code>show_on_homepage = true</code> are rendered into a static portfolio site. Card content pulled from METADATA.md fields.</p>
-      </div>
-      <div class="card">
-        <h3>Documentation Generation</h3>
-        <p><code>bin/build_documentation.sh</code> produces <code>doc/index.html</code> from project sources. <code>index.html</code> at root redirects to it — standard entry point for every project.</p>
-      </div>
-      <div class="card">
-        <h3>GitHub Pages Publishing</h3>
-        <p>One command publishes the portfolio to GitHub Pages. No separate CI pipeline required.</p>
-      </div>
-    </div>
+    <p>Start, stop, health, scheduling, logging, events — identical across every project, every stack, every team member, every AI agent.</p>
   </div>
 
 </div>
 
-<footer>GEM &nbsp;·&nbsp; Generic Enterprise Management &nbsp;·&nbsp; Est. 2012 &nbsp;·&nbsp; Web Cloud Studio</footer>
+<footer>Ed Barlow &nbsp;·&nbsp; Build Framework &nbsp;·&nbsp; Web Cloud Studio</footer>
 
 </body>
 </html>
