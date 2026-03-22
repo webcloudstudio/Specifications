@@ -3,231 +3,206 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ed Barlow — Build Framework</title>
+<title>Ed Barlow — Framework</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --green:  #16A34A;
-  --green-l:#DCFCE7;
-  --bg:     #FFFFFF;
-  --surface:#F8FAFC;
-  --border: #E2E8F0;
-  --text:   #0F172A;
-  --muted:  #64748B;
-  --sans: 'Inter','Segoe UI',system-ui,sans-serif;
+  --bg: #FAFBFC;
+  --white: #FFFFFF;
+  --text: #1B2434;
+  --sub: #526070;
+  --accent: #0D9F6E;
+  --accent-bg: #ECFDF5;
+  --rule: #E4E8EC;
+  --sans: -apple-system, 'Segoe UI', system-ui, sans-serif;
 }
 
-html, body {
-  height: 100%;
+html { height: 100%; }
+
+body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-body {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 36px 52px 28px;
-  gap: 32px;
-  max-width: 1180px;
+  padding: 32px 56px 20px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 /* ── HEADER ── */
 header {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 20px;
-}
-
-.header-left { display: flex; flex-direction: column; gap: 4px; }
-
-.name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  letter-spacing: .3px;
-  text-transform: uppercase;
+  align-items: baseline;
+  gap: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 h1 {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
-  letter-spacing: -.4px;
-  color: var(--text);
-  line-height: 1.15;
+  letter-spacing: -.3px;
 }
 
-h1 em {
-  font-style: normal;
-  color: var(--green);
+.tagline {
+  font-size: 14px;
+  color: var(--sub);
+  font-weight: 400;
 }
 
-.header-right {
-  font-size: 13px;
-  color: var(--muted);
+.pedigree {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--sub);
   text-align: right;
-  line-height: 1.7;
+  line-height: 1.5;
 }
+
+.pedigree strong { color: var(--text); font-weight: 600; }
 
 /* ── GRID ── */
-.grid {
+.columns {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   flex: 1;
 }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 22px 24px 20px;
+.col h2 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  color: var(--accent);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 10px;
+}
+
+.col ul {
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: border-color .15s, box-shadow .15s;
+  gap: 6px;
 }
 
-.card:hover {
-  border-color: var(--green);
-  box-shadow: 0 2px 12px rgba(22,163,74,.1);
-}
-
-.card-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--green-l);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.icon svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--green);
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.card h3 {
-  font-size: 15px;
-  font-weight: 700;
+.col li {
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--text);
-  line-height: 1.25;
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.35;
 }
 
-.card p {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-  margin: 0;
+.col li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--accent-bg);
+  border: 1.5px solid var(--accent);
+}
+
+.col li span {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--sub);
+  margin-top: 1px;
 }
 
 /* ── FOOTER ── */
 footer {
-  font-size: 12px;
-  color: var(--border);
-  text-align: center;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-size: 11px;
+  color: var(--sub);
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-left">
-    <span class="name">Ed Barlow</span>
-    <h1>One framework. Every project.<br><em>Automatically.</em></h1>
-  </div>
-  <div class="header-right">
-    Service catalog &nbsp;·&nbsp; Health monitoring &nbsp;·&nbsp; Scheduler<br>
-    Event system &nbsp;·&nbsp; Logging &nbsp;·&nbsp; Rules propagation
-  </div>
+  <h1>Ed Barlow</h1>
+  <span class="tagline">Enterprise project management — on a laptop</span>
+  <span class="pedigree">
+    Methodology proven across <strong>hundreds of production servers</strong><br>
+    Scheduled jobs, maintenance, monitoring — <strong>zero outages</strong>
+  </span>
 </header>
 
-<div class="grid">
+<div class="columns">
 
-  <div class="card">
-    <div class="card-top">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      </div>
-      <h3>One-Shot Project Prototypes</h3>
-    </div>
-    <p>Write a structured spec. One AI pass produces a complete, running application — wired to the platform from the first commit.</p>
+  <div class="col">
+    <h2>Operations</h2>
+    <ul>
+      <li>Service Catalog<span>Auto-discovered from the filesystem</span></li>
+      <li>Health Monitoring<span>Continuous endpoint polling with response times</span></li>
+      <li>Heartbeats &amp; Uptime<span>Rolling 24-hour uptime per service</span></li>
+      <li>Process Lifecycle<span>Start, stop, SIGTERM — managed per process group</span></li>
+      <li>Graceful Shutdown<span>Signal traps and cleanup built into every script</span></li>
+      <li>Run History<span>Every execution logged with exit code and duration</span></li>
+      <li>Health Alerts<span>State transitions fire immediately — with snooze</span></li>
+    </ul>
   </div>
 
-  <div class="card">
-    <div class="card-top">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <h3>Seamless Business Rules Integration</h3>
-    </div>
-    <p>Rules defined once propagate to every project automatically. Compliance is the default — not something to maintain per project.</p>
+  <div class="col">
+    <h2>Scheduling &amp; Events</h2>
+    <ul>
+      <li>Centralized Scheduler<span>Cron expressions in script headers — no system cron</span></li>
+      <li>Daily &amp; Weekly Hooks<span>Standard maintenance slots, auto-registered</span></li>
+      <li>Missed-Run Recovery<span>Catches up on startup — no silent failures</span></li>
+      <li>Platform Event System<span>Operations, health, git, scheduler, deployments</span></li>
+      <li>State Transition Events<span>UP/DOWN changes fire to alerts and dashboards</span></li>
+      <li>Monitoring Timeline<span>Chronological view of every platform event</span></li>
+      <li>Integrated Logging<span>Timestamped log files — zero config per script</span></li>
+    </ul>
   </div>
 
-  <div class="card">
-    <div class="card-top">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <h3>Simple Workflow, Always Current</h3>
-    </div>
-    <p>Specifications stay linked to running code through every change. What was planned and what shipped are the same thing.</p>
+  <div class="col">
+    <h2>Governance</h2>
+    <ul>
+      <li>Business Rules Propagation<span>One update pushes to every project instantly</span></li>
+      <li>Conformity Levels<span>IDEA → PROTOTYPE → ACTIVE → PRODUCTION</span></li>
+      <li>Compliance Validation<span>Same check locally, in CI, and on the dashboard</span></li>
+      <li>Auto-Detection<span>Git, tests, docs, venv — detected, never configured</span></li>
+      <li>Project Health Score<span>Composite of compliance, health, git, tests, drift</span></li>
+      <li>Environment Management<span>Env and secrets loaded automatically — no boilerplate</span></li>
+      <li>Smart Git Commits<span>Descriptive labels, enforced standards, every time</span></li>
+    </ul>
   </div>
 
-  <div class="card">
-    <div class="card-top">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      </div>
-      <h3>Common Project Documentation</h3>
-    </div>
-    <p>Every project produces identical documentation structure — generated, not written. It cannot go out of date.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-top">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-      </div>
-      <h3>Personal Portfolio Page</h3>
-    </div>
-    <p>Every project appears on a published portfolio site — curated, current, and built from the same metadata that runs the platform.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-top">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
-      <h3>One Framework to Rule Them All</h3>
-    </div>
-    <p>Start, stop, health, scheduling, logging, events — identical across every project, every stack, every team member, every AI agent.</p>
+  <div class="col">
+    <h2>Build &amp; Publish</h2>
+    <ul>
+      <li>One-Shot Prototypes<span>Spec in, working application out — single AI pass</span></li>
+      <li>Feature Branch Pipeline<span>Clone, branch, build prompt, squash-merge — standard</span></li>
+      <li>Specification Workflow<span>Specs stay linked to running code through every change</span></li>
+      <li>Kanban Board<span>Tickets with validated state transitions and history</span></li>
+      <li>Personal Portfolio Page<span>Projects publish to a curated portfolio site</span></li>
+      <li>Common Documentation<span>Generated from the project — cannot go stale</span></li>
+      <li>AI Agent Context<span>Every project carries a full briefing — instant handoff</span></li>
+    </ul>
   </div>
 
 </div>
 
-<footer>Ed Barlow &nbsp;·&nbsp; Build Framework &nbsp;·&nbsp; Web Cloud Studio</footer>
+<footer>
+  <span>Web Cloud Studio</span>
+  <span>28 integrated capabilities — delivered automatically to every project</span>
+</footer>
 
 </body>
 </html>
