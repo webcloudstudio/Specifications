@@ -120,6 +120,23 @@ h1 {
   margin-top: 1px;
 }
 
+/* ── STARRED ITEMS ── */
+.col li.star::before {
+  content: '★';
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.col li.star {
+  font-weight: 700;
+}
+
 /* ── FOOTER ── */
 footer {
   padding-top: 14px;
@@ -135,11 +152,13 @@ footer {
 <body>
 
 <header>
-  <h1>Ed Barlow</h1>
+  <h1>Effective Business Rules</h1>
   <span class="tagline">Enterprise project management — on a laptop</span>
   <span class="pedigree">
-    Methodology proven across <strong>hundreds of production servers</strong><br>
-    Scheduled jobs, maintenance, monitoring — <strong>zero outages</strong>
+    <strong>Proven Methodology</strong><br>
+    Seamless conforming of your projects<br>
+    Configurable integration with corporate services<br>
+    Full Web API available for all out-of-the-box services
   </span>
 </header>
 
@@ -148,8 +167,8 @@ footer {
   <div class="col">
     <h2>Operations</h2>
     <ul>
-      <li>Service Catalog<span>Auto-discovered from the filesystem</span></li>
-      <li>Health Monitoring<span>Continuous endpoint polling with response times</span></li>
+      <li class="star">Service Catalog<span>Every project registered and discoverable</span></li>
+      <li class="star">Health Monitoring<span>Continuous endpoint polling with response times</span></li>
       <li>Heartbeats &amp; Uptime<span>Rolling 24-hour uptime per service</span></li>
       <li>Process Lifecycle<span>Start, stop, SIGTERM — managed per process group</span></li>
       <li>Graceful Shutdown<span>Signal traps and cleanup built into every script</span></li>
@@ -161,7 +180,7 @@ footer {
   <div class="col">
     <h2>Scheduling &amp; Events</h2>
     <ul>
-      <li>Centralized Scheduler<span>Cron expressions in script headers — no system cron</span></li>
+      <li class="star">Centralized Scheduler<span>Cron expressions in script headers — no system cron</span></li>
       <li>Daily &amp; Weekly Hooks<span>Standard maintenance slots, auto-registered</span></li>
       <li>Missed-Run Recovery<span>Catches up on startup — no silent failures</span></li>
       <li>Platform Event System<span>Operations, health, git, scheduler, deployments</span></li>
@@ -174,7 +193,7 @@ footer {
   <div class="col">
     <h2>Governance</h2>
     <ul>
-      <li>Business Rules Propagation<span>One update pushes to every project instantly</span></li>
+      <li class="star">Business Rules Propagation<span>One update pushes to every project instantly</span></li>
       <li>Conformity Levels<span>IDEA → PROTOTYPE → ACTIVE → PRODUCTION</span></li>
       <li>Compliance Validation<span>Same check locally, in CI, and on the dashboard</span></li>
       <li>Auto-Detection<span>Git, tests, docs, venv — detected, never configured</span></li>
@@ -187,21 +206,21 @@ footer {
   <div class="col">
     <h2>Build &amp; Publish</h2>
     <ul>
-      <li>One-Shot Prototypes<span>Spec in, working application out — single AI pass</span></li>
-      <li>Feature Branch Pipeline<span>Clone, branch, build prompt, squash-merge — standard</span></li>
-      <li>Specification Workflow<span>Specs stay linked to running code through every change</span></li>
-      <li>Kanban Board<span>Tickets with validated state transitions and history</span></li>
-      <li>Personal Portfolio Page<span>Projects publish to a curated portfolio site</span></li>
+      <li class="star">One-Shot Prototypes<span>Spec in, working application out</span></li>
+      <li>Feature Branch Pipeline<span>Clone, branch, build prompt, squash-merge</span></li>
+      <li>Automated Specification Updates<span>Spec files stay current through every change</span></li>
+      <li>Project Kanban Board<span>Tickets with validated state transitions and history</span></li>
+      <li class="star">Personal Portfolio Page<span>Projects publish to a curated portfolio site</span></li>
       <li>Common Documentation<span>Generated from the project — cannot go stale</span></li>
-      <li>AI Agent Context<span>Every project carries a full briefing — instant handoff</span></li>
+      <li>Published Service API<span>Full REST API for all platform services</span></li>
     </ul>
   </div>
 
 </div>
 
 <footer>
+  <span>Ed Barlow</span>
   <span>Web Cloud Studio</span>
-  <span>28 integrated capabilities — delivered automatically to every project</span>
 </footer>
 
 </body>
