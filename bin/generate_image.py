@@ -9,8 +9,8 @@
 #   python3 bin/generate_image.py
 #
 # Output:
-#   doc/images/prototyper.webp        — used in the Prototyper sidebar header
-#   ../GAME/static/images/Specifications.webp — used on the GAME portfolio card
+#   doc/images/prototyper.webp            — used in the Prototyper sidebar header
+#   ../GAME/static/project_images/prototyper.webp — used on the GAME portfolio card
 #
 # Re-run any time the image_description in METADATA.md changes and you want
 # a fresh illustration. The image generator is in bin/generate_image.py;
@@ -350,8 +350,8 @@ def main():
     img.save(dest1, 'WEBP', quality=90)
     print(f"Saved {dest1}  ({dest1.stat().st_size / 1024:.1f} KB)")
 
-    # Destination 2: GAME/static/images/
-    dest2 = Path('/mnt/c/Users/barlo/projects/GAME/static/images/Specifications.webp')
+    # Destination 2: GAME/static/project_images/
+    dest2 = Path('/mnt/c/Users/barlo/projects/GAME/static/project_images/prototyper.webp')
     os.makedirs(dest2.parent, exist_ok=True)
     img.save(dest2, 'WEBP', quality=90)
     print(f"Saved {dest2}  ({dest2.stat().st_size / 1024:.1f} KB)")
