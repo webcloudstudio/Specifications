@@ -79,9 +79,19 @@ h1 {
   text-transform: uppercase;
   letter-spacing: 1.6px;
   color: var(--accent);
-  padding-bottom: 8px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--rule);
   margin-bottom: 10px;
+}
+
+.col .col-sub {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .8px;
+  text-transform: none;
+  color: var(--sub);
+  padding-bottom: 6px;
 }
 
 .col ul {
@@ -153,66 +163,65 @@ footer {
 
 <header>
   <h1>Effective Business Rules</h1>
-  <span class="tagline">Enterprise project management — on a laptop</span>
+  <span class="tagline">Seamless Enterprise Project Management — for your projects on your laptop</span>
   <span class="pedigree">
     <strong>Proven Methodology</strong><br>
-    Seamless conforming of your projects<br>
     Configurable integration with corporate services<br>
-    Full Web API available for all out-of-the-box services
+    Web Control Center API available (GAME)
   </span>
 </header>
 
 <div class="columns">
 
   <div class="col">
-    <h2>Operations</h2>
-    <ul>
-      <li class="star">Service Catalog<span>Every project registered and discoverable</span></li>
-      <li class="star">Health Monitoring<span>Continuous endpoint polling with response times</span></li>
-      <li>Heartbeats &amp; Uptime<span>Rolling 24-hour uptime per service</span></li>
-      <li>Process Lifecycle<span>Start, stop, SIGTERM — managed per process group</span></li>
-      <li>Graceful Shutdown<span>Signal traps and cleanup built into every script</span></li>
-      <li>Run History<span>Every execution logged with exit code and duration</span></li>
-      <li>Health Alerts<span>State transitions fire immediately — with snooze</span></li>
-    </ul>
-  </div>
-
-  <div class="col">
-    <h2>Scheduling &amp; Events</h2>
-    <ul>
-      <li class="star">Centralized Scheduler<span>Cron expressions in script headers — no system cron</span></li>
-      <li>Daily &amp; Weekly Hooks<span>Standard maintenance slots, auto-registered</span></li>
-      <li>Missed-Run Recovery<span>Catches up on startup — no silent failures</span></li>
-      <li>Platform Event System<span>Operations, health, git, scheduler, deployments</span></li>
-      <li>State Transition Events<span>UP/DOWN changes fire to alerts and dashboards</span></li>
-      <li>Monitoring Timeline<span>Chronological view of every platform event</span></li>
-      <li>Integrated Logging<span>Timestamped log files — zero config per script</span></li>
-    </ul>
-  </div>
-
-  <div class="col">
-    <h2>Governance</h2>
-    <ul>
-      <li class="star">Business Rules Propagation<span>One update pushes to every project instantly</span></li>
-      <li>Conformity Levels<span>IDEA → PROTOTYPE → ACTIVE → PRODUCTION</span></li>
-      <li>Compliance Validation<span>Same check locally, in CI, and on the dashboard</span></li>
-      <li>Auto-Detection<span>Git, tests, docs, venv — detected, never configured</span></li>
-      <li>Project Health Score<span>Composite of compliance, health, git, tests, drift</span></li>
-      <li>Environment Management<span>Env and secrets loaded automatically — no boilerplate</span></li>
-      <li>Smart Git Commits<span>Descriptive labels, enforced standards, every time</span></li>
-    </ul>
-  </div>
-
-  <div class="col">
-    <h2>Build &amp; Publish</h2>
+    <h2>Build<span class="col-sub">Opinionated Stack Guidance — Easy Supportability</span></h2>
     <ul>
       <li class="star">One-Shot Prototypes<span>Spec in, working application out</span></li>
+      <li>Opinionated Stack Templates<span>Prescriptive patterns per technology</span></li>
       <li>Feature Branch Pipeline<span>Clone, branch, build prompt, squash-merge</span></li>
       <li>Automated Specification Updates<span>Spec files stay current through every change</span></li>
-      <li>Project Kanban Board<span>Tickets with validated state transitions and history</span></li>
-      <li class="star">Personal Portfolio Page<span>Projects publish to a curated portfolio site</span></li>
-      <li>Common Documentation<span>Generated from the project — cannot go stale</span></li>
-      <li>Published Service API<span>Full REST API for all platform services</span></li>
+      <li>Spec-to-Code Traceability<span>Specs link to commits link to tickets</span></li>
+      <li>AI Transaction Log<span>Decisions and rationale tracked per build</span></li>
+    </ul>
+  </div>
+
+  <div class="col">
+    <h2>Development</h2>
+    <ul>
+      <li class="star">Project Kanban Board<span>Configurable workflow with validated transitions</span></li>
+      <li class="star">Business Rules Propagation<span>One update pushes to every project</span></li>
+      <li>Project Maturity Levels<span>IDEA → PROTOTYPE → PROJECT</span></li>
+      <li>Compliance Validation<span>Guardrails and KPIs</span></li>
+      <li>Secrets Management<span>Transparent, secure</span></li>
+      <li>Smart Git Commits<span>Descriptive labels, auto commit</span></li>
+      <li>AI Agent Submission<span>Tickets submitted for automated implementation</span></li>
+    </ul>
+  </div>
+
+  <div class="col">
+    <h2>Operations</h2>
+    <ul>
+      <li class="star">Health Monitoring<span>Endpoint polling with alerting thresholds</span></li>
+      <li>Heartbeats &amp; Uptime<span>Rolling 24-hour uptime per service</span></li>
+      <li class="star">Transparent Job Scheduling<span>Extracted from script headers</span></li>
+      <li>Daily &amp; Weekly Hooks<span>Standard maintenance or batch jobs</span></li>
+      <li>Missed-Run Recovery<span>Catches up — suited for your laptop</span></li>
+      <li>Process Lifecycle<span>Start, stop, SIGTERM per process group</span></li>
+      <li>Graceful Shutdown<span>Signal traps and cleanup built in</span></li>
+      <li>Intelligent Alerts<span>State transitions with snooze</span></li>
+      <li>Standard Logging<span>Consolidated system events</span></li>
+    </ul>
+  </div>
+
+  <div class="col">
+    <h2>Publish</h2>
+    <ul>
+      <li class="star">Full Service Catalog<span>One view including APIs</span></li>
+      <li class="star">Personal Portfolio Page<span>Projects publish to a curated site</span></li>
+      <li>Common Documentation<span>Generated from the project</span></li>
+      <li>Published Service API<span>REST API for all platform services</span></li>
+      <li>Project Health Score<span>Compliance, health, self-test, spec-drift</span></li>
+      <li>Integrated Event Timeline<span>Every platform event in one view</span></li>
     </ul>
   </div>
 
