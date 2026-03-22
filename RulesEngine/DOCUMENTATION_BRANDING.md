@@ -1,6 +1,6 @@
 # Documentation Branding Standards
 
-**Version:** 20260321 V2
+**Version:** 20260322 V3
 **Description:** Color variables, typography, and layout standards for project documentation
 **Reference implementation:** `Specifications/doc/` (Prototyper — process-based, slate theme)
 
@@ -181,17 +181,31 @@ For a new project: copy `doc/styles/` from `Specifications/doc/styles/` and choo
 
 ## Logo / Sidebar Header
 
-The sidebar header contains a project logo image and a two-line project title:
+Two supported formats — choose based on available assets:
 
+**Full image header** (preferred when a project image exists):
 ```html
 <div class="sidebar-header" onclick="show('workflow')">
   <img src="images/prototyper.webp" alt="Prototyper" style="width:100px;height:75px;">
   <h1>Project<br>Prototyper</h1>
 </div>
 ```
-
 Logo image: `doc/images/<project>.webp`, 100×75px display, `object-fit:contain`.
 Generate with `bin/generate_image.py` (see `doc/DOC-CREATE-IMAGE.md`).
+
+**Compact icon header** (for smaller projects or when a full image is unavailable):
+```html
+<div class="sidebar-header" onclick="show('workflow')">
+  <span class="sidebar-icon">⚔️</span>
+  <h1>Conquer<br>2026</h1>
+</div>
+```
+```css
+.sidebar-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.sidebar-header h1 { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.25; }
+```
+Emoji icons work well and render crisply at sidebar scale. Use the compact format
+when a project image hasn't been generated yet — it is not a lesser choice.
 
 ---
 
@@ -205,13 +219,86 @@ Generate with `bin/generate_image.py` (see `doc/DOC-CREATE-IMAGE.md`).
 
 ---
 
+## Callout Blocks
+
+Callouts use the accent color for a left border and a very faint tinted background.
+The font stays the same as body text — but a **label** in monospace adds technical clarity:
+
+```html
+<blockquote class="md">
+  <code>NOTE</code> This is an important callout.
+</blockquote>
+```
+
+Or with an explicit callout class (preferred for standalone HTML pages):
+```html
+<div class="callout">
+  <span class="callout-label">NOTE</span>
+  This is an important callout with a distinct label.
+</div>
+```
+```css
+.callout { border-left: 3px solid var(--c-accent); padding: 8px 14px;
+  margin: 10px 0; background: var(--c-callout-bg); border-radius: 0 4px 4px 0; }
+.callout-label { font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 11px; font-weight: 700; color: var(--c-accent);
+  text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 3px; }
+```
+
+Callout variants: add `callout--warn` (amber border/bg) or `callout--danger` (red) for urgency.
+
+---
+
+## Global CSS Architecture
+
+```
+doc/styles/
+  themes/
+    slate.css          ← color variables only (edit this to retheme)
+    midnight.css
+    purple.css
+    …
+  spec-base.css        ← all structural CSS, zero colors (rarely edit)
+  spec.css             ← GENERATED: themes/<active>.css + spec-base.css concatenated
+```
+
+**Rule:** Change colors by editing the theme file and rebuilding — never touch `spec.css`.
+One command updates all colors across the entire documentation:
+```bash
+bin/build_documentation.sh --theme=midnight
+```
+
+All themes enforce the same two-zone rule: **right/content is always light** (`#FAFAF8`),
+**left/sidebar is always dark** but never pure black (minimum `#22262E` charcoal).
+This constraint is structural — `--c-bg` lives in `spec-base.css`, not in themes,
+ensuring no theme can accidentally put dark text on a dark content background.
+
+---
+
+## Multi-Page Documentation
+
+For projects with many pages (e.g., a game with separate guides per topic):
+
+- Each page links `<link rel="stylesheet" href="style.css">` pointing to `spec.css`
+- Sidebar nav uses `<a href="page.html">` standard links (not JS `show()`)
+- All pages share the same sidebar markup — include via server-side template or duplicate
+- Active page: add `class="active"` to the current nav link
+- `doc/` folder: `index.html` is the landing page; other pages sit beside it
+
+Single shared `spec.css` means one theme change re-styles the entire multi-page set.
+
+---
+
 ## What Not to Do
 
 | Don't | Do instead |
 |-------|------------|
+| Dark content area (`--c-bg` dark) | Content is always light — `#FAFAF8` or equivalent |
+| Pure black sidebar (`#000` or `#0d1117`) | Minimum charcoal — `#22262E`; black reads as broken |
 | Dark text on dark sidebar bg | `--c-side-section` must be lighter than `--c-side-bg` |
 | Purple visited links | Keep `a:visited` the same blue as `a:link` |
 | Arrows connecting separate workflow rows | Two independent left-to-right rows, no DOWN arrow |
 | Expand/collapse toggles for script details | Always show details inline |
 | Relative `../` paths escaping `doc/` | Copy project viewers into `doc/projects/` at build time |
 | Edit `spec.css` directly | Edit the theme file and rebuild |
+| `docs/` (plural) directory | Use `doc/` (singular) — the platform standard |
