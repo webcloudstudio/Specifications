@@ -293,6 +293,8 @@ def build_page(scripts, projects, guides):
 
     ARR = '<span class="wf-arr">&#8594;</span>'
 
+    AND = '<span style="color:#1E2328;font-weight:700;padding:0 8px;align-self:center;font-size:12px">and</span>'
+
     row1 = ARR.join([
         wf_box('Setup', 'setup.sh'),
         wf_box('Validate', 'validate.sh'),
@@ -303,18 +305,12 @@ def build_page(scripts, projects, guides):
         wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
         wf_box('Iterate', 'iterate.sh'),
         wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
-    ])
-    row2b = ARR.join([
-        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
         wf_box('Promote'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
-    row3 = ARR.join([
+    row_rules = ARR.join([
         wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
         wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
-        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
-    ])
-    row4 = ARR.join([
         wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
         wf_box('ProjectUpdate.sh', 'bin/ProjectUpdate.sh'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
@@ -322,28 +318,22 @@ def build_page(scripts, projects, guides):
         wf_box('Project KPIs', terminal=True),
     ])
 
-    iter_r1 = ARR.join([
-        wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True),
-        wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>'),
-        wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True),
-        wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True),
-    ])
-    iter_r2 = ARR.join([
-        wf_box('Specification files updated', '', 'IDEAS / REFERENCE_GAPS / AC', terminal=True),
-        wf_box('iterate.sh', 'bin/iterate.sh <PROJECT>'),
-        wf_box('iterate-prompt.md', 'paste into Claude Code', ai=True),
-        wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True),
-        wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True),
-    ])
+    iter_r1 = (wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True) + ARR +
+               wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>') + ARR +
+               wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True) + AND +
+               wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True))
+    iter_r2 = (wf_box('Specification files updated', '', 'IDEAS / REFERENCE_GAPS / AC', terminal=True) + ARR +
+               wf_box('iterate.sh', 'bin/iterate.sh <PROJECT>') + ARR +
+               wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True) + AND +
+               wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True))
 
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<div class="wf-row">{row1}</div>'
                   f'<div class="wf-row">{row2}</div>'
-                  f'<div class="wf-row">{row2b}</div>'
                   f'<div class="wf-row">{iter_r1}</div>'
                   f'<div class="wf-row">{iter_r2}</div>'
-                  f'<div class="wf-row">{row3}</div>'
-                  f'<div class="wf-row">{row4}</div>'
+                  f'<p class="wf-section-h" style="margin:10px 0 4px">Business Rules</p>'
+                  f'<div class="wf-row">{row_rules}</div>'
                   f'</div>')
 
     eng_row = ARR.join([
