@@ -18,11 +18,10 @@
 #   1  One or more errors (spec is not ready to convert/build)
 #
 # Checks:
-#   - Required files exist (METADATA.md, README.md, INTENT.md, ARCHITECTURE.md)
+#   - Required files exist (METADATA.md, README.md, ARCHITECTURE.md)
 #   - METADATA.md has required fields (name, display_name, short_description, status)
-#   - INTENT.md is not empty / still has template placeholder
-#   - Naming conventions (SCREEN-*, FEATURE-* prefixes)
-#   - Open Questions section exists in applicable files (not README, METADATA, INTENT)
+#   - Naming conventions (SCREEN-*, FEATURE-*, FUNCTIONALITY.md, UI-GENERAL.md allowed)
+#   - Open Questions section exists in applicable files (not README, METADATA)
 #   - Stack files exist in RulesEngine/stack/ if stack: is declared
 #   - No example template files left (SCREEN-Example.md, FEATURE-Example.md)
 
@@ -78,7 +77,7 @@ echo ""
 
 # --- Required files ---
 echo "Required files:"
-for required in METADATA.md README.md INTENT.md ARCHITECTURE.md; do
+for required in METADATA.md README.md ARCHITECTURE.md; do
     if [ -f "$PROJECT_DIR/$required" ]; then
         pass "$required exists"
     else
@@ -176,31 +175,13 @@ if [ "${CONF_LEVEL}" -ge 1 ]; then
 fi
 echo ""
 
-# --- INTENT.md content check ---
-echo "INTENT.md content:"
-if [ -f "$PROJECT_DIR/INTENT.md" ]; then
-    # Check if still has template placeholder
-    if grep -q '<!-- Why does this project exist' "$PROJECT_DIR/INTENT.md" 2>/dev/null; then
-        warn "INTENT.md still has template placeholder — fill it in"
-    else
-        # Check if has meaningful content (more than just heading)
-        CONTENT_LINES=$(grep -cv '^\s*$\|^#\|^<!--' "$PROJECT_DIR/INTENT.md" 2>/dev/null || echo "0")
-        if [ "$CONTENT_LINES" -gt 0 ]; then
-            pass "INTENT.md has content ($CONTENT_LINES lines)"
-        else
-            warn "INTENT.md appears empty"
-        fi
-    fi
-fi
-echo ""
-
 # --- Naming conventions ---
 echo "Naming conventions:"
 BAD_NAMES=0
 for f in "$PROJECT_DIR"/*.md; do
     fname=$(basename "$f")
     case "$fname" in
-        METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md) ;;
+        METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md) ;;
         SCREEN-*.md) pass "$fname (screen)" ;;
         FEATURE-*.md) pass "$fname (feature)" ;;
         *)
