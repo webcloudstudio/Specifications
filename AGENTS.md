@@ -55,9 +55,9 @@ Specifications/
     setup.sh                       Scaffold new spec directory (or update existing) from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
-    build.sh                       Clone/fetch project, create Feature Branch, generate build prompt
+    build.sh                       Deprecated wrapper for oneshot.sh (backward compat only)
     merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
-    oneshot.sh                     Internal: generate build prompt (called by build.sh)
+    oneshot.sh                     Validate + detect mode + generate build prompt (canonical build command)
     generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
     generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md) — use oneshot.sh instead
@@ -119,13 +119,24 @@ bash bin/setup.sh <spec-name> --update     # add new template files to existing 
 # Validate spec completeness and correctness
 bash bin/validate.sh <spec-name> [--verbose]
 
-# Generate conversion prompt (concise → detailed specs)
+# Generate conversion prompt (concise → detailed specs) — optional intermediate step
 bash bin/convert.sh <spec-name> > convert-prompt.md
 
-# Build: clone/fetch project, create Feature Branch, generate build prompt
-bash bin/build.sh <spec-name> > build-prompt.md
-bash bin/build.sh <spec-name> --dry-run   # preview without git operations
-# Requires BUILD_FEATURE_BRANCH_NAME=feature/name in Specifications/<spec-name>/.env
+# OneShot: validate + detect mode + generate build prompt (canonical command)
+#
+#   Bootstrap mode (no git_repo or no BUILD_FEATURE_BRANCH_NAME):
+#     → writes <spec>/bootstrap.sh, then generate prompt
+#     bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
+#     bash <spec-name>/bootstrap.sh      # create target dir, git init
+#     cd /path/to/projects/<name> && claude .   # paste prompt
+#
+#   Feature Branch mode (git_repo + BUILD_FEATURE_BRANCH_NAME set in .env):
+#     → clone/fetch + create branch, then generate prompt
+#     bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
+#     cd /path/to/projects/<name> && claude .   # paste prompt
+#
+#   Update mode (apply spec changes to existing code):
+#     bash bin/oneshot.sh <spec-name> --update > oneshot-prompt.md
 
 # Merge: squash-merge Feature Branch into base branch (GAME calls this automatically)
 bash bin/merge.sh <spec-name>
@@ -193,10 +204,17 @@ Generates a conversion prompt: CONVERT.md expansion rules + stack reference file
 concise spec files from the project directory. Output is fed to an AI agent for expansion.
 
 ### bin/oneshot.sh
-Tags the current commit with an annotated oneshot tag, then generates a complete one-shot
-build prompt: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files. Feed the output
-to an AI agent to build the application in one pass. Warns if uncommitted changes exist.
-Shows diff stat from previous oneshot tag.
+The canonical build command. Validates the spec, detects build mode, then generates a
+complete one-shot build prompt: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.
+
+**Bootstrap mode** (no `git_repo` or no `BUILD_FEATURE_BRANCH_NAME`): writes
+`<spec>/bootstrap.sh` with absolute paths to create and git-init the target directory.
+
+**Feature Branch mode** (`git_repo` + `BUILD_FEATURE_BRANCH_NAME` both set): clones or
+fetches the project into `../<Name>/`, creates the feature branch, generates the prompt.
+
+Tags the current commit with an annotated oneshot tag. Warns if uncommitted changes exist.
+Shows diff stat from previous oneshot tag. Includes stub policy in build prompts.
 
 ### bin/test.sh
 Tests the specification system: verifies global rules, stack files, templates, script headers,
@@ -209,7 +227,8 @@ Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` f
 Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create oneshot tags. Use `bin/oneshot.sh` instead.
 
 ### bin/build.sh
-Reads `METADATA.md` and `.env` for the spec. Clones or fetches the project into `../<Name>/`, creates the feature branch, then calls `oneshot.sh` to generate the build prompt. Fails clearly if `BUILD_FEATURE_BRANCH_NAME` is not set in `.env`.
+Deprecated backward-compatible wrapper. Calls `oneshot.sh` with all arguments passed through.
+Use `bin/oneshot.sh` directly — it handles both Bootstrap and Feature Branch modes automatically.
 
 ### bin/merge.sh
 Squash-merges a feature branch into the base branch and deletes it. Reads feature branch from `.env` and base branch from `METADATA.md`. Accepts `--feature`, `--base`, and `--dry-run` overrides. Called by GAME UI — can also be run directly.
