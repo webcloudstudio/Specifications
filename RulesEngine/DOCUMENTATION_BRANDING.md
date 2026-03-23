@@ -106,8 +106,9 @@ font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;        /* code
 | Sidebar primary links | 13px | 400 | White, `padding: 3px 16px` |
 | Sidebar sub-links | 11px | 400 | `rgba(255,255,255,.8)`, `padding: 2px 16px 2px 28px` |
 | Sidebar section labels | 9px | 700 | `var(--c-side-section)`, uppercase, `letter-spacing: 1px` |
-| Code inline | 12.5px | 400 | Monospace, `var(--c-code-bg)` background |
-| Code block | 12.5px | 400 | Monospace, `var(--c-pre-bg)` background |
+| Code inline | 12.5px | 400 | Monospace, `var(--c-code-bg)` background — warm beige `#EDEEE8` |
+| Code block (markdown) | 12.5px | 400 | Monospace, `var(--c-pre-bg)` background — dark `#1A1D23` for contrast |
+| Script callout / man page | 12.5px | 400 | Monospace, **light `#F0EFEA` background** — NOT `--c-pre-bg`. Use `border: 1px solid var(--c-td-border)` |
 | Workflow box label | 12px | 700 | White |
 | Workflow box script | 10px | 400 | White, monospace |
 | Workflow box path | 9.5px | 400 | White, monospace |
