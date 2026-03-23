@@ -76,7 +76,22 @@ Repeat until the scorecard passes.
 |------|---------|
 | `IDEAS.md` | Raw thoughts, one bullet per line |
 | `ACCEPTANCE_CRITERIA.md` | MUST/MUST NOT statements — testable behavior requirements |
-| `REFERENCE_GAPS.md` | Missing features — one unchecked checkbox per gap with priority |
+| `REFERENCE_GAPS.md` | Missing features — one unchecked checkbox per gap with priority [P0]–[P4] |
+
+**Trigger phrases** (say these in Claude Code inside the prototype directory):
+
+| Say | Claude does |
+|-----|------------|
+| `process ideas` | Routes each `IDEAS.md` entry to the right file, then clears it |
+| `this is a gap` | Adds entry to `REFERENCE_GAPS.md` |
+| `add acceptance criteria` | Adds MUST statement to `ACCEPTANCE_CRITERIA.md` |
+| `update the specification` | Reviews recent changes, updates Specification files |
+
+**Auto-extract feedback** from recent sessions (runs haiku via `claude -p`):
+
+```
+bash bin/extract_session_feedback.sh <ProjectName>
+```
 
 Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE.md`.
 These rules auto-update Specification files and REFERENCE_GAPS.md when the agent fixes code.

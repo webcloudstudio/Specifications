@@ -258,13 +258,11 @@ def build_page(scripts, projects, guides):
                 step_nav += f'  <a class="sn-sub" data-script="{h.escape(sub_target)}" onclick="showScript(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
-    step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-step="5" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 5)">Step 5 — Iterate</a>\n'
-    step_nav += f'  <a class="sn-sub" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Iteration Process (detail)</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="extract_session_feedback.sh" onclick="showScript(\'extract_session_feedback.sh\')">extract_session_feedback.sh</a>\n'
     step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 6)">Step 6 — Promote</a>\n'
-    step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge (detail)</a>\n'
+    step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript(\'generate_claude_rules.sh\')">generate_claude_rules.sh</a>\n'
@@ -324,23 +322,6 @@ def build_page(scripts, projects, guides):
         wf_box('Project KPIs', terminal=True),
     ])
 
-    wf_diagram = (f'<div class="wf-diagram">'
-                  f'<div class="wf-row">{row1}</div>'
-                  f'<div class="wf-row">{row2}</div>'
-                  f'<div class="wf-row">{row2b}</div>'
-                  f'<div class="wf-row">{row3}</div>'
-                  f'<div class="wf-row">{row4}</div>'
-                  f'</div>')
-
-    eng_row = ARR.join([
-        wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
-        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
-    ])
-    eng_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
-                   f'<div class="wf-row">{eng_row}</div>'
-                   f'</div>')
-
     iter_r1 = ARR.join([
         wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True),
         wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>'),
@@ -354,6 +335,26 @@ def build_page(scripts, projects, guides):
         wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True),
         wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True),
     ])
+
+    wf_diagram = (f'<div class="wf-diagram">'
+                  f'<div class="wf-row">{row1}</div>'
+                  f'<div class="wf-row">{row2}</div>'
+                  f'<div class="wf-row">{row2b}</div>'
+                  f'<div class="wf-row">{iter_r1}</div>'
+                  f'<div class="wf-row">{iter_r2}</div>'
+                  f'<div class="wf-row">{row3}</div>'
+                  f'<div class="wf-row">{row4}</div>'
+                  f'</div>')
+
+    eng_row = ARR.join([
+        wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
+        wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
+        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
+    ])
+    eng_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
+                   f'<div class="wf-row">{eng_row}</div>'
+                   f'</div>')
+
     iter_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
                     f'<div class="wf-row">{iter_r1}</div>'
                     f'<div class="wf-row">{iter_r2}</div>'
@@ -590,9 +591,6 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
       <div class="proc-item"><span class="proc-term">Build</span><span class="proc-def">Clones or fetches the project, creates the Feature Branch from base code, generates the AI build prompt</span></div>
       <div class="proc-item"><span class="proc-term">Merge</span><span class="proc-def">Squash-merges the Feature Branch into the base branch — triggered via Prototyper UI, hides all git from the user</span></div>
     </div>
-    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Administrator Scripts</p>
-    {other_html}
   </div>
 
   <!-- ── Guide viewer ──────────────────────────── -->
