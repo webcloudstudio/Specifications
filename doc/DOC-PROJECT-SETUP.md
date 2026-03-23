@@ -28,14 +28,14 @@ Add what applies. Delete the rest.
 
 - All spec files except README and METADATA end with `## Open Questions`
 - File names use uppercase with hyphens: `SCREEN-Dashboard.md`, `FEATURE-Scan.md`
-- Write concise specs (tables, bullets). CONVERT.md rules expand them during conversion.
+- Write concise specs (tables, bullets). ONESHOT_BUILD_RULES.md rules expand them during conversion.
 - Stack-specific patterns come from `RulesEngine/stack/` files — don't repeat them in specs.
 
 ## Global Rules
 
 ```
 RulesEngine/
-  CONVERT.md           How concise specs expand into detailed specs
+  ONESHOT_BUILD_RULES.md           How concise specs expand into detailed specs
   CLAUDE_RULES.md      Agent behavior contract (injected into projects)
   stack/               Technology patterns (flask.md, sqlite.md, ...)
   spec_template/       Template files used by setup.sh

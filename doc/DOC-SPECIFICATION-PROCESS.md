@@ -1,33 +1,29 @@
 # Specification Process
 
-**Version:** 20260322 V6
-**Description:** Step-by-step guide to the Prototyper specification workflow
-
-Prototyper converts concise specification files into AI agent build prompts.
+**Version:** 20260323 V7
+**Description:** Six-step process for building a prototype with the Prototyper system
 
 ---
 
-## Step 1 — Setup the Prototype Directory
+## Step 1 — Setup
 
-```bash
-bash bin/setup.sh <ProjectName>
-```
+Create a new Specifications directory from templates.
 
-Creates `Specifications/<ProjectName>/` with template files from `RulesEngine/spec_template/`.
-
+`bin/setup.sh <ProjectName>` scaffolds `Specifications/<ProjectName>/` from `RulesEngine/spec_template/`.
 Edit `METADATA.md` immediately — set `name`, `display_name`, `short_description`, `status`.
-Set `git_repo:` only if the project has a remote git repository to clone from.
+Set `git_repo:` only if the project already has a remote git repository to clone from.
 
 ---
 
-## Step 2 — Create the Spec Files
+## Step 2 — Create
 
-Edit each file. Delete `DATABASE.md` or `UI.md` if not applicable.
+Write the Specification files in `Specifications/<ProjectName>/`.
+Delete `DATABASE.md` or `UI.md` if not applicable.
 Rename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.
 
 | Convention | Rule |
 |------------|------|
-| Scope | Concise specs only: tables, bullets, short descriptions. `CONVERT.md` expands them. |
+| Scope | Concise: tables, bullets, short descriptions. Expansion rules are in `ONESHOT_BUILD_RULES.md`. |
 | Screens | `SCREEN-<Name>.md` — route, layout, columns, interactions |
 | Features | `FEATURE-<Name>.md` — trigger, sequence, reads, writes |
 | End section | All files except `README.md`, `METADATA.md`, `INTENT.md` must end with `## Open Questions` |
@@ -35,90 +31,65 @@ Rename `SCREEN-Example.md` and `FEATURE-Example.md` to real names before Step 3.
 
 ---
 
-## Step 3 — Validate the Spec
+## Step 3 — Validate
 
-```bash
-bash bin/validate.sh <ProjectName>
-bash bin/validate.sh <ProjectName> --verbose
-```
-
-Exit 0 = ready. Exit 1 = errors to fix.
+`bin/validate.sh <ProjectName>` checks the Specifications directory. Exit 0 = ready. Exit 1 = errors to fix.
 
 | Check | Condition |
 |-------|-----------|
 | Required files | `METADATA.md`, `README.md`, `ARCHITECTURE.md` exist |
 | METADATA fields | `name`, `display_name`, `short_description`, `status` are all set |
-| Naming | Spec files use `SCREEN-*` or `FEATURE-*` prefix |
+| Naming | Specification files use `SCREEN-*` or `FEATURE-*` prefix |
 | Template cleanup | `SCREEN-Example.md` and `FEATURE-Example.md` have been renamed or deleted |
 | Open Questions | All applicable files have `## Open Questions` section |
 | Stack files | If `stack:` is declared, `RulesEngine/stack/<component>.md` exists for each component |
-| Build target | Shown as INFO: "New build" or "Update build" based on whether target directory exists |
-| Feature Branch | If `BUILD_FEATURE_BRANCH_NAME` is set in `.env`, shown as PASS — required only for Feature Branch mode |
+| Build target | INFO: "New build" or "Update build" based on whether target directory exists |
 
 ---
 
-## Step 4 — OneShot Build
+## Step 4 — OneShot
 
-Generates the complete build prompt. Validates the spec first — fails if any errors.
+`bin/oneshot.sh <ProjectName>` validates, detects mode, then generates a complete build prompt.
 
-```bash
-bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
-```
+The prompt is self-contained: `ONESHOT_BUILD_RULES.md` + `CLAUDE_RULES.md` + stack files + all Specification files.
+Paste it into Claude Code with no other instructions — the agent builds the complete application.
 
-The prompt is self-contained: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.
-Paste it into Claude Code with no other instructions needed.
+**New project (no git remote):** create the target directory manually, git init, open Claude Code, paste the prompt.
 
----
+**Feature Branch (git_repo + BUILD_FEATURE_BRANCH_NAME set):** oneshot.sh clones/fetches the project and creates the branch before generating the prompt.
 
-### New project (no git remote)
-
-```bash
-# 1. Generate the prompt
-bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
-
-# 2. Create and initialize the build directory
-mkdir -p /mnt/c/Users/barlo/projects/<ProjectName>
-cd /mnt/c/Users/barlo/projects/<ProjectName>
-git init && git checkout -b main
-
-# 3. Open Claude Code and paste the prompt
-claude .
-# paste <ProjectName>/oneshot-prompt.md
-```
+A `SCORECARD.md` is written to the prototype directory at the end of the build session.
+The oneshot tag and prototype build reference are recorded in `Specifications/<ProjectName>/.env`.
 
 ---
 
-### Feature Branch (git_repo + BUILD_FEATURE_BRANCH_NAME set)
+## Step 5 — Iterate
 
-Set in `Specifications/<ProjectName>/.env`:
-```
-BUILD_FEATURE_BRANCH_NAME=feature/my-feature-name
-```
+Test the prototype, record feedback in `Specifications/<ProjectName>/`, then run `bin/iterate.sh <ProjectName>`.
 
-```bash
-# 1. Generate the prompt — also clones/fetches project and creates the branch
-bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
+`bin/iterate.sh` generates an iteration prompt containing the current Specification files, `IDEAS.md`, `ACCEPTANCE_CRITERIA.md`, `REFERENCE_GAPS.md`, and the latest `SCORECARD.md`.
+Paste into Claude Code in the prototype directory. The agent fixes scorecard failures, closes gaps, and updates Specification files.
 
-# 2. Open Claude Code on the feature branch and paste the prompt
-cd /mnt/c/Users/barlo/projects/<ProjectName>
-claude .
-# paste <ProjectName>/oneshot-prompt.md
-```
+Repeat until the scorecard passes.
 
----
+| File | Purpose |
+|------|---------|
+| `IDEAS.md` | Raw thoughts, one bullet per line |
+| `ACCEPTANCE_CRITERIA.md` | MUST/MUST NOT statements — testable behavior requirements |
+| `REFERENCE_GAPS.md` | Missing features — one unchecked checkbox per gap with priority |
 
-### Update (apply spec changes to existing code)
-
-```bash
-bash bin/oneshot.sh <ProjectName> --update > <ProjectName>/oneshot-prompt.md
-# open Claude Code in project dir, paste prompt
-```
+Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE.md`.
+These rules auto-update Specification files and REFERENCE_GAPS.md when the agent fixes code.
 
 ---
 
-### Stub Policy
+## Step 6 — Promote
 
-Any feature marked `[ROADMAP]` or underspecified is automatically stubbed by the agent:
-- Real route/function returning a placeholder (not dead code)
-- `# TODO: [stub] <what is needed>` comment inline
-- `STUBS.md` at project root listing every stub: file, line, description
+When the prototype passes its scorecard, merge it into the main branch.
+
+For Feature Branch mode: squash-merge the feature branch into the base branch via `bin/merge.sh` or manually.
+For new-project (no branch): the prototype directory IS the project — push to a remote when ready.
+
+Promoted projects are discovered by the Prototyper platform and must conform to `CLAUDE_RULES.md`.
+Run `bin/ProjectValidate.sh <project>` to check compliance.
+Run `bin/ProjectUpdate.sh <project>` to inject the latest rules and templates.

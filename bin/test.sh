@@ -50,7 +50,7 @@ echo ""
 # --- Rules Engine ---
 echo "Rules Engine:"
 assert_file "RulesEngine/CLAUDE_RULES.md"
-assert_file "RulesEngine/CONVERT.md"
+assert_file "RulesEngine/ONESHOT_BUILD_RULES.md"
 assert_file "RulesEngine/DOCUMENTATION_BRANDING.md"
 assert_file "RulesEngine/BUSINESS_RULES.md"
 assert_contains "RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES_START"
@@ -58,7 +58,7 @@ assert_contains "RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES_END"
 assert_contains "RulesEngine/CLAUDE_RULES.md" "do not edit directly"
 assert_contains "RulesEngine/BUSINESS_RULES.md" "Conformity Levels"
 assert_contains "RulesEngine/BUSINESS_RULES.md" "Rule text:"
-assert_contains "RulesEngine/CONVERT.md" "Expansion Principles"
+assert_contains "RulesEngine/ONESHOT_BUILD_RULES.md" "Expansion Principles"
 echo ""
 
 # --- Stack files ---

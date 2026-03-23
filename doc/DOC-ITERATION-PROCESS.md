@@ -84,7 +84,7 @@ Repeat Steps 2–3 until the scorecard passes.
 
 ## Auto-Updates
 
-Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE_RULES.md`.
+Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE.md`.
 When Claude fixes code in the prototype, it automatically:
 
 - Updates the corresponding Specification file

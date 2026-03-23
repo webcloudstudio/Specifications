@@ -8,7 +8,7 @@
 
 This repository has two roles:
 
-1. **Global standards** (`RulesEngine/`) — distributing CLAUDE_RULES.md, CONVERT.md,
+1. **Global standards** (`RulesEngine/`) — distributing CLAUDE_RULES.md, ONESHOT_BUILD_RULES.md,
    templates (common.sh, common.py), stack reference patterns, and branding standards
    to every project via `bin/create_project.py`.
 2. **Project specifications** (`GAME/`, `AlexaPrototypeOne/`, etc.) — concise
@@ -26,14 +26,14 @@ The platform (GAME) then discovers and integrates projects automatically by read
 the same standards (METADATA.md, bin/ headers, AGENTS.md).
 
 **Specification methodology:** You write concise specs (tables, bullets, short descriptions).
-CONVERT.md defines expansion rules. Stack files define technology patterns. The build
+ONESHOT_BUILD_RULES.md defines expansion rules. Stack files define technology patterns. The build
 pipeline combines everything into a single prompt an AI agent can execute.
 
 **What this means for changes to RulesEngine/:**
 - BUSINESS_RULES.md is the source for agent behavioral rules — full rationale lives there
 - CLAUDE_RULES.md is generated from BUSINESS_RULES.md via `bin/generate_claude_rules.sh` — never edit it directly
 - Keep CLAUDE_RULES.md minimal — agents follow rules, they don't need rationale
-- CONVERT.md defines how concise specs expand — methodology lives here, not in project dirs
+- ONESHOT_BUILD_RULES.md defines how concise specs expand — methodology lives here, not in project dirs
 - Stack files are prescriptive — copy-paste patterns, not guidelines
 - When rules or templates change, run `bash bin/update_projects.sh` to propagate
 
@@ -44,7 +44,7 @@ Specifications/
   RulesEngine/                    Global standards distributed to all projects
     BUSINESS_RULES.md              Source for agent behavior rules — edit this, not CLAUDE_RULES.md
     CLAUDE_RULES.md                Generated agent behavior contract (injected into AGENTS.md)
-    CONVERT.md                     Specification expansion rules (global methodology)
+    ONESHOT_BUILD_RULES.md                     Specification expansion rules (global methodology)
     DOCUMENTATION_BRANDING.md      Documentation theming and color standards
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
     spec_template/                 Template files for setup.sh
@@ -60,7 +60,7 @@ Specifications/
     oneshot.sh                     Validate + detect mode + generate build prompt (canonical build command)
     generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
-    generate_prompt.sh             Legacy build prompt (no tagging, no CONVERT.md) — use oneshot.sh instead
+    generate_prompt.sh             Legacy build prompt (no tagging, no ONESHOT_BUILD_RULES.md) — use oneshot.sh instead
     rebuild_index.sh               Regenerate browsable HTML spec viewers
     build_documentation.sh         Build doc/index.html
     project_manager.py             Python backend for project verify/update operations
@@ -200,12 +200,12 @@ Scaffolds a new specification directory from `RulesEngine/spec_template/`, or up
 Validates a specification directory inside this repo: required files, METADATA fields, conformity level, naming conventions, Open Questions sections, stack file existence, template cleanup. Accepts a spec name only. Exit 0 = valid, exit 1 = errors.
 
 ### bin/convert.sh
-Generates a conversion prompt: CONVERT.md expansion rules + stack reference files + all
+Generates a conversion prompt: ONESHOT_BUILD_RULES.md expansion rules + stack reference files + all
 concise spec files from the project directory. Output is fed to an AI agent for expansion.
 
 ### bin/oneshot.sh
 The canonical build command. Validates the spec, detects build mode, then generates a
-complete one-shot build prompt: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.
+complete one-shot build prompt: ONESHOT_BUILD_RULES.md + CLAUDE_RULES.md + stack files + all spec files.
 
 **New project mode** (no `git_repo` or no `BUILD_FEATURE_BRANCH_NAME`): generates
 the prompt only. Create the target directory manually (`mkdir` + `git init`), then open
@@ -225,7 +225,7 @@ and runs a create+validate round-trip on a temporary project.
 Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` from `RulesEngine/BUSINESS_RULES.md`. Auto-increments the version (date + sequence). Output is fed to an AI agent; the agent produces the new CLAUDE_RULES.md content.
 
 ### bin/generate_prompt.sh
-Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include CONVERT.md or create oneshot tags. Use `bin/oneshot.sh` instead.
+Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include ONESHOT_BUILD_RULES.md or create oneshot tags. Use `bin/oneshot.sh` instead.
 
 ### bin/build.sh
 Deprecated backward-compatible wrapper. Calls `oneshot.sh` with all arguments passed through.
@@ -245,7 +245,7 @@ Thin wrapper calling `project_manager.py verify`. Operates on promoted code proj
 ### bin/ProjectUpdate.sh
 Thin wrapper calling `project_manager.py update`. Operates on promoted code projects only — not spec directories in this repo.
 
-### RulesEngine/CONVERT.md
+### RulesEngine/ONESHOT_BUILD_RULES.md
 Global specification expansion rules. Defines how each file type (DATABASE, SCREEN, FEATURE, UI, ARCHITECTURE) should be expanded from concise author input to detailed implementation-ready specs. Stack-specific expansion defers to `stack/*.md` files.
 
 ### RulesEngine/stack/
@@ -282,5 +282,5 @@ The pattern for adding any new contract/file that all projects should have:
 - `archive/` holds superseded documents — do not treat as current spec
 - `index.html` files are auto-generated — edit the templates, not the outputs
 - When changing `RulesEngine/` content: run `bash bin/ProjectUpdate.sh <project>` per project, or `bash bin/update_projects.sh` from `../GAME/` for all
-- CONVERT.md is global (in RulesEngine/), not per-project — methodology is shared
+- ONESHOT_BUILD_RULES.md is global (in RulesEngine/), not per-project — methodology is shared
 - BUSINESS_RULES.md is the source of truth for agent behavioral rules; CLAUDE_RULES.md is generated — never edit CLAUDE_RULES.md directly

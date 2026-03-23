@@ -152,6 +152,13 @@ Message: ${COMMIT_MSG}
 Run: $(date '+%Y-%m-%d %H:%M:%S')"
 
     echo "OneShot (${ONESHOT_MODE}): $TAG_NAME → $(git rev-parse --short HEAD)" >&2
+
+    # Record prototype build tag in .env (not committed — tracks per-developer prototype state)
+    {
+        grep -v "^PROTOTYPE_BUILD_TAG=" "$PROJECT_DIR/.env" 2>/dev/null || true
+        echo "PROTOTYPE_BUILD_TAG=$TAG_NAME"
+    } > "$PROJECT_DIR/.env.tmp" && mv "$PROJECT_DIR/.env.tmp" "$PROJECT_DIR/.env"
+    echo "  Prototype tag: $TAG_NAME → $PROJECT_DIR/.env" >&2
     echo "" >&2
 
     # Show diff from previous oneshot if one exists
@@ -172,8 +179,8 @@ if [ "$TAG_ONLY" = true ]; then
 fi
 
 # --- Generate one-shot build prompt ---
-# Include CONVERT.md so the AI can expand concise specs inline during implementation
-CONVERT_FILE="$REPO_DIR/RulesEngine/CONVERT.md"
+# Include ONESHOT_BUILD_RULES.md so the AI can expand concise specs inline during implementation
+CONVERT_FILE="$REPO_DIR/RulesEngine/ONESHOT_BUILD_RULES.md"
 
 STACK=$(get_metadata "stack")
 PORT=$(get_metadata "port")
@@ -262,7 +269,7 @@ fi
 if [ -f "$CONVERT_FILE" ]; then
     echo "# CONVERSION RULES"
     echo ""
-    emit_file "$CONVERT_FILE" "CONVERT.md (RulesEngine/CONVERT.md)"
+    emit_file "$CONVERT_FILE" "ONESHOT_BUILD_RULES.md (RulesEngine/ONESHOT_BUILD_RULES.md)"
 fi
 
 # --- CLAUDE_RULES.md ---
@@ -272,21 +279,21 @@ if [ -f "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" ]; then
     emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
 fi
 
-# --- CLAUDE_PROTOTYPE_RULES.md (iteration rules for oneshot-built prototypes) ---
-if [ -f "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE_RULES.md" ]; then
+# --- CLAUDE_PROTOTYPE.md (iteration rules for oneshot-built prototypes) ---
+if [ -f "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" ]; then
     echo "# PROTOTYPE ITERATION RULES"
     echo ""
     echo "These rules MUST be injected into the prototype's AGENTS.md under an ## Iteration Rules section."
     echo "They are ONLY active when working in this prototype directory."
     echo ""
-    emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE_RULES.md" "CLAUDE_PROTOTYPE_RULES.md"
+    emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" "CLAUDE_PROTOTYPE.md"
 fi
 
 # --- Additional RulesEngine .md files (drop-in) ---
 for rules_file in "$REPO_DIR"/RulesEngine/*.md; do
     fname="$(basename "$rules_file")"
     case "$fname" in
-        CLAUDE_RULES.md|CLAUDE_PROTOTYPE_RULES.md|CONVERT.md|BUSINESS_RULES.md|DOCUMENTATION_BRANDING.md) continue ;;
+        CLAUDE_RULES.md|CLAUDE_PROTOTYPE.md|ONESHOT_BUILD_RULES.md|BUSINESS_RULES.md|DOCUMENTATION_BRANDING.md) continue ;;
     esac
     emit_file "$rules_file" "Rules: $fname"
 done

@@ -106,7 +106,7 @@ $CONTENT"
 fi
 
 # Build the prompt
-PROTOTYPE_RULES="$(cat "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE_RULES.md" 2>/dev/null || true)"
+PROTOTYPE_RULES="$(cat "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" 2>/dev/null || true)"
 
 PROMPT="${PROTOTYPE_RULES}
 

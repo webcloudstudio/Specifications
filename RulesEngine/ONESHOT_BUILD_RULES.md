@@ -164,4 +164,4 @@ setup.sh  →  (author edits)  →  validate.sh  →  convert.sh  →  build.sh
 | BUILT | `bin/build.sh <name> > build-prompt.md` | Tagged commit + complete build prompt |
 | PROMOTED | (copy spec dir to own repo) | Independent project |
 
-One-shot path: skip CONVERTED, go straight from VALIDATED to BUILT. `bin/build.sh` includes CONVERT.md so the AI agent handles expansion and building in a single pass.
+One-shot path: skip CONVERTED, go straight from VALIDATED to BUILT. `bin/build.sh` includes ONESHOT_BUILD_RULES.md so the AI agent handles expansion and building in a single pass.

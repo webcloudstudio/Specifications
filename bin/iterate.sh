@@ -154,7 +154,7 @@ INSTRUCTIONS
 
 # --- Rules ---
 emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
-emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE_RULES.md" "CLAUDE_PROTOTYPE_RULES.md"
+emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" "CLAUDE_PROTOTYPE.md"
 
 # --- Core spec files ---
 echo "# SPECIFICATION"
