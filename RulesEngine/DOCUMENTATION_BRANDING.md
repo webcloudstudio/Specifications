@@ -39,7 +39,7 @@ The default and reference theme. Charcoal sidebar, teal accent, warm off-white c
   /* Content headings (on light bg) */
   --c-h1:            #1E2328;
   --c-h1-border:     #D0D4DA;
-  --c-h2:            #2E3640;   /* also used as dark banner background for h2 in markdown */
+  --c-h2:            #2E3640;   /* h2 text color — used on light content background */
   --c-h2-border:     #DDE0E5;
   --c-h3:            #505A68;
 
@@ -101,7 +101,7 @@ font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;        /* code
 |---------|------|--------|-------|
 | Body | **14px** | 400 | `line-height: 1.65` |
 | h1 (markdown) | 22px | 700 | `var(--c-accent)` color + 2px underline |
-| h2 (markdown) | 14px | 700 | Dark banner: `var(--c-side-bg)` bg, 3px accent left border |
+| h2 (markdown) | 17px | 700 | Light accent-tint bg (`#EFF6FF`), 4px accent left border, dark text — **never a dark banner** |
 | h3 (markdown) | 14px | 600 | `var(--c-h3)` color, no decoration |
 | Sidebar primary links | 13px | 400 | White, `padding: 3px 16px` |
 | Sidebar sub-links | 11px | 400 | `rgba(255,255,255,.8)`, `padding: 2px 16px 2px 28px` |
@@ -159,6 +159,30 @@ CSS classes (all in the inline `<style>` block of the generated page):
 ```
 
 Two independent rows, both left-aligned, no connecting arrows between rows.
+
+---
+
+## Build Process
+
+Every documented project has `bin/build_documentation.sh`. Running it:
+
+1. **Assembles CSS** — concatenates `doc/styles/themes/<theme>.css` + `doc/styles/gem-base.css` → `doc/styles/gem.css`
+2. **Generates the page** — runs a project-specific builder (Python script or bash) and writes `docs/index.html`
+
+```bash
+./bin/build_documentation.sh                   # rebuild with current theme
+./bin/build_documentation.sh --theme=midnight  # switch theme then rebuild
+./bin/build_documentation.sh --theme=purple --css-only  # switch CSS only
+```
+
+**Output always lands in `docs/`** (not `doc/`). The `doc/` directory holds the CSS source files and any multi-page legacy content. `docs/` holds the generated single-page output.
+
+**Available themes:** `midnight` (default) · `purple` · `green` · `midnight-green` · `mughal` · `rainforest` · `slate` · `ivory` · `clean`
+
+To inspect what would be rebuilt without writing:
+```bash
+./bin/build_documentation.sh --dry-run
+```
 
 ---
 
@@ -301,4 +325,5 @@ Single shared `spec.css` means one theme change re-styles the entire multi-page 
 | Expand/collapse toggles for script details | Always show details inline |
 | Relative `../` paths escaping `doc/` | Copy project viewers into `doc/projects/` at build time |
 | Edit `spec.css` directly | Edit the theme file and rebuild |
-| `docs/` (plural) directory | Use `doc/` (singular) — the platform standard |
+| Edit `spec.css` / `gem.css` directly | Edit the theme file (`doc/styles/themes/<name>.css`) and rebuild |
+| Dark h2 banner | h2 must use a light accent tint, not dark sidebar color — users confuse dark h2 for a header bar |
