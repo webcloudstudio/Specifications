@@ -185,6 +185,7 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
   <a class="sn-sub" data-script="iterate.sh" onclick="showScript('iterate.sh')">iterate.sh</a>
   <div class="nav-sep"></div>
   <a class="sn" data-key="PROMOTE" onclick="showGuide('PROMOTE')">Step 6 — Promote</a>
+  <div class="nav-sep"></div>
   <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide('ENGINEERING-RULES')">Engineering Rules</a>
   <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript('generate_claude_rules.sh')">generate_claude_rules.sh</a>
 
@@ -264,7 +265,7 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
    bash bin/iterate.sh &lt;spec-name&gt; --no-scorecard   # skip scorecard regeneration
  Reads:  Specifications/&lt;spec&gt;/*.md, IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md
  Writes: &lt;spec&gt;_prototype/SCORECARD.md (via scorecard.sh), then iterate-prompt.md to stdout</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">merge.sh</code><span class="sc-desc">Squash-merge a Feature Branch into base branch — called by GAME</span></div><div class="sc-detail-open"><pre>Squash-merges a Feature Branch into the base branch and deletes the feature branch.
+<div class="sc-entry"><div class="sc-head"><code class="sc-name">merge.sh</code><span class="sc-desc">Squash-merges a Feature Branch into the base branch and deletes the feature branch.</span></div><div class="sc-detail-open"><pre>Squash-merges a Feature Branch into the base branch and deletes the feature branch.
  Typically called by GAME via automation. Can be run directly with explicit args.
  Usage:
    bash bin/merge.sh &lt;spec-name&gt;                           # read .env and METADATA
@@ -296,56 +297,6 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
    bash bin/update_reference_gaps.sh &lt;spec-name&gt;
  Reads: Specifications/&lt;spec&gt;/*.md, prototype code, reference implementation
  Writes: Specifications/&lt;spec&gt;/REFERENCE_GAPS.md</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_conquer2026_image.py</code><span class="sc-desc">Generate the conquer_2026 card image (400x300 WebP).</span></div><div class="sc-detail-open"><pre>Generate the conquer_2026 project card image (400x300 WebP).
- Usage:
-   python3 bin/generate_conquer2026_image.py
- Output:
-   ../GAME/static/project_images/conquer_2026.webp — portfolio card
- image_description: A Cartoon Table with a map on it with a human knight, orc
-   spearman, and a dwarf axe bearer looking at it and a dagger stuck into it -
-   old school d&amp;d style</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_edbarlowsstoredprocs_image.py</code><span class="sc-desc">Composite Sybase + SQL Server logos into a 400x300 WebP card image.</span></div><div class="sc-detail-open"><pre>Generate the EdBarlowsStoredProcs project card image (400x300 WebP).
- Composites the real Sybase and SQL Server logos side by side on a dark background.
- Usage:
-   python3 bin/generate_edbarlowsstoredprocs_image.py
- Source images (from GAME/static/project_images/):
-   sybase_logo.png
-   microsoft-sql-server.jpg
- Output:
-   ../GAME/static/project_images/EdBarlowsStoredProcs.webp — portfolio card</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_game_image.py</code><span class="sc-desc">Generate the GAME card image (400x300 WebP).</span></div><div class="sc-detail-open"><pre>Generate the GAME project card image (400x300 WebP).
- Usage:
-   python3 bin/generate_game_image.py
- Output:
-   ../GAME/static/project_images/GAME.webp — used on the GAME portfolio card
- image_description: An Orange Cartoon turtle in a blue beret sitting on a rock
-   on a cloud playing a flute.</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_gem_image.py</code><span class="sc-desc">Generate the gem card image (400x300 WebP).</span></div><div class="sc-detail-open"><pre>Generate the gem project card image (400x300 WebP).
- Usage:
-   python3 bin/generate_gem_image.py
- Output:
-   ../GAME/static/project_images/gem.webp — portfolio card
- image_description: Enterprise manager dashboard — server rack, network nodes,
-   uptime monitoring gauge</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_herpeshearts_image.py</code><span class="sc-desc">Generate the HerpesHearts card image (400x300 WebP).</span></div><div class="sc-detail-open"><pre>Generate the HerpesHearts project card image (400x300 WebP).
- Usage:
-   python3 bin/generate_herpeshearts_image.py
- Output:
-   ../GAME/static/project_images/HerpesHearts.webp — used on the GAME portfolio card
- image_description: A Red Cartoon Heart with a sparkle and cartoon flowers everywhere</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_processbaseddataengineering_image.py</code><span class="sc-desc">Generate the ProcessBasedDataEngineering card image (400x300 WebP).</span></div><div class="sc-detail-open"><pre>Generate the ProcessBasedDataEngineering project card image (400x300 WebP).
- Usage:
-   python3 bin/generate_processbaseddataengineering_image.py
- Output:
-   ../GAME/static/project_images/ProcessBasedDataEngineering.webp — portfolio card
- image_description: A Brown cartoon book winking at the user - wears a yellow hat
-   and waving a paintbrush next to an easel on a cloud playing a flute.</pre></div></div>
-<div class="sc-entry"><div class="sc-head"><code class="sc-name">generate_stockratingsystem_image.py</code><span class="sc-desc">Generate the StockRatingSystem card image (400x300 WebP).</span></div><div class="sc-detail-open"><pre>Generate the StockRatingSystem project card image (400x300 WebP).
- Usage:
-   python3 bin/generate_stockratingsystem_image.py
- Output:
-   ../GAME/static/project_images/StockRatingSystem.webp — portfolio card
- image_description: Upward trending candlestick chart with 5-star gold rating</pre></div></div>
 <div class="sc-entry"><div class="sc-head"><code class="sc-name">project_manager.py</code><span class="sc-desc">project_manager.py — Verify and update promoted code projects.</span></div></div>
 </div>
   </div>
@@ -391,7 +342,7 @@ const SCRIPTS = {
   "convert.sh": {"desc": "Generate an AI expansion prompt from concise spec files \u2014 optional intermediate step", "details": "Generates a conversion prompt: concise project specs + CONVERT.md expansion rules + stack files.\n Feed the output to an AI agent to get detailed, implementation-ready specifications.\n Usage:\n   bash bin/convert.sh <project-name>                     # Print to stdout\n   bash bin/convert.sh <project-name> > convert-prompt.md # Save to file\n Example:\n   bash bin/convert.sh Game-Build > convert-prompt.md"},
   "generate_claude_rules.sh": {"desc": "Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md", "details": "Generates a prompt for an AI agent to regenerate RulesEngine/CLAUDE_RULES.md\n from RulesEngine/BUSINESS_RULES.md and related source files.\n Usage:\n   bash bin/generate_claude_rules.sh > rules-prompt.md\n   # Feed rules-prompt.md to an AI agent \u2014 paste output over RulesEngine/CLAUDE_RULES.md\n Exit codes:\n   0  Prompt generated successfully\n   1  Missing required files"},
   "iterate.sh": {"desc": "Generate an iteration prompt targeting gaps, ideas, and scorecard failures", "details": "Generates an iteration prompt for a oneshot-built prototype.\n Reads IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md from the spec directory\n and current SCORECARD.md from the prototype. Outputs a prompt to paste into\n Claude Code in the prototype directory.\n Usage:\n   bash bin/iterate.sh <spec-name>\n   bash bin/iterate.sh <spec-name> > <spec-name>/iterate-prompt.md\n   bash bin/iterate.sh <spec-name> --no-scorecard   # skip scorecard regeneration\n Reads:  Specifications/<spec>/*.md, IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md\n Writes: <spec>_prototype/SCORECARD.md (via scorecard.sh), then iterate-prompt.md to stdout"},
-  "merge.sh": {"desc": "Squash-merge a Feature Branch into base branch \u2014 called by GAME", "details": "Squash-merges a Feature Branch into the base branch and deletes the feature branch.\n Typically called by GAME via automation. Can be run directly with explicit args.\n Usage:\n   bash bin/merge.sh <spec-name>                           # read .env and METADATA\n   bash bin/merge.sh <spec-name> --feature <branch>        # override feature branch\n   bash bin/merge.sh <spec-name> --base <branch>           # override base branch\n   bash bin/merge.sh <spec-name> --dry-run                 # preview without merging\n Exit codes:\n   0  Success\n   1  Configuration error or git failure"},
+  "merge.sh": {"desc": "Squash-merges a Feature Branch into the base branch and deletes the feature branch.", "details": "Squash-merges a Feature Branch into the base branch and deletes the feature branch.\n Typically called by GAME via automation. Can be run directly with explicit args.\n Usage:\n   bash bin/merge.sh <spec-name>                           # read .env and METADATA\n   bash bin/merge.sh <spec-name> --feature <branch>        # override feature branch\n   bash bin/merge.sh <spec-name> --base <branch>           # override base branch\n   bash bin/merge.sh <spec-name> --dry-run                 # preview without merging\n Exit codes:\n   0  Success\n   1  Configuration error or git failure"},
   "oneshot.sh": {"desc": "Validate spec, detect mode, generate AI build prompt (bootstrap or feature branch)", "details": "Tags the current commit and generates a complete one-shot build prompt for an AI agent.\n Annotated tags are permanent git objects \u2014 never pruned by git gc.\n Detects build mode automatically from METADATA.md and .env:\n   Feature Branch mode  git_repo is set + BUILD_FEATURE_BRANCH_NAME in .env\n                        \u2192 clone/fetch project, create feature branch, generate prompt\n   New project mode     no git_repo or no BUILD_FEATURE_BRANCH_NAME\n                        \u2192 generate prompt only (create target dir manually, see docs)\n Usage:\n   bash bin/oneshot.sh <spec-name>                     # Print prompt to stdout (also tags)\n   bash bin/oneshot.sh <spec-name> > oneshot-prompt.md # Save to file\n   bash bin/oneshot.sh <spec-name> --tag-only          # Tag without generating prompt\n   bash bin/oneshot.sh <spec-name> --no-tag            # Generate prompt without tagging\n OneShot tags:\n   oneshot/{spec}/{YYYY-MM-DD.N}\n Examples:\n   bash bin/oneshot.sh GAME > oneshot-prompt.md\n   git diff oneshot/GAME/2026-03-19.1..oneshot/GAME/2026-03-19.2 -- GAME/"},
   "scorecard.sh": {"desc": "Generates SCORECARD.md in a prototype directory by checking the built code", "details": "Generates SCORECARD.md in a prototype directory by checking the built code\n against its specification files. Output is a checklist of KPIs.\n Usage:\n   bash bin/scorecard.sh <spec-name>\n   bash bin/scorecard.sh <spec-name> --verbose\n Reads: Specifications/<spec>/*.md, prototype routes.py, prototype STUBS.md, tests/\n Writes: SCORECARD.md in the prototype directory"},
   "setup.sh": {"desc": "Scaffold a new spec directory from templates (or update existing)", "details": "Scaffolds a new specification directory inside this repo from templates,\n or updates an existing one.\n Usage:\n   bash bin/setup.sh <spec-name>              # create Specifications/<name>/\n   bash bin/setup.sh <spec-name> --update     # copy new template files into existing dir\n   bash bin/setup.sh <spec-name> --force      # overwrite existing files\n Arguments:\n   $1        Spec name (required \u2014 created as a subdirectory of this repo)\n   --update  If directory exists, copy template files that are not yet present (no overwrite)\n   --force   If directory exists, overwrite all template files\n Creates:\n   <project-dir>/\n     METADATA.md, README.md, INTENT.md, ARCHITECTURE.md,\n     DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md\n Template source: RulesEngine/spec_template/"},

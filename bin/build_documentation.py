@@ -38,7 +38,6 @@ SCRIPT_DESCRIPTIONS = {
     'convert.sh':              'Generate an AI expansion prompt from concise spec files — optional intermediate step',
     'oneshot.sh':              'Validate spec, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
-    'merge.sh':                'Squash-merge a Feature Branch into base branch — called by GAME',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
@@ -55,8 +54,8 @@ GUIDE_TITLES = {
     'ENGINEERING-RULES':     'Engineering Rules Framework',
 }
 
-# Scripts hidden from the Administrator Scripts list (documented elsewhere)
-SCRIPTS_HIDDEN = {'generate_image.py'}
+# Scripts hidden from the scripts list (generate_*.py are per-project image generators)
+SCRIPTS_HIDDEN = set()  # pattern-filtered below: any generate_*.py is hidden
 
 
 # ── Discover scripts ──────────────────────────────────────────────────────────
@@ -263,6 +262,7 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Step 6 — Promote</a>\n'
+    step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript(\'generate_claude_rules.sh\')">generate_claude_rules.sh</a>\n'
 
@@ -364,7 +364,6 @@ def build_page(scripts, projects, guides):
         (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
         (2, 'bin/validate.sh &lt;Project&gt;', 'Check spec files, naming, fields, BUILD_FEATURE_BRANCH_NAME'),
         (3, 'bin/oneshot.sh &lt;Project&gt; &gt; prompt.md', 'Validate + detect mode + generate build prompt'),
-        (4, 'bin/merge.sh &lt;Project&gt;', 'Squash-merge Feature Branch into base branch (feature branch mode only)'),
     ]
     wf_rows = ''
     for n, cmd, desc in wf_step_data:
@@ -383,7 +382,7 @@ def build_page(scripts, projects, guides):
 
     other_parts = []
     for s in other_scripts:
-        if s['file'] in all_children or s['file'] in SCRIPTS_HIDDEN:
+        if s['file'] in all_children or s['file'] in SCRIPTS_HIDDEN or (s['file'].startswith('generate_') and s['file'].endswith('.py')):
             continue
         other_parts.append(sc_entry(s))
         for child_file in SCRIPT_CHILDREN.get(s['file'], []):
