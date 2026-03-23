@@ -350,8 +350,6 @@ def build_page(scripts, projects, guides):
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<div class="wf-row">{row1}</div>'
                   f'<div class="wf-row">{row2}</div>'
-                  f'<div class="wf-row">{iter_r1}</div>'
-                  f'<div class="wf-row">{iter_r2}</div>'
                   f'<p class="wf-section-h" style="margin:10px 0 4px">Business Rules</p>'
                   f'<div class="wf-row">{row_rules}</div>'
                   f'</div>')
