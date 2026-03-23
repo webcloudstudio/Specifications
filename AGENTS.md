@@ -124,11 +124,11 @@ bash bin/convert.sh <spec-name> > convert-prompt.md
 
 # OneShot: validate + detect mode + generate build prompt (canonical command)
 #
-#   Bootstrap mode (no git_repo or no BUILD_FEATURE_BRANCH_NAME):
-#     → writes <spec>/bootstrap.sh, then generate prompt
-#     bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
-#     bash <spec-name>/bootstrap.sh      # create target dir, git init
-#     cd /path/to/projects/<name> && claude .   # paste prompt
+#   New project mode (no git_repo or no BUILD_FEATURE_BRANCH_NAME):
+#     bash bin/oneshot.sh <spec-name> > <spec-name>/oneshot-prompt.md
+#     mkdir -p /mnt/c/Users/barlo/projects/<name> && cd /mnt/c/Users/barlo/projects/<name>
+#     git init && git checkout -b main
+#     claude .   # paste prompt
 #
 #   Feature Branch mode (git_repo + BUILD_FEATURE_BRANCH_NAME set in .env):
 #     → clone/fetch + create branch, then generate prompt
@@ -207,8 +207,9 @@ concise spec files from the project directory. Output is fed to an AI agent for 
 The canonical build command. Validates the spec, detects build mode, then generates a
 complete one-shot build prompt: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.
 
-**Bootstrap mode** (no `git_repo` or no `BUILD_FEATURE_BRANCH_NAME`): writes
-`<spec>/bootstrap.sh` with absolute paths to create and git-init the target directory.
+**New project mode** (no `git_repo` or no `BUILD_FEATURE_BRANCH_NAME`): generates
+the prompt only. Create the target directory manually (`mkdir` + `git init`), then open
+Claude Code and paste the prompt.
 
 **Feature Branch mode** (`git_repo` + `BUILD_FEATURE_BRANCH_NAME` both set): clones or
 fetches the project into `../<Name>/`, creates the feature branch, generates the prompt.

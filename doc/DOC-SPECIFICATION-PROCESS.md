@@ -59,97 +59,66 @@ Exit 0 = ready. Exit 1 = errors to fix.
 
 ## Step 4 — OneShot Build
 
-```bash
-bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md
-```
-
-Validates the spec, detects build mode, then generates the build prompt.
-
-### Mode A — Bootstrap (new project, no git remote)
-
-Used when `git_repo` is not set or `BUILD_FEATURE_BRANCH_NAME` is not configured.
-
-```
-bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md
-```
-
-1. Validates the spec (fails if any errors)
-2. Writes `<ProjectName>/bootstrap.sh` — absolute paths, `git init`, ready to run
-3. Generates the build prompt to stdout
-
-Then:
+Generates the complete build prompt. Validates the spec first — fails if any errors.
 
 ```bash
-bash <ProjectName>/bootstrap.sh        # create target dir and git init
-cd /path/to/projects/<ProjectName>
-claude .                               # open Claude Code in target dir
-# paste oneshot-prompt.md
+bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
 ```
 
-### Mode B — Feature Branch (existing project with git remote)
+The prompt is self-contained: CONVERT.md + CLAUDE_RULES.md + stack files + all spec files.
+Paste it into Claude Code with no other instructions needed.
 
-Used when `git_repo` is set in `METADATA.md` AND `BUILD_FEATURE_BRANCH_NAME` is set in `.env`.
+---
+
+### New project (no git remote)
 
 ```bash
-# In Specifications/<ProjectName>/.env:
+# 1. Generate the prompt
+bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
+
+# 2. Create and initialize the build directory
+mkdir -p /mnt/c/Users/barlo/projects/<ProjectName>
+cd /mnt/c/Users/barlo/projects/<ProjectName>
+git init && git checkout -b main
+
+# 3. Open Claude Code and paste the prompt
+claude .
+# paste <ProjectName>/oneshot-prompt.md
+```
+
+---
+
+### Feature Branch (git_repo + BUILD_FEATURE_BRANCH_NAME set)
+
+Set in `Specifications/<ProjectName>/.env`:
+```
 BUILD_FEATURE_BRANCH_NAME=feature/my-feature-name
 ```
 
 ```bash
-bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md
+# 1. Generate the prompt — also clones/fetches project and creates the branch
+bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
+
+# 2. Open Claude Code on the feature branch and paste the prompt
+cd /mnt/c/Users/barlo/projects/<ProjectName>
+claude .
+# paste <ProjectName>/oneshot-prompt.md
 ```
 
-1. Validates the spec (fails if any errors)
-2. Clones `git_repo` into `../<ProjectName>/` if it does not exist, or fetches if it does
-3. Creates `feature/<name>` branch from `base_branch` (configured or auto-detected)
-4. Generates the build prompt to stdout
+---
 
-Then:
+### Update (apply spec changes to existing code)
 
 ```bash
-cd /path/to/projects/<ProjectName>
-claude .                               # open Claude Code on feature branch
-# paste oneshot-prompt.md
+bash bin/oneshot.sh <ProjectName> --update > <ProjectName>/oneshot-prompt.md
+# open Claude Code in project dir, paste prompt
 ```
+
+---
 
 ### Stub Policy
 
 Any feature marked `[ROADMAP]` or underspecified is automatically stubbed by the agent:
 - Real route/function returning a placeholder (not dead code)
 - `# TODO: [stub] <what is needed>` comment inline
-- `STUBS.md` written at project root listing every stub: file, line, description
-
----
-
-## Update Builds
-
-To apply spec changes to an existing project:
-
-```bash
-bash bin/oneshot.sh <ProjectName> --update > oneshot-prompt.md
-```
-
-Generates an update prompt — agent applies spec changes to existing code, does not rebuild from scratch.
-
----
-
-## Full Command Reference
-
-```bash
-# New project (no git_repo / no feature branch):
-bash bin/validate.sh <ProjectName>
-bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md
-bash <ProjectName>/bootstrap.sh        # create target dir, git init
-cd /mnt/c/Users/barlo/projects/<ProjectName> && claude .
-# paste oneshot-prompt.md
-
-# Existing project (git_repo + BUILD_FEATURE_BRANCH_NAME set):
-bash bin/validate.sh <ProjectName>
-bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md   # clones/fetches, creates branch
-cd /mnt/c/Users/barlo/projects/<ProjectName> && claude .
-# paste oneshot-prompt.md
-
-# Update existing project with spec changes:
-bash bin/oneshot.sh <ProjectName> --update > oneshot-prompt.md
-# open Claude Code in project dir, paste prompt
-```
+- `STUBS.md` at project root listing every stub: file, line, description
