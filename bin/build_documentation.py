@@ -318,14 +318,15 @@ def build_page(scripts, projects, guides):
 
     row1 = ARR.join([
         wf_box('Setup', 'setup.sh'),
+        wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True),
         wf_box('Validate', 'validate.sh'),
         wf_box('OneShot', 'oneshot.sh'),
-        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
+        wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
     ])
     row2 = ARR.join([
-        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
+        wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
         wf_box('Iterate', 'iterate.sh'),
-        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
+        wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
         wf_box('Promote'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
@@ -341,12 +342,10 @@ def build_page(scripts, projects, guides):
 
     iter_r1 = (wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True) + ARR +
                wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>') + ARR +
-               wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True) + AND +
-               wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True))
+               wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True))
     iter_r2 = (wf_box('Specification files updated', '', 'IDEAS / REFERENCE_GAPS / AC', terminal=True) + ARR +
                wf_box('iterate.sh', 'bin/iterate.sh <PROJECT>') + ARR +
-               wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True) + AND +
-               wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True))
+               wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True))
 
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<div class="wf-row">{row1}</div>'
