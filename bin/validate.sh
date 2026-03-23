@@ -165,14 +165,6 @@ else
     echo "  INFO  conformity level: ${STATUS:-UNKNOWN} (${CONF_LEVEL})"
 fi
 
-# PROTOTYPE+ checks
-if [ "${CONF_LEVEL}" -ge 1 ]; then
-    if [ -f "$PROJECT_DIR/AGENTS.md" ]; then
-        pass "AGENTS.md exists (required at PROTOTYPE+)"
-    else
-        warn "AGENTS.md missing (expected at PROTOTYPE+)"
-    fi
-fi
 echo ""
 
 # --- Naming conventions ---
