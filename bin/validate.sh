@@ -150,8 +150,7 @@ if [ -f "$PROJECT_DIR/METADATA.md" ]; then
         if [ -n "$FEATURE_BRANCH" ]; then
             pass "BUILD_FEATURE_BRANCH_NAME: $FEATURE_BRANCH"
         else
-            fail "BUILD_FEATURE_BRANCH_NAME missing — add to $PROJECT_DIR/.env:
-      BUILD_FEATURE_BRANCH_NAME=feature/my-feature-name"
+            warn "BUILD_FEATURE_BRANCH_NAME not set in $PROJECT_DIR/.env (required for build.sh; not needed for oneshot.sh)"
         fi
     fi
 fi
@@ -165,6 +164,15 @@ else
     echo "  INFO  conformity level: ${STATUS:-UNKNOWN} (${CONF_LEVEL})"
 fi
 
+# --- Build target ---
+echo "Build target:"
+PROJECTS_DIR="$(cd "$REPO_DIR/.." && pwd)"
+TARGET_DIR="$PROJECTS_DIR/$PROJECT_NAME"
+if [ -d "$TARGET_DIR" ]; then
+    echo "  INFO  Update build — existing project at $TARGET_DIR"
+else
+    echo "  INFO  New build — target directory will be created: $TARGET_DIR"
+fi
 echo ""
 
 # --- Naming conventions ---
