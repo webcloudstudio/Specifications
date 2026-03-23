@@ -135,8 +135,10 @@ OUTPUT="$PROTO_DIR/SCORECARD.md"
     echo ""
     AC_FILE="$SPEC_DIR/ACCEPTANCE_CRITERIA.md"
     if [ -f "$AC_FILE" ]; then
-        AC_COUNT=$(grep -c "^- " "$AC_FILE" 2>/dev/null || echo 0)
-        FOLDED_COUNT=$(sed -n '/^## Folded/,$ p' "$AC_FILE" 2>/dev/null | grep -c "^- " 2>/dev/null || echo 0)
+        AC_COUNT=$(grep -c "^- " "$AC_FILE" 2>/dev/null || true)
+        AC_COUNT=${AC_COUNT:-0}; AC_COUNT=$(echo "$AC_COUNT" | tr -d '[:space:]')
+        FOLDED_COUNT=$(sed -n '/^## Folded/,$ p' "$AC_FILE" 2>/dev/null | grep -c "^- " 2>/dev/null || true)
+        FOLDED_COUNT=${FOLDED_COUNT:-0}; FOLDED_COUNT=$(echo "$FOLDED_COUNT" | tr -d '[:space:]')
         ACTIVE_COUNT=$((AC_COUNT - FOLDED_COUNT))
         echo "- $ACTIVE_COUNT active criteria, $FOLDED_COUNT folded"
 
@@ -244,8 +246,10 @@ OUTPUT="$PROTO_DIR/SCORECARD.md"
     echo ""
     GAPS_FILE="$SPEC_DIR/REFERENCE_GAPS.md"
     if [ -f "$GAPS_FILE" ]; then
-        OPEN_GAPS=$(grep -c '^\- \[ \]' "$GAPS_FILE" 2>/dev/null || echo 0)
-        CLOSED_GAPS=$(grep -c '^\- \[x\]' "$GAPS_FILE" 2>/dev/null || echo 0)
+        OPEN_GAPS=$(grep -c '^\- \[ \]' "$GAPS_FILE" 2>/dev/null || true)
+        OPEN_GAPS=${OPEN_GAPS:-0}; OPEN_GAPS=$(echo "$OPEN_GAPS" | tr -d '[:space:]')
+        CLOSED_GAPS=$(grep -c '^\- \[x\]' "$GAPS_FILE" 2>/dev/null || true)
+        CLOSED_GAPS=${CLOSED_GAPS:-0}; CLOSED_GAPS=$(echo "$CLOSED_GAPS" | tr -d '[:space:]')
         TOTAL_GAPS=$((OPEN_GAPS + CLOSED_GAPS))
         if [ "$TOTAL_GAPS" -gt 0 ]; then
             PCT=$((CLOSED_GAPS * 100 / TOTAL_GAPS))
@@ -253,7 +257,8 @@ OUTPUT="$PROTO_DIR/SCORECARD.md"
         fi
         # Count by priority
         for p in P0 P1 P2 P3; do
-            P_OPEN=$(grep '^\- \[ \]' "$GAPS_FILE" 2>/dev/null | grep -c "$p" 2>/dev/null || echo 0)
+            P_OPEN=$(grep '^\- \[ \]' "$GAPS_FILE" 2>/dev/null | grep -c "$p" 2>/dev/null || true)
+            P_OPEN=${P_OPEN:-0}; P_OPEN=$(echo "$P_OPEN" | tr -d '[:space:]')
             if [ "$P_OPEN" -gt 0 ]; then
                 echo "- $P_OPEN open $p gaps"
             fi
