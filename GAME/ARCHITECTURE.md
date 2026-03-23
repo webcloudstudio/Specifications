@@ -53,7 +53,7 @@ Builds static portfolio site from METADATA.md fields.
 
 1. Query projects where `show_on_homepage = true`
 2. Generate card HTML from title, short_description, tags, image
-3. If project has `doc/index.html`, add documentation link
+3. If project has `docs/index.html`, add documentation link
 4. Write static site to output directory
 5. Optionally push to GitHub Pages
 
@@ -102,7 +102,7 @@ GAME/
     common.py            Shared Python functions
     start.sh             Start Flask dev server
     stop.sh              Stop server
-    build_documentation.sh  Generate docs/
+    build_documentation.sh  Generate docs/ and docs/index.html
   data/
     game.db        SQLite database
   docs/                  Generated documentation

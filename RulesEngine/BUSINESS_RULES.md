@@ -17,10 +17,13 @@ Requires: METADATA.md with `name` and `status: IDEA`
 Requires: IDEA + all METADATA required fields + AGENTS.md with required sections
 
 ### ACTIVE
-Requires: PROTOTYPE + tests exist (`tests/` directory) + `doc/` exists
+Requires: PROTOTYPE + tests exist (`tests/` directory) + `docs/` exists
 
 ### PRODUCTION
 Requires: ACTIVE + `bin/deploy.sh` exists + `health` endpoint declared in METADATA.md
+
+### Documentation Directory
+All projects MUST use `docs/` (not `doc/`) for generated documentation. There is no `doc/` directory.
 
 ### ARCHIVED
 No enforcement — read-only historical record.
@@ -90,7 +93,7 @@ ProjectName/
   bin/              All executable scripts
     common.sh       Shared functions — sourced by all bash scripts
     common.py       Shared OperationContext — imported by Python scripts
-  doc/              Generated documentation
+  docs/             Generated documentation
   logs/             Log files (gitignored)
   data/             Persistent data
   tests/            Test suite
@@ -117,7 +120,7 @@ All scripts live in `bin/` — bash (`.sh`) or Python (`.py`). The `# CommandCen
 | `bin/build.sh` | Build / compile / package | Build |
 | `bin/daily.sh` | Daily maintenance | Daily Batch |
 | `bin/weekly.sh` | Weekly maintenance | Weekly Batch |
-| `bin/build_documentation.sh` | Generate doc/ output | Build Doc |
+| `bin/build_documentation.sh` | Generate docs/ output | Build Doc |
 | `bin/deploy.sh` | Deploy to environment | Deploy |
 | `bin/test.sh` | Run project tests — stub is acceptable | Test |
 
@@ -233,7 +236,7 @@ updated: 20260316_120000                     # set automatically by platform scr
 - Local: http://localhost:PORT
 
 ## Bookmarks
-- [Documentation](doc/index.html)
+- [Documentation](docs/index.html)
 ```
 
 Only include commands and endpoints that actually exist for the project.

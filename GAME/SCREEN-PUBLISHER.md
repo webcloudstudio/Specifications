@@ -39,7 +39,7 @@ Four sections stacked vertically: Build, Preview, Publish, Homepage.
 
 1. Scan all projects where `show_on_homepage = true`
 2. Parse card fields: `card_title` (fallback: `display_name`), `card_desc` (fallback: `short_description`), `card_tags` (fallback: `tags`), `card_image` (fallback: `logo`)
-3. If project has `doc/index.html`, add documentation link to card
+3. If project has `docs/index.html`, add documentation link to card
 4. Generate static site from `config/site_config.md` branding
 5. Serve locally or push to GitHub Pages
 

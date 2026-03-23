@@ -44,7 +44,7 @@ Scanner reads $PROJECTS_DIR
   |       |       package.json --> has_node
   |       |       CLAUDE.md --> has_claude
   |       |       tests/ or bin/test.sh --> has_tests
-  |       |       doc/index.html --> has_docs
+  |       |       docs/index.html --> has_docs
   |       |       Specifications/{name}/ --> has_specs
   |       |
   |       +---> Upsert into `projects` table
@@ -223,7 +223,7 @@ BUILD:
     |       card_type     --> fallback to project_type
     |       card_url      --> fallback to deploy_url or git_repo
     |
-    +---> Check for doc/index.html --> add Documentation link if exists
+    +---> Check for docs/index.html --> add Documentation link if exists
     |
     +---> Generate card HTML fragment
     |

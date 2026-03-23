@@ -35,7 +35,7 @@ ProjectName/
   bin/              All executable scripts
     common.sh       Shared functions — sourced by all bash scripts
     common.py       Shared OperationContext — imported by Python scripts
-  doc/              Generated documentation
+  docs/             Generated documentation
   logs/             Log files (gitignored)
   data/             Persistent data
   tests/            Test suite
@@ -56,7 +56,7 @@ All scripts live in `bin/` — bash (`.sh`) or Python (`.py`). The `# CommandCen
 | `bin/build.sh` | Build / compile / package | Build |
 | `bin/daily.sh` | Daily maintenance | Daily Batch |
 | `bin/weekly.sh` | Weekly maintenance | Weekly Batch |
-| `bin/build_documentation.sh` | Generate doc/ output | Build Doc |
+| `bin/build_documentation.sh` | Generate docs/ output | Build Doc |
 | `bin/deploy.sh` | Deploy to environment | Deploy |
 
 If the script name matches a Standard Script Name the following header should exist with a Name: field matching the Name String.  If possible
@@ -140,7 +140,7 @@ updated: 20260316_120000                     # set automatically by platform scr
 - Local: http://localhost:PORT
 
 ## Bookmarks
-- [Documentation](doc/index.html)
+- [Documentation](docs/index.html)
 ```
 
 Only include commands and endpoints that actually exist for the project.

@@ -272,6 +272,25 @@ if [ -f "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" ]; then
     emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
 fi
 
+# --- CLAUDE_PROTOTYPE_RULES.md (iteration rules for oneshot-built prototypes) ---
+if [ -f "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE_RULES.md" ]; then
+    echo "# PROTOTYPE ITERATION RULES"
+    echo ""
+    echo "These rules MUST be injected into the prototype's AGENTS.md under an ## Iteration Rules section."
+    echo "They are ONLY active when working in this prototype directory."
+    echo ""
+    emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE_RULES.md" "CLAUDE_PROTOTYPE_RULES.md"
+fi
+
+# --- Additional RulesEngine .md files (drop-in) ---
+for rules_file in "$REPO_DIR"/RulesEngine/*.md; do
+    fname="$(basename "$rules_file")"
+    case "$fname" in
+        CLAUDE_RULES.md|CLAUDE_PROTOTYPE_RULES.md|CONVERT.md|BUSINESS_RULES.md|DOCUMENTATION_BRANDING.md) continue ;;
+    esac
+    emit_file "$rules_file" "Rules: $fname"
+done
+
 # --- Technology Files ---
 echo "# TECHNOLOGY REFERENCES"
 echo ""
@@ -309,6 +328,23 @@ for spec_file in $(find "$PROJECT_DIR" -maxdepth 1 -name '*.md' ! -name 'METADAT
     emit_file "$spec_file" "Spec: $fname"
 done
 
+# --- Iteration artifacts (if they exist) ---
+HAS_ITERATION=false
+for iter_file in ACCEPTANCE_CRITERIA.md REFERENCE_GAPS.md IDEAS.md; do
+    if [ -f "$PROJECT_DIR/$iter_file" ]; then
+        if [ "$HAS_ITERATION" = false ]; then
+            echo ""
+            echo "# ITERATION FEEDBACK"
+            echo ""
+            echo "These files capture feedback from previous prototype iterations."
+            echo "Address acceptance criteria as hard requirements. Close gaps where specified. Process ideas if time permits."
+            echo ""
+            HAS_ITERATION=true
+        fi
+        emit_file "$PROJECT_DIR/$iter_file" "Iteration: $iter_file"
+    fi
+done
+
 # --- Footer ---
 if [ "$UPDATE" = true ]; then
 cat <<FOOTER
@@ -319,6 +355,13 @@ cat <<FOOTER
 Update this project following the conversion rules, integration standard, technology references, and specification files above.
 Apply spec changes to the existing codebase — do not rebuild from scratch.
 All patterns in the technology references are prescriptive — use them exactly as shown.
+
+## Session Summary Requirement
+At the end of this session, print a summary of all specification files written or modified:
+\`\`\`
+--- Specification Updates ---
+<filename>: <what changed>
+\`\`\`
 FOOTER
 else
 cat <<FOOTER
@@ -329,5 +372,12 @@ cat <<FOOTER
 Build this project following the conversion rules, integration standard, technology references, and specification files above.
 All patterns in the technology references are prescriptive — use them exactly as shown.
 Expand concise specifications inline according to the conversion rules during implementation.
+
+## Session Summary Requirement
+At the end of this session, print a summary of all files written:
+\`\`\`
+--- Build Summary ---
+<filename>: <what was created>
+\`\`\`
 FOOTER
 fi

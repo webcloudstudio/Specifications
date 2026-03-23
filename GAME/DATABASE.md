@@ -87,7 +87,7 @@ Every field stored in the `projects` table, its source, and when it is read.
 |-----|--------|-------|
 | `links` | `METADATA.md` → `## Links` table | List of `{label, url}` shown in Links column |
 | `bookmarks` | `AGENTS.md` / `CLAUDE.md` → `## Bookmarks` | Quick-access links for AI context |
-| `doc_path` | Filesystem detection | Relative path to doc index (e.g., `doc/index.html`); used to build Flask proxy URL `/project/{id}/doc/index.html` |
+| `doc_path` | Filesystem detection | Relative path to doc index (e.g., `docs/index.html`); used to build Flask proxy URL `/project/{id}/doc/index.html` |
 | `tech_stack` | Auto-detected from `app.py`, `package.json`, etc. | Fallback for `stack` column |
 | `has_start_sh` | `bin/start.sh` present | Legacy flag; bin operations supersede this |
 
