@@ -22,6 +22,7 @@ if [ -z "${1:-}" ] || [[ "${1:-}" == --* ]]; then
     exit 1
 fi
 
+PROJECT_NAME="$1"
 PROJECT_DIR="$REPO_DIR/$1"
 shift
 
