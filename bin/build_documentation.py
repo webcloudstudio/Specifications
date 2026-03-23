@@ -33,11 +33,12 @@ SCRIPT_CHILDREN = {
 
 # Human-readable descriptions override auto-detected ones
 SCRIPT_DESCRIPTIONS = {
-    'setup.sh':                'Scaffold a new spec directory from templates (or update existing)',
-    'validate.sh':             'Check a spec directory for required files, naming, and completeness',
-    'convert.sh':              'Generate an AI expansion prompt from concise spec files — optional intermediate step',
-    'oneshot.sh':              'Validate spec, detect mode, generate AI build prompt (bootstrap or feature branch)',
+    'setup.sh':                'Scaffold a new Specifications directory from templates (or update existing)',
+    'validate.sh':             'Check a Specifications directory for required files, naming, and completeness',
+    'convert.sh':              'Generate an AI expansion prompt from concise Specification files — optional intermediate step',
+    'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
+    'extract_session_feedback.sh': 'Extract bugs, gaps, and ideas from recent sessions — updates IDEAS.md, ACCEPTANCE_CRITERIA.md, REFERENCE_GAPS.md',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
@@ -260,6 +261,7 @@ def build_page(scripts, projects, guides):
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Step 5 — Iterate</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="extract_session_feedback.sh" onclick="showScript(\'extract_session_feedback.sh\')">extract_session_feedback.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Step 6 — Promote</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
@@ -339,15 +341,17 @@ def build_page(scripts, projects, guides):
                    f'</div>')
 
     iter_r1 = ARR.join([
-        wf_box('IDEAS.md', '', 'Specifications/GAME/', terminal=True),
-        wf_box('"process ideas"', 'Claude routes entries', ai=True),
-        wf_box('Spec files updated', '', 'REFERENCE_GAPS / AC', terminal=True),
+        wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True),
+        wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>'),
+        wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True),
+        wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True),
     ])
     iter_r2 = ARR.join([
-        wf_box('Spec files updated', '', 'REFERENCE_GAPS / AC', terminal=True),
-        wf_box('iterate.sh', 'bin/iterate.sh GAME'),
+        wf_box('Specification files updated', '', 'IDEAS / REFERENCE_GAPS / AC', terminal=True),
+        wf_box('iterate.sh', 'bin/iterate.sh <PROJECT>'),
         wf_box('iterate-prompt.md', 'paste into Claude Code', ai=True),
-        wf_box('PROTOTYPE', '', 'GAME_prototype/', terminal=True),
+        wf_box('PROTOTYPE', '', '<PROJECT>_prototype/', terminal=True),
+        wf_box('SCORECARD.md', '', '<PROJECT>_prototype/', terminal=True),
     ])
     iter_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
                     f'<div class="wf-row">{iter_r1}</div>'
@@ -361,8 +365,8 @@ def build_page(scripts, projects, guides):
 
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
-        (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
-        (2, 'bin/validate.sh &lt;Project&gt;', 'Check spec files, naming, fields, BUILD_FEATURE_BRANCH_NAME'),
+        (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold Specifications directory from templates'),
+        (2, 'bin/validate.sh &lt;Project&gt;', 'Check Specification files, naming, fields'),
         (3, 'bin/oneshot.sh &lt;Project&gt; &gt; prompt.md', 'Validate + detect mode + generate build prompt'),
     ]
     wf_rows = ''
@@ -578,12 +582,12 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
     <p class="wf-section-h">Dictionary</p>
     <div class="proc-defs">
-      <div class="proc-item"><span class="proc-term">Spec</span><span class="proc-def">Markdown files in <code>Specifications/&lt;Name&gt;/</code> — concise tables and bullets defining what to build</span></div>
-      <div class="proc-item"><span class="proc-term">Project</span><span class="proc-def">A live git repository with <code>METADATA.md</code>, conforming to platform standards, discovered by GAME</span></div>
-      <div class="proc-item"><span class="proc-term">Prototype</span><span class="proc-def">A Project on a named Feature Branch — built by AI from the spec, runnable and testable before merge</span></div>
+      <div class="proc-item"><span class="proc-term">Specification</span><span class="proc-def">Markdown files in <code>Specifications/&lt;Name&gt;/</code> — concise tables and bullets defining what to build</span></div>
+      <div class="proc-item"><span class="proc-term">Project</span><span class="proc-def">A live git repository with <code>METADATA.md</code>, conforming to platform standards, discovered by Prototyper</span></div>
+      <div class="proc-item"><span class="proc-term">Prototype</span><span class="proc-def">A directory built by AI from the Specification — runnable and testable, iterated before merge</span></div>
       <div class="proc-item"><span class="proc-term">Feature Branch</span><span class="proc-def">Configured in <code>.env</code> as <code>BUILD_FEATURE_BRANCH_NAME=feature/name</code> — contains AI-built code pending merge</span></div>
       <div class="proc-item"><span class="proc-term">Build</span><span class="proc-def">Clones or fetches the project, creates the Feature Branch from base code, generates the AI build prompt</span></div>
-      <div class="proc-item"><span class="proc-term">Merge</span><span class="proc-def">Squash-merges the Feature Branch into the base branch — triggered via GAME UI, hides all git from the user</span></div>
+      <div class="proc-item"><span class="proc-term">Merge</span><span class="proc-def">Squash-merges the Feature Branch into the base branch — triggered via Prototyper UI, hides all git from the user</span></div>
     </div>
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
     <p class="wf-section-h">Administrator Scripts</p>
