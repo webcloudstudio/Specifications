@@ -93,15 +93,15 @@ When Claude fixes code in the prototype, it automatically:
 
 ---
 
-## Extracting Feedback from Sessions
+## Transaction Log
 
 After a prototype session, run to update the feedback files automatically:
 
-```bash
-bash bin/extract_session_feedback.sh <PROJECT>
+```
+bash bin/update.sh <PROJECT>
 ```
 
-Uses haiku via `claude -p` — reads recent prototype changes and updates IDEAS.md, ACCEPTANCE_CRITERIA.md, REFERENCE_GAPS.md in `Specifications/<PROJECT>/`.
+Reads the Claude Code session transaction log and recent git history. Writes discovered bugs and ideas to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md` in `Specifications/<PROJECT>/`.
 
 ---
 

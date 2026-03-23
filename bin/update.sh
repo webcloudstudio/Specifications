@@ -1,18 +1,25 @@
 #!/bin/bash
 # CommandCenter Operation
-# Name: Extract Session Feedback
+# Name: Update
 # Category: maintenance
 
-# Analyzes recent prototype changes and updates iteration feedback files.
-# Reads recent git history from the prototype and Specifications directory,
-# then uses claude -p (haiku) to extract bugs, gaps, and ideas and write
-# them to the iteration feedback files.
+# Reads the session transaction log and updates iteration feedback files.
+# Analyzes recent prototype activity (git history + Claude Code session logs)
+# and uses an AI model to extract bugs found and ideas from the session.
+#
+# The transaction log is the Claude Code session JSONL stored at:
+#   ~/.claude/projects/<prototype-path>/
 #
 # Usage:
-#   bash bin/extract_session_feedback.sh <spec-name>
-#   bash bin/extract_session_feedback.sh <spec-name> --model=claude-opus-4-6
+#   bash bin/update.sh <ProjectName>
+#   bash bin/update.sh <ProjectName> --model=<model>
 #
-# Updates: Specifications/<spec>/IDEAS.md, ACCEPTANCE_CRITERIA.md, REFERENCE_GAPS.md
+# Writes:
+#   Specifications/<ProjectName>/IDEAS.md
+#   Specifications/<ProjectName>/ACCEPTANCE_CRITERIA.md
+#
+# Options:
+#   --model=<model>    AI model to use (default: claude-haiku-4-5-20251001)
 
 set -euo pipefail
 
@@ -29,7 +36,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/extract_session_feedback.sh <spec-name> [--model=<model>]" >&2
+    echo "Usage: bash bin/update.sh <ProjectName> [--model=<model>]" >&2
     exit 1
 fi
 
@@ -59,7 +66,7 @@ if ! command -v claude &>/dev/null; then
     exit 1
 fi
 
-echo "Extract Session Feedback: $PROJECT_NAME" >&2
+echo "Update: $PROJECT_NAME" >&2
 echo "  Specifications: $SPEC_DIR" >&2
 echo "  Prototype:      $PROTO_DIR" >&2
 echo "  Model:          $MODEL" >&2
@@ -112,9 +119,9 @@ PROMPT="${PROTOTYPE_RULES}
 
 ---
 
-# Extract Session Feedback Task
+# Update Task
 
-You are updating the iteration feedback files for **${PROJECT_NAME}** based on recent development activity.
+You are updating the iteration feedback files for **${PROJECT_NAME}** based on recent session activity.
 
 ## Prototype directory: $PROTO_DIR
 
@@ -128,7 +135,7 @@ ${PROTO_LOG:-"(no git history found)"}
 ${SPEC_LOG:-"(no recent changes)"}
 \`\`\`
 ${SESSION_CONTENT:+
-### Recent session activity (extracted from Claude Code sessions):
+### Recent session activity (extracted from Claude Code session log):
 $SESSION_CONTENT
 }
 
@@ -139,11 +146,7 @@ Read the current iteration files and prototype code, then update:
 1. **ACCEPTANCE_CRITERIA.md** — Add MUST/MUST NOT statements for bugs found or behavior constraints.
    Format: \`- MUST <present tense statement>\` or \`- MUST NOT <present tense statement>\`
 
-2. **REFERENCE_GAPS.md** — Add unchecked items for missing/incomplete features. Close gaps that are done.
-   Format: \`- [ ] [P1] <gap description>\`
-   Check done gaps: \`- [x] [P1] <gap description>\`
-
-3. **IDEAS.md** — Add ideas, improvements, or observations not yet captured.
+2. **IDEAS.md** — Add ideas, improvements, or observations not yet captured.
    Format: \`- <short description>\`
 
 Only add genuinely new items. Do not duplicate existing entries.
@@ -153,9 +156,8 @@ If a file does not exist, create it with a minimal header line.
 
 Print a summary of all changes at the end:
 \`\`\`
---- Feedback Extraction ---
+--- Update ---
 ACCEPTANCE_CRITERIA.md: +N entries
-REFERENCE_GAPS.md: +N added, N closed
 IDEAS.md: +N entries
 \`\`\`
 "
@@ -169,4 +171,4 @@ cd "$PROTO_DIR" && claude -p "$PROMPT" \
     --allowedTools "Read,Write,Glob,Grep"
 
 echo "" >&2
-echo "Feedback extraction complete. Check: $SPEC_DIR" >&2
+echo "Update complete. Check: $SPEC_DIR" >&2

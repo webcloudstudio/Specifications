@@ -12,6 +12,7 @@ Sidebar: Workflow (+ step sub-items) | Workflow Scripts | Setup A Project | Curr
 """
 import html as h
 import json
+import re as _re
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).parent.parent
@@ -38,7 +39,7 @@ SCRIPT_DESCRIPTIONS = {
     'convert.sh':              'Generate an AI expansion prompt from concise Specification files — optional intermediate step',
     'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
-    'extract_session_feedback.sh': 'Extract bugs, gaps, and ideas from recent sessions — updates IDEAS.md, ACCEPTANCE_CRITERIA.md, REFERENCE_GAPS.md',
+    'update.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
@@ -57,6 +58,25 @@ GUIDE_TITLES = {
 
 # Scripts hidden from the scripts list (generate_*.py are per-project image generators)
 SCRIPTS_HIDDEN = set()  # pattern-filtered below: any generate_*.py is hidden
+
+
+def _parse_script_sections(details):
+    """Parse script header comment text into named sections for man page rendering.
+    Returns dict with '_desc' for prose before first section header, plus named sections."""
+    sections = {}
+    cur = '_desc'
+    buf = []
+    for line in details.splitlines():
+        s = line.strip()
+        # Section header: Title Case word(s) ending with ':', short, no path chars
+        if _re.match(r'^[A-Z][a-zA-Z ]{1,18}:$', s):
+            sections[cur] = '\n'.join(buf).strip()
+            cur = s[:-1]
+            buf = []
+        else:
+            buf.append(s)
+    sections[cur] = '\n'.join(buf).strip()
+    return sections
 
 
 # ── Discover scripts ──────────────────────────────────────────────────────────
@@ -100,6 +120,7 @@ def discover_scripts():
                 'file': path.name, 'label': label,
                 'desc': desc,
                 'details': details,
+                'sections': _parse_script_sections(details),
             })
     return scripts
 
@@ -223,7 +244,7 @@ def build_page(scripts, projects, guides):
     # ── Script JS data ─────────────────────────────────────────────────────────
     scripts_js = 'const SCRIPTS = {\n'
     for s in scripts:
-        scripts_js += f'  {json.dumps(s["file"])}: {json.dumps({"desc": s["desc"], "details": s.get("details", "")})},\n'
+        scripts_js += f'  {json.dumps(s["file"])}: {json.dumps({"desc": s["desc"], "sections": s.get("sections", {})})},\n'
     scripts_js += '};'
 
     # ── Separate workflow vs other scripts ────────────────────────────────────
@@ -260,7 +281,7 @@ def build_page(scripts, projects, guides):
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
     step_nav += f'  <a class="sn" data-step="5" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 5)">Step 5 — Iterate</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="extract_session_feedback.sh" onclick="showScript(\'extract_session_feedback.sh\')">extract_session_feedback.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="update.sh" onclick="showScript(\'update.sh\')">update.sh</a>\n'
     step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 6)">Step 6 — Promote</a>\n'
     step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
@@ -493,14 +514,22 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .md hr {{ border: none; border-top: 1px solid var(--c-td-border); margin: 16px 0; }}
 
 /* ── Script man page ── */
-.sd-title {{ font-size: 18px; font-weight: 700; color: var(--c-h1); margin: 0 0 6px;
+.sd-man {{ max-width: 700px; padding: 2px 0; }}
+.sd-sec {{ font-size: 10.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--c-accent); margin: 20px 0 6px; }}
+.sd-sec:first-child {{ margin-top: 0; }}
+.sd-body {{ padding-left: 22px; }}
+.sd-name-line {{ font-size: 15px; font-weight: 700; color: var(--c-h1);
   font-family: 'Cascadia Code', Consolas, monospace; }}
-.sd-desc-p {{ font-size: 14px; color: var(--c-h3); margin: 0 0 14px; }}
-.sd-pre {{ background: #F0EFEA; color: #2E3640; font-size: 12.5px;
-  font-family: 'Cascadia Code', Consolas, monospace; padding: 12px 16px;
-  border-radius: 4px; line-height: 1.5; white-space: pre;
-  border: 1px solid var(--c-td-border); overflow-x: auto; }}
-.sd-none {{ font-size: 13px; color: var(--c-h3); font-style: italic; }}
+.sd-name-dash {{ font-size: 14px; color: var(--c-h3); font-family: 'Segoe UI', Arial, sans-serif; font-weight: 400; }}
+.sd-body p {{ margin: 0 0 7px; color: var(--c-text); font-size: 13px; line-height: 1.65;
+  font-family: 'Segoe UI', Arial, sans-serif; }}
+.sd-cmd {{ display: block; font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
+  color: var(--c-pre-text); background: var(--c-pre-bg); padding: 5px 12px; border-radius: 3px;
+  margin: 4px 0; border: 1px solid var(--c-side-border); }}
+.sd-item {{ font-size: 12.5px; color: var(--c-text); padding: 2px 0;
+  font-family: 'Cascadia Code', Consolas, monospace; }}
+.sd-empty {{ font-size: 13px; color: var(--c-h3); font-style: italic; }}
 
 /* ── Scripts (expandable, for Other Scripts section) ── */
 .sc-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
@@ -590,10 +619,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 
   <!-- ── Script man page ───────────────────────── -->
   <div id="script-detail" class="content-section">
-    <h2 id="sd-file" class="sd-title"></h2>
-    <p id="sd-desc" class="sd-desc-p"></p>
-    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:0 0 14px;">
-    <pre id="sd-usage" class="sd-pre"></pre>
+    <div id="sd-content"></div>
   </div>
 
   <!-- ── Project viewer (iframe) ───────────────── -->
@@ -656,18 +682,57 @@ function showGuideStep(key, step) {{
   }}, 80);
 }}
 
+function esc(t) {{ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
+
 function showScript(file) {{
-  var s = SCRIPTS[file];
-  document.getElementById('sd-file').textContent = file;
-  document.getElementById('sd-desc').textContent = s ? s.desc : '';
-  var pre = document.getElementById('sd-usage');
-  if (s && s.details) {{
-    pre.textContent = s.details;
-    pre.className = 'sd-pre';
-  }} else {{
-    pre.textContent = '(no usage documentation available)';
-    pre.className = 'sd-pre sd-none';
+  var s = SCRIPTS[file] || {{}};
+  var desc = s.desc || '';
+  var secs = s.sections || {{}};
+
+  var html = '<div class="sd-man">';
+
+  // NAME
+  html += '<div class="sd-sec">Name</div>';
+  html += '<div class="sd-body"><span class="sd-name-line">' + esc(file) + '</span>';
+  if (desc) html += '<span class="sd-name-dash"> &mdash; ' + esc(desc) + '</span>';
+  html += '</div>';
+
+  // SYNOPSIS
+  var syn = secs['Usage'] || secs['Synopsis'] || '';
+  if (syn) {{
+    html += '<div class="sd-sec">Synopsis</div><div class="sd-body">';
+    syn.split('\\n').forEach(function(line) {{
+      if (line.trim()) html += '<code class="sd-cmd">' + esc(line.trim()) + '</code>';
+    }});
+    html += '</div>';
   }}
+
+  // DESCRIPTION
+  var body = secs['_desc'] || '';
+  if (body) {{
+    html += '<div class="sd-sec">Description</div><div class="sd-body">';
+    body.split('\\n\\n').forEach(function(para) {{
+      var t = para.trim().replace(/\\n/g, ' ');
+      if (t) html += '<p>' + esc(t) + '</p>';
+    }});
+    html += '</div>';
+  }}
+
+  // Additional sections (Writes, Options, Modes, Examples, etc.)
+  var skip = {{'_desc':1,'Usage':1,'Synopsis':1}};
+  Object.keys(secs).forEach(function(key) {{
+    if (skip[key] || !secs[key].trim()) return;
+    html += '<div class="sd-sec">' + esc(key) + '</div><div class="sd-body">';
+    secs[key].split('\\n').forEach(function(line) {{
+      if (line.trim()) html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
+    }});
+    html += '</div>';
+  }});
+
+  if (!desc && !syn && !body) html += '<div class="sd-empty">(no documentation available)</div>';
+  html += '</div>';
+
+  document.getElementById('sd-content').innerHTML = html;
   show('script-detail');
   clearActive();
   var el = document.querySelector('[data-script="' + file + '"]');

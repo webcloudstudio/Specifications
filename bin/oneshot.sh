@@ -3,27 +3,29 @@
 # Name: OneShot
 # Category: maintenance
 
-# Tags the current commit and generates a complete one-shot build prompt for an AI agent.
-# Annotated tags are permanent git objects — never pruned by git gc.
-#
-# Detects build mode automatically from METADATA.md and .env:
-#   Feature Branch mode  git_repo is set + BUILD_FEATURE_BRANCH_NAME in .env
-#                        → clone/fetch project, create feature branch, generate prompt
-#   New project mode     no git_repo or no BUILD_FEATURE_BRANCH_NAME
-#                        → generate prompt only (create target dir manually, see docs)
+# Validates the Specification, detects build mode, and generates a complete AI build prompt.
+# Tags the current commit as a permanent build reference (oneshot/{spec}/{YYYY-MM-DD.N}).
 #
 # Usage:
-#   bash bin/oneshot.sh <spec-name>                     # Print prompt to stdout (also tags)
-#   bash bin/oneshot.sh <spec-name> > oneshot-prompt.md # Save to file
-#   bash bin/oneshot.sh <spec-name> --tag-only          # Tag without generating prompt
-#   bash bin/oneshot.sh <spec-name> --no-tag            # Generate prompt without tagging
+#   bash bin/oneshot.sh <ProjectName>                              # New build — stdout
+#   bash bin/oneshot.sh <ProjectName> > <ProjectName>/prompt.md   # New build — save to file
+#   bash bin/oneshot.sh <ProjectName> --update > prompt.md        # Update existing prototype
+#   bash bin/oneshot.sh <ProjectName> --tag-only                  # Tag only, no prompt
+#   bash bin/oneshot.sh <ProjectName> --no-tag                    # Prompt only, no tag
 #
-# OneShot tags:
-#   oneshot/{spec}/{YYYY-MM-DD.N}
+# Modes:
+#   New project    No git_repo or BUILD_FEATURE_BRANCH_NAME not set in .env
+#                  mkdir <ProjectName> && cd <ProjectName> && git init && git checkout -b main
+#                  Open Claude Code and paste the prompt.
+#   Feature Branch git_repo + BUILD_FEATURE_BRANCH_NAME both set in .env
+#                  Clones or fetches the project, creates the branch, then generates the prompt.
+#   Update         --update flag: generates a prompt to apply spec changes to existing code.
+#                  Open Claude Code in the existing prototype directory and paste the prompt.
 #
 # Examples:
-#   bash bin/oneshot.sh GAME > oneshot-prompt.md
-#   git diff oneshot/GAME/2026-03-19.1..oneshot/GAME/2026-03-19.2 -- GAME/
+#   bash bin/oneshot.sh GAME > GAME/prompt.md
+#   bash bin/oneshot.sh GAME --update > GAME/prompt.md
+#   git diff oneshot/GAME/2026-03-19.1..oneshot/GAME/2026-03-20.1 -- GAME/
 
 set -euo pipefail
 

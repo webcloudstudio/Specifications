@@ -61,40 +61,41 @@ Paste it into Claude Code with no other instructions — the agent builds the co
 A `SCORECARD.md` is written to the prototype directory at the end of the build session.
 The oneshot tag and prototype build reference are recorded in `Specifications/<ProjectName>/.env`.
 
+**Updating an existing prototype** — when the spec changes and you want to apply those changes without rebuilding from scratch:
+
+```
+bash bin/oneshot.sh <ProjectName> --update > <ProjectName>/prompt.md
+```
+
+Open Claude Code in the existing prototype directory and paste the prompt. The agent reads the spec changes and applies them to the existing code.
+
 ---
 
 ## Step 5 — Iterate
 
-Test the prototype, record feedback in `Specifications/<ProjectName>/`, then run `bin/iterate.sh <ProjectName>`.
+Test the prototype, then run `bash bin/iterate.sh <ProjectName>`.
 
-`bin/iterate.sh` generates an iteration prompt containing the current Specification files, `IDEAS.md`, `ACCEPTANCE_CRITERIA.md`, `REFERENCE_GAPS.md`, and the latest `SCORECARD.md`.
-Paste into Claude Code in the prototype directory. The agent fixes scorecard failures, closes gaps, and updates Specification files.
+`bash bin/iterate.sh <ProjectName>` generates an iteration prompt containing the current Specification files, `IDEAS.md`, `ACCEPTANCE_CRITERIA.md`, `REFERENCE_GAPS.md`, and the latest `SCORECARD.md`.
+Paste into Claude Code in the prototype directory. The agent fixes scorecard failures and updates Specification files.
 
 Repeat until the scorecard passes.
 
 | File | Purpose |
 |------|---------|
-| `IDEAS.md` | Raw thoughts, one bullet per line |
+| `IDEAS.md` | Raw observations and improvement ideas |
 | `ACCEPTANCE_CRITERIA.md` | MUST/MUST NOT statements — testable behavior requirements |
-| `REFERENCE_GAPS.md` | Missing features — one unchecked checkbox per gap with priority [P0]–[P4] |
+| `REFERENCE_GAPS.md` | Additional features required to meet Specification — maintained manually |
 
-**Trigger phrases** (say these in Claude Code inside the prototype directory):
-
-| Say | Claude does |
-|-----|------------|
-| `process ideas` | Routes each `IDEAS.md` entry to the right file, then clears it |
-| `this is a gap` | Adds entry to `REFERENCE_GAPS.md` |
-| `add acceptance criteria` | Adds MUST statement to `ACCEPTANCE_CRITERIA.md` |
-| `update the specification` | Reviews recent changes, updates Specification files |
-
-**Auto-extract feedback** from recent sessions (runs haiku via `claude -p`):
+**Transaction log:** After each prototype session, run to automatically extract bugs and ideas:
 
 ```
-bash bin/extract_session_feedback.sh <ProjectName>
+bash bin/update.sh <ProjectName>
 ```
+
+Reads the Claude Code session log (`~/.claude/projects/<path>/`) and recent git history. Writes discovered items to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md`.
 
 Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE.md`.
-These rules auto-update Specification files and REFERENCE_GAPS.md when the agent fixes code.
+These rules auto-update Specification files when the agent fixes code.
 
 ---
 
