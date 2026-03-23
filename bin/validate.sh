@@ -150,7 +150,7 @@ if [ -f "$PROJECT_DIR/METADATA.md" ]; then
         if [ -n "$FEATURE_BRANCH" ]; then
             pass "BUILD_FEATURE_BRANCH_NAME: $FEATURE_BRANCH"
         else
-            warn "BUILD_FEATURE_BRANCH_NAME not set in $PROJECT_DIR/.env (required for build.sh; not needed for oneshot.sh)"
+            warn "BUILD_FEATURE_BRANCH_NAME not set in $PROJECT_DIR/.env (only needed for Feature Branch mode)"
         fi
     fi
 fi
