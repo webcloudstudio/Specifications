@@ -13,11 +13,11 @@ by an AI agent from a plain-English description in `METADATA.md`.
 In your project's `METADATA.md`, fill in the `image_description:` field:
 
 ```
+image: <image name>
 image_description: mad scientist with oversized brain, wild hair, green goggles, dark lab
 ```
 
-Write it the same way you'd prompt an image AI — subject, style details, colors, mood.
-One line is enough.
+Write it the same way you'd prompt an image AI — subject, style details, colors, mood.  One line is enough.
 
 ---
 
@@ -26,11 +26,18 @@ One line is enough.
 Open Claude Code in the `Specifications/` directory and ask:
 
 ```
-Create a card image for <ProjectName> based on the image_description in METADATA.md.
-Save it as GAME/static/images/<ProjectName>.webp (400×300px WebP).
-Use Pillow to draw it programmatically — cartoon/geometric style.
-Add a create_<projectslug>_image() function to GAME/bin/generate_card_images.py
-and a generate_<projectslug>_image.py script in Specifications/bin/.
+Assume the root directory is /mnt/c/Users/barlo/projects
+
+For a <ProjectName>, the metadata can be read from the path 
+    <ProjectName>/Metadata.md
+
+From that file read the name:, image:, and image_description:
+
+Create an image in GAME/static/project_images/<ProjectName>.webp that matches <image_description> in the format (400×300px WebP).
+Use Pillow to draw it programmatically — cartoon/geometric style. Colorful.
+Add a create_<name>_image() function to GAME/bin/generate_card_images.py
+and a generate_<name>_image.py script in Specifications/bin/.
+
 ```
 
 Claude will read the description and write a Pillow drawing function. The result is saved
@@ -44,18 +51,6 @@ python3 bin/generate_image.py
 
 Edit `draw_brain()`, `draw_face()`, or other functions in that file to adjust the art,
 then re-run to regenerate.
-
----
-
-## Step 3 — Add the image: field
-
-Once the file is created, add the filename to `METADATA.md`:
-
-```
-image: <ProjectName>.webp
-```
-
-The Prototyper scanner picks this up on the next refresh and shows it on the homepage card.
 
 ---
 
