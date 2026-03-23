@@ -37,6 +37,7 @@ SCRIPT_DESCRIPTIONS = {
     'validate.sh':             'Check a spec directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise spec files — optional intermediate step',
     'oneshot.sh':              'Validate spec, detect mode, generate AI build prompt (bootstrap or feature branch)',
+    'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
     'merge.sh':                'Squash-merge a Feature Branch into base branch — called by GAME',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
@@ -44,11 +45,12 @@ SCRIPT_DESCRIPTIONS = {
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
 }
 
-GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
+GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
 GUIDE_TITLES = {
     'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
-    'PROMOTE':               'Promote / Merge',
+    'ITERATION-PROCESS':     'Iteration Process',
+    'PROMOTE':               'Step 6 — Promote',
     'CREATE-IMAGE':          'Create Image',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
 }
@@ -257,11 +259,12 @@ def build_page(scripts, projects, guides):
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
-    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
+    step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Step 5 — Iterate</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
+    step_nav += '  <div class="nav-sep"></div>\n'
+    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Step 6 — Promote</a>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript(\'generate_claude_rules.sh\')">generate_claude_rules.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="ProjectUpdate.sh" onclick="showScript(\'ProjectUpdate.sh\')">ProjectUpdate.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -297,7 +300,12 @@ def build_page(scripts, projects, guides):
     ])
     row2 = ARR.join([
         wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
-        wf_box('Promote', extra_label='Merge', script='merge.sh'),
+        wf_box('Iterate', 'iterate.sh'),
+        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
+    ])
+    row2b = ARR.join([
+        wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
+        wf_box('Promote'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
     row3 = ARR.join([
@@ -316,6 +324,7 @@ def build_page(scripts, projects, guides):
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<div class="wf-row">{row1}</div>'
                   f'<div class="wf-row">{row2}</div>'
+                  f'<div class="wf-row">{row2b}</div>'
                   f'<div class="wf-row">{row3}</div>'
                   f'<div class="wf-row">{row4}</div>'
                   f'</div>')
@@ -328,7 +337,27 @@ def build_page(scripts, projects, guides):
     eng_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
                    f'<div class="wf-row">{eng_row}</div>'
                    f'</div>')
-    guide_diagrams_js = f'const GUIDE_DIAGRAMS = {{\n  "ENGINEERING-RULES": {json.dumps(eng_diagram)},\n}};'
+
+    iter_r1 = ARR.join([
+        wf_box('IDEAS.md', '', 'Specifications/GAME/', terminal=True),
+        wf_box('"process ideas"', 'Claude routes entries', ai=True),
+        wf_box('Spec files updated', '', 'REFERENCE_GAPS / AC', terminal=True),
+    ])
+    iter_r2 = ARR.join([
+        wf_box('Spec files updated', '', 'REFERENCE_GAPS / AC', terminal=True),
+        wf_box('iterate.sh', 'bin/iterate.sh GAME'),
+        wf_box('iterate-prompt.md', 'paste into Claude Code', ai=True),
+        wf_box('PROTOTYPE', '', 'GAME_prototype/', terminal=True),
+    ])
+    iter_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
+                    f'<div class="wf-row">{iter_r1}</div>'
+                    f'<div class="wf-row">{iter_r2}</div>'
+                    f'</div>')
+
+    guide_diagrams_js = (f'const GUIDE_DIAGRAMS = {{\n'
+                         f'  "ENGINEERING-RULES": {json.dumps(eng_diagram)},\n'
+                         f'  "ITERATION-PROCESS": {json.dumps(iter_diagram)},\n'
+                         f'}};')
 
     # ── Workflow steps table (Prototyper steps only) ───────────────────────────
     wf_step_data = [
@@ -421,9 +450,9 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 #project-frame {{ flex: 1; border: none; width: 100%; height: 100%; display: block; }}
 
 /* ── Two-row workflow diagram ── */
-.wf-diagram {{ display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }}
-.wf-row {{ display: flex; align-items: stretch; flex-wrap: nowrap; gap: 0; }}
-.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 0; justify-content: flex-end; }}
+.wf-diagram {{ display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }}
+.wf-row {{ display: flex; align-items: stretch; flex-wrap: nowrap; gap: 8px; }}
+.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; }}
 .wf-box {{
   background: var(--c-side-bg); border: 1px solid var(--c-side-border);
   border-radius: 4px; padding: 5px 10px; text-align: center;
@@ -472,10 +501,10 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .sd-title {{ font-size: 18px; font-weight: 700; color: var(--c-h1); margin: 0 0 6px;
   font-family: 'Cascadia Code', Consolas, monospace; }}
 .sd-desc-p {{ font-size: 14px; color: var(--c-h3); margin: 0 0 14px; }}
-.sd-pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12.5px;
+.sd-pre {{ background: #F0EFEA; color: #2E3640; font-size: 12.5px;
   font-family: 'Cascadia Code', Consolas, monospace; padding: 12px 16px;
   border-radius: 4px; line-height: 1.5; white-space: pre;
-  border: 1px solid var(--c-side-border); overflow-x: auto; }}
+  border: 1px solid var(--c-td-border); overflow-x: auto; }}
 .sd-none {{ font-size: 13px; color: var(--c-h3); font-style: italic; }}
 
 /* ── Scripts (expandable, for Other Scripts section) ── */
@@ -492,9 +521,10 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   border-radius: 3px; white-space: nowrap; flex-shrink: 0; }}
 .sc-desc {{ font-size: 12.5px; color: var(--c-h3); }}
 .sc-detail-open {{ margin: 0 0 6px 0; }}
-.sc-detail pre, .sc-detail-open pre {{ background: var(--c-pre-bg); color: var(--c-pre-text); font-size: 12px;
+.sc-detail pre, .sc-detail-open pre {{ background: #F0EFEA; color: #2E3640; font-size: 12px;
   font-family: 'Cascadia Code', Consolas, monospace; padding: 8px 12px;
-  border-radius: 4px; line-height: 1.5; white-space: pre; overflow-x: auto; }}
+  border-radius: 4px; line-height: 1.5; white-space: pre; overflow-x: auto;
+  border: 1px solid var(--c-td-border); }}
 
 /* ── Workflow table ── */
 .wf-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
@@ -521,7 +551,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 .proc-defs {{ margin-bottom: 4px; }}
 .proc-item {{ display: flex; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--c-td-border); align-items: baseline; }}
 .proc-item:last-child {{ border-bottom: none; }}
-.proc-term {{ font-size: 12px; font-weight: 700; color: var(--c-accent); white-space: nowrap; min-width: 110px; }}
+.proc-term {{ font-size: 12px; font-weight: 700; color: #1E2328; white-space: nowrap; min-width: 110px; }}
 .proc-def {{ font-size: 12.5px; color: var(--c-h3); }}
 .proc-def code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
@@ -544,11 +574,10 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
-    <p class="wf-section-h">Workflows</p>
     {wf_diagram}
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Process</p>
+    <p class="wf-section-h">Dictionary</p>
     <div class="proc-defs">
       <div class="proc-item"><span class="proc-term">Spec</span><span class="proc-def">Markdown files in <code>Specifications/&lt;Name&gt;/</code> — concise tables and bullets defining what to build</span></div>
       <div class="proc-item"><span class="proc-term">Project</span><span class="proc-def">A live git repository with <code>METADATA.md</code>, conforming to platform standards, discovered by GAME</span></div>
