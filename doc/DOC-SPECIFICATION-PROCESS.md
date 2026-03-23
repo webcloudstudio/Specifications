@@ -1,6 +1,6 @@
 # Specification Process
 
-**Version:** 20260322 V5
+**Version:** 20260322 V6
 **Description:** Step-by-step guide to the Prototyper specification workflow
 
 Prototyper converts concise specification files into AI agent build prompts.
@@ -57,21 +57,7 @@ Exit 0 = ready. Exit 1 = errors to fix.
 
 ---
 
-## Step 4 — Convert to Detailed Specs  *(optional)*
-
-```bash
-bash bin/convert.sh <ProjectName> > convert-prompt.md
-```
-
-Generates: `CONVERT.md` expansion rules + stack references + concise spec files.
-Feed to an AI agent to produce detailed, implementation-ready specs.
-Replace the concise spec files with the expanded output, then proceed to Step 5.
-
-`oneshot.sh` includes `CONVERT.md` inline — the AI can expand during build without this step.
-
----
-
-## Step 5 — OneShot Build
+## Step 4 — OneShot Build
 
 ```bash
 bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md

@@ -24,7 +24,7 @@ SKIP_DIRS = {
 }
 
 # Scripts that appear in the sidebar as Workflow Scripts (in this order)
-WF_SCRIPTS = ['setup.sh', 'validate.sh', 'convert.sh', 'build.sh']
+WF_SCRIPTS = ['setup.sh', 'validate.sh', 'oneshot.sh']
 
 # Scripts that appear as indented children of another script in Other Scripts
 SCRIPT_CHILDREN = {
@@ -35,8 +35,8 @@ SCRIPT_CHILDREN = {
 SCRIPT_DESCRIPTIONS = {
     'setup.sh':                'Scaffold a new spec directory from templates (or update existing)',
     'validate.sh':             'Check a spec directory for required files, naming, and completeness',
-    'convert.sh':              'Generate an AI expansion prompt from concise spec files',
-    'build.sh':                'Clone or fetch project, create Feature Branch, generate AI build prompt',
+    'convert.sh':              'Generate an AI expansion prompt from concise spec files — optional intermediate step',
+    'oneshot.sh':              'Validate spec, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'merge.sh':                'Squash-merge a Feature Branch into base branch — called by GAME',
     'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
@@ -238,8 +238,7 @@ def build_page(scripts, projects, guides):
                                    ('Create Image (AI)',   'guide',  'CREATE-IMAGE')]),
         (2, 'Step 2 — Create',   [('Project Creation',    'guide',  'PROJECT-SETUP')]),
         (3, 'Step 3 — Validate', [('validate.sh',       'script', 'validate.sh')]),
-        (4, 'Step 4 — Convert',  [('convert.sh',        'script', 'convert.sh')]),
-        (5, 'Step 5 — Build',    [('build.sh',          'script', 'build.sh')]),
+        (4, 'Step 4 — OneShot',  [('oneshot.sh',        'script', 'oneshot.sh')]),
     ]
 
     # Warn if STEP_NAV references a script not found in bin/ (catches renames)
@@ -293,8 +292,7 @@ def build_page(scripts, projects, guides):
     row1 = ARR.join([
         wf_box('Setup', 'setup.sh'),
         wf_box('Validate', 'validate.sh'),
-        wf_box('Convert', 'convert.sh'),
-        wf_box('Build', 'build.sh'),
+        wf_box('OneShot', 'oneshot.sh'),
         wf_box('PROTOTYPE', feature='<name>', path='../<PROJECT>', terminal=True),
     ])
     row2 = ARR.join([
@@ -336,9 +334,8 @@ def build_page(scripts, projects, guides):
     wf_step_data = [
         (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold spec directory from templates'),
         (2, 'bin/validate.sh &lt;Project&gt;', 'Check spec files, naming, fields, BUILD_FEATURE_BRANCH_NAME'),
-        (3, 'bin/convert.sh &lt;Project&gt; &gt; prompt.md', 'Expand to detailed specs with AI — optional'),
-        (4, 'bin/build.sh &lt;Project&gt; &gt; prompt.md', 'Clone/fetch project, create Feature Branch, generate build prompt'),
-        (5, 'bin/merge.sh &lt;Project&gt;', 'Squash-merge Feature Branch into base branch (or via GAME UI)'),
+        (3, 'bin/oneshot.sh &lt;Project&gt; &gt; prompt.md', 'Validate + detect mode + generate build prompt'),
+        (4, 'bin/merge.sh &lt;Project&gt;', 'Squash-merge Feature Branch into base branch (feature branch mode only)'),
     ]
     wf_rows = ''
     for n, cmd, desc in wf_step_data:
