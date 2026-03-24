@@ -155,10 +155,11 @@ Run: $(date '+%Y-%m-%d %H:%M:%S')"
 
     echo "OneShot (${ONESHOT_MODE}): $TAG_NAME → $(git rev-parse --short HEAD)" >&2
 
-    # Record prototype build tag in .env (not committed — tracks per-developer prototype state)
+    # Record prototype build tag and commit in .env (not committed — tracks per-developer prototype state)
     {
-        grep -v "^PROTOTYPE_BUILD_TAG=" "$PROJECT_DIR/.env" 2>/dev/null || true
+        grep -v "^PROTOTYPE_BUILD_TAG=\|^PROTOTYPE_BUILD_COMMIT=" "$PROJECT_DIR/.env" 2>/dev/null || true
         echo "PROTOTYPE_BUILD_TAG=$TAG_NAME"
+        echo "PROTOTYPE_BUILD_COMMIT=$COMMIT_SHA"
     } > "$PROJECT_DIR/.env.tmp" && mv "$PROJECT_DIR/.env.tmp" "$PROJECT_DIR/.env"
     echo "  Prototype tag: $TAG_NAME → $PROJECT_DIR/.env" >&2
     echo "" >&2
