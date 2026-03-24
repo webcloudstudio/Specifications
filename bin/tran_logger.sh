@@ -11,12 +11,13 @@
 #   ~/.claude/projects/<prototype-path>/
 #
 # Usage:
-#   bash bin/update.sh <ProjectName>
-#   bash bin/update.sh <ProjectName> --model=<model>
+#   bash bin/tran_logger.sh <ProjectName>
+#   bash bin/tran_logger.sh <ProjectName> --model=<model>
 #
 # Writes:
-#   Specifications/<ProjectName>/IDEAS.md
+#   Specifications/<ProjectName>/changes/CHANGE-NNN-*.md
 #   Specifications/<ProjectName>/ACCEPTANCE_CRITERIA.md
+#   Specifications/<ProjectName>/IDEAS.md
 #
 # Options:
 #   --model=<model>    AI model to use (default: claude-haiku-4-5-20251001)
@@ -36,7 +37,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/update.sh <ProjectName> [--model=<model>]" >&2
+    echo "Usage: bash bin/tran_logger.sh <ProjectName> [--model=<model>]" >&2
     exit 1
 fi
 
@@ -115,7 +116,8 @@ fi
 # Build the prompt
 PROTOTYPE_RULES="$(cat "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" 2>/dev/null || true)"
 
-PROMPT="${PROTOTYPE_RULES}
+PROMPT=$(cat <<END_PROMPT
+${PROTOTYPE_RULES}
 
 ---
 
@@ -195,7 +197,8 @@ changes/CHANGE-NNN-description.md: created (pending)
 ACCEPTANCE_CRITERIA.md: +N entries
 IDEAS.md: +N entries
 \`\`\`
-"
+END_PROMPT
+)
 
 echo "Running claude -p (model: $MODEL)..." >&2
 echo "" >&2
