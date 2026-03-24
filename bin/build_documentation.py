@@ -338,7 +338,7 @@ def build_page(scripts, projects, guides):
         wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
         wf_box('summarize_rules.sh', 'bin/summarize_rules.sh'),
         wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('ProjectUpdate.sh', 'bin/ProjectUpdate.sh'),
+        wf_box('ProjectUpdate.sh', 'ProjectUpdate.sh'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
         wf_box('ProjectValidate.sh', 'bin/ProjectValidate.sh'),
         wf_box('Project KPIs', terminal=True),

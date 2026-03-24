@@ -54,7 +54,7 @@ bash bin/ProjectValidate.sh <project-name> --verbose
 
 Output groups checks by conformity level (IDEA → PROTOTYPE → ACTIVE → PRODUCTION), marks each check PASS or FAIL, and indicates where the project currently sits. Thin wrapper over `bin/project_manager.py verify`.
 
-## bin/ProjectUpdate.sh
+## ProjectUpdate.sh
 
 Updates a promoted code project with the latest rules and templates from this repository. Injects the current `CLAUDE_RULES.md` into the project's `AGENTS.md`, copies canonical templates (`common.sh`, `common.py`, `index.html`), and adds any missing `METADATA.md` default fields.
 
@@ -62,13 +62,13 @@ The project must already have a `CLAUDE_RULES_START` marker in its `AGENTS.md`. 
 
 ```bash
 # Update by project name (looks up under ../projects/)
-bash bin/ProjectUpdate.sh <project-name>
+bash ProjectUpdate.sh <project-name>
 
 # Update by absolute path
-bash bin/ProjectUpdate.sh /abs/path/to/project
+bash ProjectUpdate.sh /abs/path/to/project
 
 # Preview without writing
-bash bin/ProjectUpdate.sh <project-name> --dry-run
+bash ProjectUpdate.sh <project-name> --dry-run
 ```
 
 To propagate to all set-up projects at once, run `bash bin/update_projects.sh` from `../GAME/bin/`. Thin wrapper over `bin/project_manager.py update`.

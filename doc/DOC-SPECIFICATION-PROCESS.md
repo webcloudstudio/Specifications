@@ -108,4 +108,4 @@ For new-project (no branch): the prototype directory IS the project — push to 
 
 Promoted projects are discovered by the Prototyper platform and must conform to `CLAUDE_RULES.md`.
 Run `bin/ProjectValidate.sh <project>` to check compliance.
-Run `bin/ProjectUpdate.sh <project>` to inject the latest rules and templates.
+Run `ProjectUpdate.sh <project>` to inject the latest rules and templates.

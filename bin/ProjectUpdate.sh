@@ -8,9 +8,9 @@
 # Project must already be set up (CLAUDE_RULES_START marker required).
 #
 # Usage:
-#   bash bin/ProjectUpdate.sh <project>            # project name under projects/
-#   bash bin/ProjectUpdate.sh /abs/path/project    # absolute path
-#   bash bin/ProjectUpdate.sh <project> --dry-run  # preview without writing
+#   bash ProjectUpdate.sh <project>            # project name under projects/
+#   bash ProjectUpdate.sh /abs/path/project    # absolute path
+#   bash ProjectUpdate.sh <project> --dry-run  # preview without writing
 #
 # Arguments:
 #   $1        Project name or absolute path (required)
@@ -25,7 +25,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -z "${1:-}" ]; then
-    echo "Usage: bash bin/ProjectUpdate.sh <project> [--dry-run]" >&2
+    echo "Usage: bash ProjectUpdate.sh <project> [--dry-run]" >&2
     echo "  <project>  Project name under ../projects/, or absolute path" >&2
     exit 1
 fi
