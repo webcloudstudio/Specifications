@@ -38,7 +38,7 @@ SCRIPT_DESCRIPTIONS = {
     'validate.sh':             'Check a Specifications directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise Specification files — optional intermediate step',
     'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
-    'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
+    'iterate.sh':              'Generate a focused iteration prompt from spec changes since the last oneshot build',
     'tran_logger.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
     'summarize_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
@@ -347,9 +347,9 @@ def build_page(scripts, projects, guides):
     iter_r1 = (wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True) + ARR +
                wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>') + ARR +
                wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True))
-    iter_r2 = (wf_box('Specification files updated', '', 'IDEAS / REFERENCE_GAPS / AC', terminal=True) + ARR +
+    iter_r2 = (wf_box('Edit spec files', '', 'Specifications/<PROJECT>/', terminal=True) + ARR +
                wf_box('iterate.sh', 'bin/iterate.sh <PROJECT>') + ARR +
-               wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True))
+               wf_box('PROTOTYPE', feature='<name>', terminal=True))
 
     wf_diagram = (f'<div class="wf-diagram">'
                   f'<p class="wf-section-h" style="margin:0 0 4px">Oneshot Rules</p>'

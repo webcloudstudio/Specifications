@@ -73,26 +73,25 @@ Open Claude Code in the existing prototype directory and paste the prompt. The a
 
 ## Step 5 — Iterate
 
-Test the prototype, then run `bash bin/iterate.sh <ProjectName>`.
+Edit spec files in `Specifications/<ProjectName>/` to reflect the changes you want, then run:
 
-`bash bin/iterate.sh <ProjectName>` generates an iteration prompt containing the current Specification files, `IDEAS.md`, `ACCEPTANCE_CRITERIA.md`, `REFERENCE_GAPS.md`, and the latest `SCORECARD.md`.
-Paste into Claude Code in the prototype directory. The agent fixes scorecard failures and updates Specification files.
+```bash
+bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md
+cd /mnt/c/Users/barlo/projects/<ProjectName>
+claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<ProjectName>/iterate-prompt.md)"
+```
 
-Repeat until the scorecard passes.
+`iterate.sh` diffs the spec directory against the previous `PROTOTYPE_BUILD_TAG` and emits only the changed spec files plus `ACCEPTANCE_CRITERIA.md`. The agent applies those changes to the existing code — it does not rebuild from scratch. `claude -p` uses your Claude subscription (not API tokens).
 
-| File | Purpose |
-|------|---------|
-| `IDEAS.md` | Raw observations and improvement ideas |
-| `ACCEPTANCE_CRITERIA.md` | MUST/MUST NOT statements — testable behavior requirements |
-| `REFERENCE_GAPS.md` | Additional features required to meet Specification — maintained manually |
+Repeat until the prototype matches the spec.
 
-**Transaction log:** After each prototype session, run to automatically extract bugs and ideas:
+**Transaction log:** After each prototype session, run to extract bugs and ideas from the session log:
 
 ```
 bash bin/tran_logger.sh <ProjectName>
 ```
 
-Reads the Claude Code session log (`~/.claude/projects/<path>/`) and recent git history. Writes discovered items to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md`.
+Reads the Claude Code session log and recent git history. Writes discovered items to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md`. Review the output and update the relevant spec files before running iterate.sh.
 
 Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE.md`.
 These rules auto-update Specification files when the agent fixes code.

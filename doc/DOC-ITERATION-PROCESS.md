@@ -1,6 +1,6 @@
 # Iteration Process
 
-**Version:** 20260323 V4
+**Version:** 20260324 V5
 **Description:** How to build and iterate a oneshot prototype
 
 ---
@@ -9,15 +9,12 @@
 
 **Initial build:**
 ```
-Specifications/<PROJECT>/  ──[oneshot.sh]──►  <PROJECT>_prototype/  +  SCORECARD.md
+Specifications/<PROJECT>/  ──[oneshot.sh]──►  <PROJECT>/  (prototype)
 ```
 
 **Iteration loop:**
 ```
-Specifications/<PROJECT>/        ──[iterate.sh]──►  iterate-prompt.md
-  IDEAS.md                                                │
-  ACCEPTANCE_CRITERIA.md                                  ▼
-  REFERENCE_GAPS.md                            <PROJECT>_prototype/  +  SCORECARD.md
+Edit spec files  ──[iterate.sh]──►  iterate-prompt.md  ──[claude -p]──►  <PROJECT>/  (prototype updated)
 ```
 
 ---
@@ -28,28 +25,22 @@ Specifications/<PROJECT>/        ──[iterate.sh]──►  iterate-prompt.md
 # From Specifications/
 bash bin/oneshot.sh <PROJECT> > <PROJECT>/oneshot-prompt.md
 
-mkdir -p /mnt/c/Users/barlo/projects/<PROJECT>_prototype
-cd /mnt/c/Users/barlo/projects/<PROJECT>_prototype
+mkdir -p /mnt/c/Users/barlo/projects/<PROJECT>
+cd /mnt/c/Users/barlo/projects/<PROJECT>
 git init && git checkout -b main
 claude .
 # paste <PROJECT>/oneshot-prompt.md
 ```
 
-The prototype is built. A `SCORECARD.md` is written at the end of the session.
+`oneshot.sh` tags the current commit (`oneshot/<PROJECT>/<date>.<n>`) and writes `PROTOTYPE_BUILD_TAG` and `PROTOTYPE_BUILD_COMMIT` to `<PROJECT>/.env`. These are the baseline for all subsequent iterations.
 
 ---
 
 ## Step 2 — Update the Specification
 
-After testing the prototype, record feedback in `Specifications/<PROJECT>/`:
+Edit spec files in `Specifications/<PROJECT>/` to reflect the changes you want. You decide what changes — the agent applies them exactly as written.
 
-| File | What goes here |
-|------|----------------|
-| `IDEAS.md` | Raw thoughts, one bullet per line — no format required |
-| `ACCEPTANCE_CRITERIA.md` | MUST/MUST NOT statements (testable behavior requirements) |
-| `REFERENCE_GAPS.md` | Missing features — one unchecked checkbox per gap, with priority [P0]–[P4] |
-
-Edit these files directly, or say **"process ideas"** in Claude Code inside the prototype — it routes `IDEAS.md` entries to the right files automatically.
+Update `ACCEPTANCE_CRITERIA.md` with any hard requirements the prototype must satisfy.
 
 ---
 
@@ -60,48 +51,27 @@ Edit these files directly, or say **"process ideas"** in Claude Code inside the 
 bash bin/iterate.sh <PROJECT> > <PROJECT>/iterate-prompt.md
 
 # Then in the prototype directory:
-cd /mnt/c/Users/barlo/projects/<PROJECT>_prototype
-claude .
-# paste <PROJECT>/iterate-prompt.md
+cd /mnt/c/Users/barlo/projects/<PROJECT>
+claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<PROJECT>/iterate-prompt.md)"
 ```
 
-The iterate prompt includes: current Specification files, IDEAS.md, ACCEPTANCE_CRITERIA.md, REFERENCE_GAPS.md, and the latest SCORECARD.md.
+`iterate.sh` diffs the spec directory against `PROTOTYPE_BUILD_TAG`, emits only the changed spec files plus `ACCEPTANCE_CRITERIA.md`. The agent applies those changes to the existing code — it does not rebuild from scratch.
 
-Repeat Steps 2–3 until the scorecard passes.
+`claude -p` runs non-interactively using your Claude subscription (not API tokens).
 
----
-
-## Trigger Phrases (in Claude Code, prototype directory)
-
-| Say | Claude does |
-|-----|------------|
-| `process ideas` | IDEAS.md → routes each entry to the right file, deletes after routing |
-| `this is a gap` | Adds entry to REFERENCE_GAPS.md |
-| `add acceptance criteria` | Adds MUST statement to ACCEPTANCE_CRITERIA.md |
-| `update the specification` | Reviews recent changes, updates Specification files |
-
----
-
-## Auto-Updates
-
-Every prototype's `AGENTS.md` contains iteration rules from `RulesEngine/CLAUDE_PROTOTYPE.md`.
-When Claude fixes code in the prototype, it automatically:
-
-- Updates the corresponding Specification file
-- Adds acceptance criteria for the bug
-- Checks off the gap in REFERENCE_GAPS.md
+Repeat Steps 2–3 until the prototype matches the spec.
 
 ---
 
 ## Transaction Log
 
-After a prototype session, run to update the feedback files automatically:
+After a prototype session, run to extract bugs and ideas from the session log:
 
 ```
 bash bin/tran_logger.sh <PROJECT>
 ```
 
-Reads the Claude Code session transaction log and recent git history. Writes discovered bugs and ideas to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md` in `Specifications/<PROJECT>/`.
+Reads the Claude Code session transaction log and recent git history. Writes discovered bugs and ideas to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md` in `Specifications/<PROJECT>/`. Review and edit the output — then update the relevant spec files before running iterate.sh.
 
 ---
 

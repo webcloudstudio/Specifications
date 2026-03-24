@@ -3,55 +3,51 @@
 # Name: Iterate
 # Category: maintenance
 
-# Generates an iteration prompt for a oneshot-built prototype.
-# Reads IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md from the spec directory
-# and current SCORECARD.md from the prototype. Outputs a prompt to paste into
-# Claude Code in the prototype directory.
+# Generates a focused iteration prompt from spec changes since the last oneshot build.
+# Reads PROTOTYPE_BUILD_TAG from .env, diffs spec files against that tag, and emits
+# only the changed spec files plus ACCEPTANCE_CRITERIA.md. The agent applies the
+# changes to the existing prototype — it does not rebuild from scratch.
 #
 # Usage:
 #   bash bin/iterate.sh <ProjectName>
 #   bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md
-#   bash bin/iterate.sh <ProjectName> --no-scorecard   # skip scorecard regeneration
+#   cd /mnt/c/Users/barlo/projects/<ProjectName>
+#   claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<ProjectName>/iterate-prompt.md)"
 #
-# Reads:  Specifications/<ProjectName>/*.md, IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md
-# Writes: <ProjectName>_prototype/SCORECARD.md (via scorecard.sh), then iterate-prompt.md to stdout
+# Note: claude -p runs non-interactively using your Claude subscription (not API tokens).
+#
+# Requires: PROTOTYPE_BUILD_TAG in <ProjectName>/.env (written by oneshot.sh)
+# Reads:    spec .md files changed since the build tag, ACCEPTANCE_CRITERIA.md
+# Excludes: IDEAS.md, REFERENCE_GAPS.md, SCORECARD.md
+#
+# Arguments:
+#   $1  ProjectName (required)
+#
+# Exit codes:
+#   0  Prompt written to stdout
+#   1  Missing argument, spec directory, METADATA.md, or build tag
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-NO_SCORECARD=false
 POSITIONAL=""
 for arg in "$@"; do
     case "$arg" in
-        --no-scorecard) NO_SCORECARD=true ;;
-        --*)            ;;
-        *)              [ -z "$POSITIONAL" ] && POSITIONAL="$arg" ;;
+        --*) ;;
+        *) [ -z "$POSITIONAL" ] && POSITIONAL="$arg" ;;
     esac
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/iterate.sh <ProjectName> [--no-scorecard]" >&2
+    echo "Usage: bash bin/iterate.sh <ProjectName> [> <ProjectName>/iterate-prompt.md]" >&2
     exit 1
 fi
 
 PROJECT_NAME="$POSITIONAL"
 SPEC_DIR="$REPO_DIR/$PROJECT_NAME"
-PROJECTS_DIR="$(cd "$REPO_DIR/.." && pwd)"
-PROTO_DIR="$PROJECTS_DIR/${PROJECT_NAME}_prototype"
-
-# Fall back to non-_prototype directory
-if [ ! -d "$PROTO_DIR" ]; then
-    PROTO_DIR="$PROJECTS_DIR/$PROJECT_NAME"
-fi
 
 if [ ! -d "$SPEC_DIR" ]; then
     echo "ERROR: Spec directory not found: $SPEC_DIR" >&2
-    exit 1
-fi
-
-if [ ! -d "$PROTO_DIR" ]; then
-    echo "ERROR: Prototype directory not found: $PROTO_DIR" >&2
-    echo "       Expected: ${PROJECT_NAME}_prototype/ or ${PROJECT_NAME}/" >&2
     exit 1
 fi
 
@@ -65,15 +61,36 @@ get_metadata() {
     grep "^${1}:" "$METADATA_FILE" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//" | tr -d '\r'
 }
 
-DISPLAY_NAME=$(get_metadata "display_name")
-
-# --- Run scorecard to update SCORECARD.md ---
-SCORECARD_FILE="$PROTO_DIR/SCORECARD.md"
-if [ "$NO_SCORECARD" = false ]; then
-    echo "Running scorecard..." >&2
-    bash "$REPO_DIR/bin/scorecard.sh" "$PROJECT_NAME" >/dev/null 2>&1 || true
+# --- Read build tag from .env ---
+ENV_FILE="$SPEC_DIR/.env"
+BUILD_TAG=""
+BUILD_COMMIT=""
+if [ -f "$ENV_FILE" ]; then
+    BUILD_TAG=$(grep "^PROTOTYPE_BUILD_TAG=" "$ENV_FILE" 2>/dev/null | head -1 | sed 's/^PROTOTYPE_BUILD_TAG=//' | tr -d '\r' || true)
+    BUILD_COMMIT=$(grep "^PROTOTYPE_BUILD_COMMIT=" "$ENV_FILE" 2>/dev/null | head -1 | sed 's/^PROTOTYPE_BUILD_COMMIT=//' | tr -d '\r' || true)
 fi
 
+if [ -z "$BUILD_TAG" ]; then
+    echo "ERROR: PROTOTYPE_BUILD_TAG not found in $ENV_FILE" >&2
+    echo "       Run bash bin/oneshot.sh $PROJECT_NAME first to establish a build baseline." >&2
+    exit 1
+fi
+
+if ! git -C "$REPO_DIR" rev-parse "$BUILD_TAG" >/dev/null 2>&1; then
+    echo "ERROR: Build tag not found in git: $BUILD_TAG" >&2
+    exit 1
+fi
+
+# --- Find changed spec files since the build tag ---
+# Compares tag to current working tree (includes uncommitted changes)
+SKIP_PATTERN="^${PROJECT_NAME}/\(METADATA\|IDEAS\|REFERENCE_GAPS\|ACCEPTANCE_CRITERIA\)\.md$"
+CHANGED_NAMES=$(git -C "$REPO_DIR" diff --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
+    | grep '\.md$' \
+    | grep -v "$SKIP_PATTERN" \
+    | sed "s|^${PROJECT_NAME}/||" \
+    || true)
+
+# --- Helpers ---
 emit_file() {
     local filepath="$1"
     local label="$2"
@@ -88,65 +105,46 @@ emit_file() {
     fi
 }
 
-# --- Summarize what needs doing ---
-OPEN_GAPS=0
-HAS_IDEAS=false
-P0_COUNT=0
-P1_COUNT=0
-
-if [ -f "$SPEC_DIR/REFERENCE_GAPS.md" ]; then
-    OPEN_GAPS=$(grep -c '^\- \[ \]' "$SPEC_DIR/REFERENCE_GAPS.md" 2>/dev/null || echo 0)
-    OPEN_GAPS=$(echo "$OPEN_GAPS" | tr -d '[:space:]')
-    P0_COUNT=$(grep '^\- \[ \]' "$SPEC_DIR/REFERENCE_GAPS.md" 2>/dev/null | grep -c '\[P0\]' || echo 0)
-    P0_COUNT=$(echo "$P0_COUNT" | tr -d '[:space:]')
-    P1_COUNT=$(grep '^\- \[ \]' "$SPEC_DIR/REFERENCE_GAPS.md" 2>/dev/null | grep -c '\[P1\]' || echo 0)
-    P1_COUNT=$(echo "$P1_COUNT" | tr -d '[:space:]')
-fi
-
-if [ -f "$SPEC_DIR/IDEAS.md" ]; then
-    IDEAS_LINES=$(grep -c '^-' "$SPEC_DIR/IDEAS.md" 2>/dev/null || echo 0)
-    IDEAS_LINES=$(echo "$IDEAS_LINES" | tr -d '[:space:]')
-    [ "$IDEAS_LINES" -gt 0 ] && HAS_IDEAS=true
-fi
-
-SCORE_SUMMARY=""
-if [ -f "$SCORECARD_FILE" ]; then
-    SCORE_SUMMARY=$(grep '^\*\*[0-9]' "$SCORECARD_FILE" 2>/dev/null | head -1 | tr -d '*' || true)
-fi
+DISPLAY_NAME=$(get_metadata "display_name")
+STACK=$(get_metadata "stack")
+SHORT_COMMIT="${BUILD_COMMIT:0:8}"
 
 echo "Iterate: $PROJECT_NAME" >&2
-echo "  Proto: $PROTO_DIR" >&2
-[ -n "$SCORE_SUMMARY" ] && echo "  Score: $SCORE_SUMMARY" >&2
-[ "$OPEN_GAPS" -gt 0 ] && echo "  Gaps:  $OPEN_GAPS open ($P0_COUNT P0, $P1_COUNT P1)" >&2
-[ "$HAS_IDEAS" = true ] && echo "  Ideas: unprocessed entries in IDEAS.md" >&2
+echo "  Tag:   $BUILD_TAG ($SHORT_COMMIT)" >&2
+if [ -n "$CHANGED_NAMES" ]; then
+    echo "  Changed spec files:" >&2
+    echo "$CHANGED_NAMES" | while read -r f; do echo "    $f" >&2; done
+else
+    echo "  WARNING: No spec changes detected since $BUILD_TAG — emitting all spec files." >&2
+fi
 echo "" >&2
 
 # --- Header ---
 cat <<HEADER
 # Iterate Prompt: $PROJECT_NAME
 
-You are ITERATING **${DISPLAY_NAME:-$PROJECT_NAME}** — the prototype already exists.
-Do not rebuild from scratch. Apply targeted changes only.
+You are applying spec changes to the existing **${DISPLAY_NAME:-$PROJECT_NAME}** prototype.
+Do not rebuild from scratch. Read the changed spec files and apply only those changes.
 
-## Session Goals
+Previous build: \`$BUILD_TAG\` (${SHORT_COMMIT})
 
+## Changed Spec Files
 HEADER
 
-[ "$HAS_IDEAS" = true ] && echo "- Unprocessed ideas in IDEAS.md — **process these first**"
-[ "$OPEN_GAPS" -gt 0 ]  && echo "- $OPEN_GAPS open gaps ($P0_COUNT P0, $P1_COUNT P1) in REFERENCE_GAPS.md"
-[ -n "$SCORE_SUMMARY" ] && echo "- Current scorecard: $SCORE_SUMMARY"
-echo ""
+if [ -n "$CHANGED_NAMES" ]; then
+    echo "$CHANGED_NAMES" | while read -r f; do echo "- $f"; done
+else
+    echo "_(no diff detected — all spec files included)_"
+fi
 
 cat <<INSTRUCTIONS
+
 ## Instructions
 
-1. **Process IDEAS.md first** (if entries exist): route each idea to ACCEPTANCE_CRITERIA.md,
-   REFERENCE_GAPS.md, or a spec file. Delete each idea after routing.
-2. **Fix SCORECARD failures** — every `[ ]` in SCORECARD.md is a failing check
-3. **Implement P0 gaps** from REFERENCE_GAPS.md, then P1 if time permits
-4. **For every code change**: update the corresponding spec file in Specifications/${PROJECT_NAME}/
-5. **When a gap is closed**: check the box in REFERENCE_GAPS.md
-6. **Print session summary** at the end
+1. Read ACCEPTANCE_CRITERIA.md — these are hard requirements, all must pass
+2. Read the changed spec files — these define what has changed since the last build
+3. Apply changes to the existing code; do not rebuild from scratch
+4. Follow all patterns in CLAUDE_RULES.md exactly
 
 ---
 
@@ -154,36 +152,53 @@ INSTRUCTIONS
 
 # --- Rules ---
 emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
-emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" "CLAUDE_PROTOTYPE.md"
 
-# --- Core spec files ---
-echo "# SPECIFICATION"
+# --- Stack files ---
+if [ -n "$STACK" ]; then
+    IFS='/' read -ra COMPONENTS <<< "$STACK"
+    emit_file "$REPO_DIR/RulesEngine/stack/common.md" "Common Practices (stack/common.md)"
+    for comp in "${COMPONENTS[@]}"; do
+        comp_lower="$(echo "$comp" | tr -d ' ' | tr '[:upper:]' '[:lower:]')"
+        stack_file="$REPO_DIR/RulesEngine/stack/${comp_lower}.md"
+        [ -f "$stack_file" ] && emit_file "$stack_file" "$comp (stack/${comp_lower}.md)"
+    done
+fi
+
+# --- Project config ---
+echo "---"
 echo ""
-for spec_file in \
-    "$SPEC_DIR/FUNCTIONALITY.md" \
-    "$SPEC_DIR/ARCHITECTURE.md" \
-    "$SPEC_DIR/DATABASE.md"; do
-    fname="$(basename "$spec_file")"
-    emit_file "$spec_file" "Spec: $fname"
-done
-
-for spec_file in "$SPEC_DIR"/SCREEN-*.md "$SPEC_DIR"/FEATURE-*.md; do
-    [ -f "$spec_file" ] || continue
-    fname="$(basename "$spec_file")"
-    emit_file "$spec_file" "Spec: $fname"
-done
-
-# --- Iteration artifacts ---
-echo "# ITERATION TARGETS"
+echo "## Project Configuration (METADATA.md)"
 echo ""
-emit_file "$SPEC_DIR/IDEAS.md" "IDEAS.md — process each entry and delete after routing"
-emit_file "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" "ACCEPTANCE_CRITERIA.md — all criteria are required"
-emit_file "$SPEC_DIR/REFERENCE_GAPS.md" "REFERENCE_GAPS.md — implement P0 and P1 gaps"
-
-# --- Scorecard ---
-echo "# CURRENT SCORECARD"
+echo '```'
+cat "$METADATA_FILE"
+echo '```'
 echo ""
-emit_file "$SCORECARD_FILE" "SCORECARD.md (as of this run)"
+echo ""
+
+# --- Changed spec files (or all if no diff detected) ---
+echo "# CHANGED SPECIFICATIONS"
+echo ""
+
+if [ -n "$CHANGED_NAMES" ]; then
+    echo "$CHANGED_NAMES" | while read -r fname; do
+        fpath="$SPEC_DIR/$fname"
+        [ -f "$fpath" ] && emit_file "$fpath" "Spec: $fname"
+    done
+else
+    for spec_file in $(find "$SPEC_DIR" -maxdepth 1 -name '*.md' \
+            ! -name 'METADATA.md' ! -name 'IDEAS.md' \
+            ! -name 'REFERENCE_GAPS.md' ! -name 'ACCEPTANCE_CRITERIA.md' | sort); do
+        fname="$(basename "$spec_file")"
+        emit_file "$spec_file" "Spec: $fname"
+    done
+fi
+
+# --- Acceptance Criteria (always included) ---
+if [ -f "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" ]; then
+    echo "# ACCEPTANCE CRITERIA"
+    echo ""
+    emit_file "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" "ACCEPTANCE_CRITERIA.md — all criteria are required"
+fi
 
 # --- Footer ---
 cat <<FOOTER
@@ -191,13 +206,13 @@ cat <<FOOTER
 
 # END OF ITERATE PROMPT
 
-Iterate this prototype: fix scorecard failures, close P0/P1 gaps, process ideas.
-For every code change, update the corresponding spec file in Specifications/${PROJECT_NAME}/.
+Apply the changed specifications to the existing prototype.
+All listed acceptance criteria are hard requirements — all must pass.
 
 ## Session Summary Requirement
 At the end of this session, print:
 \`\`\`
---- Specification Updates ---
+--- Changes Applied ---
 <filename>: <what changed>
 \`\`\`
 FOOTER
