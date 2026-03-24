@@ -73,17 +73,21 @@ Open Claude Code in the existing prototype directory and paste the prompt. The a
 
 ## Step 5 — Iterate
 
-Edit spec files in `Specifications/<ProjectName>/` to reflect the changes you want, then run:
+Edit specification files in `Specifications/<ProjectName>/` to reflect the changes you want, then run:
 
 ```bash
 bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md
+```
+
+```bash
+# Run from the prototype directory (printed by iterate.sh to stderr)
 cd /mnt/c/Users/barlo/projects/<ProjectName>
 claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<ProjectName>/iterate-prompt.md)"
 ```
 
-`iterate.sh` diffs the spec directory against the previous `PROTOTYPE_BUILD_TAG` and emits only the changed spec files plus `ACCEPTANCE_CRITERIA.md`. The agent applies those changes to the existing code — it does not rebuild from scratch. `claude -p` uses your Claude subscription (not API tokens).
+`iterate.sh` diffs the specification directory against `PROTOTYPE_BUILD_TAG` and emits only the changed specification files plus `ACCEPTANCE_CRITERIA.md`, `IDEAS.md`, and `REFERENCE_GAPS.md`. The agent applies those changes to the existing code — it does not rebuild from scratch. `claude -p` uses your Claude subscription (not API tokens). Run it from the prototype directory so the agent can read the existing code.
 
-Repeat until the prototype matches the spec.
+Repeat until the prototype matches the specification.
 
 **Transaction log:** After each prototype session, run to extract bugs and ideas from the session log:
 

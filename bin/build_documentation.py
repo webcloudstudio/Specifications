@@ -38,7 +38,7 @@ SCRIPT_DESCRIPTIONS = {
     'validate.sh':             'Check a Specifications directory for required files, naming, and completeness',
     'convert.sh':              'Generate an AI expansion prompt from concise Specification files — optional intermediate step',
     'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
-    'iterate.sh':              'Generate a focused iteration prompt from spec changes since the last oneshot build',
+    'iterate.sh':              'Generate a focused iteration prompt from specification changes since the last oneshot build',
     'tran_logger.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
     'summarize_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',

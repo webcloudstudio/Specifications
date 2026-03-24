@@ -49,17 +49,19 @@ Update `ACCEPTANCE_CRITERIA.md` with any hard requirements the prototype must sa
 ```bash
 # From Specifications/
 bash bin/iterate.sh <PROJECT> > <PROJECT>/iterate-prompt.md
+```
 
-# Then in the prototype directory:
+```bash
+# From the prototype directory (printed by iterate.sh to stderr)
 cd /mnt/c/Users/barlo/projects/<PROJECT>
 claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<PROJECT>/iterate-prompt.md)"
 ```
 
-`iterate.sh` diffs the spec directory against `PROTOTYPE_BUILD_TAG`, emits only the changed spec files plus `ACCEPTANCE_CRITERIA.md`. The agent applies those changes to the existing code — it does not rebuild from scratch.
+`iterate.sh` diffs the specification directory against `PROTOTYPE_BUILD_TAG`, emits only the changed specification files plus `ACCEPTANCE_CRITERIA.md`, `IDEAS.md`, and `REFERENCE_GAPS.md`. The agent applies those changes to the existing code — it does not rebuild from scratch.
 
-`claude -p` runs non-interactively using your Claude subscription (not API tokens).
+`claude -p` uses your Claude subscription (not API tokens). Run it from the prototype directory so the agent can read the existing code.
 
-Repeat Steps 2–3 until the prototype matches the spec.
+Repeat Steps 2–3 until the prototype matches the specification.
 
 ---
 

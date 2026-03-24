@@ -3,33 +3,33 @@
 # Name: Iterate
 # Category: maintenance
 
-# Generates a focused iteration prompt from spec changes since the last oneshot build.
-# Reads PROTOTYPE_BUILD_TAG from .env, diffs spec files against that tag, and emits
-# only the changed spec files plus ACCEPTANCE_CRITERIA.md. The agent applies the
-# changes to the existing prototype — it does not rebuild from scratch.
+# Generates a focused iteration prompt from specification changes since the last oneshot build.
+# Diffs the specification directory against PROTOTYPE_BUILD_TAG, emits only changed
+# specification files plus ACCEPTANCE_CRITERIA.md, IDEAS.md, and REFERENCE_GAPS.md.
+# The agent applies the changes to the existing prototype — it does not rebuild from scratch.
+# Run claude -p from the prototype directory so the agent can read the existing code.
 #
 # Usage:
-#   bash bin/iterate.sh <ProjectName>
 #   bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md
-#   cd /mnt/c/Users/barlo/projects/<ProjectName>
-#   claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<ProjectName>/iterate-prompt.md)"
 #
-# Note: claude -p runs non-interactively using your Claude subscription (not API tokens).
-#
-# Requires: PROTOTYPE_BUILD_TAG in <ProjectName>/.env (written by oneshot.sh)
-# Reads:    spec .md files changed since the build tag, ACCEPTANCE_CRITERIA.md
-# Excludes: IDEAS.md, REFERENCE_GAPS.md, SCORECARD.md
+# Examples:
+#   bash bin/iterate.sh GAME > GAME/iterate-prompt.md
+#   cd /mnt/c/Users/barlo/projects/GAME
+#   claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/GAME/iterate-prompt.md)"
+#   # claude -p uses your Claude subscription, not API tokens
 #
 # Arguments:
-#   $1  ProjectName (required)
+#   $1        Project name (required) — specification directory name under Specifications/
 #
 # Exit codes:
 #   0  Prompt written to stdout
-#   1  Missing argument, spec directory, METADATA.md, or build tag
+#   1  Missing argument, specification directory, METADATA.md, or build tag
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECTS_DIR="$(cd "$REPO_DIR/.." && pwd)"
+
 POSITIONAL=""
 for arg in "$@"; do
     case "$arg" in
@@ -39,15 +39,16 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/iterate.sh <ProjectName> [> <ProjectName>/iterate-prompt.md]" >&2
+    echo "Usage: bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md" >&2
     exit 1
 fi
 
 PROJECT_NAME="$POSITIONAL"
 SPEC_DIR="$REPO_DIR/$PROJECT_NAME"
+PROTO_DIR="$PROJECTS_DIR/$PROJECT_NAME"
 
 if [ ! -d "$SPEC_DIR" ]; then
-    echo "ERROR: Spec directory not found: $SPEC_DIR" >&2
+    echo "ERROR: Specification directory not found: $SPEC_DIR" >&2
     exit 1
 fi
 
@@ -81,12 +82,12 @@ if ! git -C "$REPO_DIR" rev-parse "$BUILD_TAG" >/dev/null 2>&1; then
     exit 1
 fi
 
-# --- Find changed spec files since the build tag ---
-# Compares tag to current working tree (includes uncommitted changes)
-SKIP_PATTERN="^${PROJECT_NAME}/\(METADATA\|IDEAS\|REFERENCE_GAPS\|ACCEPTANCE_CRITERIA\)\.md$"
+# --- Find changed specification files since the build tag ---
+# Compares tag to current working tree (includes uncommitted changes).
+# Excludes METADATA.md — project config, not implementation spec.
 CHANGED_NAMES=$(git -C "$REPO_DIR" diff --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
-    | grep -v "$SKIP_PATTERN" \
+    | grep -v "^${PROJECT_NAME}/METADATA\.md$" \
     | sed "s|^${PROJECT_NAME}/||" \
     || true)
 
@@ -110,31 +111,36 @@ STACK=$(get_metadata "stack")
 SHORT_COMMIT="${BUILD_COMMIT:0:8}"
 
 echo "Iterate: $PROJECT_NAME" >&2
-echo "  Tag:   $BUILD_TAG ($SHORT_COMMIT)" >&2
+echo "  Tag:       $BUILD_TAG ($SHORT_COMMIT)" >&2
+echo "  Prototype: $PROTO_DIR" >&2
 if [ -n "$CHANGED_NAMES" ]; then
-    echo "  Changed spec files:" >&2
+    echo "  Changed specification files:" >&2
     echo "$CHANGED_NAMES" | while read -r f; do echo "    $f" >&2; done
 else
-    echo "  WARNING: No spec changes detected since $BUILD_TAG — emitting all spec files." >&2
+    echo "  WARNING: No specification changes detected since $BUILD_TAG — emitting all specification files." >&2
 fi
+echo "" >&2
+echo "  Run from prototype directory:" >&2
+echo "    cd $PROTO_DIR" >&2
+echo "    claude -p \"\$(cat $SPEC_DIR/iterate-prompt.md)\"" >&2
 echo "" >&2
 
 # --- Header ---
 cat <<HEADER
 # Iterate Prompt: $PROJECT_NAME
 
-You are applying spec changes to the existing **${DISPLAY_NAME:-$PROJECT_NAME}** prototype.
-Do not rebuild from scratch. Read the changed spec files and apply only those changes.
+You are applying specification changes to the existing **${DISPLAY_NAME:-$PROJECT_NAME}** prototype.
+Do not rebuild from scratch. Read the changed specification files and apply only those changes.
 
 Previous build: \`$BUILD_TAG\` (${SHORT_COMMIT})
 
-## Changed Spec Files
+## Changed Specification Files
 HEADER
 
 if [ -n "$CHANGED_NAMES" ]; then
     echo "$CHANGED_NAMES" | while read -r f; do echo "- $f"; done
 else
-    echo "_(no diff detected — all spec files included)_"
+    echo "_(no diff detected — all specification files included)_"
 fi
 
 cat <<INSTRUCTIONS
@@ -142,7 +148,7 @@ cat <<INSTRUCTIONS
 ## Instructions
 
 1. Read ACCEPTANCE_CRITERIA.md — these are hard requirements, all must pass
-2. Read the changed spec files — these define what has changed since the last build
+2. Read the changed specification files — these define what has changed since the last build
 3. Apply changes to the existing code; do not rebuild from scratch
 4. Follow all patterns in CLAUDE_RULES.md exactly
 
@@ -175,30 +181,36 @@ echo '```'
 echo ""
 echo ""
 
-# --- Changed spec files (or all if no diff detected) ---
+# --- Changed specification files (or all if no diff detected) ---
 echo "# CHANGED SPECIFICATIONS"
 echo ""
 
 if [ -n "$CHANGED_NAMES" ]; then
     echo "$CHANGED_NAMES" | while read -r fname; do
         fpath="$SPEC_DIR/$fname"
-        [ -f "$fpath" ] && emit_file "$fpath" "Spec: $fname"
+        [ -f "$fpath" ] && emit_file "$fpath" "Specification: $fname"
     done
 else
     for spec_file in $(find "$SPEC_DIR" -maxdepth 1 -name '*.md' \
-            ! -name 'METADATA.md' ! -name 'IDEAS.md' \
-            ! -name 'REFERENCE_GAPS.md' ! -name 'ACCEPTANCE_CRITERIA.md' | sort); do
+            ! -name 'METADATA.md' \
+            ! -name 'IDEAS.md' \
+            ! -name 'REFERENCE_GAPS.md' \
+            ! -name 'ACCEPTANCE_CRITERIA.md' | sort); do
         fname="$(basename "$spec_file")"
-        emit_file "$spec_file" "Spec: $fname"
+        emit_file "$spec_file" "Specification: $fname"
     done
 fi
 
-# --- Acceptance Criteria (always included) ---
-if [ -f "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" ]; then
-    echo "# ACCEPTANCE CRITERIA"
+# --- Context files (always included if present) ---
+if [ -f "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" ] || \
+   [ -f "$SPEC_DIR/IDEAS.md" ] || \
+   [ -f "$SPEC_DIR/REFERENCE_GAPS.md" ]; then
+    echo "# CONTEXT"
     echo ""
-    emit_file "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" "ACCEPTANCE_CRITERIA.md — all criteria are required"
 fi
+emit_file "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" "ACCEPTANCE_CRITERIA.md — all criteria are required"
+emit_file "$SPEC_DIR/IDEAS.md"               "IDEAS.md"
+emit_file "$SPEC_DIR/REFERENCE_GAPS.md"      "REFERENCE_GAPS.md"
 
 # --- Footer ---
 cat <<FOOTER
