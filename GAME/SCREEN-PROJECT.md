@@ -5,6 +5,10 @@
 
 **Single-project deep view.** Shows all metadata, operations, run history, links, and events for one project. Also serves as the metadata editor for that project.
 
+## Menu Navigation
+
+Top bar: `Projects` (active — detail drill-down, not a direct nav item). No project sub-bar on this screen.
+
 ## Route
 
 ```

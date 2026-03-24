@@ -27,11 +27,9 @@ Full viewport width — no max-width cap. Sortable table. Column header click so
 
 ## Filter Button
 
-Single cycling button in the section header:
+Lives in the **project sub-bar** (right side) — see Navigation Bar in UI-GENERAL. Present whenever a Projects sub-screen (Dashboard, Configuration) is active.
 
-```
-normal → all → idea → archive → normal
-```
+State cycles on click, encoded as URL query param `?filter=`:
 
 | State | Shows |
 |-------|-------|
@@ -39,8 +37,6 @@ normal → all → idea → archive → normal
 | `all` | All projects |
 | `idea` | Status = IDEA only |
 | `archive` | Status = ARCHIVED only |
-
-State is a URL query param; clicking generates a link with the next state.
 
 ## Table Structure
 

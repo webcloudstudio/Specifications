@@ -25,15 +25,31 @@ No JS build step. Bootstrap 5 via CDN. HTMX via CDN.
 
 ## Navigation Bar
 
-Fixed top bar present on all screens. Components left to right:
+Two-tier navigation. Top bar is always visible. Project sub-bar appears only when `Projects` is the active top-level item.
+
+### Top Bar
+
+Fixed. Present on all screens. Components left to right:
 
 | Element | Behavior |
 |---------|----------|
-| **Brand** (`cc-brand`) | App name with command icon. Click --> project list. |
-| **Tab links** | Projects, Configuration, Processes, Publisher, Monitoring, Workflow. Active tab highlighted. |
+| **Brand** (`cc-brand`) | App name with command icon. Click → Dashboard (`/`). |
+| **Top-level tabs** | Projects, Processes, Monitoring, Workflow, Publisher, Catalog. Active tab highlighted. |
 | **Documentation button** | Opens `docs/index.html` in new tab. |
 | **Settings dropdown** | Hamburger icon. Contains: Settings, Tags, Help. |
-| **Running badges** | Green pill badges for each currently-running project. Click --> project detail. |
+| **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
+
+### Project Sub-Bar
+
+Visible only when `Projects` is active in the top bar. Renders directly below the top bar.
+
+| Element | Position | Behavior |
+|---------|----------|----------|
+| **Dashboard** tab | Left | Links to `/` — default project list |
+| **Configuration** tab | Left | Links to `/project-config` — batch metadata editor |
+| **Filter button** | Right | Cycling view filter: `normal → all → idea → archive → normal`. State is a URL query param (`?filter=`). |
+
+Dashboard is the default sub-tab when Projects is first selected. All SCREEN-DEFAULT-based screens render in this Projects context.
 
 ---
 

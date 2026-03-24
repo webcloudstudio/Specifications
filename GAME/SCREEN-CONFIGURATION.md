@@ -6,6 +6,10 @@
 
 A Baseline screen for editing project metadata across all projects in a single list.
 
+## Menu Navigation
+
+`Projects / Configuration`
+
 ## Route
 
 ```

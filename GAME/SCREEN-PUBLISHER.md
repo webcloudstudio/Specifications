@@ -5,6 +5,10 @@
 
 **Portfolio site management.** Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields.
 
+## Menu Navigation
+
+`Publisher`
+
 ## Route
 
 ```

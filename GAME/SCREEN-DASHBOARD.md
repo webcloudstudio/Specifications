@@ -6,6 +6,10 @@
 
 **The main view.** Shows every discovered project with status, operations, and quick links. This is the landing page.
 
+## Menu Navigation
+
+`Projects / Dashboard` — default sub-view when Projects is selected.
+
 ## Route
 
 ```
@@ -16,7 +20,7 @@ Renders SCREEN-DEFAULT (Baseline) with `columns=Links,Actions,Help`.
 
 ## Layout
 
-Full-width project list. One row per project. Nav bar at top per UI-GENERAL. Filter bar below nav.
+Full-width project list. One row per project. Two-tier nav at top per UI-GENERAL; filter button in project sub-bar. Text/tag filter controls below sub-bar.
 
 ## Middle Columns
 

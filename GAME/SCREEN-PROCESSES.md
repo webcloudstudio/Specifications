@@ -6,6 +6,10 @@
 
 **Live log viewer and process control.** Shows what is running, what ran, and the output.
 
+## Menu Navigation
+
+`Processes`
+
 ## Route
 
 ```

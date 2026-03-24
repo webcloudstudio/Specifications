@@ -5,6 +5,10 @@
 
 **Service health dashboard and event timeline.** Polls running services, shows status, alerts on failure.
 
+## Menu Navigation
+
+`Monitoring`
+
 ## Route
 
 ```

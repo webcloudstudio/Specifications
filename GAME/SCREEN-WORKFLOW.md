@@ -5,6 +5,10 @@
 
 **Kanban board for prototype lifecycle management.** Tracks features and prototypes from idea through implementation to completion.
 
+## Menu Navigation
+
+`Workflow`
+
 ## Route
 
 ```

@@ -6,6 +6,10 @@
 
 API-oriented view of all projects and their registered scripts. Each project shows its endpoint surface; scripts can be run directly from the screen. Active and past runs are visible inline with live log output.
 
+## Menu Navigation
+
+`Catalog`
+
 ## Route
 
 ```
