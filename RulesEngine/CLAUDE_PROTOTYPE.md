@@ -65,3 +65,13 @@ Key files:
 ### 8. Build reference tracking
 
 When adding to `ACCEPTANCE_CRITERIA.md` or `REFERENCE_GAPS.md`, note the current oneshot tag in the `Build-ref:` header if it has changed since the file was last updated.
+
+### 9. Capture before iterate
+
+After any interactive session that modifies code, run from the Specifications directory:
+
+```bash
+bash bin/tran_logger.sh <PROJECT>
+```
+
+This reads the session log and produces CHANGE tickets, acceptance criteria, and ideas. Review the output, then run `iterate.sh` for the next formal apply. Do not start an iterate session without first running tran_logger.sh if you have done interactive prototype work since the last iterate.

@@ -184,6 +184,7 @@ for f in "$PROJECT_DIR"/*.md; do
         METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md) ;;
         SCREEN-*.md) pass "$fname (screen)" ;;
         FEATURE-*.md) pass "$fname (feature)" ;;
+        UI-*.md) pass "$fname (ui component)" ;;
         *)
             warn "Unexpected file name: $fname (expected SCREEN-* or FEATURE-* prefix for spec files)"
             BAD_NAMES=$((BAD_NAMES + 1))
@@ -222,6 +223,38 @@ for f in "$PROJECT_DIR"/*.md; do
         warn "$fname missing ## Open Questions section"
     fi
 done
+echo ""
+
+# --- CHANGE tickets ---
+echo "CHANGE tickets (changes/):"
+CHANGES_DIR="$PROJECT_DIR/changes"
+if [ -d "$CHANGES_DIR" ]; then
+    PENDING=0
+    APPLIED=0
+    REJECTED=0
+    INVALID=0
+    while IFS= read -r ticket; do
+        tname=$(basename "$ticket")
+        if grep -q '^\*\*Status:\*\* pending' "$ticket" 2>/dev/null; then
+            PENDING=$((PENDING + 1))
+            pass "$tname (pending)"
+        elif grep -q '^\*\*Status:\*\* applied' "$ticket" 2>/dev/null; then
+            APPLIED=$((APPLIED + 1))
+            [ "$VERBOSE" = true ] && pass "$tname (applied)"
+        elif grep -q '^\*\*Status:\*\* rejected' "$ticket" 2>/dev/null; then
+            REJECTED=$((REJECTED + 1))
+            warn "$tname (rejected — review and fix or delete)"
+        else
+            INVALID=$((INVALID + 1))
+            warn "$tname missing **Status:** field"
+        fi
+    done < <(find "$CHANGES_DIR" -maxdepth 1 -name 'CHANGE-*.md' 2>/dev/null | sort)
+    if [ $((PENDING + APPLIED + REJECTED + INVALID)) -eq 0 ]; then
+        pass "changes/ directory exists (empty)"
+    fi
+else
+    pass "No changes/ directory (none needed yet)"
+fi
 echo ""
 
 # --- Summary ---

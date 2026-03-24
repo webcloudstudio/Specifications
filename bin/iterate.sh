@@ -3,10 +3,10 @@
 # Name: Iterate
 # Category: maintenance
 
-# Generates a focused iteration prompt from specification changes since the last oneshot build.
-# Diffs the specification directory against PROTOTYPE_BUILD_TAG, emits only changed
-# specification files plus ACCEPTANCE_CRITERIA.md, IDEAS.md, and REFERENCE_GAPS.md.
-# The agent applies the changes to the existing prototype — it does not rebuild from scratch.
+# Generates a focused iteration prompt from pending CHANGE tickets and new specification
+# files added since the last oneshot build. The agent validates each item before
+# implementing — underspecified items are rejected with explanation. A scorecard is
+# written after implementation. Does not rebuild from scratch.
 # Run claude -p from the prototype directory so the agent can read the existing code.
 #
 # Usage:
@@ -16,8 +16,7 @@
 #   bash bin/iterate.sh GAME > GAME/iterate-prompt.md
 #   cd /mnt/c/Users/barlo/projects/GAME
 #   claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/GAME/iterate-prompt.md)"
-#   # Uses your Claude subscription. "$(cat file)" passes file as the prompt;
-#   # cat file | claude -p requires a separate query arg (piped content is context only).
+#   # Uses your Claude subscription. Run from the prototype directory.
 #
 # Arguments:
 #   $1        Project name (required) — specification directory name under Specifications/
@@ -83,16 +82,54 @@ if ! git -C "$REPO_DIR" rev-parse "$BUILD_TAG" >/dev/null 2>&1; then
     exit 1
 fi
 
-# --- Find changed specification files since the build tag ---
-# Compares tag to current working tree (includes uncommitted changes).
-# Excludes METADATA.md — project config, not implementation spec.
-CHANGED_NAMES=$(git -C "$REPO_DIR" diff --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
+# --- New specification files added since the build tag ---
+# Only FEATURE-*, SCREEN-*, UI-* files — not context files (AC, IDEAS, GAPS)
+NEW_SPECS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
-    | grep -v "^${PROJECT_NAME}/METADATA\.md$" \
+    | grep -E "^${PROJECT_NAME}/(FEATURE|SCREEN|UI)-" \
     | sed "s|^${PROJECT_NAME}/||" \
     || true)
 
-# --- Helpers ---
+# --- Pending CHANGE tickets ---
+PENDING_TICKETS=""
+if [ -d "$SPEC_DIR/changes" ]; then
+    while IFS= read -r ticket; do
+        if grep -q '^\*\*Status:\*\* pending' "$ticket" 2>/dev/null; then
+            PENDING_TICKETS="$PENDING_TICKETS$ticket"$'\n'
+        fi
+    done < <(find "$SPEC_DIR/changes" -maxdepth 1 -name 'CHANGE-*.md' 2>/dev/null | sort)
+fi
+PENDING_TICKETS="${PENDING_TICKETS%$'\n'}"
+
+# --- Summary ---
+DISPLAY_NAME=$(get_metadata "display_name")
+SHORT_COMMIT="${BUILD_COMMIT:0:8}"
+NEW_COUNT=$(echo "$NEW_SPECS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
+TICKET_COUNT=$(echo "$PENDING_TICKETS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
+
+echo "Iterate: $PROJECT_NAME" >&2
+echo "  Tag:       $BUILD_TAG ($SHORT_COMMIT)" >&2
+echo "  Prototype: $PROTO_DIR" >&2
+echo "  New specification files: $NEW_COUNT" >&2
+if [ -n "$NEW_SPECS" ]; then
+    echo "$NEW_SPECS" | while read -r f; do [ -n "$f" ] && echo "    $f" >&2; done
+fi
+echo "  Pending tickets: $TICKET_COUNT" >&2
+if [ -n "$PENDING_TICKETS" ]; then
+    echo "$PENDING_TICKETS" | while read -r f; do [ -n "$f" ] && echo "    $(basename "$f")" >&2; done
+fi
+echo "" >&2
+echo "  Run from prototype directory:" >&2
+echo "    cd $PROTO_DIR" >&2
+echo "    claude -p \"\$(cat $SPEC_DIR/iterate-prompt.md)\"" >&2
+echo "" >&2
+
+if [ "$NEW_COUNT" -eq 0 ] && [ "$TICKET_COUNT" -eq 0 ]; then
+    echo "WARNING: No new specification files and no pending CHANGE tickets found." >&2
+    echo "         Create changes/CHANGE-NNN-description.md or add new FEATURE-*/SCREEN-* files." >&2
+fi
+
+# --- Helper ---
 emit_file() {
     local filepath="$1"
     local label="$2"
@@ -107,102 +144,87 @@ emit_file() {
     fi
 }
 
-DISPLAY_NAME=$(get_metadata "display_name")
-STACK=$(get_metadata "stack")
-SHORT_COMMIT="${BUILD_COMMIT:0:8}"
-
-echo "Iterate: $PROJECT_NAME" >&2
-echo "  Tag:       $BUILD_TAG ($SHORT_COMMIT)" >&2
-echo "  Prototype: $PROTO_DIR" >&2
-if [ -n "$CHANGED_NAMES" ]; then
-    echo "  Changed specification files:" >&2
-    echo "$CHANGED_NAMES" | while read -r f; do echo "    $f" >&2; done
-else
-    echo "  WARNING: No specification changes detected since $BUILD_TAG — emitting all specification files." >&2
-fi
-echo "" >&2
-echo "  Run from prototype directory:" >&2
-echo "    cd $PROTO_DIR" >&2
-echo "    claude -p \"\$(cat $SPEC_DIR/iterate-prompt.md)\"" >&2
-echo "" >&2
-
-# --- Header ---
+# --- Prompt header ---
 cat <<HEADER
 # Iterate Prompt: $PROJECT_NAME
 
 You are applying specification changes to the existing **${DISPLAY_NAME:-$PROJECT_NAME}** prototype.
-Do not rebuild from scratch. Read the changed specification files and apply only those changes.
+Do not rebuild from scratch. Read the work items below and apply only those changes.
 
 Previous build: \`$BUILD_TAG\` (${SHORT_COMMIT})
+Prototype directory: \`$PROTO_DIR\`
 
-## Changed Specification Files
+## Pending Work
+
 HEADER
 
-if [ -n "$CHANGED_NAMES" ]; then
-    echo "$CHANGED_NAMES" | while read -r f; do echo "- $f"; done
-else
-    echo "_(no diff detected — all specification files included)_"
+if [ -n "$NEW_SPECS" ]; then
+    echo "**New specification files:**"
+    echo "$NEW_SPECS" | while read -r f; do [ -n "$f" ] && echo "- $f"; done
+    echo ""
+fi
+if [ -n "$PENDING_TICKETS" ]; then
+    echo "**Pending CHANGE tickets:**"
+    echo "$PENDING_TICKETS" | while read -r f; do [ -n "$f" ] && echo "- $(basename "$f")"; done
+    echo ""
+fi
+if [ "$NEW_COUNT" -eq 0 ] && [ "$TICKET_COUNT" -eq 0 ]; then
+    echo "_(no pending work detected)_"
+    echo ""
 fi
 
-cat <<INSTRUCTIONS
+# --- Validation protocol ---
+cat <<VALIDATION
+---
 
-## Instructions
+## Validation Rules (apply before implementing anything)
 
-1. Read ACCEPTANCE_CRITERIA.md — these are hard requirements, all must pass
-2. Read the changed specification files — these define what has changed since the last build
-3. Apply changes to the existing code; do not rebuild from scratch
-4. Follow all patterns in CLAUDE_RULES.md exactly
+For each new specification file and each CHANGE ticket listed above:
+
+1. The description or Intent must be concrete and specific — not vague ("improve the UI")
+2. The changes required must be specific enough to implement without guessing
+3. The \`## Open Questions\` section must exist and be either empty or contain only \`None.\`
+4. No placeholder text: \`TODO\`, \`TBD\`, \`[placeholder]\`
+
+**If any check fails:**
+- Do NOT implement the item
+- Write: \`[UNDERSPECIFIED] <filename>: <what is missing or unresolved>\`
+- In CHANGE tickets: set \`**Status:** rejected\` and add a \`## Rejection Reason\` section
+
+**If all checks pass:** implement the item fully, then in CHANGE tickets set \`**Status:** applied\`.
 
 ---
 
-INSTRUCTIONS
+VALIDATION
 
-# --- Rules ---
-emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
+# --- Architecture context (always included) ---
+echo "# ARCHITECTURE"
+echo ""
+emit_file "$SPEC_DIR/ARCHITECTURE.md" "ARCHITECTURE.md"
 
-# --- Stack files ---
-if [ -n "$STACK" ]; then
-    IFS='/' read -ra COMPONENTS <<< "$STACK"
-    emit_file "$REPO_DIR/RulesEngine/stack/common.md" "Common Practices (stack/common.md)"
-    for comp in "${COMPONENTS[@]}"; do
-        comp_lower="$(echo "$comp" | tr -d ' ' | tr '[:upper:]' '[:lower:]')"
-        stack_file="$REPO_DIR/RulesEngine/stack/${comp_lower}.md"
-        [ -f "$stack_file" ] && emit_file "$stack_file" "$comp (stack/${comp_lower}.md)"
-    done
-fi
-
-# --- Project config ---
-echo "---"
-echo ""
-echo "## Project Configuration (METADATA.md)"
-echo ""
-echo '```'
-cat "$METADATA_FILE"
-echo '```'
-echo ""
-echo ""
-
-# --- Changed specification files (or all if no diff detected) ---
-echo "# CHANGED SPECIFICATIONS"
-echo ""
-
-if [ -n "$CHANGED_NAMES" ]; then
-    echo "$CHANGED_NAMES" | while read -r fname; do
+# --- New specification files ---
+if [ -n "$NEW_SPECS" ]; then
+    echo "# NEW SPECIFICATIONS"
+    echo ""
+    echo "$NEW_SPECS" | while read -r fname; do
+        [ -z "$fname" ] && continue
         fpath="$SPEC_DIR/$fname"
-        [ -f "$fpath" ] && emit_file "$fpath" "Specification: $fname"
-    done
-else
-    for spec_file in $(find "$SPEC_DIR" -maxdepth 1 -name '*.md' \
-            ! -name 'METADATA.md' \
-            ! -name 'IDEAS.md' \
-            ! -name 'REFERENCE_GAPS.md' \
-            ! -name 'ACCEPTANCE_CRITERIA.md' | sort); do
-        fname="$(basename "$spec_file")"
-        emit_file "$spec_file" "Specification: $fname"
+        emit_file "$fpath" "Specification: $fname"
     done
 fi
 
-# --- Context files (always included if present) ---
+# --- Pending CHANGE tickets ---
+if [ -n "$PENDING_TICKETS" ]; then
+    echo "# CHANGE TICKETS"
+    echo ""
+    echo "$PENDING_TICKETS" | while read -r fpath; do
+        [ -z "$fpath" ] && continue
+        fname="$(basename "$fpath")"
+        emit_file "$fpath" "Ticket: $fname"
+    done
+fi
+
+# --- Context files ---
 if [ -f "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" ] || \
    [ -f "$SPEC_DIR/IDEAS.md" ] || \
    [ -f "$SPEC_DIR/REFERENCE_GAPS.md" ]; then
@@ -213,19 +235,36 @@ emit_file "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" "ACCEPTANCE_CRITERIA.md — all cri
 emit_file "$SPEC_DIR/IDEAS.md"               "IDEAS.md"
 emit_file "$SPEC_DIR/REFERENCE_GAPS.md"      "REFERENCE_GAPS.md"
 
-# --- Footer ---
+# --- Footer with scorecard instruction ---
 cat <<FOOTER
 ---
 
 # END OF ITERATE PROMPT
 
-Apply the changed specifications to the existing prototype.
-All listed acceptance criteria are hard requirements — all must pass.
+Apply accepted items only. Reject and explain any underspecified items.
+
+## Post-Implementation Scorecard
+
+After applying all accepted items, write or update \`SCORECARD.md\` in the prototype directory.
+
+Format:
+\`\`\`
+# Iteration Scorecard: $PROJECT_NAME
+**Tag:** $BUILD_TAG
+**Date:** $(date '+%Y-%m-%d')
+
+## Results
+- [x] FEATURE-Example — PASS: implemented and verified
+- [ ] CHANGE-001 — FAIL: route updated but template not found
+- [~] SCREEN-Example — PARTIAL: layout complete, interactions pending
+\`\`\`
 
 ## Session Summary Requirement
 At the end of this session, print:
 \`\`\`
 --- Changes Applied ---
 <filename>: <what changed>
+--- Rejected ---
+<filename>: <reason>
 \`\`\`
 FOOTER

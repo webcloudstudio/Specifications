@@ -116,6 +116,36 @@ These rules are global — they apply to all projects regardless of stack. Stack
 
 **Feature names** describe the capability: `FEATURE-Scan.md`, `FEATURE-Operations.md`.
 
+### CHANGE Tickets (iteration only)
+
+Mutations to existing specifications are expressed as CHANGE tickets, not edits fed raw to the build. Tickets live in `changes/CHANGE-NNN-description.md` within the spec directory.
+
+| Prefix | Contains | Location |
+|--------|----------|----------|
+| `changes/CHANGE-NNN-description.md` | Targeted mutation to existing spec | `changes/` subdirectory |
+
+**Ticket format:**
+
+```markdown
+# Change: NNN — Short description
+**Status:** pending
+**Type:** mutation
+**Scope:** list of target files or areas
+
+## Intent
+Why this change is needed. One paragraph.
+
+## Changes Required
+- Specific, unambiguous instruction
+- Another instruction
+
+## Open Questions
+None.
+```
+
+**Status values:** `pending` → `applied` (by LLM after apply) or `rejected` (by LLM if underspecified).
+Rejected tickets gain a `## Rejection Reason` section. Applied tickets are kept for history.
+
 ---
 
 ## Open Questions Section

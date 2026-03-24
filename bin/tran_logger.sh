@@ -1,6 +1,6 @@
 #!/bin/bash
 # CommandCenter Operation
-# Name: Update
+# Name: Transaction Logger
 # Category: maintenance
 
 # Reads the session transaction log and updates iteration feedback files.
@@ -139,24 +139,59 @@ ${SESSION_CONTENT:+
 $SESSION_CONTENT
 }
 
+## Artifact Taxonomy
+
+Classify each discovery into exactly one of these three artifact types:
+
+**CHANGE ticket** — a concrete code change needed in the prototype.
+Examples: a bug fix, a missing feature, a behavioral correction, a refactor.
+Write to: \`$SPEC_DIR/changes/CHANGE-NNN-description.md\`
+
+Use this format:
+\`\`\`
+# Change: NNN — Short description
+**Status:** pending
+**Type:** mutation
+**Scope:** list of prototype files or areas affected
+
+## Intent
+Why this change is needed. One paragraph.
+
+## Changes Required
+- Specific, unambiguous instruction
+- Another instruction
+
+## Open Questions
+None.
+\`\`\`
+
+**ACCEPTANCE_CRITERIA.md entry** — a testable behavioral requirement (MUST/MUST NOT).
+Examples: "Login MUST redirect to dashboard", "API MUST NOT return 500 on invalid input".
+Write to: \`$SPEC_DIR/ACCEPTANCE_CRITERIA.md\`
+
+**IDEAS.md entry** — a fuzzy observation, improvement idea, or question not yet actionable.
+Examples: "Consider adding pagination", "Nav feels cluttered".
+Write to: \`$SPEC_DIR/IDEAS.md\`
+
 ## Instructions
 
-Read the current iteration files and prototype code, then update:
+1. Determine the next CHANGE ticket counter:
+   Count existing files matching \`$SPEC_DIR/changes/CHANGE-*.md\` — next number is count + 1, zero-padded to 3 digits.
+   Create \`$SPEC_DIR/changes/\` directory if it does not exist.
 
-1. **ACCEPTANCE_CRITERIA.md** — Add MUST/MUST NOT statements for bugs found or behavior constraints.
-   Format: \`- MUST <present tense statement>\` or \`- MUST NOT <present tense statement>\`
+2. For each discovery from the session activity and git log:
+   - Classify as: CHANGE ticket, AC entry, or IDEA
+   - Write one CHANGE ticket file per concrete code change
+   - Append AC entries to ACCEPTANCE_CRITERIA.md (create with header if missing)
+   - Append IDEA entries to IDEAS.md (create with header if missing)
 
-2. **IDEAS.md** — Add ideas, improvements, or observations not yet captured.
-   Format: \`- <short description>\`
-
-Only add genuinely new items. Do not duplicate existing entries.
-Write only to files in: $SPEC_DIR/
-
-If a file does not exist, create it with a minimal header line.
+3. Only add genuinely new items. Do not duplicate existing entries.
+   Write only to files in: $SPEC_DIR/
 
 Print a summary of all changes at the end:
 \`\`\`
---- Update ---
+--- Transaction Log ---
+changes/CHANGE-NNN-description.md: created (pending)
 ACCEPTANCE_CRITERIA.md: +N entries
 IDEAS.md: +N entries
 \`\`\`

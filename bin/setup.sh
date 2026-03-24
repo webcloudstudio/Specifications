@@ -65,6 +65,7 @@ if [ -d "$PROJECT_DIR" ]; then
     fi
 else
     mkdir -p "$PROJECT_DIR"
+    mkdir -p "$PROJECT_DIR/changes"
     echo "Created: $PROJECT_DIR/"
 fi
 
