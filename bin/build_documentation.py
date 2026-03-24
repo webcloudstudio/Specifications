@@ -722,11 +722,15 @@ function showScript(file) {{
 
   // Additional sections (Writes, Options, Modes, Examples, etc.)
   var skip = {{'_desc':1,'Usage':1,'Synopsis':1}};
+  var codeKeys = {{'Examples':1}};
   Object.keys(secs).forEach(function(key) {{
     if (skip[key] || !secs[key].trim()) return;
     html += '<div class="sd-sec">' + esc(key) + '</div><div class="sd-body">';
     secs[key].split('\\n').forEach(function(line) {{
-      if (line.trim()) html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
+      if (line.trim()) {{
+        if (codeKeys[key]) html += '<code class="sd-cmd">' + esc(line.trim()) + '</code>';
+        else html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
+      }}
     }});
     html += '</div>';
   }});

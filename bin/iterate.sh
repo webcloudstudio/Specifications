@@ -16,7 +16,8 @@
 #   bash bin/iterate.sh GAME > GAME/iterate-prompt.md
 #   cd /mnt/c/Users/barlo/projects/GAME
 #   claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/GAME/iterate-prompt.md)"
-#   # claude -p uses your Claude subscription, not API tokens
+#   # Uses your Claude subscription. "$(cat file)" passes file as the prompt;
+#   # cat file | claude -p requires a separate query arg (piped content is context only).
 #
 # Arguments:
 #   $1        Project name (required) — specification directory name under Specifications/
