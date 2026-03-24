@@ -98,7 +98,7 @@ When Claude fixes code in the prototype, it automatically:
 After a prototype session, run to update the feedback files automatically:
 
 ```
-bash bin/update.sh <PROJECT>
+bash bin/tran_logger.sh <PROJECT>
 ```
 
 Reads the Claude Code session transaction log and recent git history. Writes discovered bugs and ideas to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md` in `Specifications/<PROJECT>/`.

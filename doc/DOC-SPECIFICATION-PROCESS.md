@@ -89,7 +89,7 @@ Repeat until the scorecard passes.
 **Transaction log:** After each prototype session, run to automatically extract bugs and ideas:
 
 ```
-bash bin/update.sh <ProjectName>
+bash bin/tran_logger.sh <ProjectName>
 ```
 
 Reads the Claude Code session log (`~/.claude/projects/<path>/`) and recent git history. Writes discovered items to `IDEAS.md` and `ACCEPTANCE_CRITERIA.md`.

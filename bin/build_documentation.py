@@ -39,7 +39,7 @@ SCRIPT_DESCRIPTIONS = {
     'convert.sh':              'Generate an AI expansion prompt from concise Specification files — optional intermediate step',
     'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
-    'update.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
+    'tran_logger.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
     'summarize_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
@@ -283,7 +283,7 @@ def build_page(scripts, projects, guides):
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
     step_nav += f'  <a class="sn" data-step="5" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 5)">Step 5 — Iterate</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="update.sh" onclick="showScript(\'update.sh\')">update.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="tran_logger.sh" onclick="showScript(\'tran_logger.sh\')">tran_logger.sh</a>\n'
     step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 6)">Step 6 — Promote</a>\n'
     step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
