@@ -41,7 +41,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/validate.sh <spec-name> [--verbose]" >&2
+    echo "Usage: bash bin/validate.sh <ProjectName> [--verbose]" >&2
     exit 1
 fi
 

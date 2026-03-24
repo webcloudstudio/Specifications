@@ -9,12 +9,12 @@
 # Claude Code in the prototype directory.
 #
 # Usage:
-#   bash bin/iterate.sh <spec-name>
-#   bash bin/iterate.sh <spec-name> > <spec-name>/iterate-prompt.md
-#   bash bin/iterate.sh <spec-name> --no-scorecard   # skip scorecard regeneration
+#   bash bin/iterate.sh <ProjectName>
+#   bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md
+#   bash bin/iterate.sh <ProjectName> --no-scorecard   # skip scorecard regeneration
 #
-# Reads:  Specifications/<spec>/*.md, IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md
-# Writes: <spec>_prototype/SCORECARD.md (via scorecard.sh), then iterate-prompt.md to stdout
+# Reads:  Specifications/<ProjectName>/*.md, IDEAS.md, REFERENCE_GAPS.md, ACCEPTANCE_CRITERIA.md
+# Writes: <ProjectName>_prototype/SCORECARD.md (via scorecard.sh), then iterate-prompt.md to stdout
 
 set -euo pipefail
 
@@ -30,7 +30,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/iterate.sh <spec-name> [--no-scorecard]" >&2
+    echo "Usage: bash bin/iterate.sh <ProjectName> [--no-scorecard]" >&2
     exit 1
 fi
 

@@ -7,9 +7,9 @@
 # or updates an existing one.
 #
 # Usage:
-#   bash bin/setup.sh <spec-name>              # create Specifications/<name>/
-#   bash bin/setup.sh <spec-name> --update     # copy new template files into existing dir
-#   bash bin/setup.sh <spec-name> --force      # overwrite existing files
+#   bash bin/setup.sh <ProjectName>              # create Specifications/<name>/
+#   bash bin/setup.sh <ProjectName> --update     # copy new template files into existing dir
+#   bash bin/setup.sh <ProjectName> --force      # overwrite existing files
 #
 # Arguments:
 #   $1        Spec name (required — created as a subdirectory of this repo)
@@ -28,7 +28,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$REPO_DIR/RulesEngine/spec_template"
 
-ARG="${1:?Usage: bash bin/setup.sh <spec-name> [--update|--force]}"
+ARG="${1:?Usage: bash bin/setup.sh <ProjectName> [--update|--force]}"
 UPDATE=false
 FORCE=false
 for a in "$@"; do

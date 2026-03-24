@@ -113,34 +113,34 @@ bash bin/generate_claude_rules.sh > rules-prompt.md
 
 ```bash
 # Scaffold a new spec directory from templates (or update an existing one)
-bash bin/setup.sh <spec-name>              # creates Specifications/<name>/
-bash bin/setup.sh <spec-name> --update     # add new template files to existing dir
+bash bin/setup.sh <ProjectName>              # creates Specifications/<name>/
+bash bin/setup.sh <ProjectName> --update     # add new template files to existing dir
 
 # Validate spec completeness and correctness
-bash bin/validate.sh <spec-name> [--verbose]
+bash bin/validate.sh <ProjectName> [--verbose]
 
 # Generate conversion prompt (concise → detailed specs) — optional intermediate step
-bash bin/convert.sh <spec-name> > convert-prompt.md
+bash bin/convert.sh <ProjectName> > convert-prompt.md
 
 # OneShot: validate + detect mode + generate build prompt (canonical command)
 #
 #   New project mode (no git_repo or no BUILD_FEATURE_BRANCH_NAME):
-#     bash bin/oneshot.sh <spec-name> > <spec-name>/oneshot-prompt.md
+#     bash bin/oneshot.sh <ProjectName> > <ProjectName>/oneshot-prompt.md
 #     mkdir -p /mnt/c/Users/barlo/projects/<name> && cd /mnt/c/Users/barlo/projects/<name>
 #     git init && git checkout -b main
 #     claude .   # paste prompt
 #
 #   Feature Branch mode (git_repo + BUILD_FEATURE_BRANCH_NAME set in .env):
 #     → clone/fetch + create branch, then generate prompt
-#     bash bin/oneshot.sh <spec-name> > oneshot-prompt.md
+#     bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md
 #     cd /path/to/projects/<name> && claude .   # paste prompt
 #
 #   Update mode (apply spec changes to existing code):
-#     bash bin/oneshot.sh <spec-name> --update > oneshot-prompt.md
+#     bash bin/oneshot.sh <ProjectName> --update > oneshot-prompt.md
 
 # Merge: squash-merge Feature Branch into base branch (GAME calls this automatically)
-bash bin/merge.sh <spec-name>
-bash bin/merge.sh <spec-name> --feature feature/name --base main --dry-run
+bash bin/merge.sh <ProjectName>
+bash bin/merge.sh <ProjectName> --feature feature/name --base main --dry-run
 
 # Test the specification system itself
 bash bin/test.sh

@@ -46,7 +46,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$POSITIONAL" ]; then
-    echo "Usage: bash bin/oneshot.sh <spec-name> [--no-tag|--tag-only|--update]" >&2
+    echo "Usage: bash bin/oneshot.sh <ProjectName> [--no-tag|--tag-only|--update]" >&2
     exit 1
 fi
 
