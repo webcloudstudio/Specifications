@@ -348,6 +348,7 @@ def build_page(scripts, projects, guides):
                wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True))
 
     wf_diagram = (f'<div class="wf-diagram">'
+                  f'<p class="wf-section-h" style="margin:0 0 4px">Oneshot Rules</p>'
                   f'<div class="wf-row">{row1}</div>'
                   f'<div class="wf-row">{row2}</div>'
                   f'<p class="wf-section-h" style="margin:10px 0 4px">Business Rules</p>'
