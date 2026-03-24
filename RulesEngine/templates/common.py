@@ -70,30 +70,76 @@ class OperationContext:
         except OSError:
             pass
 
+    def _game_port(self):
+        port = os.environ.get('GAME_PORT')
+        if port:
+            return port
+        try:
+            with open(os.path.expanduser('~/.game_port')) as f:
+                return f.read().strip()
+        except OSError:
+            return '5000'
+
     def _signal_handler(self, signum, frame):
-        self.stopped()
+        self.exit_ok()
         sys.exit(0)
 
     def started(self):
         self.logger.info(f'[{self.project_name}] Starting: {self.script_name}')
 
-    def stopped(self):
-        self.logger.info(f'[{self.project_name}] Stopped: {self.script_name}')
+    def exit_ok(self):
+        self.logger.info(f'[{self.project_name}] EXIT - OK')
 
-    def error(self, msg):
-        self.logger.error(f'[{self.project_name}] Error: {self.script_name}: {msg}')
+    def exit_error(self, msg=''):
+        self.logger.error(f'[{self.project_name}] EXIT - ERROR{": " + msg if msg else ""}')
 
     def run(self, fn):
-        """Lifecycle wrapper: started → fn(ctx) → stopped or error."""
+        """Lifecycle wrapper: started → fn(ctx) → EXIT - OK or EXIT - ERROR."""
         self.started()
         try:
             fn(self)
-            self.stopped()
+            self.exit_ok()
         except (KeyboardInterrupt, SystemExit):
-            self.stopped()
+            self.exit_ok()
         except Exception as e:
-            self.error(str(e))
+            self.exit_error(str(e))
             sys.exit(1)
+
+    def heartbeat(self, state, message='', subsystem=None):
+        """POST heartbeat to GAME. state: OK WARNING ERROR CRITICAL. Silent on failure."""
+        import urllib.request, json
+        payload = {'program': self.script_name, 'system': self.project_name,
+                   'state': state, 'message': message}
+        if subsystem:
+            payload['subsystem'] = subsystem
+        try:
+            req = urllib.request.Request(
+                f'http://localhost:{self._game_port()}/api/heartbeat',
+                data=json.dumps(payload).encode(),
+                headers={'Content-Type': 'application/json'},
+                method='POST',
+            )
+            urllib.request.urlopen(req, timeout=2)
+        except Exception:
+            pass
+
+    def log_event(self, severity, message, subsystem=None):
+        """POST event to GAME. severity: INFORMATION WARNING ERROR CRITICAL. Silent on failure."""
+        import urllib.request, json
+        payload = {'program': self.script_name, 'system': self.project_name,
+                   'severity': severity, 'message': message}
+        if subsystem:
+            payload['subsystem'] = subsystem
+        try:
+            req = urllib.request.Request(
+                f'http://localhost:{self._game_port()}/api/events',
+                data=json.dumps(payload).encode(),
+                headers={'Content-Type': 'application/json'},
+                method='POST',
+            )
+            urllib.request.urlopen(req, timeout=2)
+        except Exception:
+            pass
 
 
 def op(script_file):

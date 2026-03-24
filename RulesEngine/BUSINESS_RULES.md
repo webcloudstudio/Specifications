@@ -1,6 +1,6 @@
 # Business Rules
 
-**Version:** 20260320 V1
+**Version:** 20260323 V2
 **Description:** Source for CLAUDE_RULES.md — edit here, then regenerate via `bin/summarize_rules.sh`.
 
 ---
@@ -157,7 +157,7 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 # e.g. Flask: export FLASK_DEBUG=1 && flask run --port "$PORT"
 ```
 
-`common.sh` handles everything: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, and the `[$PROJECT_NAME] Starting:` message. Use `$PORT` as the service port — never hardcode a port number. Override the trap after sourcing if the script needs custom cleanup.
+`common.sh` handles: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, standardized exit logging, and the `[$PROJECT_NAME] Starting:` message. Use `$PORT` as the service port — never hardcode a port number. Override the trap after sourcing if the script needs custom cleanup.
 
 ### SCRIPTS_PYTHON_PATTERN
 **Scope:** scripts
@@ -180,9 +180,55 @@ if __name__ == '__main__':
     op(__file__).run(main)
 ```
 
-`op(__file__).run(main)` handles the same concerns as `common.sh`: path setup, METADATA.md parsing, env loading, logging, SIGTERM, and status messages.
+`op(__file__).run(main)` handles the same concerns as `common.sh`: path setup, METADATA.md parsing, env loading, logging, SIGTERM, and standardized exit logging. On clean exit it logs `EXIT - OK`; on unhandled exception it logs `EXIT - ERROR: <message>` and exits 1.
 
 Use Linux line endings (no `\r`). Run `chmod +x bin/*.sh`.
+
+### SCRIPTS_EXIT_LOGGING
+**Scope:** scripts
+**Applies at:** PROTOTYPE
+**Requirement:** Every script must log a standardized exit line on completion.
+**Rationale:** The log ingestor and operators need a single unambiguous token to know whether a script succeeded or failed without parsing arbitrary output.
+**Rule text:**
+Every script must emit one of these lines as its final log output:
+
+```
+[ProjectName] EXIT - OK
+[ProjectName] EXIT - ERROR: <reason>
+```
+
+`common.sh` emits these automatically via the `EXIT` trap (code 0 → OK; non-zero → ERROR with code).
+`common.py`'s `run()` emits them automatically: clean exit → OK; unhandled exception → ERROR with message.
+Do not print additional "done" or "completed" lines after these — they are the canonical terminal tokens.
+
+### SCRIPTS_HEARTBEAT
+**Scope:** scripts
+**Applies at:** PROTOTYPE
+**Requirement:** Scripts may report operational state and log events to GAME using `heartbeat()` and `log_event()`.
+**Rationale:** Centralised health state and event history in GAME enables monitoring across all projects without per-project instrumentation.
+**Rule text:**
+Both `common.sh` and `common.py` provide two helpers:
+
+**Bash:**
+```bash
+heartbeat <state> [message]
+# state: OK | WARNING | ERROR | CRITICAL
+# Resolves GAME port from $GAME_PORT env var, then ~/.game_port, then 5000.
+# Silent no-op if GAME is unreachable — never aborts the script.
+
+log_event <severity> <message>
+# severity: INFORMATION | WARNING | ERROR | CRITICAL
+```
+
+**Python:**
+```python
+ctx.heartbeat(state, message='')
+ctx.log_event(severity, message)
+# state / severity: OK WARNING ERROR CRITICAL (heartbeat); INFORMATION WARNING ERROR CRITICAL (log_event)
+# Silent no-op if GAME unreachable.
+```
+
+Call `heartbeat('OK')` at script start after `run()` if using long-running loops. Call `heartbeat('ERROR', msg)` before exiting on known failure conditions. These calls are advisory — never gate script logic on their success.
 
 ---
 
