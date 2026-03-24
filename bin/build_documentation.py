@@ -44,6 +44,8 @@ SCRIPT_DESCRIPTIONS = {
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
+    'ProjectValidate.sh':      'Verify a promoted code project against CLAUDE_RULES compliance — shows pass/fail by level',
+    'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
 }
 
 GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
@@ -284,6 +286,8 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn-sub" data-script="update.sh" onclick="showScript(\'update.sh\')">update.sh</a>\n'
     step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 6)">Step 6 — Promote</a>\n'
     step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="ProjectUpdate.sh" onclick="showScript(\'ProjectUpdate.sh\')">ProjectUpdate.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="summarize_rules.sh" onclick="showScript(\'summarize_rules.sh\')">summarize_rules.sh</a>\n'

@@ -55,13 +55,10 @@ Specifications/
     setup.sh                       Scaffold new spec directory (or update existing) from templates
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
-    build.sh                       Deprecated wrapper for oneshot.sh (backward compat only)
     merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
     oneshot.sh                     Validate + detect mode + generate build prompt (canonical build command)
     summarize_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
-    generate_prompt.sh             Legacy build prompt (no tagging, no ONESHOT_BUILD_RULES.md) — use oneshot.sh instead
-    rebuild_index.sh               Regenerate browsable HTML spec viewers
     build_documentation.sh         Build doc/index.html
     project_manager.py             Python backend for project verify/update operations
     ProjectValidate.sh             Verify a promoted code project against CLAUDE_RULES compliance
@@ -172,7 +169,6 @@ git checkout oneshot/GAME/2026-03-19.1 -- GAME/DATABASE.md
 ### Spec viewer
 
 ```bash
-bash bin/rebuild_index.sh
 bash bin/build_documentation.sh
 ```
 
@@ -224,11 +220,7 @@ and runs a create+validate round-trip on a temporary project.
 ### bin/summarize_rules.sh
 Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` from `RulesEngine/BUSINESS_RULES.md`. Auto-increments the version (date + sequence). Output is fed to an AI agent; the agent produces the new CLAUDE_RULES.md content.
 
-### bin/generate_prompt.sh
-Legacy build prompt generator. Reads `stack:` from METADATA.md, concatenates CLAUDE_RULES + stack files + spec files. Does not include ONESHOT_BUILD_RULES.md or create oneshot tags. Use `bin/oneshot.sh` instead.
 
-### bin/build.sh
-Deprecated backward-compatible wrapper. Calls `oneshot.sh` with all arguments passed through.
 Use `bin/oneshot.sh` directly — it handles both Bootstrap and Feature Branch modes automatically.
 
 ### bin/merge.sh
