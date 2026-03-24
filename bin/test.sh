@@ -86,11 +86,11 @@ echo ""
 
 # --- Bin scripts ---
 echo "Bin scripts:"
-for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh bin/generate_claude_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_prompt.sh bin/summarize_rules.sh; do
     assert_file "$script"
 done
 # Verify CommandCenter headers
-for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/summarize_rules.sh; do
     assert_contains "$script" "CommandCenter Operation"
     assert_contains "$script" "# Name:"
     assert_contains "$script" "# Category:"
@@ -99,16 +99,16 @@ echo ""
 
 # --- Script executability ---
 echo "Script executability:"
-for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/generate_claude_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/build.sh bin/summarize_rules.sh; do
     assert "$script is executable" test -x "$script"
 done
 echo ""
 
 # --- Generate Claude Rules ---
 echo "Generate Claude Rules:"
-assert "generate_claude_rules.sh runs without error" bash bin/generate_claude_rules.sh
-assert "output contains CLAUDE_RULES_START" bash -c 'bash bin/generate_claude_rules.sh | grep -q "CLAUDE_RULES_START"'
-assert "output references BUSINESS_RULES" bash -c 'bash bin/generate_claude_rules.sh | grep -q "BUSINESS_RULES"'
+assert "summarize_rules.sh runs without error" bash bin/summarize_rules.sh
+assert "output contains CLAUDE_RULES_START" bash -c 'bash bin/summarize_rules.sh | grep -q "CLAUDE_RULES_START"'
+assert "output references BUSINESS_RULES" bash -c 'bash bin/summarize_rules.sh | grep -q "BUSINESS_RULES"'
 echo ""
 
 # --- Create + validate round-trip ---

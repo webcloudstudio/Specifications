@@ -26,7 +26,7 @@ python3 bin/create_project.py <ProjectName>
 bash bin/update_projects.sh
 
 # 5. Regenerate agent rules after editing RulesEngine/BUSINESS_RULES.md
-bash bin/generate_claude_rules.sh > rules-prompt.md
+bash bin/summarize_rules.sh > rules-prompt.md
 # Feed rules-prompt.md to an AI agent → paste output over RulesEngine/CLAUDE_RULES.md
 ```
 
@@ -49,7 +49,7 @@ Specifications/
     validate.sh                    Validate a spec directory for completeness and correctness
     convert.sh                     Generate concise→detailed expansion prompt
     build.sh                       Tag commit + generate complete build prompt
-    generate_claude_rules.sh       Regenerate CLAUDE_RULES.md from BUSINESS_RULES.md
+    summarize_rules.sh       Regenerate CLAUDE_RULES.md from BUSINESS_RULES.md
     test.sh                        Self-test the specification system
 
   GAME/                            GAME project specification

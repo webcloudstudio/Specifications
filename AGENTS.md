@@ -31,7 +31,7 @@ pipeline combines everything into a single prompt an AI agent can execute.
 
 **What this means for changes to RulesEngine/:**
 - BUSINESS_RULES.md is the source for agent behavioral rules — full rationale lives there
-- CLAUDE_RULES.md is generated from BUSINESS_RULES.md via `bin/generate_claude_rules.sh` — never edit it directly
+- CLAUDE_RULES.md is generated from BUSINESS_RULES.md via `bin/summarize_rules.sh` — never edit it directly
 - Keep CLAUDE_RULES.md minimal — agents follow rules, they don't need rationale
 - ONESHOT_BUILD_RULES.md defines how concise specs expand — methodology lives here, not in project dirs
 - Stack files are prescriptive — copy-paste patterns, not guidelines
@@ -58,7 +58,7 @@ Specifications/
     build.sh                       Deprecated wrapper for oneshot.sh (backward compat only)
     merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
     oneshot.sh                     Validate + detect mode + generate build prompt (canonical build command)
-    generate_claude_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
+    summarize_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
     generate_prompt.sh             Legacy build prompt (no tagging, no ONESHOT_BUILD_RULES.md) — use oneshot.sh instead
     rebuild_index.sh               Regenerate browsable HTML spec viewers
@@ -105,7 +105,7 @@ Spec files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Q
 ### CLAUDE_RULES regeneration
 
 ```bash
-bash bin/generate_claude_rules.sh > rules-prompt.md
+bash bin/summarize_rules.sh > rules-prompt.md
 # Feed rules-prompt.md to an AI agent — paste output over RulesEngine/CLAUDE_RULES.md
 ```
 
@@ -221,7 +221,7 @@ Shows diff stat from previous oneshot tag. Includes stub policy in build prompts
 Tests the specification system: verifies global rules, stack files, templates, script headers,
 and runs a create+validate round-trip on a temporary project.
 
-### bin/generate_claude_rules.sh
+### bin/summarize_rules.sh
 Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` from `RulesEngine/BUSINESS_RULES.md`. Auto-increments the version (date + sequence). Output is fed to an AI agent; the agent produces the new CLAUDE_RULES.md content.
 
 ### bin/generate_prompt.sh

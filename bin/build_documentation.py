@@ -40,7 +40,7 @@ SCRIPT_DESCRIPTIONS = {
     'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'iterate.sh':              'Generate an iteration prompt targeting gaps, ideas, and scorecard failures',
     'update.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
-    'generate_claude_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
+    'summarize_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
@@ -286,7 +286,7 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="generate_claude_rules.sh" onclick="showScript(\'generate_claude_rules.sh\')">generate_claude_rules.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="summarize_rules.sh" onclick="showScript(\'summarize_rules.sh\')">summarize_rules.sh</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -332,7 +332,7 @@ def build_page(scripts, projects, guides):
     ])
     row_rules = ARR.join([
         wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
+        wf_box('summarize_rules.sh', 'bin/summarize_rules.sh'),
         wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
         wf_box('ProjectUpdate.sh', 'bin/ProjectUpdate.sh'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
@@ -357,7 +357,7 @@ def build_page(scripts, projects, guides):
 
     eng_row = ARR.join([
         wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('generate_claude_rules.sh', 'bin/generate_claude_rules.sh'),
+        wf_box('summarize_rules.sh', 'bin/summarize_rules.sh'),
         wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
     ])
     eng_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'

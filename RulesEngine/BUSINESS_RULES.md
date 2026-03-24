@@ -1,7 +1,7 @@
 # Business Rules
 
 **Version:** 20260320 V1
-**Description:** Source for CLAUDE_RULES.md — edit here, then regenerate via `bin/generate_claude_rules.sh`.
+**Description:** Source for CLAUDE_RULES.md — edit here, then regenerate via `bin/summarize_rules.sh`.
 
 ---
 
