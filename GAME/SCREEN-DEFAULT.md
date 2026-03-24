@@ -1,7 +1,10 @@
-# Screen: Baseline
+# Screen: Baseline Layout
 
-**Version:** 20260320 V1  
-**Description:** Spec for the Baseline screen
+**Version:** 20260320 V1
+**Type:** abstract — base layout, not a routed screen
+**Description:** Reusable project list layout. Named views extend this by declaring `Extends: SCREEN-DEFAULT` and specifying their middle columns.
+
+**Inherited by:** SCREEN-DASHBOARD, SCREEN-CONFIGURATION
 
 A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
 

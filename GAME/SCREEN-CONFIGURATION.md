@@ -1,6 +1,7 @@
 # Screen: Configuration
 
-**Version:** 20260320 V1  
+**Version:** 20260320 V1
+**Extends:** SCREEN-DEFAULT
 **Description:** Spec for the Configuration screen
 
 A Baseline screen for editing project metadata across all projects in a single list.

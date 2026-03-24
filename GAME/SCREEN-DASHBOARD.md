@@ -1,6 +1,7 @@
 # Screen: Dashboard
 
-**Version:** 20260320 V1  
+**Version:** 20260320 V1
+**Extends:** SCREEN-DEFAULT
 **Description:** Spec for the Dashboard screen
 
 **The main view.** Shows every discovered project with status, operations, and quick links. This is the landing page.
@@ -17,9 +18,9 @@ Renders SCREEN-DEFAULT (Baseline) with `columns=Links,Actions,Help`.
 
 Full-width project list. One row per project. Nav bar at top per UI-GENERAL. Filter bar below nav.
 
-## Per-Project Row
+## Middle Columns
 
-Uses the Baseline fixed columns (status badge, namespace, icon + name, cog) plus:
+Renders Baseline with `columns=Links,Actions,Help`. Inherits all fixed columns and filter button from SCREEN-DEFAULT.
 
 | Column | Source | Interaction |
 |--------|--------|-------------|

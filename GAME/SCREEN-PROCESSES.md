@@ -1,6 +1,7 @@
 # Screen: Processes
 
-**Version:** 20260320 V1  
+**Version:** 20260320 V1
+**Row structure from:** SCREEN-DEFAULT (status badge, icon, project name — fixed columns only; does not use Baseline table or filter button)
 **Description:** Spec for the Processes screen
 
 **Live log viewer and process control.** Shows what is running, what ran, and the output.
