@@ -155,14 +155,29 @@ Run: $(date '+%Y-%m-%d %H:%M:%S')"
 
     echo "OneShot (${ONESHOT_MODE}): $TAG_NAME → $(git rev-parse --short HEAD)" >&2
 
-    # Record prototype build tag and commit in .env (not committed — tracks per-developer prototype state)
+    # Record prototype build tag, commit, and directory in .env
     {
-        grep -v "^PROTOTYPE_BUILD_TAG=\|^PROTOTYPE_BUILD_COMMIT=" "$PROJECT_DIR/.env" 2>/dev/null || true
+        grep -v "^PROTOTYPE_BUILD_TAG=\|^PROTOTYPE_BUILD_COMMIT=\|^PROTOTYPE_DIR=" "$PROJECT_DIR/.env" 2>/dev/null || true
         echo "PROTOTYPE_BUILD_TAG=$TAG_NAME"
         echo "PROTOTYPE_BUILD_COMMIT=$COMMIT_SHA"
+        echo "PROTOTYPE_DIR=$TARGET_DIR"
     } > "$PROJECT_DIR/.env.tmp" && mv "$PROJECT_DIR/.env.tmp" "$PROJECT_DIR/.env"
     echo "  Prototype tag: $TAG_NAME → $PROJECT_DIR/.env" >&2
     echo "" >&2
+
+    # Append deploy log entry
+    DEPLOY_LOG="$PROJECT_DIR/DEPLOY_LOG.md"
+    if [ ! -f "$DEPLOY_LOG" ]; then
+        echo "# Deploy Log: $PROJECT_NAME" > "$DEPLOY_LOG"
+        echo "" >> "$DEPLOY_LOG"
+    fi
+    {
+        echo "## $(date '+%Y-%m-%d %H:%M') — oneshot ($ONESHOT_MODE)"
+        echo "- Tag:       $TAG_NAME"
+        echo "- Commit:    $(git rev-parse --short HEAD)"
+        echo "- Prototype: $TARGET_DIR"
+        echo ""
+    } >> "$DEPLOY_LOG"
 
     # Show diff from previous oneshot if one exists
     PREV_TAG=$(git tag -l "oneshot/${PROJECT_NAME}/*" --sort=-version:refname | head -2 | tail -1)

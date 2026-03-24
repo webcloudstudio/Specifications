@@ -43,22 +43,28 @@ fi
 
 PROJECT_NAME="$POSITIONAL"
 SPEC_DIR="$REPO_DIR/$PROJECT_NAME"
-PROJECTS_DIR="$(cd "$REPO_DIR/.." && pwd)"
-PROTO_DIR="$PROJECTS_DIR/${PROJECT_NAME}_prototype"
-
-# Fall back to non-_prototype directory
-if [ ! -d "$PROTO_DIR" ]; then
-    PROTO_DIR="$PROJECTS_DIR/$PROJECT_NAME"
-fi
 
 if [ ! -d "$SPEC_DIR" ]; then
     echo "ERROR: Specifications directory not found: $SPEC_DIR" >&2
     exit 1
 fi
 
+# Read prototype directory from .env (written by oneshot.sh / iterate.sh)
+PROTO_DIR=""
+ENV_FILE="$SPEC_DIR/.env"
+if [ -f "$ENV_FILE" ]; then
+    PROTO_DIR=$(grep "^PROTOTYPE_DIR=" "$ENV_FILE" 2>/dev/null | head -1 | sed 's/^PROTOTYPE_DIR=//' | tr -d '\r' || true)
+fi
+
+if [ -z "$PROTO_DIR" ]; then
+    echo "ERROR: PROTOTYPE_DIR not set in $ENV_FILE" >&2
+    echo "       Run bash bin/iterate.sh $PROJECT_NAME or bash bin/oneshot.sh $PROJECT_NAME first." >&2
+    exit 1
+fi
+
 if [ ! -d "$PROTO_DIR" ]; then
     echo "ERROR: Prototype directory not found: $PROTO_DIR" >&2
-    echo "       Expected: ${PROJECT_NAME}_prototype/ or ${PROJECT_NAME}/" >&2
+    echo "       Update PROTOTYPE_DIR in $ENV_FILE or re-run iterate.sh/oneshot.sh." >&2
     exit 1
 fi
 

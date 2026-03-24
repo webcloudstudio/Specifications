@@ -129,6 +129,27 @@ if [ "$NEW_COUNT" -eq 0 ] && [ "$TICKET_COUNT" -eq 0 ]; then
     echo "         Create changes/CHANGE-NNN-description.md or add new FEATURE-*/SCREEN-* files." >&2
 fi
 
+# --- Record prototype directory and append deploy log ---
+{
+    grep -v "^PROTOTYPE_DIR=" "$ENV_FILE" 2>/dev/null || true
+    echo "PROTOTYPE_DIR=$PROTO_DIR"
+} > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+
+DEPLOY_LOG="$SPEC_DIR/DEPLOY_LOG.md"
+if [ ! -f "$DEPLOY_LOG" ]; then
+    echo "# Deploy Log: $PROJECT_NAME" > "$DEPLOY_LOG"
+    echo "" >> "$DEPLOY_LOG"
+fi
+{
+    echo "## $(date '+%Y-%m-%d %H:%M') — iterate"
+    echo "- Tag:       $BUILD_TAG (baseline)"
+    echo "- Commit:    $SHORT_COMMIT"
+    echo "- Prototype: $PROTO_DIR"
+    [ "$TICKET_COUNT" -gt 0 ] && echo "- Tickets:   $TICKET_COUNT pending"
+    [ "$NEW_COUNT"    -gt 0 ] && echo "- New specs: $NEW_COUNT"
+    echo ""
+} >> "$DEPLOY_LOG"
+
 # --- Helper ---
 emit_file() {
     local filepath="$1"
