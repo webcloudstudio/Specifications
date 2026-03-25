@@ -8,7 +8,7 @@
 
 ## Menu Navigation
 
-`Projects / Dashboard` — default sub-view when Projects is selected.
+`Projects / Overview` 
 
 ## Route
 

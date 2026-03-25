@@ -12,10 +12,14 @@
 ## Route
 
 ```
-GET /publisher
+GET /homepage
 ```
 
 ## Layout
+
+At the top is a nice paragraph and heading bar indicating that this page will build and publish
+a personal portfolio page.  It will briefly describe the project and show the publish location.
+You can edit that location from there.
 
 Four sections stacked vertically: Build, Preview, Publish, Homepage.
 

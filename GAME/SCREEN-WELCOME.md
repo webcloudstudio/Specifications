@@ -5,7 +5,7 @@
 
 ## Menu Navigation
 
-Top-level tab in the navigation bar: `Welcome` — leftmost tab, always present. This is the default route.
+`Projects / Welcome` 
 
 ## Route
 

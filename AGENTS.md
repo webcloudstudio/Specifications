@@ -29,6 +29,8 @@ the same standards (METADATA.md, bin/ headers, AGENTS.md).
 ONESHOT_BUILD_RULES.md defines expansion rules. Stack files define technology patterns. The build
 pipeline combines everything into a single prompt an AI agent can execute.
 
+Never the shortcut word spec for specification in documentation or comments.  That shortcut is only to be used in script naming where brevity matters.
+
 **What this means for changes to RulesEngine/:**
 - BUSINESS_RULES.md is the source for agent behavioral rules — full rationale lives there
 - CLAUDE_RULES.md is generated from BUSINESS_RULES.md via `bin/summarize_rules.sh` — never edit it directly
@@ -51,9 +53,9 @@ Specifications/
     templates/                     Canonical common.sh and common.py (code projects)
     gitignore                      Standard .gitignore distributed to projects
 
-  bin/                             Tooling — spec scripts work on this repo only; Project* scripts push to code projects
-    setup.sh                       Scaffold new spec directory (or update existing) from templates
-    validate.sh                    Validate a spec directory for completeness and correctness
+  bin/                             Tooling — specification scripts work on this repo only; Project* scripts push to code projects
+    setup.sh                       Scaffold new specification directory (or update existing) from templates
+    validate.sh                    Validate a specification directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
     merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
     oneshot.sh                     Validate + detect mode + generate build prompt (canonical build command)
@@ -76,8 +78,8 @@ Specifications/
 
 **Separation of concerns:**
 - `RulesEngine/` = what standards projects must follow + how specs expand
-- `{ProjectName}/` = what a specific prototype spec should be and do
-- `bin/` spec scripts = work on prototype directories inside this repo only
+- `{ProjectName}/` = what a specific prototype specification should be and do
+- `bin/` specification scripts = work on prototype directories inside this repo only
 - `bin/` Project* scripts = push standards to promoted code projects (absolute path or project name)
 - `doc/` = documentation about the specification system itself
 - GAME project (`../GAME/bin/`) = create_project.py (scaffold new projects); wrappers delegate validate/update to project_manager.py
@@ -95,7 +97,7 @@ Specifications/
 | `SCREEN-{Name}.md` | Per-screen: route, layout, interactions | If has UI |
 | `FEATURE-{Name}.md` | Per-feature: trigger, sequence, reads, writes | As needed |
 
-Spec files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README, METADATA, and INTENT do not.
+specification files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README, METADATA, and INTENT do not.
 
 ## Dev Commands
 
@@ -106,14 +108,14 @@ bash bin/summarize_rules.sh > rules-prompt.md
 # Feed rules-prompt.md to an AI agent — paste output over RulesEngine/CLAUDE_RULES.md
 ```
 
-### Specification workflow (spec names only — directories inside this repo)
+### Specification workflow (specification names only — directories inside this repo)
 
 ```bash
-# Scaffold a new spec directory from templates (or update an existing one)
+# Scaffold a new specification directory from templates (or update an existing one)
 bash bin/setup.sh <ProjectName>              # creates Specifications/<name>/
 bash bin/setup.sh <ProjectName> --update     # add new template files to existing dir
 
-# Validate spec completeness and correctness
+# Validate specification completeness and correctness
 bash bin/validate.sh <ProjectName> [--verbose]
 
 # Generate conversion prompt (concise → detailed specs) — optional intermediate step
@@ -132,7 +134,7 @@ bash bin/convert.sh <ProjectName> > convert-prompt.md
 #     bash bin/oneshot.sh <ProjectName> > oneshot-prompt.md
 #     cd /path/to/projects/<name> && claude .   # paste prompt
 #
-#   Update mode (apply spec changes to existing code):
+#   Update mode (apply specification changes to existing code):
 #     bash bin/oneshot.sh <ProjectName> --update > oneshot-prompt.md
 
 # Merge: squash-merge Feature Branch into base branch (GAME calls this automatically)
@@ -166,7 +168,7 @@ git show oneshot/GAME/2026-03-19.1
 git checkout oneshot/GAME/2026-03-19.1 -- GAME/DATABASE.md
 ```
 
-### Spec viewer
+### Specification viewer
 
 ```bash
 bash bin/build_documentation.sh
@@ -185,7 +187,7 @@ bash bin/update_projects.sh [--dry-run]       # push rules/templates to all set-
 Every `bin/oneshot.sh` run creates an annotated git tag: `oneshot/{spec}/{YYYY-MM-DD.N}`.
 
 Annotated tags are permanent git objects — never pruned by `git gc`. They preserve the exact
-spec state used for each build, enabling spec-to-spec diffs between builds.
+specification state used for each build, enabling spec-to-spec diffs between builds.
 
 ## Architecture
 

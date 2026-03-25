@@ -5,7 +5,7 @@
 
 ## Menu Navigation
 
-Top-level tab in the navigation bar: `Prototypes`. Added to the right of the existing tabs.
+`Prototypes`
 
 ## Route
 

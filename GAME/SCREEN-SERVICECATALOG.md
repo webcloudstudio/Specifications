@@ -13,7 +13,7 @@ API-oriented view of all projects and their registered scripts. Each project sho
 ## Route
 
 ```
-GET /catalog
+GET /servicecatalog
 ```
 
 ## Layout
