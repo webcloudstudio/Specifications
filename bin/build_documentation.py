@@ -48,10 +48,9 @@ SCRIPT_DESCRIPTIONS = {
     'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
 }
 
-GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'FEATURES']
+GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'FEATURES']
 GUIDE_TITLES = {
     'PROTOTYPE-PROCESS':     'Prototype Process Spec',
-    'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
     'ITERATION-PROCESS':     'Iteration Process',
     'PROMOTE':               'Step 6 — Promote',
@@ -296,17 +295,21 @@ def build_page(scripts, projects, guides):
 
     step_nav = ''
     for num, label, subs in STEP_NAV:
-        step_nav += f'  <a class="sn" data-step="{num}" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', {num})">{h.escape(label)}</a>\n'
+        # Steps 1-4: link to first guide sub-item; step 5+: handled below
+        first_guide_sub = next((t for t in subs if t[1] == 'guide'), None)
+        if first_guide_sub and num < 5:
+            step_nav += f'  <a class="sn" data-key="{first_guide_sub[2]}" onclick="showGuide(\'{first_guide_sub[2]}\')">{h.escape(label)}</a>\n'
+        else:
+            step_nav += f'  <a class="sn" data-step="{num}">{h.escape(label)}</a>\n'
         for sub_label, sub_type, sub_target in subs:
             if sub_type == 'script':
                 step_nav += f'  <a class="sn-sub" data-script="{h.escape(sub_target)}" onclick="showScript(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
-    step_nav += f'  <a class="sn" data-step="5" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 5)">Step 5 — Iterate</a>\n'
+    step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Iterate</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="tran_logger.sh" onclick="showScript(\'tran_logger.sh\')">tran_logger.sh</a>\n'
-    step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'SPECIFICATION-PROCESS\', 6)">Step 6 — Promote</a>\n'
-    step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
+    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectUpdate.sh" onclick="showScript(\'ProjectUpdate.sh\')">ProjectUpdate.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
@@ -681,23 +684,8 @@ marked.setOptions({{ gfm: true, breaks: false }});
 function initGuideList() {{
   var container = document.querySelector('.doc-guide-list');
   if (!container) return;
-  // Show only guides NOT already in sidebar navigation
-  var docOrder = ['SPECIFICATION-PROCESS', 'ITERATION-PROCESS'];
-  docOrder.forEach(function(key) {{
-    var meta = GUIDES_META[key];
-    if (meta) {{
-      var card = document.createElement('div');
-      card.className = 'doc-guide-card';
-      card.onclick = function() {{ showGuide(key); }};
-      card.innerHTML = '<div class="doc-guide-card-title">' +
-                       (meta.title || key.replace(/-/g, ' ')) +
-                       '</div>';
-      if (meta.desc) {{
-        card.innerHTML += '<div class="doc-guide-card-desc">' + meta.desc + '</div>';
-      }}
-      container.appendChild(card);
-    }}
-  }});
+  // All guides are now in sidebar navigation, so Documentation section is empty
+  // This function is kept for future reference docs
 }}
 
 function clearActive() {{
