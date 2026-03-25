@@ -268,11 +268,23 @@ Apply accepted items only. Reject and explain any underspecified items.
 
 After applying all accepted items, write or update \`SCORECARD.md\` in the prototype directory.
 
+To compute KPIs, read these files:
+- Pending tickets: count \`**Status:** pending\` in \`$SPEC_DIR/changes/CHANGE-*.md\`
+- P0/P1 gaps: count lines beginning with \`P0\` or \`P1\` in \`$SPEC_DIR/REFERENCE_GAPS.md\`
+- Open questions: count non-\`None.\` bullet lines in \`## Open Questions\` sections across \`$SPEC_DIR\`/*.md
+
 Format:
 \`\`\`
 # Iteration Scorecard: $PROJECT_NAME
-**Tag:** $BUILD_TAG
-**Date:** $(date '+%Y-%m-%d')
+**Tag:** $BUILD_TAG  **Date:** $(date '+%Y-%m-%d')
+
+## KPIs
+| Metric | Value |
+|--------|-------|
+| Completion (this session) | X% (N applied / M attempted) |
+| Pending tickets remaining | N |
+| P0/P1 reference gaps | N |
+| Unresolved open questions | N |
 
 ## Results
 - [x] FEATURE-Example — PASS: implemented and verified

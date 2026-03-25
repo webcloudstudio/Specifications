@@ -181,7 +181,8 @@ BAD_NAMES=0
 for f in "$PROJECT_DIR"/*.md; do
     fname=$(basename "$f")
     case "$fname" in
-        METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md|DEPLOY_LOG.md) ;;
+        METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md) ;;
+        DEPLOY_LOG.md|ACCEPTANCE_CRITERIA.md|IDEAS.md|REFERENCE_GAPS.md|SCORECARD.md) ;;
         SCREEN-*.md) pass "$fname (screen)" ;;
         FEATURE-*.md) pass "$fname (feature)" ;;
         UI-*.md) pass "$fname (ui component)" ;;
@@ -215,7 +216,8 @@ for f in "$PROJECT_DIR"/*.md; do
     fname=$(basename "$f")
     # These files don't need Open Questions
     case "$fname" in
-        METADATA.md|README.md|INTENT.md|DEPLOY_LOG.md) continue ;;
+        METADATA.md|README.md|INTENT.md) continue ;;
+        DEPLOY_LOG.md|ACCEPTANCE_CRITERIA.md|IDEAS.md|REFERENCE_GAPS.md|SCORECARD.md) continue ;;
     esac
     if grep -q '## Open Questions' "$f" 2>/dev/null; then
         pass "$fname has Open Questions"

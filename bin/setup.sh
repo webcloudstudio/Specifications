@@ -19,7 +19,9 @@
 # Creates:
 #   <project-dir>/
 #     METADATA.md, README.md, INTENT.md, ARCHITECTURE.md,
-#     DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md
+#     DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md,
+#     UI-Component-Example.md, ACCEPTANCE_CRITERIA.md, IDEAS.md,
+#     REFERENCE_GAPS.md, changes/
 #
 # Template source: RulesEngine/spec_template/
 
@@ -98,6 +100,6 @@ echo ""
 echo "Next steps:"
 echo "  1. Edit INTENT.md — why does this project exist?"
 echo "  2. Edit METADATA.md — add stack, port, status fields as needed"
-echo "  3. Rename SCREEN-Example.md and FEATURE-Example.md to real names"
+echo "  3. Rename SCREEN-Example.md, FEATURE-Example.md, UI-Component-Example.md to real names"
 echo "  4. Delete DATABASE.md or UI.md if not applicable"
 echo "  5. Run: bash bin/validate.sh $PROJECT_SLUG"

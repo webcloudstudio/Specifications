@@ -48,14 +48,19 @@ SCRIPT_DESCRIPTIONS = {
     'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
 }
 
-GUIDE_ORDER = ['SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
+GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
 GUIDE_TITLES = {
+    'PROTOTYPE-PROCESS':     'Prototype Process Spec',
     'SPECIFICATION-PROCESS': 'Specification Process',
     'PROJECT-SETUP':         'Project Creation',
     'ITERATION-PROCESS':     'Iteration Process',
     'PROMOTE':               'Step 6 — Promote',
     'CREATE-IMAGE':          'Create Image',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
+}
+RULES_ENGINE_DIR = PROJECT_DIR / "RulesEngine"
+GUIDE_EXTRA = {
+    'PROTOTYPE-PROCESS': RULES_ENGINE_DIR / 'PROTOTYPE_PROCESS.md',
 }
 
 # Scripts hidden from the scripts list (generate_*.py are per-project image generators)
@@ -166,6 +171,10 @@ def discover_projects():
 def discover_guides():
     # Source files are prefixed DOC- to avoid name collisions (e.g. DOC-ENGINEERING-RULES.md)
     found = {f.stem[4:]: f for f in DOC_DIR.glob('DOC-*.md')}
+    # Also include spec files from RulesEngine/ registered in GUIDE_EXTRA
+    for key, path in GUIDE_EXTRA.items():
+        if path.exists():
+            found[key] = path
     guides = []
     for key in GUIDE_ORDER:
         if key in found:
