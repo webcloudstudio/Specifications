@@ -23,22 +23,22 @@ Ticket files are numbered variants of canonical types representing a single pend
 
 | File | Type | Required At | Purpose |
 |------|------|-------------|---------|
-| `README.md` | canonical | DRAFT | One-line description |
-| `INTENT.md` | canonical | DRAFT | Why the project exists; who it is for |
-| `ARCHITECTURE.md` | canonical | VALIDATED | Module layout, routes, directory structure. Always included in iterate prompt |
-| `DATABASE.md` | canonical | VALIDATED (if DB) | Tables, columns, types — schema only |
-| `UI.md` | canonical | VALIDATED (if UI) | Shared UI patterns across screens |
-| `SCREEN-{Name}.md` | canonical | VALIDATED (if UI) | Per-screen: route, layout, interactions |
+| `README.md` | canonical | `setup.sh` | One-line description |
+| `INTENT.md` | canonical | `setup.sh` | Why the project exists; who it is for |
+| `ARCHITECTURE.md` | canonical | `validate.sh` | Module layout, routes, directory structure. Always included in iterate prompt |
+| `DATABASE.md` | canonical | `validate.sh` (if DB) | Tables, columns, types — schema only |
+| `UI.md` | canonical | `validate.sh` (if UI) | Shared UI patterns across screens |
+| `SCREEN-{Name}.md` | canonical | `validate.sh` (if UI) | Per-screen: route, layout, interactions |
 | `FEATURE-{Name}.md` | canonical | as needed | Cross-cutting behavior: trigger, sequence, reads/writes |
-| `SCREEN-NNN-*.md` | ticket | iterate | New or revised screen specification |
-| `FEATURE-NNN-*.md` | ticket | iterate | New or revised feature specification |
-| `PATCH-NNN-*.md` | ticket | iterate | Bug fix, behavioral correction, refactor |
-| `AC-NNN-*.md` | ticket | iterate | Testable MUST / MUST NOT batch |
-| `INTENT-NNN-*.md` | ticket | iterate | Clarification or scope change |
-| `ACCEPTANCE_CRITERIA.md` | tracking | DRAFT | Standing MUST / MUST NOT list; always included in iterate prompt |
-| `IDEAS.md` | tracking | DRAFT | Fuzzy observations; processed on request |
+| `SCREEN-NNN-*.md` | ticket | `iterate.sh` | New or revised screen specification |
+| `FEATURE-NNN-*.md` | ticket | `iterate.sh` | New or revised feature specification |
+| `PATCH-NNN-*.md` | ticket | `iterate.sh` | Bug fix, behavioral correction, refactor |
+| `AC-NNN-*.md` | ticket | `iterate.sh` | Testable MUST / MUST NOT batch |
+| `INTENT-NNN-*.md` | ticket | `iterate.sh` | Clarification or scope change |
+| `ACCEPTANCE_CRITERIA.md` | tracking | `setup.sh` | Standing MUST / MUST NOT list; always included in iterate prompt |
+| `IDEAS.md` | tracking | `setup.sh` | Fuzzy observations; processed on request |
 | `REFERENCE_GAPS.md` | tracking | as needed | Unspecified features by priority P0–P4; written by LLM |
-| `DEPLOY_LOG.md` | tracking | BUILT | Record of every build and iterate run with target directory |
+| `DEPLOY_LOG.md` | tracking | `oneshot.sh` | Record of every build and iterate run with target directory |
 | `.tran_logger_cursor` | tracking | — | Processed session basenames — prevents duplicate log processing |
 
 ---
@@ -63,20 +63,20 @@ All metadata files live in `Specifications/<PROJECT>/`.
 
 ### METADATA.md
 
-Required at: **DRAFT** (scaffold). Fields marked `†` are auto-managed by tooling.
+Required at: **`setup.sh`** (scaffold). Fields marked `†` are auto-managed by tooling.
 
 | Field | Required At | Set By | Purpose |
 |-------|-------------|--------|---------|
-| `name` | DRAFT | `setup.sh` | Directory and git repo identifier |
-| `display_name` | DRAFT | `setup.sh` | Prototyper UI label |
-| `short_description` | DRAFT | author | One-line description |
-| `status` | DRAFT | `setup.sh` → author → `merge.sh` `†` | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |
-| `stack` | VALIDATED | author | Technology stack string (e.g. `Python/Flask/SQLite`) |
-| `port` | VALIDATED | author | Service port for health checks and links |
-| `type` | VALIDATED | author | `oneshot` or `feature-branch` |
-| `git_repo` | BUILT | author | Repository name; used by `oneshot.sh` to clone/fetch |
-| `version` | BUILT | `oneshot.sh` `†` | Format `YYYY-MM-DD.N`; updated each oneshot run |
-| `updated` | BUILT | `oneshot.sh` `†` | Format `YYYYMMDD`; updated each oneshot run |
+| `name` | `setup.sh` | `setup.sh` | Directory and git repo identifier |
+| `display_name` | `setup.sh` | `setup.sh` | Prototyper UI label |
+| `short_description` | `setup.sh` | author | One-line description |
+| `status` | `setup.sh` | `setup.sh` → author → `merge.sh` `†` | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |
+| `stack` | `validate.sh` | author | Technology stack string (e.g. `Python/Flask/SQLite`) |
+| `port` | `validate.sh` | author | Service port for health checks and links |
+| `type` | `validate.sh` | author | `oneshot` or `feature-branch` |
+| `git_repo` | `oneshot.sh` | author | Repository name; used by `oneshot.sh` to clone/fetch |
+| `version` | `oneshot.sh` | `oneshot.sh` `†` | Format `YYYY-MM-DD.N`; updated each oneshot run |
+| `updated` | `oneshot.sh` | `oneshot.sh` `†` | Format `YYYYMMDD`; updated each oneshot run |
 
 ### .env (not committed)
 
