@@ -681,14 +681,11 @@ marked.setOptions({{ gfm: true, breaks: false }});
 function initGuideList() {{
   var container = document.querySelector('.doc-guide-list');
   if (!container) return;
-  // Order for documentation section
-  var docOrder = ['SPECIFICATION-PROCESS', 'ITERATION-PROCESS', 'PROJECT-SETUP',
-                  'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES'];
-  var added = {{}};
-  // Add ordered docs
+  // Show only guides NOT already in sidebar navigation
+  var docOrder = ['SPECIFICATION-PROCESS', 'ITERATION-PROCESS'];
   docOrder.forEach(function(key) {{
     var meta = GUIDES_META[key];
-    if (meta && !added[key]) {{
+    if (meta) {{
       var card = document.createElement('div');
       card.className = 'doc-guide-card';
       card.onclick = function() {{ showGuide(key); }};
@@ -699,7 +696,6 @@ function initGuideList() {{
         card.innerHTML += '<div class="doc-guide-card-desc">' + meta.desc + '</div>';
       }}
       container.appendChild(card);
-      added[key] = true;
     }}
   }});
 }}
