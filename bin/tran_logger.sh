@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Transaction Logger
 # Category: maintenance
+# Args: Spec
 
 # Reads the session transaction log and updates iteration feedback files.
 # Analyzes recent prototype activity (git history + Claude Code session logs)

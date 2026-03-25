@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Project Update
 # Category: maintenance
+# Args: Project
 #
 # Update a promoted code project with the latest CLAUDE_RULES and templates.
 # Injects CLAUDE_RULES.md, copies template files, updates METADATA.md defaults.

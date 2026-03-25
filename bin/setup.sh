@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Setup Spec
 # Category: maintenance
+# Args: Spec
 
 # Scaffolds a new specification directory inside this repo from templates,
 # or updates an existing one.

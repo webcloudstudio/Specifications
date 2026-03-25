@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Iterate
 # Category: maintenance
+# Args: Spec
 
 # Generates a focused iteration prompt from numbered ticket files added to the
 # specification directory since the last oneshot build. Ticket types: SCREEN-NNN-*,

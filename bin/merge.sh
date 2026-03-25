@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Merge
 # Category: maintenance
+# Args: Spec
 #
 # Squash-merges a Feature Branch into the base branch and deletes the feature branch.
 # Typically called by GAME via automation. Can be run directly with explicit args.

@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Gap Analysis
 # Category: maintenance
+# Args: Spec
 
 # Runs gap analysis comparing spec vs prototype vs reference implementation.
 # Uses claude -p (subscription, not API tokens).

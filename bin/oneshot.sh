@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: OneShot
 # Category: maintenance
+# Args: Spec
 
 # Validates the Specification, detects build mode, and generates a complete AI build prompt.
 # Tags the current commit as a permanent build reference (oneshot/{spec}/{YYYY-MM-DD.N}).

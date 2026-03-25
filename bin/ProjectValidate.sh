@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Project Validate
 # Category: maintenance
+# Args: Project
 #
 # Verify a promoted code project against CLAUDE_RULES compliance criteria.
 # Shows pass/fail per rule grouped by level, with a next-level preview.

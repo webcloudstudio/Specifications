@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Scorecard
 # Category: maintenance
+# Args: Spec
 
 # Generates SCORECARD.md in a prototype directory by checking the built code
 # against its specification files. Output is a checklist of KPIs.

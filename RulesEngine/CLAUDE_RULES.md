@@ -5,7 +5,7 @@
 
 # DEFAULT DEVELOPMENT RULES
 
-**Version:** 20260320 V1  
+**Version:** 20260325 V1
 **Description:** Agent behavior contract distributed to all AI agent projects — covers git, error handling, and completion standards
 
 Full specification and methodology: `Specifications/AGENTS.md` in the Specifications repository. This condensed version covers agent behavior only.
@@ -66,6 +66,9 @@ these should be the first lines of the file and there should be no other "# Name
 # CommandCenter Operation
 # Name: {Name String}
 # Category: Operations
+# Args: Arg1, Arg2          # omit if the script takes no positional arguments
+
+The `# Args:` line lists positional arguments in order, comma-separated. Include only positional arguments — not flags (e.g. `--verbose`, `--dry-run`). Omit the line entirely if the script takes no positional arguments. Platform consumers and tools use `Args:` to discover the script's calling convention without reading the body.
 
 **Bash** — source `common.sh` then add functionality:
 

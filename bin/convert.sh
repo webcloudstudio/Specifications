@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Convert Specs
 # Category: maintenance
+# Args: Spec
 
 # Generates a conversion prompt: concise project specs + ONESHOT_BUILD_RULES.md expansion rules + stack files.
 # Feed the output to an AI agent to get detailed, implementation-ready specifications.
