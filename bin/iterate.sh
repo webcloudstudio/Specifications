@@ -3,11 +3,11 @@
 # Name: Iterate
 # Category: maintenance
 
-# Generates a focused iteration prompt from pending CHANGE tickets and new specification
-# files added since the last oneshot build. The agent validates each item before
-# implementing — underspecified items are rejected with explanation. A scorecard is
-# written after implementation. Does not rebuild from scratch.
-# Run claude -p from the prototype directory so the agent can read the existing code.
+# Generates a focused iteration prompt from numbered ticket files added to the
+# specification directory since the last oneshot build. Ticket types: SCREEN-NNN-*,
+# FEATURE-NNN-*, PATCH-NNN-*, AC-NNN-*, INTENT-NNN-*. The agent validates each item
+# before implementing — underspecified items are rejected. A scorecard is written after.
+# Does not rebuild from scratch. Run claude -p from the prototype directory.
 #
 # Usage:
 #   bash bin/iterate.sh <ProjectName> > <ProjectName>/iterate-prompt.md
@@ -82,41 +82,30 @@ if ! git -C "$REPO_DIR" rev-parse "$BUILD_TAG" >/dev/null 2>&1; then
     exit 1
 fi
 
-# --- New specification files added since the build tag ---
-# Only FEATURE-*, SCREEN-*, UI-* files — not context files (AC, IDEAS, GAPS)
-NEW_SPECS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
+# --- Numbered ticket files added since the build tag ---
+# Ticket types: SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*, AC-NNN-*, INTENT-NNN-*
+# Any file matching PREFIX-[0-9]{3}[-.]*.md added after the build tag.
+# Order is preserved by the 3-digit number prefix.
+NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
-    | grep -E "^${PROJECT_NAME}/(FEATURE|SCREEN|UI)-" \
+    | grep -E "^${PROJECT_NAME}/[A-Z]+-[0-9]{3}[-.]" \
     | sed "s|^${PROJECT_NAME}/||" \
+    | sort \
     || true)
-
-# --- Pending CHANGE tickets ---
-PENDING_TICKETS=""
-if [ -d "$SPEC_DIR/changes" ]; then
-    while IFS= read -r ticket; do
-        if grep -q '^\*\*Status:\*\* pending' "$ticket" 2>/dev/null; then
-            PENDING_TICKETS="$PENDING_TICKETS$ticket"$'\n'
-        fi
-    done < <(find "$SPEC_DIR/changes" -maxdepth 1 -name 'CHANGE-*.md' 2>/dev/null | sort)
-fi
-PENDING_TICKETS="${PENDING_TICKETS%$'\n'}"
 
 # --- Summary ---
 DISPLAY_NAME=$(get_metadata "display_name")
 SHORT_COMMIT="${BUILD_COMMIT:0:8}"
-NEW_COUNT=$(echo "$NEW_SPECS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
-TICKET_COUNT=$(echo "$PENDING_TICKETS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
+SPEC_COMMIT=$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || true)
+ITEM_COUNT=$(echo "$NEW_ITEMS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
 
 echo "Iterate: $PROJECT_NAME" >&2
 echo "  Tag:       $BUILD_TAG ($SHORT_COMMIT)" >&2
+echo "  Spec:      $SPEC_COMMIT" >&2
 echo "  Prototype: $PROTO_DIR" >&2
-echo "  New specification files: $NEW_COUNT" >&2
-if [ -n "$NEW_SPECS" ]; then
-    echo "$NEW_SPECS" | while read -r f; do [ -n "$f" ] && echo "    $f" >&2; done
-fi
-echo "  Pending tickets: $TICKET_COUNT" >&2
-if [ -n "$PENDING_TICKETS" ]; then
-    echo "$PENDING_TICKETS" | while read -r f; do [ -n "$f" ] && echo "    $(basename "$f")" >&2; done
+echo "  Work items: $ITEM_COUNT" >&2
+if [ -n "$NEW_ITEMS" ]; then
+    echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "    $f" >&2; done
 fi
 echo "" >&2
 echo "  Run from prototype directory:" >&2
@@ -124,16 +113,27 @@ echo "    cd $PROTO_DIR" >&2
 echo "    claude -p \"\$(cat $SPEC_DIR/iterate-prompt.md)\"" >&2
 echo "" >&2
 
-if [ "$NEW_COUNT" -eq 0 ] && [ "$TICKET_COUNT" -eq 0 ]; then
-    echo "WARNING: No new specification files and no pending CHANGE tickets found." >&2
-    echo "         Create changes/CHANGE-NNN-description.md or add new FEATURE-*/SCREEN-* files." >&2
+if [ "$ITEM_COUNT" -eq 0 ]; then
+    echo "WARNING: No numbered ticket files found since $BUILD_TAG." >&2
+    echo "         Add SCREEN-NNN-*.md, FEATURE-NNN-*.md, PATCH-NNN-*.md, AC-NNN-*.md, or INTENT-NNN-*.md files." >&2
 fi
 
-# --- Record prototype directory and append deploy log ---
+# --- Record prototype directory and spec commit in Specifications/.env ---
 {
     grep -v "^PROTOTYPE_DIR=" "$ENV_FILE" 2>/dev/null || true
     echo "PROTOTYPE_DIR=$PROTO_DIR"
 } > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+
+# --- Write spec commit to Prototype <PROJECT>/.env so prototype knows what specs it implements ---
+if [ -d "$PROTO_DIR" ]; then
+    PROTO_ENV="$PROTO_DIR/.env"
+    {
+        grep -v "^SPEC_COMMIT=\|^SPEC_TAG=" "$PROTO_ENV" 2>/dev/null || true
+        echo "SPEC_COMMIT=$SPEC_COMMIT"
+        echo "SPEC_TAG=$BUILD_TAG"
+    } > "$PROTO_ENV.tmp" && mv "$PROTO_ENV.tmp" "$PROTO_ENV"
+    echo "  Spec commit written to Prototype .env: $SPEC_COMMIT" >&2
+fi
 
 DEPLOY_LOG="$SPEC_DIR/DEPLOY_LOG.md"
 if [ ! -f "$DEPLOY_LOG" ]; then
@@ -143,10 +143,9 @@ fi
 {
     echo "## $(date '+%Y-%m-%d %H:%M') — iterate"
     echo "- Tag:       $BUILD_TAG (baseline)"
-    echo "- Commit:    $SHORT_COMMIT"
+    echo "- Spec:      $SPEC_COMMIT"
     echo "- Prototype: $PROTO_DIR"
-    [ "$TICKET_COUNT" -gt 0 ] && echo "- Tickets:   $TICKET_COUNT pending"
-    [ "$NEW_COUNT"    -gt 0 ] && echo "- New specs: $NEW_COUNT"
+    [ "$ITEM_COUNT" -gt 0 ] && echo "- Items:     $ITEM_COUNT"
     echo ""
 } >> "$DEPLOY_LOG"
 
@@ -179,17 +178,12 @@ Prototype directory: \`$PROTO_DIR\`
 
 HEADER
 
-if [ -n "$NEW_SPECS" ]; then
-    echo "**New specification files:**"
-    echo "$NEW_SPECS" | while read -r f; do [ -n "$f" ] && echo "- $f"; done
+if [ -n "$NEW_ITEMS" ]; then
+    echo "**Work items (in order):**"
+    echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "- $f"; done
     echo ""
 fi
-if [ -n "$PENDING_TICKETS" ]; then
-    echo "**Pending CHANGE tickets:**"
-    echo "$PENDING_TICKETS" | while read -r f; do [ -n "$f" ] && echo "- $(basename "$f")"; done
-    echo ""
-fi
-if [ "$NEW_COUNT" -eq 0 ] && [ "$TICKET_COUNT" -eq 0 ]; then
+if [ "$ITEM_COUNT" -eq 0 ]; then
     echo "_(no pending work detected)_"
     echo ""
 fi
@@ -200,19 +194,20 @@ cat <<VALIDATION
 
 ## Validation Rules (apply before implementing anything)
 
-For each new specification file and each CHANGE ticket listed above:
+For each work item listed above, check:
 
-1. The description or Intent must be concrete and specific — not vague ("improve the UI")
-2. The changes required must be specific enough to implement without guessing
-3. The \`## Open Questions\` section must exist and be either empty or contain only \`None.\`
+1. Intent / description is concrete — not vague
+2. Changes Required are specific enough to implement without guessing
+3. \`## Open Questions\` exists and is empty or \`None.\`
 4. No placeholder text: \`TODO\`, \`TBD\`, \`[placeholder]\`
 
 **If any check fails:**
 - Do NOT implement the item
-- Write: \`[UNDERSPECIFIED] <filename>: <what is missing or unresolved>\`
-- In CHANGE tickets: set \`**Status:** rejected\` and add a \`## Rejection Reason\` section
+- Write: \`[UNDERSPECIFIED] <filename>: <what is missing>\`
+- Add a \`## Rejection Reason\` section to the file and leave it in place
 
-**If all checks pass:** implement the item fully, then in CHANGE tickets set \`**Status:** applied\`.
+**If all checks pass:** implement the item fully, then delete the ticket file.
+(Canonical spec files — SCREEN-Name.md, FEATURE-Name.md — are kept; numbered tickets are deleted after apply.)
 
 ---
 
@@ -223,25 +218,14 @@ echo "# ARCHITECTURE"
 echo ""
 emit_file "$SPEC_DIR/ARCHITECTURE.md" "ARCHITECTURE.md"
 
-# --- New specification files ---
-if [ -n "$NEW_SPECS" ]; then
-    echo "# NEW SPECIFICATIONS"
+# --- Work items (in number order) ---
+if [ -n "$NEW_ITEMS" ]; then
+    echo "# WORK ITEMS"
     echo ""
-    echo "$NEW_SPECS" | while read -r fname; do
+    echo "$NEW_ITEMS" | while read -r fname; do
         [ -z "$fname" ] && continue
         fpath="$SPEC_DIR/$fname"
-        emit_file "$fpath" "Specification: $fname"
-    done
-fi
-
-# --- Pending CHANGE tickets ---
-if [ -n "$PENDING_TICKETS" ]; then
-    echo "# CHANGE TICKETS"
-    echo ""
-    echo "$PENDING_TICKETS" | while read -r fpath; do
-        [ -z "$fpath" ] && continue
-        fname="$(basename "$fpath")"
-        emit_file "$fpath" "Ticket: $fname"
+        emit_file "$fpath" "Item: $fname"
     done
 fi
 

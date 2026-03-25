@@ -1,6 +1,5 @@
-# Change: 002 — Implement two-tier navigation bar
-**Status:** pending
-**Type:** mutation
+# Patch: 002 — Implement two-tier navigation bar
+**Type:** patch
 **Scope:** Base template, all screens, UI-GENERAL.md nav patterns
 
 ## Intent

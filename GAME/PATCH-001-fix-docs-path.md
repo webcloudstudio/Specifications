@@ -1,6 +1,5 @@
-# Change: 001 — Fix documentation path from doc/ to docs/
-**Status:** pending
-**Type:** mutation
+# Patch: 001 — Fix documentation path from doc/ to docs/
+**Type:** patch
 **Scope:** Scanner (has_docs detection), Portfolio builder, Flask doc proxy, ARCHITECTURE.md references
 
 ## Intent

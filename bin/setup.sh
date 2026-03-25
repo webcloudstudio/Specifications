@@ -21,7 +21,7 @@
 #     METADATA.md, README.md, INTENT.md, ARCHITECTURE.md,
 #     DATABASE.md, UI.md, SCREEN-Example.md, FEATURE-Example.md,
 #     UI-Component-Example.md, ACCEPTANCE_CRITERIA.md, IDEAS.md,
-#     REFERENCE_GAPS.md, changes/
+#     REFERENCE_GAPS.md
 #
 # Template source: RulesEngine/spec_template/
 
@@ -67,7 +67,6 @@ if [ -d "$PROJECT_DIR" ]; then
     fi
 else
     mkdir -p "$PROJECT_DIR"
-    mkdir -p "$PROJECT_DIR/changes"
     echo "Created: $PROJECT_DIR/"
 fi
 

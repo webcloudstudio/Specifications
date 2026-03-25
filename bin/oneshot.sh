@@ -103,6 +103,16 @@ if [ -n "$(git status --porcelain -- "$REL_PATH/" 2>/dev/null || true)" ]; then
     echo "" >&2
 fi
 
+# --- Numbered ticket files belong to iterate, not oneshot ---
+NUMBERED_FILES=$(find "$PROJECT_DIR" -maxdepth 1 \( -name '*-[0-9][0-9][0-9]-*.md' -o -name '*-[0-9][0-9][0-9].md' \) 2>/dev/null | head -5 || true)
+if [ -n "$NUMBERED_FILES" ]; then
+    echo "WARNING: Numbered ticket files found in $PROJECT_NAME/ — these are iterate territory." >&2
+    echo "         Numbered files (PREFIX-NNN-*.md) are processed by iterate.sh, not oneshot.sh." >&2
+    echo "         Remove or rename them before running oneshot if you want a clean build." >&2
+    echo "$NUMBERED_FILES" | while read -r f; do echo "         - $(basename "$f")" >&2; done
+    echo "" >&2
+fi
+
 # --- Feature Branch mode: clone/fetch project and create feature branch ---
 if [ "$GIT_MODE" = true ]; then
     BASE_BRANCH=$(get_metadata "base_branch")

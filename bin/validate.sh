@@ -183,11 +183,14 @@ for f in "$PROJECT_DIR"/*.md; do
     case "$fname" in
         METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md) ;;
         DEPLOY_LOG.md|ACCEPTANCE_CRITERIA.md|IDEAS.md|REFERENCE_GAPS.md|SCORECARD.md) ;;
-        SCREEN-*.md) pass "$fname (screen)" ;;
-        FEATURE-*.md) pass "$fname (feature)" ;;
-        UI-*.md) pass "$fname (ui component)" ;;
+        # Canonical spec files (no number — oneshot territory)
+        SCREEN-*.md|FEATURE-*.md|UI-*.md) pass "$fname (spec)" ;;
+        # Numbered ticket files (iterate territory) — SCREEN-NNN, FEATURE-NNN, PATCH-NNN, AC-NNN, INTENT-NNN
+        PATCH-[0-9][0-9][0-9]-*.md)   pass "$fname (patch ticket)" ;;
+        AC-[0-9][0-9][0-9]-*.md)      pass "$fname (AC ticket)" ;;
+        INTENT-[0-9][0-9][0-9]-*.md)  pass "$fname (intent ticket)" ;;
         *)
-            warn "Unexpected file name: $fname (expected SCREEN-* or FEATURE-* prefix for spec files)"
+            warn "Unexpected file name: $fname"
             BAD_NAMES=$((BAD_NAMES + 1))
             ;;
     esac
@@ -227,35 +230,23 @@ for f in "$PROJECT_DIR"/*.md; do
 done
 echo ""
 
-# --- CHANGE tickets ---
-echo "CHANGE tickets (changes/):"
-CHANGES_DIR="$PROJECT_DIR/changes"
-if [ -d "$CHANGES_DIR" ]; then
-    PENDING=0
-    APPLIED=0
-    REJECTED=0
-    INVALID=0
-    while IFS= read -r ticket; do
-        tname=$(basename "$ticket")
-        if grep -q '^\*\*Status:\*\* pending' "$ticket" 2>/dev/null; then
-            PENDING=$((PENDING + 1))
-            pass "$tname (pending)"
-        elif grep -q '^\*\*Status:\*\* applied' "$ticket" 2>/dev/null; then
-            APPLIED=$((APPLIED + 1))
-            [ "$VERBOSE" = true ] && pass "$tname (applied)"
-        elif grep -q '^\*\*Status:\*\* rejected' "$ticket" 2>/dev/null; then
-            REJECTED=$((REJECTED + 1))
-            warn "$tname (rejected — review and fix or delete)"
-        else
-            INVALID=$((INVALID + 1))
-            warn "$tname missing **Status:** field"
-        fi
-    done < <(find "$CHANGES_DIR" -maxdepth 1 -name 'CHANGE-*.md' 2>/dev/null | sort)
-    if [ $((PENDING + APPLIED + REJECTED + INVALID)) -eq 0 ]; then
-        pass "changes/ directory exists (empty)"
+# --- Numbered ticket files ---
+echo "Iterate tickets:"
+TICKET_COUNT=0
+REJECTED_COUNT=0
+for ticket in "$PROJECT_DIR"/*-[0-9][0-9][0-9]-*.md "$PROJECT_DIR"/*-[0-9][0-9][0-9].md 2>/dev/null; do
+    [ -f "$ticket" ] || continue
+    tname=$(basename "$ticket")
+    TICKET_COUNT=$((TICKET_COUNT + 1))
+    if grep -q '## Rejection Reason' "$ticket" 2>/dev/null; then
+        REJECTED_COUNT=$((REJECTED_COUNT + 1))
+        warn "$tname (rejected — review and fix or delete)"
+    else
+        pass "$tname"
     fi
-else
-    pass "No changes/ directory (none needed yet)"
+done
+if [ "$TICKET_COUNT" -eq 0 ]; then
+    pass "No numbered ticket files (no pending iterate work)"
 fi
 echo ""
 
