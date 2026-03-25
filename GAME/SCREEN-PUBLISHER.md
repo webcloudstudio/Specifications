@@ -7,7 +7,7 @@
 
 ## Menu Navigation
 
-`Publisher`
+`Homepage`
 
 ## Route
 

@@ -8,7 +8,7 @@
 
 ## Menu Navigation
 
-`Processes`
+`Dashboards / Projects`
 
 ## Route
 

@@ -8,7 +8,7 @@ API-oriented view of all projects and their registered scripts. Each project sho
 
 ## Menu Navigation
 
-`Catalog`
+`Dashboards / Service Catalog`
 
 ## Route
 

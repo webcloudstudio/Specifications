@@ -7,7 +7,7 @@
 
 ## Menu Navigation
 
-`Monitoring`
+`Dashboards / Monitoring`
 
 ## Route
 

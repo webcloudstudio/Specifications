@@ -48,7 +48,7 @@ SCRIPT_DESCRIPTIONS = {
     'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
 }
 
-GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES']
+GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'BUSINESS-RULES', 'ENGINEERING-RULES', 'FEATURES']
 GUIDE_TITLES = {
     'PROTOTYPE-PROCESS':     'Prototype Process Spec',
     'SPECIFICATION-PROCESS': 'Specification Process',
@@ -56,11 +56,14 @@ GUIDE_TITLES = {
     'ITERATION-PROCESS':     'Iteration Process',
     'PROMOTE':               'Step 6 — Promote',
     'CREATE-IMAGE':          'Create Image',
+    'BUSINESS-RULES':        'Business Rules',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
+    'FEATURES':              'Features',
 }
 RULES_ENGINE_DIR = PROJECT_DIR / "RulesEngine"
 GUIDE_EXTRA = {
     'PROTOTYPE-PROCESS': RULES_ENGINE_DIR / 'PROTOTYPE_PROCESS.md',
+    'BUSINESS-RULES': RULES_ENGINE_DIR / 'BUSINESS_RULES.md',
 }
 
 # Scripts hidden from the scripts list (generate_*.py are per-project image generators)
@@ -175,15 +178,23 @@ def discover_guides():
     for key, path in GUIDE_EXTRA.items():
         if path.exists():
             found[key] = path
+    # Include Features.html
+    features_path = DOC_DIR / 'Features.html'
+    if features_path.exists():
+        found['FEATURES'] = features_path
     guides = []
     for key in GUIDE_ORDER:
         if key in found:
             title = GUIDE_TITLES.get(key, key.replace('-', ' ').replace('_', ' ').title())
-            guides.append({'key': key, 'title': title, 'content': found[key].read_text(encoding='utf-8')})
+            content = found[key].read_text(encoding='utf-8')
+            is_html = str(found[key]).endswith('.html')
+            guides.append({'key': key, 'title': title, 'content': content, 'is_html': is_html})
     for key, f in sorted(found.items()):
         if key not in GUIDE_ORDER:
             title = GUIDE_TITLES.get(key, key.replace('-', ' ').replace('_', ' ').title())
-            guides.append({'key': key, 'title': title, 'content': f.read_text(encoding='utf-8')})
+            content = f.read_text(encoding='utf-8')
+            is_html = str(f).endswith('.html')
+            guides.append({'key': key, 'title': title, 'content': content, 'is_html': is_html})
     return guides
 
 
@@ -248,9 +259,12 @@ def build_page(scripts, projects, guides):
 
     # ── Guide JS data ──────────────────────────────────────────────────────────
     guides_js = 'const GUIDES = {\n'
+    guides_meta_js = 'const GUIDES_META = {\n'
     for g in guides:
         guides_js += f'  {json.dumps(g["key"])}: {json.dumps(g["content"])},\n'
+        guides_meta_js += f'  {json.dumps(g["key"])}: {json.dumps({"title": g["title"], "is_html": g.get("is_html", False)})},\n'
     guides_js += '};'
+    guides_meta_js += '};'
 
     # ── Script JS data ─────────────────────────────────────────────────────────
     scripts_js = 'const SCRIPTS = {\n'
@@ -300,6 +314,21 @@ def build_page(scripts, projects, guides):
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="summarize_rules.sh" onclick="showScript(\'summarize_rules.sh\')">summarize_rules.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-key="FEATURES" onclick="showGuide(\'FEATURES\')">Features</a>\n'
+
+    # ── Sidebar: documentation guides ──────────────────────────────────────────
+    doc_nav = '  <div class="nav-section">Documentation</div>\n'
+    # Group guides into categories for sidebar display
+    doc_nav_items = []
+    for g in guides:
+        key = g['key']
+        title = g['title']
+        # Skip guides already in step nav or projects
+        if key not in ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP',
+                       'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'FEATURES']:
+            doc_nav_items.append((key, title))
+    for key, title in sorted(doc_nav_items):
+        doc_nav += f'  <a class="sn" data-key="{h.escape(key)}" onclick="showGuide(\'{h.escape(key)}\')">{h.escape(title)}</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -590,6 +619,13 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 .proc-def {{ font-size: 12.5px; color: var(--c-h3); }}
 .proc-def code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
   background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
+/* ── Documentation guide list ── */
+.doc-guide-list {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 14px; }}
+.doc-guide-card {{ background: var(--c-side-bg); border: 1px solid var(--c-side-border); border-radius: 5px;
+  padding: 12px 14px; cursor: pointer; transition: background .2s, border-color .2s; }}
+.doc-guide-card:hover {{ background: rgba(255,255,255,.08); border-color: var(--c-accent); }}
+.doc-guide-card-title {{ font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 3px; }}
+.doc-guide-card-desc {{ font-size: 11px; color: rgba(255,255,255,.7); }}
 </style>
 </head>
 <body>
@@ -600,6 +636,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <h1>Project<br>Prototyper</h1>
   </div>
 {step_nav}
+{doc_nav}
   <div class="nav-sep"></div>
   <div class="nav-section">Current Projects</div>
 {proj_nav}
@@ -610,6 +647,10 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
     {wf_diagram}
+
+    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
+    <p class="wf-section-h">Oneshot Rules</p>
+    <div class="doc-guide-list"></div>
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
     <p class="wf-section-h">Dictionary</p>
@@ -643,10 +684,36 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 {guides_js}
+{guides_meta_js}
 {guide_diagrams_js}
 {scripts_js}
 
 marked.setOptions({{ gfm: true, breaks: false }});
+
+// ── Initialize documentation guide list on page load ──
+function initGuideList() {{
+  var container = document.querySelector('.doc-guide-list');
+  if (!container) return;
+  // List of key guides to show in the Oneshot Rules section
+  var guideOrder = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP',
+                    'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'BUSINESS-RULES',
+                    'ENGINEERING-RULES', 'FEATURES'];
+  guideOrder.forEach(function(key) {{
+    var meta = GUIDES_META[key];
+    if (meta) {{
+      var card = document.createElement('div');
+      card.className = 'doc-guide-card';
+      card.onclick = function() {{ showGuide(key); }};
+      card.innerHTML = '<div class="doc-guide-card-title">' +
+                       (meta.title || key.replace(/-/g, ' ')) +
+                       '</div>';
+      if (meta.desc) {{
+        card.innerHTML += '<div class="doc-guide-card-desc">' + meta.desc + '</div>';
+      }}
+      container.appendChild(card);
+    }}
+  }});
+}}
 
 function clearActive() {{
   document.querySelectorAll('.sn, .sn-sub').forEach(a => a.classList.remove('active'));
@@ -665,8 +732,17 @@ function show(id) {{
 function showGuide(key) {{
   var content = GUIDES[key];
   if (!content) return;
+  var meta = GUIDES_META[key] || {{}};
   var diagram = GUIDE_DIAGRAMS[key] || '';
-  document.getElementById('guide-content').innerHTML = diagram + marked.parse(content);
+  var htmlContent;
+  if (meta.is_html) {{
+    // HTML content (e.g., Features.html) — render as-is
+    htmlContent = diagram + content;
+  }} else {{
+    // Markdown content — parse and render
+    htmlContent = diagram + marked.parse(content);
+  }}
+  document.getElementById('guide-content').innerHTML = htmlContent;
   show('guide');
   clearActive();
   var el = document.querySelector('[data-key="' + key + '"]');
@@ -764,6 +840,7 @@ function showProject(name, url) {{
 }}
 
 (function() {{
+  initGuideList();
   show('workflow');
 }})();
 </script>
