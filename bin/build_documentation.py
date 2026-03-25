@@ -48,7 +48,7 @@ SCRIPT_DESCRIPTIONS = {
     'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
 }
 
-GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'FEATURES']
+GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'SDD-SPECIFICATIONS', 'FEATURES']
 GUIDE_TITLES = {
     'PROTOTYPE-PROCESS':     'Prototype Process Spec',
     'PROJECT-SETUP':         'Project Creation',
@@ -56,6 +56,7 @@ GUIDE_TITLES = {
     'PROMOTE':               'Step 6 — Promote',
     'CREATE-IMAGE':          'Create Image',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
+    'SDD-SPECIFICATIONS':    'SDD — Specifications',
     'FEATURES':              'Features',
 }
 RULES_ENGINE_DIR = PROJECT_DIR / "RulesEngine"
@@ -312,6 +313,7 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="summarize_rules.sh" onclick="showScript(\'summarize_rules.sh\')">summarize_rules.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-key="FEATURES" onclick="showGuide(\'FEATURES\')">Features</a>\n'
+    step_nav += f'  <a class="sn" data-key="SDD-SPECIFICATIONS" onclick="showGuide(\'SDD-SPECIFICATIONS\')">SDD — Specifications</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
