@@ -110,7 +110,7 @@ NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$DIFF_BASELINE"
 DISPLAY_NAME=$(get_metadata "display_name")
 SHORT_COMMIT="${BUILD_COMMIT:0:8}"
 SPEC_COMMIT=$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || true)
-ITEM_COUNT=$(echo "$NEW_ITEMS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
+ITEM_COUNT=$(echo "$NEW_ITEMS" | grep -c '[^[:space:]]' 2>/dev/null || true)
 
 echo "Iterate: $PROJECT_NAME" >&2
 echo "  Baseline:  $DIFF_BASELINE${DIFF_BASELINE:+$( [ "$DIFF_BASELINE" = "$BUILD_TAG" ] && echo ' (oneshot tag)' || echo ' (last iterate)' )}" >&2
