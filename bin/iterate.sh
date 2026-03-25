@@ -93,6 +93,12 @@ NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$BUILD_TAG" -- 
     | sort \
     || true)
 
+# --- Exclude tickets already applied (tracked in prototype docs/applied_tickets.txt) ---
+APPLIED_LOG="$PROTO_DIR/docs/applied_tickets.txt"
+if [ -f "$APPLIED_LOG" ] && [ -n "$NEW_ITEMS" ]; then
+    NEW_ITEMS=$(echo "$NEW_ITEMS" | grep -v -F -f "$APPLIED_LOG" || true)
+fi
+
 # --- Summary ---
 DISPLAY_NAME=$(get_metadata "display_name")
 SHORT_COMMIT="${BUILD_COMMIT:0:8}"
@@ -206,8 +212,7 @@ For each work item listed above, check:
 - Write: \`[UNDERSPECIFIED] <filename>: <what is missing>\`
 - Add a \`## Rejection Reason\` section to the file and leave it in place
 
-**If all checks pass:** implement the item fully, then delete the ticket file.
-(Canonical spec files — SCREEN-Name.md, FEATURE-Name.md — are kept; numbered tickets are deleted after apply.)
+**If all checks pass:** implement the item fully, then record the ticket as applied by appending its filename (basename only, e.g. `PATCH-004-fix-nav.md`) as a new line to `docs/applied_tickets.txt` in the prototype directory. Create the file if it does not exist. Do not modify or delete the ticket file in the Specifications directory.
 
 ---
 
