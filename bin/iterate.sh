@@ -266,7 +266,8 @@ Apply accepted items only. Reject and explain any underspecified items.
 
 ## Post-Implementation Scorecard
 
-After applying all accepted items, write or update \`SCORECARD.md\` in the prototype directory.
+After applying all accepted items, write or update \`docs/SCORECARD.md\` in the prototype directory.
+Create \`docs/\` if it does not exist.
 
 To compute KPIs, read these files:
 - Pending tickets: count \`**Status:** pending\` in \`$SPEC_DIR/changes/CHANGE-*.md\`
