@@ -610,6 +610,10 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 .doc-guide-card:hover {{ background: rgba(255,255,255,.08); border-color: var(--c-accent); }}
 .doc-guide-card-title {{ font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 3px; }}
 .doc-guide-card-desc {{ font-size: 11px; color: rgba(255,255,255,.7); }}
+/* ── HTML content wrapper (for Features.html, etc.) ── */
+#guide-content.html-content {{ background: #FAFBFC; color: #1B2434; padding: 20px; border-radius: 4px; }}
+#guide-content.html-content * {{ box-sizing: border-box; }}
+#guide-content.html-content body {{ height: auto !important; display: block !important; flex: none !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }}
 </style>
 </head>
 <body>
@@ -677,14 +681,14 @@ marked.setOptions({{ gfm: true, breaks: false }});
 function initGuideList() {{
   var container = document.querySelector('.doc-guide-list');
   if (!container) return;
-  // Guides already shown in main workflow steps/navigation
-  var shownGuides = {{'PROTOTYPE-PROCESS':1, 'SPECIFICATION-PROCESS':1, 'PROJECT-SETUP':1,
-                      'ITERATION-PROCESS':1, 'PROMOTE':1, 'CREATE-IMAGE':1,
-                      'ENGINEERING-RULES':1, 'FEATURES':1}};
-  // Show all other guides in the Documentation section
-  Object.keys(GUIDES_META).forEach(function(key) {{
-    if (!shownGuides[key]) {{
-      var meta = GUIDES_META[key];
+  // Order for documentation section
+  var docOrder = ['SPECIFICATION-PROCESS', 'ITERATION-PROCESS', 'PROJECT-SETUP',
+                  'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES'];
+  var added = {{}};
+  // Add ordered docs
+  docOrder.forEach(function(key) {{
+    var meta = GUIDES_META[key];
+    if (meta && !added[key]) {{
       var card = document.createElement('div');
       card.className = 'doc-guide-card';
       card.onclick = function() {{ showGuide(key); }};
@@ -695,6 +699,7 @@ function initGuideList() {{
         card.innerHTML += '<div class="doc-guide-card-desc">' + meta.desc + '</div>';
       }}
       container.appendChild(card);
+      added[key] = true;
     }}
   }});
 }}
@@ -718,15 +723,21 @@ function showGuide(key) {{
   if (!content) return;
   var meta = GUIDES_META[key] || {{}};
   var diagram = GUIDE_DIAGRAMS[key] || '';
+  var guideEl = document.getElementById('guide-content');
   var htmlContent;
   if (meta.is_html) {{
-    // HTML content (e.g., Features.html) — render as-is
-    htmlContent = diagram + content;
+    // HTML content (e.g., Features.html) — extract body and wrap
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(content, 'text/html');
+    var bodyContent = doc.body.innerHTML;
+    htmlContent = diagram + bodyContent;
+    guideEl.classList.add('html-content');
   }} else {{
     // Markdown content — parse and render
     htmlContent = diagram + marked.parse(content);
+    guideEl.classList.remove('html-content');
   }}
-  document.getElementById('guide-content').innerHTML = htmlContent;
+  guideEl.innerHTML = htmlContent;
   show('guide');
   clearActive();
   var el = document.querySelector('[data-key="' + key + '"]');
