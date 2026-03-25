@@ -2,7 +2,7 @@
 
 **Type:** Methodology  ·  **Status:** Active  ·  **Scope:** All Prototypes
 
-Specification Driven Design (SDD) is the process used by this platform. An AI agent builds and iterates a prototype entirely from structured specification files — no ad-hoc prompting during iteration. The specification directory is the single source of truth; the prototype code is a derived artifact.
+Specification Driven Design (SDD): an AI agent builds and iterates a prototype entirely from structured files in a specification directory. The specification is the single source of truth; the prototype code is a derived artifact.
 
 ---
 
@@ -13,147 +13,118 @@ Specifications/<PROJECT>/   ──►   AI agent   ──►   Prototype <PROJEC
         (canonical)                                    (derived)
 ```
 
-You write concise specs (tables, bullets, short descriptions). `oneshot.sh` expands them into a complete build prompt. `iterate.sh` diff-detects pending ticket files and generates a targeted iteration prompt. The AI agent applies changes, deletes completed tickets, and writes a SCORECARD.
-
-**Core constraint:** Never modify prototype code directly for tracked changes. Every change is authored as a spec or ticket file first.
+Every change is authored in the specification first — as a canonical spec file update or a numbered ticket. The AI agent applies tickets, marks them done (deletes from working tree; deletion committed to the Specifications Repository, so history is preserved), and writes a SCORECARD in the prototype.
 
 ---
 
 ## Lifecycle States
 
-| State | Meaning | Entry |
-|-------|---------|-------|
-| `DRAFT` | Spec directory exists, files being authored | `setup.sh` run |
-| `VALIDATED` | All required files present, fields correct | `validate.sh` exits 0 |
-| `BUILT` | Build prompt generated; baseline tag set in git | `oneshot.sh` run |
-| `ITERATING` | Prototype exists; changes applied via ticket cycle | `iterate.sh` / `claude -p` |
-| `PROMOTED` | Code squash-merged to main or independent repo | `merge.sh` run |
+States are inferred automatically from which commands have been run. Not stored in a single field — derived from the artifacts present.
+
+| State | Derived From |
+|-------|-------------|
+| `DRAFT` | Spec directory exists (`setup.sh` has run) |
+| `VALIDATED` | `validate.sh` last exited 0 |
+| `BUILT` | `.env` contains `PROTOTYPE_BUILD_TAG` (`oneshot.sh` has run) |
+| `ITERATING` | Prototype directory exists at `PROTOTYPE_DIR` |
+| `PROMOTED` | `METADATA.md status` = ACTIVE / PRODUCTION (`merge.sh` has run) |
 
 ---
 
-## Specification Files
+## Specification Data Dictionary
 
-### Identity Files
+All files live in `Specifications/<PROJECT>/`. Tickets are specification files — numbered variants of canonical types.
 
-| File | Required | Key Fields | Purpose |
-|------|----------|------------|---------|
-| `METADATA.md` | Yes | `name`, `display_name`, `git_repo`, `status`, `stack`, `port`, `version` | Project identity — read by Prototyper scanner at runtime |
-| `README.md` | Yes | — | One-line project description |
-| `INTENT.md` | Yes | — | Why the project exists; who it's for |
+### METADATA.md
 
-**Key `METADATA.md` fields consumed by tooling:**
+Required at: **DRAFT** (scaffold). Fields marked `†` are auto-managed by tooling.
 
-| Field | Example | Used By |
-|-------|---------|---------|
-| `name` | `GAME` | All tooling; directory and git repo name |
-| `display_name` | `GAME` | Prototyper UI display |
-| `git_repo` | `GAME` | `oneshot.sh` clone/fetch target |
-| `status` | `ACTIVE` | Prototyper status badge; IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED |
-| `stack` | `Python/Flask/SQLite/Bootstrap5` | Build prompt preamble |
-| `port` | `5001` | Prototyper health checks and links |
-| `version` | `2026-03-20.1` | Displayed in Prototyper; format `YYYY-MM-DD.N` |
-| `type` | `oneshot` | `oneshot` or `feature-branch` build mode |
-| `BUILD_FEATURE_BRANCH_NAME` | `feature/new-screen` | `.env` override for feature branch mode |
+| Field | Required At | Set By | Purpose |
+|-------|-------------|--------|---------|
+| `name` | DRAFT | `setup.sh` | Directory and git repo identifier |
+| `display_name` | DRAFT | `setup.sh` | Prototyper UI label |
+| `short_description` | DRAFT | author | One-line description |
+| `status` | DRAFT | `setup.sh` → author → `merge.sh` `†` | IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED |
+| `stack` | VALIDATED | author | Technology stack string (e.g. `Python/Flask/SQLite`) |
+| `port` | VALIDATED | author | Service port for health checks and links |
+| `type` | VALIDATED | author | `oneshot` or `feature-branch` |
+| `git_repo` | BUILT | author | Repository name; used by `oneshot.sh` to clone/fetch |
+| `version` | BUILT | `oneshot.sh` `†` | Format `YYYY-MM-DD.N`; updated each oneshot run |
+| `updated` | BUILT | `oneshot.sh` `†` | Format `YYYYMMDD`; updated each oneshot run |
 
-### Design Files
+### .env (not committed)
 
-| File | Required | Purpose |
-|------|----------|---------|
-| `ARCHITECTURE.md` | Yes | Module layout, routes, directory structure — always included in iterate prompt |
-| `DATABASE.md` | If has DB | Tables, columns, types — schema only |
-| `UI.md` | If has UI | Shared UI patterns across screens |
-| `SCREEN-{Name}.md` | If has UI | Per-screen spec: route, layout, interactions |
-| `FEATURE-{Name}.md` | As needed | Cross-cutting behavior: trigger, sequence, reads, writes |
+Auto-managed entirely. Written by `oneshot.sh` and `iterate.sh`; read by `tran_logger.sh` and `iterate.sh`. Gitignored.
 
-All design files end with `## Open Questions`. Unresolved questions block iterate items in that file from being applied.
+| Key | Set By | Purpose |
+|-----|--------|---------|
+| `PROTOTYPE_BUILD_TAG` | `oneshot.sh` | Git tag of spec commit used for last build — e.g. `oneshot/GAME/2026-03-22.4` |
+| `PROTOTYPE_BUILD_COMMIT` | `oneshot.sh` | Git commit hash at build time |
+| `PROTOTYPE_DIR` | `oneshot.sh` / `iterate.sh` | Absolute path to prototype directory |
+| `BUILD_FEATURE_BRANCH_NAME` | author | If set, activates feature-branch build mode |
 
-### Tracking Files (not committed)
+### Canonical Spec Files
 
-`.env` is gitignored. Written by `oneshot.sh` and `iterate.sh` on every run. Read by `tran_logger.sh` and `iterate.sh` to locate the prototype.
+Permanent. Written by author; included in oneshot and iterate prompts.
 
-| Key | Example | Set By | Purpose |
-|-----|---------|--------|---------|
-| `PROTOTYPE_BUILD_TAG` | `oneshot/GAME/2026-03-22.4` | `oneshot.sh` | Git tag of the spec commit used for the last build |
-| `PROTOTYPE_BUILD_COMMIT` | `34c6af85...` | `oneshot.sh` | Git commit hash at build time |
-| `PROTOTYPE_DIR` | `/mnt/c/Users/barlo/projects/GAME` | `oneshot.sh` / `iterate.sh` | Absolute path to prototype directory |
-| `BUILD_FEATURE_BRANCH_NAME` | `feature/name` | author | If set, activates feature branch build mode |
+| File | Required At | Purpose |
+|------|-------------|---------|
+| `README.md` | DRAFT | One-line description |
+| `INTENT.md` | DRAFT | Why the project exists; who it is for |
+| `ARCHITECTURE.md` | VALIDATED | Module layout, routes, directory structure. Always included in iterate prompt |
+| `DATABASE.md` | VALIDATED (if DB) | Tables, columns, types — schema only |
+| `UI.md` | VALIDATED (if UI) | Shared UI patterns across screens |
+| `SCREEN-{Name}.md` | VALIDATED (if UI) | Per-screen: route, layout, interactions |
+| `FEATURE-{Name}.md` | as needed | Cross-cutting behavior: trigger, sequence, reads/writes |
 
-`iterate.sh` also writes into the prototype's own `.env`:
+All canonical spec files end with `## Open Questions`. Unresolved questions in a file block that file's iterate tickets from being applied.
 
-| Key | Example | Purpose |
-|-----|---------|---------|
-| `SPEC_COMMIT` | `8d56eb4...` | Spec repo commit applied to this prototype |
-| `SPEC_TAG` | `oneshot/GAME/2026-03-22.4` | Tag the prototype was built from |
+### Ticket Files
 
----
-
-## Ticket Files
-
-Tickets are numbered files in `Specifications/<PROJECT>/`. **File presence = pending. File deletion = done** (applied by LLM, or manually discarded).
+Numbered variants of canonical file types. Represent a single pending change. **Presence = pending; deletion = done.** Deleted from working tree by the LLM after applying — committed to the Specifications Repository so history is preserved.
 
 | Prefix | Created By | Purpose |
 |--------|-----------|---------|
-| `PATCH-NNN-*.md` | author / `tran_logger.sh` | Bug fix, behavioral correction, refactor |
-| `AC-NNN-*.md` | author / `tran_logger.sh` | Testable MUST/MUST NOT batch |
 | `SCREEN-NNN-*.md` | author | New or revised screen spec |
 | `FEATURE-NNN-*.md` | author | New or revised feature spec |
+| `PATCH-NNN-*.md` | author / `tran_logger.sh` | Bug fix, behavioral correction, refactor |
+| `AC-NNN-*.md` | author / `tran_logger.sh` | Testable MUST / MUST NOT batch |
 | `INTENT-NNN-*.md` | author | Clarification or scope change |
 
-**Naming rules:** 3-digit zero-padded (`PATCH-004-fix-nav.md`). Files with `tl-` in the name were auto-generated by `tran_logger.sh` and must be reviewed before running `iterate.sh`. Numbered ticket files must not exist when running `oneshot.sh`.
+Naming: 3-digit zero-padded (`PATCH-004-fix-nav.md`). Files with `tl-` were auto-generated by `tran_logger.sh` and must be reviewed before `iterate.sh`. Numbered files must not exist when running `oneshot.sh`.
+
+Rejected tickets get a `## Rejection Reason` section added and remain until the author resolves and re-runs iterate.
+
+### Tracking and Generated Files
+
+| File | Created By | Purpose |
+|------|------------|---------|
+| `ACCEPTANCE_CRITERIA.md` | `setup.sh` + author | Standing MUST / MUST NOT list; always included in iterate prompt |
+| `IDEAS.md` | `setup.sh` + `tran_logger.sh` | Fuzzy observations; processed on request |
+| `REFERENCE_GAPS.md` | `setup.sh` + LLM | Unspecified features by priority P0–P4 |
+| `DEPLOY_LOG.md` | `oneshot.sh` / `iterate.sh` | Record of every build and iterate run with target directory |
+| `.tran_logger_cursor` | `tran_logger.sh` | Processed session basenames — prevents duplicate log processing |
 
 ---
 
-## Generated Artifacts
+## Prototype Metadata Dictionary
 
-Written during build/iterate runs — not authored manually.
+Written by the LLM into the prototype directory during build and iterate. Not authored manually.
 
-| File | Location | Written By | Purpose |
-|------|----------|------------|---------|
-| `oneshot-prompt.md` | `Specifications/<PROJECT>/` | `>` redirect | Saved build prompt (optional) |
-| `iterate-prompt.md` | `Specifications/<PROJECT>/` | `>` redirect | Saved iteration prompt (optional) |
-| `DEPLOY_LOG.md` | `Specifications/<PROJECT>/` | `oneshot.sh` / `iterate.sh` | Record of every build and iterate run |
-| `.tran_logger_cursor` | `Specifications/<PROJECT>/` | `tran_logger.sh` | Processed session list — prevents duplicate processing |
-| `SCORECARD.md` | `Prototype <PROJECT>/docs/` | LLM (during apply) | KPI table: completion %, pending tickets, open questions |
+| File | Location | Key | Set By | Purpose |
+|------|----------|-----|--------|---------|
+| `.env` | `Prototype <PROJECT>/` | `SPEC_COMMIT` | `iterate.sh` | Spec repo commit applied to this prototype |
+| `.env` | `Prototype <PROJECT>/` | `SPEC_TAG` | `iterate.sh` | Spec git tag the prototype was built from |
+| `docs/SCORECARD.md` | `Prototype <PROJECT>/docs/` | — | LLM (apply session) | KPI table: completion %, pending tickets, open questions |
 
 ---
 
-## Git Tags
+## Specifications Repository Git Tags
 
-Every `oneshot.sh` run creates an annotated git tag in `Specifications/`:
+Every `oneshot.sh` run creates an annotated git tag in the Specifications Repository:
 
 ```
 oneshot/<PROJECT>/<YYYY-MM-DD.N>
 ```
 
-`iterate.sh` diffs from `PROTOTYPE_BUILD_TAG` to HEAD to find ticket files added since the last build. This is how pending work is detected — no separate tracker needed.
-
----
-
-## Workflow Commands
-
-```bash
-# 1. Scaffold new spec directory
-bash bin/setup.sh <PROJECT>
-
-# 2. Validate spec completeness
-bash bin/validate.sh <PROJECT>
-
-# 3. Generate build prompt (sets .env + git tag)
-bash bin/oneshot.sh <PROJECT> > Specifications/<PROJECT>/oneshot-prompt.md
-
-# 4. Apply build in prototype directory
-cd /path/to/projects/<PROJECT>
-claude -p "$(cat .../oneshot-prompt.md)"
-
-# 5. Capture session logs → auto-generate ticket files
-bash bin/tran_logger.sh <PROJECT>
-
-# 6. Generate iteration prompt
-bash bin/iterate.sh <PROJECT> > Specifications/<PROJECT>/iterate-prompt.md
-
-# 7. Apply iteration
-claude -p "$(cat .../iterate-prompt.md)"
-
-# 8. Promote (squash-merge to base branch)
-bash bin/merge.sh <PROJECT>
-```
+`iterate.sh` diffs from `PROTOTYPE_BUILD_TAG` to HEAD to detect ticket files added since the last build. The tag is the boundary between what has been built and what is pending.
