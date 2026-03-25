@@ -34,7 +34,7 @@ Fixed. Present on all screens. Components left to right:
 | Element | Behavior |
 |---------|----------|
 | **Brand** (`cc-brand`) | App name with command icon. Click → Dashboard (`/`). |
-| **Top-level tabs** | Projects, Processes, Monitoring, Workflow, Publisher, Catalog. Active tab highlighted. |
+| **Top-level tabs** | Welcome, Projects, Processes, Monitoring, Workflow, Publisher, Catalog, Prototypes. Active tab highlighted. Welcome is leftmost and is the default. |
 | **Documentation button** | Opens `docs/index.html` in new tab. |
 | **Settings dropdown** | Hamburger icon. Contains: Settings, Tags, Help. |
 | **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
