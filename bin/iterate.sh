@@ -82,22 +82,28 @@ if ! git -C "$REPO_DIR" rev-parse "$BUILD_TAG" >/dev/null 2>&1; then
     exit 1
 fi
 
-# --- Numbered ticket files added since the build tag ---
+# --- Determine diff baseline: last iterate SPEC_COMMIT if available, else BUILD_TAG ---
+# On first iterate after oneshot: no SPEC_COMMIT in prototype .env yet → use BUILD_TAG.
+# On subsequent iterates: use the SPEC_COMMIT written by the previous iterate run.
+# This advances the baseline automatically so only NEW tickets appear each run.
+DIFF_BASELINE="$BUILD_TAG"
+if [ -d "$PROTO_DIR" ]; then
+    PROTO_SPEC_COMMIT=$(grep "^SPEC_COMMIT=" "$PROTO_DIR/.env" 2>/dev/null | head -1 | sed 's/^SPEC_COMMIT=//' | tr -d '\r' || true)
+    if [ -n "$PROTO_SPEC_COMMIT" ] && git -C "$REPO_DIR" rev-parse "$PROTO_SPEC_COMMIT" >/dev/null 2>&1; then
+        DIFF_BASELINE="$PROTO_SPEC_COMMIT"
+    fi
+fi
+
+# --- Numbered ticket files added since the diff baseline ---
 # Ticket types: SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*, AC-NNN-*, INTENT-NNN-*
-# Any file matching PREFIX-[0-9]{3}[-.]*.md added after the build tag.
+# Any file matching PREFIX-[0-9]{3}[-.]*.md added after the baseline.
 # Order is preserved by the 3-digit number prefix.
-NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$BUILD_TAG" -- "${PROJECT_NAME}/" 2>/dev/null \
+NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$DIFF_BASELINE" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
     | grep -E "^${PROJECT_NAME}/[A-Z]+-[0-9]{3}[-.]" \
     | sed "s|^${PROJECT_NAME}/||" \
     | sort \
     || true)
-
-# --- Exclude tickets already applied (tracked in prototype docs/applied_tickets.txt) ---
-APPLIED_LOG="$PROTO_DIR/docs/applied_tickets.txt"
-if [ -f "$APPLIED_LOG" ] && [ -n "$NEW_ITEMS" ]; then
-    NEW_ITEMS=$(echo "$NEW_ITEMS" | grep -v -F -f "$APPLIED_LOG" || true)
-fi
 
 # --- Summary ---
 DISPLAY_NAME=$(get_metadata "display_name")
@@ -106,7 +112,7 @@ SPEC_COMMIT=$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || true)
 ITEM_COUNT=$(echo "$NEW_ITEMS" | grep -c '[^[:space:]]' 2>/dev/null || echo 0)
 
 echo "Iterate: $PROJECT_NAME" >&2
-echo "  Tag:       $BUILD_TAG ($SHORT_COMMIT)" >&2
+echo "  Baseline:  $DIFF_BASELINE${DIFF_BASELINE:+$( [ "$DIFF_BASELINE" = "$BUILD_TAG" ] && echo ' (oneshot tag)' || echo ' (last iterate)' )}" >&2
 echo "  Spec:      $SPEC_COMMIT" >&2
 echo "  Prototype: $PROTO_DIR" >&2
 echo "  Work items: $ITEM_COUNT" >&2
@@ -120,7 +126,7 @@ echo "    claude -p \"\$(cat $SPEC_DIR/iterate-prompt.md)\"" >&2
 echo "" >&2
 
 if [ "$ITEM_COUNT" -eq 0 ]; then
-    echo "WARNING: No numbered ticket files found since $BUILD_TAG." >&2
+    echo "WARNING: No numbered ticket files found since $DIFF_BASELINE." >&2
     echo "         Add SCREEN-NNN-*.md, FEATURE-NNN-*.md, PATCH-NNN-*.md, AC-NNN-*.md, or INTENT-NNN-*.md files." >&2
 fi
 
@@ -212,7 +218,7 @@ For each work item listed above, check:
 - Write: \`[UNDERSPECIFIED] <filename>: <what is missing>\`
 - Add a \`## Rejection Reason\` section to the file and leave it in place
 
-**If all checks pass:** implement the item fully, then record the ticket as applied by appending its filename (basename only, e.g. `PATCH-004-fix-nav.md`) as a new line to `docs/applied_tickets.txt` in the prototype directory. Create the file if it does not exist. Do not modify or delete the ticket file in the Specifications directory.
+**If all checks pass:** implement the item fully. Do not modify or delete the ticket file in the Specifications directory.
 
 ---
 
