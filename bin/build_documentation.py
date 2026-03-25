@@ -48,7 +48,7 @@ SCRIPT_DESCRIPTIONS = {
     'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
 }
 
-GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'BUSINESS-RULES', 'ENGINEERING-RULES', 'FEATURES']
+GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'FEATURES']
 GUIDE_TITLES = {
     'PROTOTYPE-PROCESS':     'Prototype Process Spec',
     'SPECIFICATION-PROCESS': 'Specification Process',
@@ -56,14 +56,12 @@ GUIDE_TITLES = {
     'ITERATION-PROCESS':     'Iteration Process',
     'PROMOTE':               'Step 6 — Promote',
     'CREATE-IMAGE':          'Create Image',
-    'BUSINESS-RULES':        'Business Rules',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
     'FEATURES':              'Features',
 }
 RULES_ENGINE_DIR = PROJECT_DIR / "RulesEngine"
 GUIDE_EXTRA = {
     'PROTOTYPE-PROCESS': RULES_ENGINE_DIR / 'PROTOTYPE_PROCESS.md',
-    'BUSINESS-RULES': RULES_ENGINE_DIR / 'BUSINESS_RULES.md',
 }
 
 # Scripts hidden from the scripts list (generate_*.py are per-project image generators)
@@ -315,20 +313,6 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="summarize_rules.sh" onclick="showScript(\'summarize_rules.sh\')">summarize_rules.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-key="FEATURES" onclick="showGuide(\'FEATURES\')">Features</a>\n'
-
-    # ── Sidebar: documentation guides ──────────────────────────────────────────
-    doc_nav = '  <div class="nav-section">Documentation</div>\n'
-    # Group guides into categories for sidebar display
-    doc_nav_items = []
-    for g in guides:
-        key = g['key']
-        title = g['title']
-        # Skip guides already in step nav or projects
-        if key not in ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP',
-                       'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'FEATURES']:
-            doc_nav_items.append((key, title))
-    for key, title in sorted(doc_nav_items):
-        doc_nav += f'  <a class="sn" data-key="{h.escape(key)}" onclick="showGuide(\'{h.escape(key)}\')">{h.escape(title)}</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
     proj_nav = ''
@@ -636,7 +620,6 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <h1>Project<br>Prototyper</h1>
   </div>
 {step_nav}
-{doc_nav}
   <div class="nav-sep"></div>
   <div class="nav-section">Current Projects</div>
 {proj_nav}
@@ -649,7 +632,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     {wf_diagram}
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Oneshot Rules</p>
+    <p class="wf-section-h">Documentation</p>
     <div class="doc-guide-list"></div>
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
@@ -694,13 +677,14 @@ marked.setOptions({{ gfm: true, breaks: false }});
 function initGuideList() {{
   var container = document.querySelector('.doc-guide-list');
   if (!container) return;
-  // List of key guides to show in the Oneshot Rules section
-  var guideOrder = ['PROTOTYPE-PROCESS', 'SPECIFICATION-PROCESS', 'PROJECT-SETUP',
-                    'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'BUSINESS-RULES',
-                    'ENGINEERING-RULES', 'FEATURES'];
-  guideOrder.forEach(function(key) {{
-    var meta = GUIDES_META[key];
-    if (meta) {{
+  // Guides already shown in main workflow steps/navigation
+  var shownGuides = {{'PROTOTYPE-PROCESS':1, 'SPECIFICATION-PROCESS':1, 'PROJECT-SETUP':1,
+                      'ITERATION-PROCESS':1, 'PROMOTE':1, 'CREATE-IMAGE':1,
+                      'ENGINEERING-RULES':1, 'FEATURES':1}};
+  // Show all other guides in the Documentation section
+  Object.keys(GUIDES_META).forEach(function(key) {{
+    if (!shownGuides[key]) {{
+      var meta = GUIDES_META[key];
       var card = document.createElement('div');
       card.className = 'doc-guide-card';
       card.onclick = function() {{ showGuide(key); }};
