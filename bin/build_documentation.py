@@ -295,21 +295,17 @@ def build_page(scripts, projects, guides):
 
     step_nav = ''
     for num, label, subs in STEP_NAV:
-        # Steps 1-4: link to first guide sub-item; step 5+: handled below
-        first_guide_sub = next((t for t in subs if t[1] == 'guide'), None)
-        if first_guide_sub and num < 5:
-            step_nav += f'  <a class="sn" data-key="{first_guide_sub[2]}" onclick="showGuide(\'{first_guide_sub[2]}\')">{h.escape(label)}</a>\n'
-        else:
-            step_nav += f'  <a class="sn" data-step="{num}">{h.escape(label)}</a>\n'
+        step_nav += f'  <a class="sn" data-step="{num}" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', {num})">{h.escape(label)}</a>\n'
         for sub_label, sub_type, sub_target in subs:
             if sub_type == 'script':
                 step_nav += f'  <a class="sn-sub" data-script="{h.escape(sub_target)}" onclick="showScript(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
-    step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Iterate</a>\n'
+    step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Step 5 — Iterate</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="tran_logger.sh" onclick="showScript(\'tran_logger.sh\')">tran_logger.sh</a>\n'
-    step_nav += f'  <a class="sn" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote</a>\n'
+    step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', 6)">Step 6 — Promote</a>\n'
+    step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectUpdate.sh" onclick="showScript(\'ProjectUpdate.sh\')">ProjectUpdate.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
@@ -637,10 +633,6 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
     {wf_diagram}
-
-    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Documentation</p>
-    <div class="doc-guide-list"></div>
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
     <p class="wf-section-h">Dictionary</p>
