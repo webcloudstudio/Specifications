@@ -143,6 +143,32 @@ The `# Args:` line lists positional arguments in order, comma-separated. Include
 **Rule text:**
 All projects must have `bin/test.sh`. A minimal stub (`#!/bin/bash` + `exit 0`) is sufficient until real tests exist. The script must exist — GAME and the validation system check for it.
 
+### PYTEST_FRAMEWORK
+**Scope:** testing
+**Applies at:** ACTIVE
+**Requirement:** All Python projects use pytest with a standard test suite structure.
+**Rationale:** A consistent test framework with standard fixtures means any agent can run and extend the test suite without project-specific knowledge. Baseline coverage at the application entry points catches regressions from any change.
+**Rule text:**
+Every Python project must have a pytest-based test suite. Required structure:
+
+```
+tests/
+  conftest.py     — app, client, and db fixtures
+  test_smoke.py   — startup and health checks
+  test_routes.py  — one test per registered route
+  test_db.py      — schema and CRUD round-trips (if project has a database)
+```
+
+`pytest` must appear in `requirements.txt`. A `pytest.ini` at project root sets:
+
+```ini
+[pytest]
+testpaths = tests
+addopts = -v
+```
+
+`bin/test.sh` activates the venv and runs `python -m pytest tests/ -v`. Tests must pass before any commit. A failing test suite is treated as a broken build.
+
 ### SCRIPTS_BASH_PATTERN
 **Scope:** scripts
 **Applies at:** PROTOTYPE

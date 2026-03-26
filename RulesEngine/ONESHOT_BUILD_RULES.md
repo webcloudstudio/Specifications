@@ -99,6 +99,51 @@ These rules are global — they apply to all projects regardless of stack. Stack
 
 ---
 
+## Testing
+
+Every Python project build must include a complete pytest suite regardless of whether the spec mentions tests. Do not skip this — a project without tests does not satisfy ACTIVE conformity (see BUSINESS_RULES.md `PYTEST_FRAMEWORK`).
+
+### Files to create
+
+**`tests/conftest.py`** — fixtures shared across all test modules. Patterns from `stack/flask.md §7` and `stack/python.md §4`:
+- `app` fixture: `create_app(TestConfig)` — in-memory DB, `TESTING=True`
+- `client` fixture: `app.test_client()`
+- `db` fixture: fresh `init_db(':memory:')` per test, yielded inside `app.app_context()`
+
+**`tests/test_smoke.py`** — liveness checks:
+- App factory returns a Flask app without error
+- `GET /health` returns 200 and `{"status": "ok"}`
+- Root route `GET /` returns 200
+
+**`tests/test_routes.py`** — one test per registered route:
+- Every `GET` page route: `assert response.status_code == 200`
+- Every `POST` API route: assert status in `{200, 201, 204}` with a minimal valid payload
+- HTMX routes: include `HX-Request: true` header; assert 200 and non-empty `response.data`
+- Routes with `{id}` params: use a fixture-created record for the ID
+
+**`tests/test_db.py`** — only if project has a DATABASE.md:
+- Schema test: after `init_db()`, all expected tables exist (`SELECT name FROM sqlite_master WHERE type='table'`)
+- Round-trip per major table: insert a minimal valid row, read it back, assert field values match
+- FK enforcement: inserting a row with an invalid FK raises `IntegrityError` (requires `PRAGMA foreign_keys=ON`)
+
+### Configuration
+
+**`pytest.ini`** at project root:
+```ini
+[pytest]
+testpaths = tests
+addopts = -v
+```
+
+Add `pytest` to `requirements.txt`.
+
+### What not to test
+- Third-party library internals (Flask, SQLite, HTMX)
+- Configuration loading — tested implicitly by fixture startup
+- Private helper functions — test through the public interface that uses them
+
+---
+
 ## Naming Conventions
 
 | Prefix | Contains | Example |
