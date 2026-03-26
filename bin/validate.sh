@@ -182,7 +182,7 @@ BAD_NAMES=0
 for f in "$PROJECT_DIR"/*.md; do
     fname=$(basename "$f")
     case "$fname" in
-        METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md) ;;
+        METADATA.md|README.md|INTENT.md|ARCHITECTURE.md|DATABASE.md|UI.md|FUNCTIONALITY.md|UI-GENERAL.md|HOMEPAGE.md) ;;
         DEPLOY_LOG.md|ACCEPTANCE_CRITERIA.md|IDEAS.md|REFERENCE_GAPS.md|SCORECARD.md) ;;
         # Canonical spec files (no number — oneshot territory)
         SCREEN-*.md|FEATURE-*.md|UI-*.md) pass "$fname (spec)" ;;
