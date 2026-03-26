@@ -1,6 +1,6 @@
 # Iteration Process
 
-**Version:** 20260324 V8
+**Version:** 20260326 V9
 **Specification:** `RulesEngine/PROTOTYPE_PROCESS.md`
 
 > The authoritative process spec is `RulesEngine/PROTOTYPE_PROCESS.md`.
@@ -23,6 +23,64 @@ claude .
 
 `oneshot.sh` tags the commit, writes `PROTOTYPE_BUILD_TAG`, `PROTOTYPE_BUILD_COMMIT`,
 and `PROTOTYPE_DIR` to `<PROJECT>/.env`, and appends to `DEPLOY_LOG.md`.
+
+---
+
+## Spec Iterate (AI-assisted specification gap analysis)
+
+Use this when the spec is ahead of the code and you want the AI to:
+- Identify what is still unspecified (update REFERENCE_GAPS.md)
+- Rate the spec quality (SPEC_SCORECARD.md)
+- Draft the next 1–2 spec files to write (SPEC_ITERATION.md)
+
+**Step 1 — Run the analysis:**
+
+```bash
+# From Specifications/
+bash bin/spec_iterate.sh <PROJECT>
+# Optional: bash bin/spec_iterate.sh <PROJECT> --model opus  (more thorough)
+```
+
+Claude reads all spec files and BUSINESS_RULES.md, then writes three files:
+
+| File | Purpose |
+|------|---------|
+| `<PROJECT>/REFERENCE_GAPS.md` | Updated gap list — open gaps marked `[ ]`, resolved `[x]` |
+| `<PROJECT>/SPEC_SCORECARD.md` | 7-dimension spec quality rating with priority actions |
+| `<PROJECT>/SPEC_ITERATION.md` | A ready-to-run prompt targeting 1–2 highest-priority gaps |
+
+**Step 2 — Review the output:**
+
+```bash
+# See the score and what to do next
+cat <PROJECT>/SPEC_SCORECARD.md
+
+# Review the prompt — edit to refine scope or add context
+# The generated prompt targets 1-2 gaps; you may narrow or adjust
+$EDITOR <PROJECT>/SPEC_ITERATION.md
+```
+
+**Step 3 — Create the targeted spec files:**
+
+```bash
+# From Specifications/
+claude -p "$(cat <PROJECT>/SPEC_ITERATION.md)"
+# Claude creates the 1-2 spec files named in SPEC_ITERATION.md
+```
+
+**Step 4 — Build or iterate:**
+
+```bash
+# Option A: full rebuild from spec
+bash bin/oneshot.sh <PROJECT> > <PROJECT>/oneshot-prompt.md
+
+# Option B: incremental update to an existing prototype
+bash bin/iterate.sh <PROJECT> > <PROJECT>/iterate-prompt.md
+cd /mnt/c/Users/barlo/projects/<PROJECT>
+claude -p "$(cat /mnt/c/Users/barlo/projects/Specifications/<PROJECT>/iterate-prompt.md)"
+```
+
+Repeat Step 1 after each spec change to keep the scorecard current.
 
 ---
 
