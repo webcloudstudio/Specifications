@@ -4,7 +4,7 @@
 **Type:** abstract — base layout, not a routed screen
 **Description:** Reusable project list layout. Named views extend this by declaring `Extends: SCREEN-DEFAULT` and specifying their middle columns.
 
-**Inherited by:** SCREEN-DASHBOARD, SCREEN-CONFIGURATION
+**Inherited by:** SCREEN-PROJECTS-OVERVIEW, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION
 
 A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
 
