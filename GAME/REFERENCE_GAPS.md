@@ -1,7 +1,7 @@
 # Reference Gaps
 
-**Version:** 20260326 V2
-**Build-ref:** oneshot/GAME/2026-03-22.1
+**Version:** 20260326 V3
+**Build-ref:** oneshot/GAME/2026-03-26.1
 **Purpose:** Features not yet specified, organized by target spec file. Drives iteration priority.
 
 > Format: Sections are spec filenames. `(NEW)` = file does not exist yet. Each gap is a checkbox: `- [ ]` open, `- [x]` specified. Include GAME reference file, priority (P0=critical → P10=someday), and one-line description.
@@ -36,20 +36,20 @@
 
 ## ARCHITECTURE.md
 
-- [ ] **P1 — monitoring.py / healthcheck.py module:** Service health poller and log ingestor need a named module in the architecture. FEATURE-HEALTHCHECK.md defines behavior but ARCHITECTURE.md has no module entry.
-- [ ] **P1 — scheduler.py module:** Background cron loop needs a named module (currently implied by FUNCTIONALITY.md Flow 7). Not in ARCHITECTURE.md.
-- [ ] **P1 — Routes table update:** New routes from FEATURE-SERVICE-CATALOG and FEATURE-HEALTHCHECK need to be added to the routes table in ARCHITECTURE.md.
+- [x] **P1 — monitoring.py / healthcheck.py module:** Full `Health Monitor (monitoring.py)` section now in ARCHITECTURE.md with poller thread, log ingestor thread, and provided functions.
+- [x] **P1 — scheduler.py module:** Full `Scheduler (scheduler.py)` section now in ARCHITECTURE.md with cron loop, catch-up logic, and provided functions.
+- [x] **P1 — Routes table update:** Routes table in ARCHITECTURE.md now includes all FEATURE-SERVICE-CATALOG and FEATURE-HEALTHCHECK routes (lines 115–125).
 - [ ] **P8 — Request timing middleware:** Log requests >50ms.
 - [ ] **P8 — TTL caches:** Cache workflow states and tag colors (30s).
 - [ ] **P8 — Dead process cleanup:** Detect stale PIDs, mark op_runs as error.
 
 ## DATABASE.md
 
-- [ ] **P1 — Add FEATURE-HEALTHCHECK tables:** `health_check_log`, `log_positions`, `log_filter` are specified in FEATURE-HEALTHCHECK.md but not yet in DATABASE.md schema section. DATABASE.md is the authoritative schema source.
-- [ ] **P1 — Promote tag_colors to DB table:** Currently in `data/tag_colors.json`. SCREEN-SETTINGS-TAG.md writes to both; DB table needs formal schema entry.
-- [ ] **P1 — has_tests and has_specs flags:** Referenced in SCREEN-PROJECTS-VALIDATION.md and FUNCTIONALITY.md Flow 1 but not yet in DATABASE.md field source mapping or the projects table schema.
-- [ ] **P3 — git_last_commit_date column:** Would replace version date as `LastUpdate` source. Requires `git log` during scan.
-- [ ] **P8 — Database migrations:** `_run_migrations()` / `_add_column_if_missing()` pattern — needs implementation note for new columns.
+- [x] **P1 — Add FEATURE-HEALTHCHECK tables:** `health_check_log`, `log_positions`, `log_filter` now documented in DATABASE.md schema section with summary table and retention notes.
+- [x] **P1 — Promote tag_colors to DB table:** Full `tag_colors` schema now in DATABASE.md; migration path from `data/tag_colors.json` documented.
+- [ ] **P1 — has_tests and has_specs flags:** Remain in DATABASE.md Open Questions only — not yet added to the `projects` table schema or Field Source Mapping table.
+- [ ] **P3 — git_last_commit_date column:** Still in Open Questions — not added to projects table schema. Requires `git log` during scan.
+- [x] **P8 — Database migrations:** `_add_column_if_missing()` pattern documented in DATABASE.md Conventions section.
 
 ## SCREEN-SETTINGS-LOGFILTER.md (NEW)
 
@@ -122,3 +122,9 @@
 | P1 Settings screen | SCREEN-SETTINGS-GENERAL.md | 2026-03-26 |
 | P5 Project Maturity Scorecard | SCREEN-PROJECTS-VALIDATION.md (conformity levels) | 2026-03-25 |
 | P6 Specification management | SCREEN-PROTOTYPES.md + SCREEN-PROJECTS-WORKFLOW.md | 2026-03-24 |
+| P1 monitoring.py module | ARCHITECTURE.md (Health Monitor section) | 2026-03-26 |
+| P1 scheduler.py module | ARCHITECTURE.md (Scheduler section) | 2026-03-26 |
+| P1 Routes table update | ARCHITECTURE.md (routes table lines 115–125) | 2026-03-26 |
+| P1 FEATURE-HEALTHCHECK tables in DATABASE.md | DATABASE.md (health_check_log / log_positions / log_filter section) | 2026-03-26 |
+| P1 tag_colors DB table | DATABASE.md (tag_colors schema + migration note) | 2026-03-26 |
+| P8 Database migrations | DATABASE.md Conventions (_add_column_if_missing note) | 2026-03-26 |
