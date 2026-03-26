@@ -235,7 +235,7 @@ echo ""
 echo "Iterate tickets:"
 TICKET_COUNT=0
 REJECTED_COUNT=0
-for ticket in "$PROJECT_DIR"/*-[0-9][0-9][0-9]-*.md "$PROJECT_DIR"/*-[0-9][0-9][0-9].md 2>/dev/null; do
+for ticket in "$PROJECT_DIR"/*-[0-9][0-9][0-9]-*.md "$PROJECT_DIR"/*-[0-9][0-9][0-9].md; do
     [ -f "$ticket" ] || continue
     tname=$(basename "$ticket")
     TICKET_COUNT=$((TICKET_COUNT + 1))
