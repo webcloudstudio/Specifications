@@ -256,7 +256,7 @@ Append-only log. Rows are never updated or deleted.
 |--------|------|-------------|
 | id | INTEGER PK | Auto-increment |
 | project_id | INTEGER FK | References projects.id; NULL for platform-level events |
-| event_type | TEXT | Valid values: `operation_started`, `operation_completed`, `operation_failed`, `state_transition`, `git_push`, `git_commit`, `schedule_fired`, `schedule_missed`, `build_completed`, `deploy_completed`, `scan_completed`, `ticket_transition`, `metadata_changed`, `alert_fired`, `spec_updated` |
+| event_type | TEXT | Valid values: `operation_started`, `operation_completed`, `operation_failed`, `state_transition`, `git_push`, `git_commit`, `schedule_fired`, `schedule_missed`, `build_completed`, `deploy_completed`, `scan_completed`, `ticket_transition`, `metadata_changed`, `alert_fired`, `spec_updated`, `spec_ticket_created` |
 | timestamp | TEXT | When it happened (yyyymmdd_hhmmss) |
 | summary | TEXT | Human-readable one-liner |
 | detail | TEXT | JSON event-specific payload |
@@ -289,6 +289,47 @@ Per-ticket AI decision log. Written when a ticket enters IN DEVELOPMENT.
 | decision | TEXT | What was decided and why |
 | alternatives | TEXT | What was considered but rejected |
 | files_changed | TEXT | JSON array of files modified |
+
+### workflow_types
+
+Configurable spec ticket type definitions. Seeded once on first startup; rows are never deleted by the scanner — only by user action via Settings. Each row defines one button in the Projects / Workflow screen.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| id | INTEGER PK | auto | Auto-increment |
+| name | TEXT | — | Display name shown on button (e.g. `Patch`) |
+| file_prefix | TEXT | — | Prefix used for generated filename (e.g. `PATCH`) |
+| description | TEXT | NULL | Tooltip text shown on hover |
+| template | TEXT | — | Markdown template for the created file; supports `{title}` and `{body}` placeholders |
+| sort_order | INTEGER | 0 | Left-to-right display order within the Workflows column |
+| is_active | INTEGER | 1 | 1 = shown in UI; 0 = hidden without deleting |
+| created_at | TEXT | datetime('now') | |
+| updated_at | TEXT | datetime('now') | |
+
+**Seed data (inserted if table is empty on startup):**
+
+| name | file_prefix | description |
+|------|-------------|-------------|
+| Patch | PATCH | Bug fix, behavioral correction, or refactor |
+| Screen | SCREEN | New or revised screen specification |
+| Feature | FEATURE | New or revised feature specification |
+| Acceptance Criteria | AC | Testable MUST / MUST NOT batch |
+
+### spec_tickets
+
+Log of spec ticket files created via the Projects / Workflow screen. One row per file written to disk.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| id | INTEGER PK | auto | Auto-increment |
+| project_id | INTEGER FK | — | References projects.id |
+| workflow_type_id | INTEGER FK | — | References workflow_types.id |
+| filename | TEXT | — | Created file basename (e.g. `PATCH-003-fix-nav.md`) |
+| title | TEXT | — | User-entered title (also used in filename slug) |
+| body | TEXT | NULL | User-entered body text written into the file |
+| status | TEXT | `pending` | `pending` / `applied` / `rejected` — updated when the file is deleted or the iterate run processes it |
+| created_at | TEXT | datetime('now') | |
+| updated_at | TEXT | datetime('now') | |
 
 ---
 
