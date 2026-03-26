@@ -69,5 +69,5 @@ Banner notification when a service changes state (UP→DOWN or DOWN→UP). Links
 
 ## Open Questions
 
-- What should the polling interval be? Configurable per-project or global?
-- Should alerts use browser notifications or just in-page banners?
+- What should the polling interval be? Per-project via `health_check_interval` column (default 60s); see FEATURE-HEALTHCHECK.md. No global override needed.
+- Should alerts use browser notifications or just in-page banners? In-page banners only. Browser notification permissions are intrusive; the dashboard is intended for active monitoring sessions.

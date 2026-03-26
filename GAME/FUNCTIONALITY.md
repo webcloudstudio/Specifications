@@ -677,3 +677,8 @@ The browser replaces the targeted DOM element. No full page reload unless naviga
 - Scanner runs async — dashboard is usable during scan
 - Heartbeat poller runs on its own timer, independent of user actions
 - Scheduler runs on its own timer, independent of heartbeat poller
+
+## Open Questions
+
+- Flow 8 (Ticket Lifecycle): The AI agent integration trigger mechanism for READY tickets is unspecified — needs FEATURE-AI-SUBMISSION.md or a concrete webhook/API design.
+- Flow 10 (Specification Management): The agent commit auto-detection (linking spec changes to active tickets via git diff) requires a scan-triggered diff check not currently in the scanner. Needs design.

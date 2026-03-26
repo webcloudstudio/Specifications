@@ -357,6 +357,31 @@ Key-value store for application-level configuration. Seeded on first startup. Ro
 | `app_name` | `Command Center` | Name displayed in the upper-left corner of the application |
 | `homepage_url` | `` | Live homepage URL (shown on the Homepage screen) |
 
+### tag_colors
+
+Color assignments per tag. Written by `POST /settings/tags`. Canonical source for tag pill colors — supersedes `data/tag_colors.json` once this table is added.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| tag | TEXT PK | — | Raw tag string |
+| bg | TEXT | `#64748b` | Background hex color |
+| fg | TEXT | `#ffffff` | Foreground hex color |
+| updated_at | TEXT | datetime('now') | |
+
+> Until this table is added, `data/tag_colors.json` remains the color source. Migration: on first Settings / Tag page load, import any entries from the JSON file into this table and delete the file.
+
+### health_check_log, log_positions, log_filter
+
+These three tables support `monitoring.py` (health poller + log ingestor). Full schema is in FEATURE-HEALTHCHECK.md. Summary:
+
+| Table | Purpose | Retention |
+|-------|---------|-----------|
+| `health_check_log` | Raw HTTP/TCP poll results (one row per check) | 24h rolling window |
+| `log_positions` | Byte-offset cursor per project log file (incremental ingestion) | Permanent |
+| `log_filter` | Regex classification rules; seeded with defaults on startup | Permanent |
+
+Schema is authoritative in FEATURE-HEALTHCHECK.md. When these tables are implemented, add their full column definitions here and remove this reference.
+
 ---
 
 ## Conventions
@@ -371,8 +396,9 @@ Key-value store for application-level configuration. Seeded on first startup. Ro
 
 ## Open Questions / Design Decisions
 
-- **`title` column**: Duplicated by `display_name`. Candidate for removal once all templates consistently use `display_name`.
-- **WAL PRAGMA per connection**: Harmless (WAL is persistent) but wasteful — should move to `init_db()` only.
-- **Tag colors**: Currently in `data/tag_colors.json` (file, not DB). Should be promoted to a `tag_colors` table to stay consistent with the DB-as-UI-source model.
-- **`has_docs`, `has_tests`, `has_specs` flags**: `has_docs` is implemented. `has_tests` and `has_specs` are roadmap items for contract-earns-capability.
-- **`git_last_commit_date`**: Not yet implemented. Would replace `version` date as the `LastUpdate` source — requires running `git log` during scan and storing the result.
+- **`title` column**: Duplicated by `display_name`. Remove once all templates reference `display_name` exclusively. Until then, keep it to avoid breaking existing renders.
+- **WAL PRAGMA per connection**: Harmless (WAL is persistent). Move to `init_db()` only as a cleanup task — not a blocking issue.
+- **Tag colors**: Promoted to `tag_colors` table above. `data/tag_colors.json` is legacy; migrate on first Settings / Tag load.
+- **`has_tests` flag**: Scanned from `tests/` directory or `bin/test.sh` presence. Add to scanner and `projects` table schema in same pass as `has_specs`.
+- **`has_specs` flag**: Scanned from `{SPECIFICATIONS_PATH}/{project.name}/` existence. Requires `SPECIFICATIONS_PATH` to be set; defaults to `false` when not configured.
+- **`git_last_commit_date`**: Not yet implemented. Would replace `version` date as the `LastUpdate` column source. Requires `git log --format=%ci -1` during scan and storing the ISO date. Add to `projects` table when scanner is updated.

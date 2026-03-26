@@ -151,6 +151,6 @@ Screen uses HTMX for project selection / panel swaps. Run controls and polling u
 
 ## Open Questions
 
-- Should the log drawer support text search within output?
-- Should the screen auto-select the first project on load, or start with the panel empty?
-- Should active runs from other sessions (e.g., started via curl) appear in the Active Runs section?
+- Should the log drawer support text search within output? Yes — add a search input that highlights matching lines. Can reuse the same pattern as the Processes screen log viewer when that feature is added.
+- Should the screen auto-select the first project on load? Start with panel empty. The left panel is the navigation; forcing a selection is disorienting on first visit.
+- Should active runs from other sessions appear in Active Runs? Yes — the Active Runs section shows all `op_runs` rows with `status = running` for this project regardless of origin session. Curl-initiated runs appear here the same as UI-initiated ones.

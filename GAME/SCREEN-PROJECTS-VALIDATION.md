@@ -102,6 +102,6 @@ Above the table: aggregate counts across all visible projects.
 
 ## Open Questions
 
-- Should validation results be persisted between sessions, or always re-run on demand?
-- Should the `Validate All` run be triggered automatically on a schedule (e.g., nightly)?
-- Should failing PRODUCTION checks surface as alerts on the Monitoring screen?
+- Should validation results be persisted between sessions? Yes — results are stored in the `heartbeats` table (`heartbeat_type = 'compliance'`). The Validation screen shows the last stored result; clicking `Validate` refreshes it. Results survive restart.
+- Should `Validate All` run automatically on a schedule? Yes — wire to the scheduler loop via a `validation_schedule` key in the `settings` table (e.g., `0 2 * * *` for 2am nightly). Add to SCREEN-SETTINGS-GENERAL.md fields when implemented.
+- Should failing PRODUCTION checks surface as alerts on the Monitoring screen? Yes — compliance state changes (from the `heartbeats` table) should appear in the Monitoring event timeline as `compliance` event type. Existing event pipeline handles this; no new mechanism needed.

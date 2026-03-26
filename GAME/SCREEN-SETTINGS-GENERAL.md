@@ -70,5 +70,5 @@ No full-page reload on save — HTMX `hx-post` replaces the form fragment; succe
 
 ## Open Questions
 
-- Should additional settings (polling interval, PROJECTS_DIR, SPECIFICATIONS_PATH) be editable here, or remain `.env`-only?
-- Should `app_name` changes take effect immediately (server re-reads on each request) or require restart?
+- Should additional settings (polling interval, PROJECTS_DIR, SPECIFICATIONS_PATH) be editable here, or remain `.env`-only? Path-level settings (`PROJECTS_DIR`, `SPECIFICATIONS_PATH`) remain `.env`-only — changing them requires a restart and the risk of misconfiguration is high. Operational settings (polling interval, app branding) belong here.
+- Should `app_name` changes take effect immediately? Yes — the server reads the `settings` table on each request for the brand label. No restart required.

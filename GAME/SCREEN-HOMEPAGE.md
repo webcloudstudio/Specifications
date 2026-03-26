@@ -70,4 +70,4 @@ Four sections stacked vertically: Build, Preview, Publish, Homepage.
 
 ## Open Questions
 
-- Should the preview section show a card grid preview inline, or only via the external URL?
+- Should the preview section show a card grid preview inline, or only via the external URL? External URL only. The preview server is already running at a known port (4321); an inline iframe adds complexity without benefit. The "Open Preview →" button is sufficient.

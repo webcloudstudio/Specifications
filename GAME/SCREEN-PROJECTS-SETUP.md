@@ -123,7 +123,7 @@ GitHub API calls are server-side (token stays in `.env`, never exposed to browse
 
 ## Open Questions
 
-- Should `Make A Project` also run `setup.sh` to create a Specifications entry for the new project?
-- Should the screen support GitLab or Bitbucket as an alternative to GitHub?
-- Should the target clone path (`~/Projects`) be configurable, or is it always inferred from `PROJECTS_DIR` in `.env`?
-- Should Conform show a diff preview of what will change before applying?
+- Should `Make A Project` also run `setup.sh` to create a Specifications entry for the new project? Yes — if `SPECIFICATIONS_PATH` is configured, offer an optional "Also create specification directory" checkbox. Default checked.
+- Should the screen support GitLab or Bitbucket as an alternative to GitHub? V1 GitHub only. Abstract the provider behind a `GIT_HOST` env var for future extension.
+- Should the target clone path be configurable? Always inferred from `PROJECTS_DIR` in `.env`. No additional configuration needed.
+- Should Conform show a diff preview of what will change before applying? Yes — show a collapsible diff panel before the operation runs. Blocked until `project_manager.py update --dry-run` output is parseable.

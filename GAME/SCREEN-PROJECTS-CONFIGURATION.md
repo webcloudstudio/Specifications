@@ -20,13 +20,13 @@ Renders SCREEN-DEFAULT (Baseline) with `columns=Configuration`.
 
 ## Configuration Column
 
-Three editable fields per project row:
+Editable fields per project row:
 
 | Field | Label | Source | Input |
 |-------|-------|--------|-------|
 | Port | `port:` | `projects.port` | number |
 | Show on homepage | `show:` | `projects.card_show` | checkbox |
-| Stack | `stack:` | `projects.stack` | checkbox |
+| Stack | `stack:` | `projects.stack` | text |
 | Tags | `tags:` | `projects.tags` | text |
 
 Fields persist on change per DATABASE.md rules. Each field saves independently — no Save button.
@@ -37,5 +37,4 @@ Clicking the cog icon navigates to SCREEN-PROJECT for full metadata editing orga
 
 ## Open Questions
 
-- Should the batch Configuration column include additional fields (namespace, desired_state)?
-    Ans: Yes but i dont know how to visualize that in an easily configurable way so one screen handles all configuration so this is just initial state
+- Should the batch Configuration column include additional fields (namespace, desired_state)? The Configuration screen shows the most-commonly-edited fields. Full metadata editing (including namespace and desired_state) is available via SCREEN-DRILLDOWN-PROJECT when the cog is clicked. The batch column stays minimal.

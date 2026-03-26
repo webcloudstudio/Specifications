@@ -1,6 +1,6 @@
 # Reference Gaps
 
-**Version:** 20260323 V1
+**Version:** 20260326 V2
 **Build-ref:** oneshot/GAME/2026-03-22.1
 **Purpose:** Features not yet specified, organized by target spec file. Drives iteration priority.
 
@@ -25,65 +25,59 @@
 
 ## FUNCTIONALITY.md
 
-- [ ] **P0 — Service Catalog API (Flow 12):** `GET /api/catalog` returns every project, its endpoints, bin/ scripts, health path, port. GAME ref: `routes.py` catalog endpoints.
-- [ ] **P0 — Script Endpoint API (Flow 11):** `POST /api/{name}/run/{script}` exposes bin/ scripts as REST. GAME ref: `routes.py` script endpoints.
-- [ ] **P0 — Project Health API (Flow 13):** `GET /api/{name}/health` proxies to each project's health endpoint. GAME ref: `routes.py` health proxy.
-- [ ] **P0 — CLI/Bash Gateway:** `bin/game-cli.sh` wrapper for catalog, run, health commands from bash without curl.
-- [ ] **P2 — Heartbeat Polling (Flow 6):** Background poller not implemented. GAME ref: `monitoring.py` (82 LOC, concurrent threaded polling, incident cache).
-- [ ] **P3 — Schedule Fire (Flow 7):** DB columns exist, cron loop missing. GAME ref: not fully implemented there either.
-- [ ] **P3 — Missed-Run Recovery:** Catch up on startup if scheduled run was missed.
-- [ ] **P3 — Dynamic Port Management:** Track ports in use, detect conflicts. Spec: "Dynamic Port Management and Forwarding".
+- [x] **P0 — Service Catalog API (Flow 12):** `GET /api/catalog` returns every project, its endpoints, bin/ scripts, health path, port. Specified in FEATURE-SERVICE-CATALOG.md.
+- [x] **P0 — Script Endpoint API (Flow 11):** `POST /api/{name}/run/{script}` exposes bin/ scripts as REST. Specified in FEATURE-SERVICE-CATALOG.md.
+- [x] **P0 — Project Health API (Flow 13):** `GET /api/{name}/health` proxies to each project's health endpoint. Specified in FEATURE-HEALTHCHECK.md.
+- [ ] **P0 — CLI/Bash Gateway:** `bin/game-cli.sh` wrapper for catalog, run, health commands from bash without curl. No spec yet.
+- [x] **P2 — Heartbeat Polling (Flow 6):** Background poller fully specified in FEATURE-HEALTHCHECK.md (concurrent threading, state transitions, uptime_pct).
+- [x] **P3 — Schedule Fire (Flow 7):** Cron loop specified in SCREEN-DASHBOARDS-SCHEDULER.md; startup catch-up in FUNCTIONALITY.md Flow 7.
+- [x] **P3 — Missed-Run Recovery:** FUNCTIONALITY.md Flow 7 startup catch-up fires ONE immediate run for each missed schedule.
+- [ ] **P3 — Dynamic Port Management:** Track ports in use, detect conflicts at scan time. Not yet specified.
 
 ## ARCHITECTURE.md
 
-- [ ] **P2 — monitoring.py module:** Health polling module missing from architecture. GAME ref: `monitoring.py`.
-- [ ] **P8 — Request timing middleware:** Log requests >50ms. GAME ref: `app.py` timing decorator.
-- [ ] **P8 — TTL caches:** Cache workflow states and tag colors (30s). GAME ref: routes.py cache decorators.
-- [ ] **P8 — Dead process cleanup:** Detect stale PIDs, mark op_runs as error. GAME ref: spawn.py cleanup.
-
-## SCREEN-TAGS.md (NEW)
-
-- [ ] **P1 — Tag management screen:** `/tags` + CRUD APIs (`/api/tag/add`, `/api/tag/update`, `/api/tag/delete`). Custom tag colors with color picker. GAME ref: `templates/tags.html`, `routes.py` tag endpoints, `data/tag_colors.json`.
-
-## SCREEN-SETTINGS.md (NEW)
-
-- [ ] **P1 — Settings screen:** `/settings` + `/settings/save`. App-level config (PROJECTS_DIR, APP_NAME, port, display prefs). GAME ref: `templates/settings.html`.
-
-## SCREEN-HELP.md (NEW)
-
-- [ ] **P1 — Help screen:** `/help` serving platform documentation. GAME ref: `templates/help.html`.
-
-## SCREEN-ENVIRONMENT.md (NEW)
-
-- [ ] **P1 — Environment screen:** `/environment` showing loaded env vars and config state. GAME ref: `templates/environment.html`.
-
-## SCREEN-PUBLISHER.md
-
-- [ ] **P1 — Publish edit page:** `/publish/edit/<project_id>` for per-project homepage metadata. GAME ref: `templates/publish_edit.html`.
-- [ ] **P1 — Publish preview:** Local Astro preview server start/stop at port 4321. GAME ref: `bin/LocalPreview.sh`.
-- [ ] **P7 — Card image generation:** Port `bin/generate_card_images.py`. GAME ref: `bin/generate_card_images.py`.
-
-## SCREEN-DASHBOARD.md
-
-- [ ] **P1 — Type-specific templates:** `templates/types/_software_detail.html`, `_book_detail.html`, `_software_row.html`, `_book_row.html`. GAME ref: `templates/types/`.
-- [ ] **P1 — Inline row editor:** `/api/project/<id>/edit-row` returns editable form; `/api/project/<id>/row` returns read-only. HTMX swap. GAME ref: `routes.py` edit-row endpoints.
-- [ ] **P1 — Links management:** `/api/project/<id>/links/add`, `/links/remove`. GAME ref: `routes.py` link endpoints.
-- [ ] **P2 — Project registration:** `/api/register-project` for manual registration. GAME ref: `routes.py` register endpoint.
-
-## SCREEN-PROJECT.md
-
-- [ ] **P2 — Quick edit API:** `/api/project/<id>/quick-edit` saves workflow state + type in one call. GAME ref: `routes.py`.
-
-## UI-GENERAL.md
-
-- [ ] **P2 — Configurable alerting:** Thresholds with snooze/escalation. Spec: "Configurable Alerting".
+- [ ] **P1 — monitoring.py / healthcheck.py module:** Service health poller and log ingestor need a named module in the architecture. FEATURE-HEALTHCHECK.md defines behavior but ARCHITECTURE.md has no module entry.
+- [ ] **P1 — scheduler.py module:** Background cron loop needs a named module (currently implied by FUNCTIONALITY.md Flow 7). Not in ARCHITECTURE.md.
+- [ ] **P1 — Routes table update:** New routes from FEATURE-SERVICE-CATALOG and FEATURE-HEALTHCHECK need to be added to the routes table in ARCHITECTURE.md.
+- [ ] **P8 — Request timing middleware:** Log requests >50ms.
+- [ ] **P8 — TTL caches:** Cache workflow states and tag colors (30s).
+- [ ] **P8 — Dead process cleanup:** Detect stale PIDs, mark op_runs as error.
 
 ## DATABASE.md
 
-- [ ] **P8 — Database migrations:** `_run_migrations()` is a no-op. Implement add-column-if-missing. GAME ref: `db.py` migration pattern.
-- [ ] **P8 — workflow.json:** Externalize workflow state definitions. GAME ref: `data/workflow.json`.
+- [ ] **P1 — Add FEATURE-HEALTHCHECK tables:** `health_check_log`, `log_positions`, `log_filter` are specified in FEATURE-HEALTHCHECK.md but not yet in DATABASE.md schema section. DATABASE.md is the authoritative schema source.
+- [ ] **P1 — Promote tag_colors to DB table:** Currently in `data/tag_colors.json`. SCREEN-SETTINGS-TAG.md writes to both; DB table needs formal schema entry.
+- [ ] **P1 — has_tests and has_specs flags:** Referenced in SCREEN-PROJECTS-VALIDATION.md and FUNCTIONALITY.md Flow 1 but not yet in DATABASE.md field source mapping or the projects table schema.
+- [ ] **P3 — git_last_commit_date column:** Would replace version date as `LastUpdate` source. Requires `git log` during scan.
+- [ ] **P8 — Database migrations:** `_run_migrations()` / `_add_column_if_missing()` pattern — needs implementation note for new columns.
 
-## tests/ (NEW — no spec file needed)
+## SCREEN-SETTINGS-LOGFILTER.md (NEW)
+
+- [ ] **P2 — Log filter rule editor:** `log_filter` table is defined in FEATURE-HEALTHCHECK.md with seed rules, but no UI screen exists to view, edit, add, or reorder classification rules. Needed for production tuning.
+
+## SCREEN-PROTOTYPES-DETAIL.md (NEW)
+
+- [ ] **P2 — Prototype detail view:** `GET /prototypes/{name}` is referenced in SCREEN-PROTOTYPES.md but has no spec. Should show parsed spec files as a rendered HTML index with file list, Open Questions, and links to the oneshot flow.
+
+## SCREEN-SETTINGS-WORKFLOWS.md (NEW)
+
+- [ ] **P3 — Workflow type management screen:** `workflow_types` table is seeded on startup; SCREEN-PROJECTS-WORKFLOW.md notes "until that screen exists, types are edited directly in the DB." Needs a proper settings screen for CRUD on workflow type definitions.
+
+## SCREEN-HOMEPAGE.md
+
+- [x] **P1 — Publish edit page:** Cover is provided by the SCREEN-HOMEPAGE.md Build/Publish/Preview/Homepage sections. Per-project card editing is handled via Configuration screen (`card_show`, `card_title`, etc.).
+- [ ] **P1 — Publish preview:** Local Astro preview server start/stop at port 4321. SCREEN-HOMEPAGE.md references this but `bin/LocalPreview.sh` is not specified.
+- [ ] **P7 — Card image generation:** `bin/generate_card_images.py` not yet specified.
+
+## SCREEN-PROJECTS-VALIDATION.md
+
+- [ ] **P2 — Schedule nightly validation:** `Validate All` triggered automatically on schedule. Not yet wired to scheduler. When specified, add a `validation_schedule` key to settings table and reference FUNCTIONALITY.md Flow 7.
+
+## SCREEN-DASHBOARDS-WORKFLOW.md
+
+- [ ] **P2 — AI agent submission mechanism:** READY tickets can be "submitted to an AI agent" but the trigger mechanism (queue, webhook, API call to Claude) is unspecified. Needs a concrete flow or FEATURE-AI-SUBMISSION.md.
+
+## tests/ (no spec file needed)
 
 - [ ] **P4 — Test framework:** Create `tests/` with conftest.py, fixtures (app, client, db).
 - [ ] **P4 — Unit tests — db layer:** init_db, query, execute, upsert, migrations.
@@ -94,33 +88,37 @@
 - [ ] **P4 — Unit tests — claude_convention:** parse_agents_md, @AGENTS.md redirect.
 - [ ] **P4 — Integration tests:** scan → discover → run → check → view log.
 
-## bin/ scripts (NEW — no spec file needed)
+## bin/ scripts (no spec file needed)
 
+- [ ] **P0 — Published API docs:** Auto-generate API reference at `/api/docs`. No spec yet.
 - [ ] **P3 — bin/test.sh:** Run test suite.
-- [ ] **P3 — bin/PushAndPublish.sh:** Full GitHub Pages publish pipeline.
-- [ ] **P3 — bin/LocalPreview.sh:** Astro preview server.
-- [ ] **P3 — bin/validate_project.py:** Validate project compliance.
-- [ ] **P6 — bin/create_project.py:** Scaffold new projects from templates.
+- [ ] **P3 — bin/PushAndPublish.sh:** Full GitHub Pages publish pipeline (referenced in FUNCTIONALITY.md Flow 5, not yet a formal script spec).
+- [ ] **P3 — bin/LocalPreview.sh:** Astro preview server (referenced in SCREEN-HOMEPAGE.md).
+- [ ] **P6 — bin/create_project.py:** Scaffold new projects from templates (lives in GAME project, referenced from Specifications AGENTS.md).
 
-## Unspecified Features (from Features.html)
+## Unspecified Features (backlog)
 
-- [ ] **P5 — Usage analytics:** Port `usage_analyzer.py` (454 LOC). Token tracking, cost estimation, HTML reports.
-- [ ] **P5 — AI Transaction Log:** Wire up `ai_decisions` table. Decisions/rationale per build.
-- [ ] **P5 — Project Maturity Scorecard:** Measure against standards (tests, docs, health, CLAUDE.md, git).
-- [ ] **P5 — Health KPIs:** Compliance, uptime, self-test, spec-drift in one view.
-- [ ] **P6 — Specification management:** `has_specs` detection, spec editor UI.
+- [ ] **P5 — Usage analytics:** `usage_analyzer.py` (454 LOC). Token tracking, cost estimation, HTML reports.
+- [ ] **P5 — AI Transaction Log UI:** `ai_decisions` table exists in DATABASE.md; no screen renders it outside of ticket detail.
+- [ ] **P5 — Health KPIs dashboard:** Compliance, uptime, self-test, spec-drift aggregated in one view. Partially covered by SCREEN-PROJECTS-VALIDATION.md.
 - [ ] **P6 — Spec-to-code traceability:** Specs → commits → tickets linked.
-- [ ] **P6 — Common technology rules:** Shared rules across projects.
-- [ ] **P6 — Compliance validation:** Guardrails and KPI checks.
 - [ ] **P7 — Consistent doc branding:** Standard structure across all projects.
-- [ ] **P7 — Diagram export:** Port `bin/export_diagrams.py`. Excalidraw → PNG.
 - [ ] **P9 — Smart git commits:** Descriptive labels, auto-commit integration.
 - [ ] **P9 — Secrets management:** Detect/protect .env files, warn on commit.
-- [ ] **P9 — Project templates/scaffolding:** Jinja2 templates for new projects.
-- [ ] **P0 — Published API docs:** Auto-generate API reference at `/api/docs`. Spec: "Published Service API".
 
 ---
 
 ## Closed
-<!-- Gaps that have been fully specified. Check the box above and note the date here. -->
 
+| Gap | Resolved in | Date |
+|-----|-------------|------|
+| P0 Service Catalog API | FEATURE-SERVICE-CATALOG.md | 2026-03-23 |
+| P0 Script Endpoint API | FEATURE-SERVICE-CATALOG.md | 2026-03-23 |
+| P0 Project Health API | FEATURE-HEALTHCHECK.md | 2026-03-23 |
+| P2 Heartbeat Polling | FEATURE-HEALTHCHECK.md | 2026-03-23 |
+| P3 Schedule Fire | SCREEN-DASHBOARDS-SCHEDULER.md | 2026-03-25 |
+| P3 Missed-Run Recovery | FUNCTIONALITY.md Flow 7 | 2026-03-20 |
+| P1 Tag management screen | SCREEN-SETTINGS-TAG.md | 2026-03-25 |
+| P1 Settings screen | SCREEN-SETTINGS-GENERAL.md | 2026-03-26 |
+| P5 Project Maturity Scorecard | SCREEN-PROJECTS-VALIDATION.md (conformity levels) | 2026-03-25 |
+| P6 Specification management | SCREEN-PROTOTYPES.md + SCREEN-PROJECTS-WORKFLOW.md | 2026-03-24 |

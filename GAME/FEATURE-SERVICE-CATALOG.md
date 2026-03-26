@@ -269,6 +269,6 @@ Screen route added by SCREEN-CATALOG: `GET /catalog`.
 
 ## Open Questions
 
-- Should `GET /api/catalog` support `?project={name}` to filter to a single project?
-- Should the 409 conflict guard be the default, with an opt-in `?force=true` override?
-- Should log fetching support chunked streaming (SSE or chunked transfer) for very large logs?
+- Should `GET /api/catalog` support `?project={name}` filtering? Yes — add optional `?name={name}` param returning a single-project response. Low cost, high convenience for callers who only need one project.
+- Should the 409 guard be the default? Yes — 409 is always enforced. Add `?force=true` query param to bypass for scripts that support concurrent runs. The `# Singleton: true` header (not yet implemented) is the proper per-script opt-out.
+- Should log fetching support chunked streaming? Not in V1. Full log via JSON is sufficient. Add SSE streaming as a P3 enhancement when logs exceed ~100KB regularly.

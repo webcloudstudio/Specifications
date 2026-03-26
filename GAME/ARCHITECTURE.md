@@ -57,6 +57,24 @@ Builds static portfolio site from METADATA.md fields.
 4. Write static site to output directory
 5. Optionally push to GitHub Pages
 
+### Health Monitor (`monitoring.py`)
+
+Periodic service health poller and log event ingestor. Runs as two background threads started at app startup.
+
+**Poller thread:** Checks each project with a port or `health_check_type`. Performs HTTP GET or TCP connect; writes `heartbeats` and `health_check_log`; appends `events` on state change. Per-project interval from `health_check_interval` column (default 60s).
+
+**Log ingestor thread:** Runs every 60 seconds. Incrementally reads new bytes from `{project.path}/data/logs/*.log` using cursor positions in `log_positions`. Classifies lines against `log_filter` rules; writes matched lines to `events`. `junk` lines are discarded.
+
+Provides: `start_poller()`, `stop_poller()`, `poll_now()`, `ingest_now()`.
+
+### Scheduler (`scheduler.py`)
+
+Background cron loop. Started at app startup. Runs every 60 seconds.
+
+Queries `operations` where `schedule IS NOT NULL AND schedule_enabled = 1`. Evaluates each cron expression against current time using a standard cron parser. On match, delegates to the process engine (`ops.py`) to launch the operation. Tracks `last_scheduled_run` and calculates `next_scheduled_run`. On startup, checks for missed runs and fires one catch-up per operation.
+
+Provides: `start_scheduler()`, `stop_scheduler()`, `tick()`.
+
 ## Routes (HTMX)
 
 All screen interactions use HTMX for partial page updates. Server returns HTML fragments, not JSON.
@@ -78,6 +96,33 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | GET | `/monitoring` | Monitoring page | Nav link |
 | GET | `/workflow` | Workflow board | Nav link |
 | GET | `/health` | `{"status":"ok"}` | Health check |
+| GET | `/scheduler` | Scheduler page | Nav link |
+| GET | `/servicecatalog` | Service Catalog page | Nav link |
+| GET | `/prototypes` | Prototype list | Nav link |
+| POST | `/api/prototypes/create` | JSON | New prototype scaffold |
+| GET | `/api/prototypes` | JSON | List prototype dirs |
+| GET | `/welcome` | Welcome page | Nav link (default `/`) |
+| GET | `/project-setup` | Project Setup page | Nav link |
+| GET | `/project-validation` | Validation page | Nav link |
+| GET | `/project-maintenance` | Maintenance page | Nav link |
+| GET | `/project-workflow` | Workflow screen | Nav link |
+| POST | `/api/spec-tickets` | JSON | Create spec ticket + write file |
+| POST | `/api/validate/{project_id}` | HTMX row fragment | Run validation checks |
+| GET | `/settings/general` | Settings page | Settings dropdown |
+| POST | `/settings/general` | HTMX form fragment | Save settings |
+| GET | `/settings/tags` | Tag settings page | Settings dropdown |
+| POST | `/settings/tags` | JSON | Save tag colors |
+| GET | `/api/catalog` | JSON | Service catalog (all projects + scripts) |
+| POST | `/api/{name}/run/{script}` | JSON 202 | Fire script headlessly |
+| GET | `/api/runs/{run_id}` | JSON | Poll run status |
+| GET | `/api/runs/{run_id}/log` | JSON | Fetch run log |
+| POST | `/api/runs/{run_id}/stop` | JSON | Stop run |
+| POST | `/api/heartbeat` | JSON 200 | Record script heartbeat |
+| POST | `/api/events` | JSON 200 | Record script event |
+| POST | `/api/health/poll` | JSON | Trigger immediate health poll |
+| GET | `/api/health/{name}` | JSON | Current health for one project |
+| POST | `/api/logs/ingest` | JSON | Trigger immediate log ingest |
+| GET | `/api/github/repos` | JSON | Fetch GitHub repo list |
 
 ## Directory Layout
 
@@ -89,6 +134,8 @@ GAME/
   ops.py                 Operation launch/stop/status
   spawn.py               Subprocess management
   publisher.py           Portfolio builder
+  monitoring.py          Health poller + log ingestor (background threads)
+  scheduler.py           Cron loop for scheduled operations
   models.py              PROJECT_TYPES registry
   db.py                  Database access helpers
   claude_convention.py   CLAUDE.md / AGENTS.md parsing
@@ -132,4 +179,4 @@ Environment variables loaded from `.env` at startup (via `python-dotenv`). A `.e
 
 ## Open Questions
 
-- Should routes.py be split into per-screen blueprint modules as the app grows?
+- Should routes.py be split into per-screen blueprint modules as the app grows? Not at PROTOTYPE — single routes.py until the file exceeds ~800 lines or team size demands it. Per-screen blueprints add indirection without benefit at current scale.

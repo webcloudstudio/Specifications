@@ -97,6 +97,6 @@ Workflow types are managed via Settings (future: Settings / Workflow Types scree
 
 ## Open Questions
 
-- Should the Body textarea render a live markdown preview pane?
-- Should submitting a ticket also trigger a git commit in the Specifications repo?
-- Should the pending badge link directly open the spec directory in the file manager, or navigate to the Prototypes screen filtered to that project?
+- Should the Body textarea render a live markdown preview pane? Yes — split-pane preview is useful given that body content is markdown. Implement as a toggle (Edit / Preview) rather than always-split to keep the modal compact.
+- Should submitting a ticket also trigger a git commit in the Specifications repo? Yes — auto-commit with message `Add {PREFIX}-{NNN}-{slug}.md for {project_name}` immediately after the file is written. No-op if the Specifications repo has no `.git/` or git is unavailable.
+- Should the pending badge click navigate to the Prototypes screen filtered to that project? Yes — navigate to `/prototypes?filter={project.name}` so the user sees all spec files for that project in context.

@@ -200,3 +200,8 @@ System font stack (no web fonts). Monospace for logs and code output.
 ## Responsive Behavior
 
 Designed for desktop use (operations center). Minimum supported width: 1024px. Nav bar scrolls horizontally on smaller screens. No mobile-first breakpoints.
+
+## Open Questions
+
+- Should the nav bar's top-level tabs be configurable (show/hide per user preference)? Not in V1 — all tabs are always visible. A future settings option could hide infrequently-used tabs.
+- Should running badges in the nav bar auto-dismiss after a configurable timeout? Yes — badges clear when the process exits (already the design). No timeout behavior needed.

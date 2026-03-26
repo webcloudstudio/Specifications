@@ -110,7 +110,7 @@ Shown centered, muted text, inside the list area.
 
 ## Open Questions
 
-- Should clicking a row open a detail view (parsed spec files rendered as HTML) or just link to the raw Specifications directory?
-- Should this screen also show prototypes that are missing `METADATA.md` (as "unconfigured")?
-- Should status badges on this screen be clickable to cycle status (like Dashboard) or read-only?
-- Should `SPECIFICATIONS_PATH` default to a sibling directory (`../Specifications`) when not set?
+- Should clicking a row open a detail view (parsed spec files rendered as HTML) or just link to the raw Specifications directory? A future SCREEN-PROTOTYPES-DETAIL.md will define a rendered detail view. Until it exists, clicking a row shows the spec file list as a plain index.
+- Should this screen also show prototypes that are missing `METADATA.md` (as "unconfigured")? Yes — show them with a dim "unconfigured" badge so the user can investigate. A missing METADATA.md is a setup issue, not a reason to hide the entry.
+- Should status badges on this screen be clickable to cycle status? Read-only here — status changes go through SCREEN-DRILLDOWN-PROJECT or the Dashboard.
+- Should `SPECIFICATIONS_PATH` default to a sibling directory? Yes — default to `../Specifications` relative to `PROJECTS_DIR` when `SPECIFICATIONS_PATH` is not explicitly set in `.env`.
