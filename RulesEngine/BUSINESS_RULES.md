@@ -169,6 +169,28 @@ addopts = -v
 
 `bin/test.sh` activates the venv and runs `python -m pytest tests/ -v`. Tests must pass before any commit. A failing test suite is treated as a broken build.
 
+### SCRIPTS_ENV_LOAD_ORDER
+**Scope:** scripts
+**Applies at:** PROTOTYPE
+**Requirement:** `.env` must be loaded before any variable that depends on its contents is derived.
+**Rationale:** Shell variables set with `${VAR:-default}` evaluate at assignment time. If `.env` is sourced after the assignment, the env file value is silently ignored and the hardcoded default wins. This is a common ordering bug with no error message.
+**Rule text:**
+Load `.env` (and `.secrets`) **before** deriving any variables from env vars. Never write:
+
+```bash
+PORT="${APP_PORT:-5001}"   # BUG: APP_PORT not loaded yet
+source .env                # too late
+```
+
+Write instead:
+
+```bash
+source .env                # load first
+PORT="${APP_PORT:-5001}"   # now APP_PORT is available
+```
+
+The canonical `common.sh` template follows this order: METADATA.md fields → venv → `.secrets` → `.env` → derived vars. Do not change that order.
+
 ### SCRIPTS_BASH_PATTERN
 **Scope:** scripts
 **Applies at:** PROTOTYPE
