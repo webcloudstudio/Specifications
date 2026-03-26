@@ -317,19 +317,45 @@ Configurable spec ticket type definitions. Seeded once on first startup; rows ar
 
 ### spec_tickets
 
-Log of spec ticket files created via the Projects / Workflow screen. One row per file written to disk.
+Unified ticket store shared by the Projects / Workflow screen (file creation) and the Dashboards / Workflow Kanban (lifecycle tracking). One row per ticket regardless of whether a spec file has been generated yet.
+
+Supersedes the `tickets` table — see note below.
 
 | Column | Type | Default | Description |
 |--------|------|---------|-------------|
 | id | INTEGER PK | auto | Auto-increment |
 | project_id | INTEGER FK | — | References projects.id |
-| workflow_type_id | INTEGER FK | — | References workflow_types.id |
-| filename | TEXT | — | Created file basename (e.g. `PATCH-003-fix-nav.md`) |
+| workflow_type_id | INTEGER FK | NULL | References workflow_types.id; NULL for tickets not tied to a type |
+| filename | TEXT | NULL | Created file basename (e.g. `PATCH-003-fix-nav.md`); NULL until file is written |
 | title | TEXT | — | User-entered title (also used in filename slug) |
-| body | TEXT | NULL | User-entered body text written into the file |
-| status | TEXT | `pending` | `pending` / `applied` / `rejected` — updated when the file is deleted or the iterate run processes it |
+| body | TEXT | NULL | User-entered body / description |
+| file_status | TEXT | `pending` | File-processing state: `pending` / `applied` / `rejected`; only meaningful when `filename` is set |
+| kanban_state | TEXT | `idea` | Kanban lifecycle: `idea` / `proposed` / `ready` / `in_development` / `testing` / `done` |
+| priority | TEXT | `medium` | `low` / `medium` / `high` / `critical` |
+| tags | TEXT | NULL | Comma-separated tag string |
+| sort_order | INTEGER | 0 | Column position within `kanban_state` |
 | created_at | TEXT | datetime('now') | |
 | updated_at | TEXT | datetime('now') | |
+
+> **`tickets` table is superseded.** New code reads and writes `spec_tickets`. The `tickets` table is retained for backwards compatibility until migrated.
+
+### settings
+
+Key-value store for application-level configuration. Seeded on first startup. Rows are never deleted — only updated.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| key | TEXT PK | — | Setting identifier |
+| value | TEXT | NULL | Current value |
+| description | TEXT | NULL | Human-readable label shown in Settings UI |
+| updated_at | TEXT | datetime('now') | |
+
+**Seed data:**
+
+| key | value | description |
+|-----|-------|-------------|
+| `app_name` | `Command Center` | Name displayed in the upper-left corner of the application |
+| `homepage_url` | `` | Live homepage URL (shown on the Homepage screen) |
 
 ---
 
