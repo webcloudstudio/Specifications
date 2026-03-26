@@ -95,6 +95,7 @@ Specifications/
 | `UI.md` | Shared UI patterns across screens | If has UI |
 | `SCREEN-{Name}.md` | Per-screen: route, layout, interactions | If has UI |
 | `FEATURE-{Name}.md` | Per-feature: trigger, sequence, reads, writes | As needed |
+| `HOMEPAGE.md` | Portfolio homepage: branding, contact, bio, diagram links | If publishes a portfolio |
 
 specification files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README and METADATA do not.
 
