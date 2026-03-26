@@ -105,9 +105,30 @@ GAME/
     build_documentation.sh  Generate docs/ and docs/index.html
   data/
     game.db        SQLite database
+    tag_colors.json  Tag color assignments
   docs/                  Generated documentation
   logs/                  Operation log files
+  .env                   Local environment config (gitignored)
+  .env.sample            Environment variable reference template
 ```
+
+## Configuration
+
+Environment variables loaded from `.env` at startup (via `python-dotenv`). A `.env.sample` at the project root documents all supported variables.
+
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `FLASK_ENV` | No | `development` | Flask environment; `production` disables debug mode |
+| `FLASK_DEBUG` | No | `1` | Enable Flask auto-reloader and debugger |
+| `SECRET_KEY` | Yes | — | Flask session signing key |
+| `PROJECTS_DIR` | Yes | — | Absolute path to the directory containing managed projects |
+| `SPECIFICATIONS_PATH` | No | — | Absolute path to the Specifications repo (enables `has_specs` detection and Conform) |
+| `GITHUB_USERNAME` | No | — | GitHub username for Project Setup screen repo discovery |
+| `GITHUB_TOKEN` | No | — | GitHub personal access token (required for private repos) |
+| `GAME_PORT` | No | `5000` | Port the GAME server listens on |
+| `DATABASE_PATH` | No | `data/game.db` | Path to SQLite database file |
+
+`.env.sample` ships in the repo as a reference template; `.env` is gitignored.
 
 ## Open Questions
 
