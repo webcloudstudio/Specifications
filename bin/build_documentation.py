@@ -40,6 +40,7 @@ SCRIPT_DESCRIPTIONS = {
     'oneshot.sh':              'Validate Specifications, detect mode, generate AI build prompt (bootstrap or feature branch)',
     'iterate.sh':              'Generate an iteration prompt from pending CHANGE tickets and new specification files — validates each item before implementation',
     'tran_logger.sh':              'Read the session transaction log, extract bugs and ideas, write to IDEAS.md and ACCEPTANCE_CRITERIA.md',
+    'spec_iterate.sh':             'AI-powered spec gap analysis — updates REFERENCE_GAPS.md, writes SPEC_SCORECARD.md (7-dimension quality rating) and SPEC_ITERATION.md (focused prompt targeting 1–2 highest-priority gaps)',
     'summarize_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
     'build_documentation.py':  'Build this documentation page (doc/index.html)',
@@ -305,6 +306,7 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Step 5 — Iterate</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="tran_logger.sh" onclick="showScript(\'tran_logger.sh\')">tran_logger.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="spec_iterate.sh" onclick="showScript(\'spec_iterate.sh\')">spec_iterate.sh</a>\n'
     step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', 6)">Step 6 — Promote</a>\n'
     step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
