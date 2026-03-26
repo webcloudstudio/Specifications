@@ -89,15 +89,14 @@ Specifications/
 | Prefix | Purpose | Required |
 |--------|---------|----------|
 | `METADATA.md` | Project identity (name, display_name, short_description, status) | Yes |
-| `README.md` | One-line project description | Yes |
-| `INTENT.md` | Why the project exists, who it's for | Yes |
+| `README.md` | One-line description + `## Intent` section (why it exists, who it's for) | Yes |
 | `ARCHITECTURE.md` | Modules, routes, directory layout | Yes |
 | `DATABASE.md` | Tables, columns, types (schema only) | If has DB |
 | `UI.md` | Shared UI patterns across screens | If has UI |
 | `SCREEN-{Name}.md` | Per-screen: route, layout, interactions | If has UI |
 | `FEATURE-{Name}.md` | Per-feature: trigger, sequence, reads, writes | As needed |
 
-specification files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README, METADATA, and INTENT do not.
+specification files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README and METADATA do not.
 
 ## Dev Commands
 

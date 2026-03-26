@@ -104,8 +104,7 @@ These rules are global — they apply to all projects regardless of stack. Stack
 | Prefix | Contains | Example |
 |--------|----------|---------|
 | `METADATA.md` | Project identity fields | Always present |
-| `README.md` | One-line project description | Always present |
-| `INTENT.md` | Why the project exists | Always present |
+| `README.md` | One-line description + intent section | Always present |
 | `DATABASE.md` | Tables and columns | If project has a database |
 | `UI.md` | Shared visual patterns | If project has a UI |
 | `ARCHITECTURE.md` | Code organization | Always present |
@@ -150,7 +149,7 @@ Rejected tickets gain a `## Rejection Reason` section. Applied tickets are kept 
 
 ## Open Questions Section
 
-Spec files end with `## Open Questions` — except README.md, METADATA.md, and INTENT.md which do not have this section.
+Spec files end with `## Open Questions` — except README.md and METADATA.md which do not have this section.
 
 ```markdown
 ## Open Questions

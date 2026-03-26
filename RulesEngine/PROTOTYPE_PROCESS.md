@@ -68,7 +68,6 @@ Numbered files are iterate work items. File presence = pending. File deletion = 
 | `FEATURE-NNN-*.md` | Feature spec | author | New or revised feature |
 | `PATCH-NNN-*.md` | Mutation | author / `tran_logger.sh` | Bug fix, behavioral correction, refactor |
 | `AC-NNN-*.md` | Acceptance criteria | author / `tran_logger.sh` | Testable MUST/MUST NOT batch |
-| `INTENT-NNN-*.md` | Intent update | author | Clarification or scope change |
 
 **Rules for numbered files:**
 - 3-digit zero-padded number — ordering is preserved by `sort`
@@ -105,7 +104,6 @@ Numbered files are iterate work items. File presence = pending. File deletion = 
 | `AC-NNN[-tl]-*.md` | `Specifications/<PROJECT>/` | author / `tran_logger.sh` | Acceptance criteria ticket (pending until deleted after apply) |
 | `SCREEN-NNN-*.md` | `Specifications/<PROJECT>/` | author | New screen ticket (pending until deleted after apply) |
 | `FEATURE-NNN-*.md` | `Specifications/<PROJECT>/` | author | New feature ticket (pending until deleted after apply) |
-| `INTENT-NNN-*.md` | `Specifications/<PROJECT>/` | author | Intent update ticket (pending until deleted after apply) |
 | `oneshot-prompt.md` | `Specifications/<PROJECT>/` | author redirect (`>`) | Saved build prompt — optional, for reference |
 | `iterate-prompt.md` | `Specifications/<PROJECT>/` | author redirect (`>`) | Saved iteration prompt — optional, for reference |
 | `SCORECARD.md` | `Prototype <PROJECT>/docs/` | LLM (during apply) | KPI table + per-item PASS/FAIL/PARTIAL results |
