@@ -4,7 +4,7 @@
 **Type:** abstract — base layout, not a routed screen
 **Description:** Reusable project list layout. Named views extend this by declaring `Extends: SCREEN-DEFAULT` and specifying their middle columns.
 
-**Inherited by:** SCREEN-PROJECTS-OVERVIEW, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION
+**Inherited by:** SCREEN-PROJECTS-OVERVIEW, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION, SCREEN-PROJECTS-MAINTENANCE
 
 A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
 
@@ -59,7 +59,7 @@ State cycles on click, encoded as URL query param `?filter=`:
 | `Actions` | Actions | `operations` (category != maintenance) | Operation buttons per UI-GENERAL |
 | `Links` | Links | `projects.extra.links` | Link buttons; fallback to server link if port set |
 | `Claude` | CLAUDE.md | `projects.has_claude` | Opens AGENTS.md content in modal |
-| `Help` | Help | `projects.has_docs` + `extra.doc_path` | Green Documentation button → proxy route → new tab |
+| `Help` | Help | `projects.has_docs` + `extra.doc_path` | Green Documentation button → proxy route → new tab; `has_docs` is true when any of `doc/index.htm`, `doc/index.html`, `docs/index.htm`, `docs/index.html` exists (glob: `doc*/index.htm*`) |
 | `Maintenance` | Maintenance | `operations` (category = maintenance) | Operation buttons |
 | `LastUpdate` | Updated | `projects.version` | Date portion only; strips `.N` suffix |
 | `Configuration` | Configuration | `projects.port`, `card_show`, `tags` | Inline-editable fields per SCREEN-CONFIGURATION |
