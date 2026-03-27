@@ -11,9 +11,9 @@ Global agent behavior contracts, spec templates, and technology stack patterns �
 | `BUSINESS_RULES.md` | Engineering Rules Framework — edit here, then run the workflow |
 | `ONESHOT_BUILD_RULES.md` | Build and expansion rules: concise spec → implementation-ready spec |
 | `DOCUMENTATION_BRANDING.md` | Color palette, typography, and theme standards |
-| `stack/` (14 files) | Prescriptive technology patterns (Flask, SQLite, Bootstrap5, …) |
-| `spec_template/` (8 files) | New-project scaffolding used by `bin/setup.sh` |
-| `templates/` (3 files) | Canonical `common.sh`, `common.py`, `index.html` propagated to all projects |
+| `stack/` | Prescriptive technology patterns (Flask, SQLite, Bootstrap5, …) |
+| `spec_template/`  | New-project scaffolding used by `bin/setup.sh` |
+| `templates/` | Canonical `common.sh`, `common.py`, `index.html` propagated to all code projects |
 
 ## Update Cycle
 
