@@ -50,7 +50,7 @@ body {
 .cover {
   border-bottom: 2px solid var(--accent);
   padding-bottom: 32px;
-  margin-bottom: 48px;
+  margin-bottom: 56px;
 }
 .cover-eyebrow {
   font-size: 11px;
@@ -71,6 +71,7 @@ body {
   font-size: 16px;
   color: var(--muted);
   margin-bottom: 24px;
+  max-width: 600px;
 }
 .cover-meta {
   font-size: 12px;
@@ -79,22 +80,18 @@ body {
   gap: 24px;
 }
 
-/* ── Overview diagram ── */
-.overview-diagram {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 24px;
-  margin: 32px 0 48px;
-  text-align: center;
+/* ── Intro ── */
+.intro {
+  margin-bottom: 56px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
 }
-.overview-diagram img { max-width: 100%; border-radius: 4px; }
-.overview-caption {
-  font-size: 11px;
+.intro p {
   color: var(--muted);
-  margin-top: 10px;
-  font-style: italic;
+  font-size: 15px;
+  max-width: 700px;
 }
+.intro p + p { margin-top: 14px; }
 
 /* ── Workflow sections ── */
 .workflow {
@@ -112,12 +109,14 @@ body {
   font-size: 24px;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 6px;
+  margin-bottom: 14px;
 }
 .workflow-desc {
-  font-size: 14px;
-  color: var(--muted);
-  margin-bottom: 20px;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 24px;
+  max-width: 700px;
+  line-height: 1.75;
 }
 
 /* ── Mermaid diagram container ── */
@@ -192,25 +191,27 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
 <div class="cover">
   <div class="cover-eyebrow">Engineering Methodology</div>
   <h1>Specification Driven Design</h1>
-  <div class="cover-sub">Structured specification files as canonical truth — AI agents execute, iterate, and ship.</div>
+  <div class="cover-sub">A repeatable process for building software with AI agents — where the spec files are the product and the code is what the agent produces.</div>
   <div class="cover-meta">
-    <span>Ed Barlo</span>
+    <span>Ed Barlow</span>
     <span>Web Cloud Studio</span>
     <span>2026</span>
   </div>
 </div>
 
-<!-- OVERVIEW -->
-<div class="overview-diagram">
-  <img src="sdd-diagram.png" alt="SDD Process Loop">
-  <div class="overview-caption">The SDD loop — SPECIFICATIONS → STACK → PROTOTYPE → PROJECTS, connected by script handshakes.</div>
+<!-- INTRO -->
+<div class="intro">
+  <p>Specification Driven Design (SDD) is a development process built around one rule: you never edit generated code directly. Every change — a new screen, a bug fix, a data model change — starts as a markdown file in a specification directory. An AI agent reads those files and builds or updates the prototype. The spec is what you maintain; the code is what the agent produces from it.</p>
+  <p>This matters because AI agents are good at executing clear instructions and bad at holding context across sessions. SDD gives the agent everything it needs in a single, structured prompt — and gives you a process that works the same way every time, whether you're starting a new project or shipping a change to an existing one.</p>
 </div>
 
 <!-- 1. PROTOTYPE BUILD -->
 <div class="workflow">
   <div class="workflow-num">Workflow 1</div>
   <h2>Prototype Build</h2>
-  <p class="workflow-desc">Scaffold a specification directory, validate it, then generate a single build prompt the agent uses to produce a running prototype from scratch.</p>
+  <p class="workflow-desc">
+    You write markdown files describing what to build — screens, data models, API routes, acceptance criteria. <code>setup.sh</code> creates the directory structure from a template. <code>validate.sh</code> checks every required field and file exists before you waste an agent run on an incomplete spec. <code>oneshot.sh</code> then assembles your spec files, the technology stack patterns, and the agent behavior rules into a single prompt. You paste that into Claude Code and the agent builds a working prototype.
+  </p>
 
   <div class="diagram">
     <div class="mermaid">
@@ -237,15 +238,15 @@ flowchart LR
       <h4>Inputs</h4>
       <ul>
         <li>spec_template/ (scaffolding)</li>
-        <li>Specifications/ (authored files)</li>
+        <li>Specifications/ (your spec files)</li>
         <li>Stack/ (technology patterns)</li>
-        <li>Technology_Rules/ (CLAUDE_RULES.md)</li>
+        <li>Technology_Rules/ (agent rules)</li>
       </ul>
     </div>
     <div class="io-col">
       <h4>Outputs</h4>
       <ul>
-        <li>Prototype/ (running codebase)</li>
+        <li>Prototype/ (working codebase)</li>
         <li>SCORECARD.md</li>
         <li>git tag oneshot/{name}/{date}</li>
       </ul>
@@ -259,7 +260,9 @@ flowchart LR
 <div class="workflow">
   <div class="workflow-num">Workflow 2</div>
   <h2>Change Iteration</h2>
-  <p class="workflow-desc">Express each change as a file. The agent applies it against the prototype, scores the result, and merges to the project branch when ready.</p>
+  <p class="workflow-desc">
+    Once the prototype exists, changes don't go directly to the code. You write a <code>CHANGES.md</code> file describing what needs to change and why. <code>iterate.sh</code> packages that file with the current prototype state and scorecard into a prompt, and the agent applies the change. When it's validated, <code>merge.sh</code> squash-merges the feature branch into the project — one commit per change, clean history. The old prototype state and scorecard become inputs to the next iteration.
+  </p>
 
   <div class="diagram">
     <div class="mermaid">
@@ -280,14 +283,14 @@ flowchart LR
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, the ticket-as-file pattern with presence-equals-pending was simpler than any database-backed ticket system and worked naturally with git history and code review tooling.</p>
+    <p>Lorem ipsum dolor sit amet, the change-as-file pattern with presence-equals-pending was simpler than any ticket system and worked naturally with git history — rejected changes stay in the file with a rejection reason appended.</p>
   </div>
 
   <div class="io-cols">
     <div class="io-col">
       <h4>Inputs</h4>
       <ul>
-        <li>CHANGES.md (ticket)</li>
+        <li>CHANGES.md</li>
         <li>Prototype/ (current state)</li>
         <li>SCORECARD.md</li>
       </ul>
@@ -309,7 +312,9 @@ flowchart LR
 <div class="workflow">
   <div class="workflow-num">Workflow 3</div>
   <h2>Rules Propagation</h2>
-  <p class="workflow-desc">Author behavioral contracts once; distribute them automatically to every project and verify compliance.</p>
+  <p class="workflow-desc">
+    Every project built with SDD shares the same agent behavior rules — how to structure code, what conventions to follow, what to never do. Those rules live in one file (<code>BUSINESS_RULES.md</code>) in the Specifications repository. <code>summarize_rules.sh</code> generates a concise version that gets injected into every project's <code>AGENTS.md</code> automatically. <code>ProjectUpdate.sh</code> pushes the update out. <code>ProjectValidate.sh</code> checks each project is compliant and writes a KPI report. You change the rules once; every project gets them.
+  </p>
 
   <div class="diagram">
     <div class="mermaid">
@@ -329,14 +334,14 @@ flowchart LR
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, separating the rationale document from the injected contract kept CLAUDE_RULES.md concise enough that agents actually followed it, rather than pattern-matching on length.</p>
+    <p>Lorem ipsum dolor sit amet, keeping the rationale in BUSINESS_RULES.md and generating the short CLAUDE_RULES.md from it meant agents received a concise contract they actually followed, not a wall of text they pattern-matched around.</p>
   </div>
 
   <div class="io-cols">
     <div class="io-col">
       <h4>Inputs</h4>
       <ul>
-        <li>BUSINESS_RULES.md (source of truth)</li>
+        <li>BUSINESS_RULES.md</li>
         <li>templates/ (common.sh, common.py)</li>
         <li>stack/ (technology patterns)</li>
       </ul>
@@ -358,7 +363,9 @@ flowchart LR
 <div class="workflow">
   <div class="workflow-num">Workflow 4</div>
   <h2>Specification Review</h2>
-  <p class="workflow-desc">Run the AI against the specification itself — before writing tickets — to surface gaps, score quality, and draft the next specification files.</p>
+  <p class="workflow-desc">
+    Before writing more change files, you run <code>spec_iterate.sh</code>. It feeds your entire spec directory to an AI that reads it the same way the build agent will — and tells you what's missing. The output is a scored gap report (P0 critical to P4 nice-to-have), a quality scorecard across seven dimensions, and a draft of the next spec files you should write. This catches gaps before the agent builds them wrong, not after.
+  </p>
 
   <div class="diagram">
     <div class="mermaid">
@@ -376,7 +383,7 @@ flowchart LR
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, letting the AI score its own input specification revealed blind spots that a human reviewer would consistently miss, particularly around error states and edge conditions.</p>
+    <p>Lorem ipsum dolor sit amet, asking the AI to review the spec before the build revealed blind spots a human reviewer would miss consistently — missing error states, unspecified edge cases, ambiguous field names.</p>
   </div>
 
   <div class="io-cols">
@@ -391,7 +398,7 @@ flowchart LR
       <h4>Outputs</h4>
       <ul>
         <li>REFERENCE_GAPS.md (P0–P4 gaps)</li>
-        <li>SPEC_SCORECARD.md (7-dimension rating)</li>
+        <li>SPEC_SCORECARD.md (quality rating)</li>
         <li>SPEC_ITERATION.md (next prompt)</li>
       </ul>
     </div>
@@ -404,7 +411,9 @@ flowchart LR
 <div class="workflow">
   <div class="workflow-num">Workflow 5</div>
   <h2>Session Capture</h2>
-  <p class="workflow-desc">Convert informal Claude Code session activity into formal specification ticket files automatically, closing the loop between exploration and the spec history.</p>
+  <p class="workflow-desc">
+    Developers make informal changes — test something in a session, fix a bug interactively, try an idea. Without a process, those changes exist in the code but not in the spec. <code>tran_logger.sh</code> reads Claude Code session logs and converts the changes made during a session into formal ticket files, written back into the spec directory. Nothing that happened in a session goes unrecorded.
+  </p>
 
   <div class="diagram">
     <div class="mermaid">
@@ -418,7 +427,7 @@ flowchart LR
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, formalizing interactive session changes into tickets retroactively kept the specification honest; changes made outside the ticket workflow were no longer invisible.</p>
+    <p>Lorem ipsum dolor sit amet, formalizing session changes into tickets retroactively kept the spec honest — changes made outside the ticket workflow were no longer invisible or lost between sessions.</p>
   </div>
 
   <div class="io-cols">
