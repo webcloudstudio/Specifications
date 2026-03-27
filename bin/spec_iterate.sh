@@ -144,6 +144,9 @@ Write all output files using your Write tool.
 Read all spec files in \`$SPEC_DIR\`. Compare the specification against the Business Rules
 and against the project's own stated scope.
 
+**Do not read or use as input:** \`SPEC_SCORECARD.md\`, \`SPEC_ITERATION.md\`, \`DEPLOY_LOG.md\`.
+These are outputs of this process, not specification inputs.
+
 Rules for updating REFERENCE_GAPS.md:
 - Mark any gap with \`- [x]\` if it is now specified (has a corresponding spec file or section)
 - Mark any gap with \`- [ ]\` if it remains unspecified
