@@ -4,26 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Specification Driven Design — White Paper</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  flowchart: { curve: 'linear', nodeSpacing: 40, rankSpacing: 35, padding: 16 },
+  themeVariables: {
+    darkMode: true, background: '#0f1117',
+    lineColor: '#4a7fa0', edgeLabelBackground: '#0f1117', fontSize: '14px'
+  }
+});
+</script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #0f1117;
-  --surface:   #1a1d27;
-  --border:    #2a2e3d;
-  --accent:    #2cb67d;
-  --amber:     #d4a017;
-  --text:      #e2e8f0;
-  --muted:     #94a3b8;
-  --teal:      #0d5c4a;
-  --blue:      #1a3a6b;
-  --purple:    #3b1a6b;
-  --learn-bg:  #1c1508;
+  --bg:           #0f1117;
+  --surface:      #1a1d27;
+  --border:       #2a2e3d;
+  --accent:       #2cb67d;
+  --amber:        #d4a017;
+  --text:         #e2e8f0;
+  --muted:        #94a3b8;
+  --learn-bg:     #1c1508;
   --learn-border: #d4a017;
-  --learn-text: #f0d080;
-  --font-body: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
-  --font-mono: 'Cascadia Code', Consolas, 'Courier New', monospace;
-  --font-learn:'Georgia', 'Times New Roman', serif;
+  --learn-text:   #f0d080;
+  --font-body:    'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
+  --font-mono:    'Cascadia Code', Consolas, 'Courier New', monospace;
+  --font-learn:   'Georgia', 'Times New Roman', serif;
 }
 
 body {
@@ -59,7 +68,7 @@ body {
   margin-bottom: 10px;
 }
 .cover-sub {
-  font-size: 17px;
+  font-size: 16px;
   color: var(--muted);
   margin-bottom: 24px;
 }
@@ -69,104 +78,65 @@ body {
   display: flex;
   gap: 24px;
 }
-.cover-meta span { display: flex; align-items: center; gap: 5px; }
 
-/* ── Diagram container ── */
-.diagram-wrap {
+/* ── Overview diagram ── */
+.overview-diagram {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 20px;
-  margin: 32px 0;
+  padding: 24px;
+  margin: 32px 0 48px;
   text-align: center;
 }
-.diagram-wrap img {
-  max-width: 100%;
-  border-radius: 4px;
-}
-.diagram-caption {
+.overview-diagram img { max-width: 100%; border-radius: 4px; }
+.overview-caption {
   font-size: 11px;
   color: var(--muted);
   margin-top: 10px;
   font-style: italic;
 }
 
-/* ── Sections ── */
-.section {
-  margin-bottom: 56px;
+/* ── Workflow sections ── */
+.workflow {
+  margin-bottom: 64px;
 }
-.section-tag {
-  display: inline-block;
+.workflow-num {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding: 2px 8px;
-  border-radius: 3px;
-  margin-bottom: 8px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 6px;
 }
-.tag-spec    { background: var(--teal);   color: #a0d8c8; }
-.tag-stack   { background: var(--blue);   color: #90b4e0; }
-.tag-proto   { background: var(--purple); color: #c0a0e0; }
-.tag-script  { background: #3a2600;       color: #d4a017; }
-.tag-rules   { background: #3a0a0a;       color: #e08080; }
-.tag-system  { background: #1a1a2a;       color: var(--muted); }
-
-.section h2 {
-  font-size: 22px;
-  font-weight: 700;
+.workflow h2 {
+  font-size: 24px;
+  font-weight: 800;
   color: #fff;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
-.section-tagline {
+.workflow-desc {
   font-size: 14px;
   color: var(--muted);
   margin-bottom: 20px;
-  font-style: italic;
 }
 
-/* ── IO tables ── */
-.io-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.io-box {
+/* ── Mermaid diagram container ── */
+.diagram {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 14px 16px;
+  border-radius: 6px;
+  padding: 20px 16px 12px;
+  margin-bottom: 20px;
+  overflow-x: auto;
 }
-.io-box h4 {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-.io-box ul {
-  list-style: none;
-  padding: 0;
-}
-.io-box li {
-  font-size: 12px;
-  font-family: var(--font-mono);
-  color: var(--muted);
-  padding: 2px 0;
-  border-bottom: 1px solid var(--border);
-}
-.io-box li:last-child { border-bottom: none; }
-.io-box li::before { content: "·  "; color: var(--accent); }
 
 /* ── Learnings block ── */
 .learnings {
   background: var(--learn-bg);
   border-left: 3px solid var(--learn-border);
   border-radius: 0 4px 4px 0;
-  padding: 16px 20px;
-  margin-top: 18px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
 }
 .learnings-label {
   font-size: 10px;
@@ -174,39 +144,55 @@ body {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--amber);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .learnings p {
   font-family: var(--font-learn);
   font-size: 13px;
   font-style: italic;
   color: var(--learn-text);
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
-/* ── Section divider ── */
-hr.div { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
-
-/* ── Print ── */
-@media print {
-  body { background: #fff; color: #111; max-width: none; padding: 20mm; }
-  .cover h1 { color: #111; }
-  .section h2 { color: #111; }
-  .io-box { border: 1px solid #ccc; background: #f8f8f8; }
-  .learnings { background: #fffbe6; border-left: 3px solid #b8860b; }
-  .learnings p { color: #5a4a00; }
-  .diagram-wrap { background: #f0f0f0; }
+/* ── IO lists ── */
+.io-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
+.io-col h4 {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.io-col ul {
+  list-style: none;
+  padding: 0;
+}
+.io-col li {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.io-col li:last-child { border-bottom: none; }
+.io-col li::before { content: "· "; color: var(--accent); }
+
+/* ── Divider ── */
+hr.div { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
 </style>
 </head>
 <body>
 
-<!-- ── COVER ── -->
+<!-- COVER -->
 <div class="cover">
   <div class="cover-eyebrow">Engineering Methodology</div>
   <h1>Specification Driven Design</h1>
-  <div class="cover-sub">How structured specification files, a rules engine, and AI execution<br>
-  combine into a repeatable prototyping workflow.</div>
+  <div class="cover-sub">Structured specification files as canonical truth — AI agents execute, iterate, and ship.</div>
   <div class="cover-meta">
     <span>Ed Barlo</span>
     <span>Web Cloud Studio</span>
@@ -214,202 +200,30 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
   </div>
 </div>
 
-<!-- ── OVERVIEW ── -->
-<div class="section">
-  <span class="section-tag tag-system">Overview</span>
-  <h2>The SDD Loop</h2>
-  <p class="section-tagline">Specification files are the single source of truth; prototype code is a derived artifact.</p>
-
-  <p>In Specification Driven Design (SDD), every change originates in a specification directory — structured markdown files that define screens, data models, features, and acceptance criteria. An AI agent reads these files and builds or updates the prototype. No ad-hoc instructions, no manual editing of generated code. The specification is what you author; the code is what the agent produces.</p>
-
-  <div class="diagram-wrap">
-    <img src="sdd-diagram.png" alt="SDD Process Loop">
-    <div class="diagram-caption">Fig 1 — The SDD loop: clockwise from SPECIFICATIONS through script steps to PROTOTYPE and back.</div>
-  </div>
-
-  <p>The outer ring shows the main objects: <strong>SPECIFICATIONS</strong> (what to build), <strong>STACK</strong> (how to build it), <strong>PROTOTYPE</strong> (the running result), and <strong>PROJECTS</strong> (the promoted, standards-conformant system). The amber cards between them are the script handshakes that move work from one state to the next. The PRINCIPLES in the center — simplifying, change management, strict lint, expose endpoints, data first — are the engineering constraints that every script and specification must satisfy.</p>
-
-  <div class="learnings">
-    <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, specification drift compounds faster than expected; weekly scorecard reviews proved essential for keeping the build honest and the agent focused.</p>
-  </div>
+<!-- OVERVIEW -->
+<div class="overview-diagram">
+  <img src="sdd-diagram.png" alt="SDD Process Loop">
+  <div class="overview-caption">The SDD loop — SPECIFICATIONS → STACK → PROTOTYPE → PROJECTS, connected by script handshakes.</div>
 </div>
 
-<hr class="div">
+<!-- 1. PROTOTYPE BUILD -->
+<div class="workflow">
+  <div class="workflow-num">Workflow 1</div>
+  <h2>Prototype Build</h2>
+  <p class="workflow-desc">Scaffold a specification directory, validate it, then generate a single build prompt the agent uses to produce a running prototype from scratch.</p>
 
-<!-- ── SPECIFICATIONS ── -->
-<div class="section">
-  <span class="section-tag tag-spec">Object</span>
-  <h2>Specifications</h2>
-  <p class="section-tagline">Canonical markdown files that define the full intent of the prototype.</p>
-
-  <p>A specification directory contains one file per concern: screens, database schema, UI patterns, features, and acceptance criteria. Canonical files are permanent and authored by the human. Ticket files are numbered variants that represent a single pending change — their presence means pending; their deletion by the agent means done. Every canonical file ends with an <strong>## Open Questions</strong> section, which blocks tickets for that file from being applied until the question is resolved. This forces specification precision before execution.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>File Types</h4>
-      <ul>
-        <li>SCREEN-{Name}.md</li>
-        <li>DATABASE.md</li>
-        <li>UI.md</li>
-        <li>ARCHITECTURE.md</li>
-        <li>FEATURE-{Name}.md</li>
-        <li>METADATA.md</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Ticket Types</h4>
-      <ul>
-        <li>SCREEN-NNN-*.md</li>
-        <li>FEATURE-NNN-*.md</li>
-        <li>PATCH-NNN-*.md</li>
-        <li>AC-NNN-*.md</li>
-        <li>INTENT-NNN-*.md</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="learnings">
-    <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, the mandatory Open Questions section felt like friction at first; it eliminated an entire class of ambiguous builds that would have wasted agent time.</p>
-  </div>
-</div>
-
-<hr class="div">
-
-<!-- ── STACK ── -->
-<div class="section">
-  <span class="section-tag tag-stack">Object</span>
-  <h2>Stack</h2>
-  <p class="section-tagline">Prescriptive technology patterns that cap context and eliminate tech-decision churn.</p>
-
-  <p>The stack directory holds one file per technology — Flask, SQLite, Bootstrap5, security patterns, pipeline templates. These files are included verbatim in every build prompt. Their purpose is dual: they give the AI agent copy-paste implementation patterns, and they cap the token budget by making the answer to "how do I do X?" a file read rather than a freeform generation. Context minimization is an engineering discipline, not an afterthought.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
-      <ul>
-        <li>RulesEngine/stack/flask.md</li>
-        <li>RulesEngine/stack/sqlite.md</li>
-        <li>RulesEngine/stack/styles.md</li>
-        <li>RulesEngine/stack/security.md</li>
-        <li>RulesEngine/stack/pipelines.md</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Effect</h4>
-      <ul>
-        <li>Agent uses prescribed patterns</li>
-        <li>No tech-choice variance per build</li>
-        <li>Prompt token budget bounded</li>
-        <li>Stack decisions made once, reused everywhere</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="learnings">
-    <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, writing the stack files once and reusing them across prototypes cut per-build prompt size by roughly a third and removed inconsistent library choices.</p>
-  </div>
-</div>
-
-<hr class="div">
-
-<!-- ── SETUP.SH ── -->
-<div class="section">
-  <span class="section-tag tag-script">Script</span>
-  <h2>setup.sh</h2>
-  <p class="section-tagline">Scaffold a new specification directory from templates — one command, complete structure.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
-      <ul>
-        <li>RulesEngine/spec_template/ (8 files)</li>
-        <li>ProjectName argument</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Writes</h4>
-      <ul>
-        <li>Specifications/{Name}/ directory</li>
-        <li>METADATA.md (stubbed)</li>
-        <li>README.md, ARCHITECTURE.md</li>
-        <li>ACCEPTANCE_CRITERIA.md</li>
-        <li>IDEAS.md, DEPLOY_LOG.md</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="learnings">
-    <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, scaffolding enforced structure from the first commit; projects started with setup.sh had consistently better validate.sh pass rates on first run.</p>
-  </div>
-</div>
-
-<hr class="div">
-
-<!-- ── VALIDATE.SH → QUALITY ── -->
-<div class="section">
-  <span class="section-tag tag-script">Script — Quality Gate</span>
-  <h2>validate.sh</h2>
-  <p class="section-tagline">Verifies specification completeness before any build prompt is generated.</p>
-
-  <p>Quality in SDD is defined at the specification level, not the code level. <code>validate.sh</code> checks required files, METADATA fields, Open Questions sections, stack file existence, naming conventions, and template cleanup. Exit 0 means the specification is ready to build. Exit 1 means the human has more work to do. No agent is involved — this is a deterministic lint pass over structured files.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
-      <ul>
-        <li>Specifications/{Name}/ all files</li>
-        <li>METADATA.md fields</li>
-        <li>RulesEngine/stack/ (existence check)</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Outputs</h4>
-      <ul>
-        <li>Exit 0 — specification valid</li>
-        <li>Exit 1 — errors to stderr</li>
-        <li>Conformity level score</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="learnings">
-    <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, gating on specification quality rather than code quality surfaced gaps earlier and made the AI's output predictably better on the first attempt.</p>
-  </div>
-</div>
-
-<hr class="div">
-
-<!-- ── ONESHOT.SH ── -->
-<div class="section">
-  <span class="section-tag tag-script">Script</span>
-  <h2>oneshot.sh</h2>
-  <p class="section-tagline">The canonical build command — validate, tag, and generate the complete build prompt in one step.</p>
-
-  <p>The oneshot build assembles CLAUDE_RULES, ONESHOT_BUILD_RULES, all stack files, and every specification file into a single prompt. The AI agent receives this prompt and builds the prototype from scratch. The specification commit is tagged (<code>oneshot/{project}/{date.N}</code>) so any future iterate run can diff against the exact state used for the build. Tags are permanent git objects — never pruned.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
-      <ul>
-        <li>RulesEngine/CLAUDE_RULES.md</li>
-        <li>RulesEngine/ONESHOT_BUILD_RULES.md</li>
-        <li>RulesEngine/stack/ (all)</li>
-        <li>Specifications/{Name}/ (all)</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Writes</h4>
-      <ul>
-        <li>{Name}/oneshot-prompt.md</li>
-        <li>git tag oneshot/{Name}/{date}</li>
-        <li>{Name}/.env (build metadata)</li>
-        <li>{Name}/DEPLOY_LOG.md (appended)</li>
-      </ul>
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
+  SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
+  STACK(["Stack/"]):::dir --> S3
+  TR(["Technology_Rules/"]):::dir --> S3
+  S3 --> PT(["Prototype/"]):::dir
+  S3 --> SC{{"SCORECARD.md"}}:::md
     </div>
   </div>
 
@@ -417,72 +231,50 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <div class="learnings-label">Learnings</div>
     <p>Lorem ipsum dolor sit amet, the git tag as a build boundary was the key insight; without it there is no reliable way to distinguish what has been built from what is pending.</p>
   </div>
-</div>
 
-<hr class="div">
-
-<!-- ── SPEC_ITERATE.SH ── -->
-<div class="section">
-  <span class="section-tag tag-script">Script — AI-Assisted</span>
-  <h2>spec_iterate.sh</h2>
-  <p class="section-tagline">Ask the AI what the specification is missing before writing more tickets.</p>
-
-  <p>Before each iteration cycle, <code>spec_iterate.sh</code> feeds all specification files and BUSINESS_RULES into an AI agent and asks it to rate the spec quality across seven dimensions, identify unspecified gaps by priority (P0–P4), and draft the next one or two spec files to write. The human reviews and edits the output before proceeding. This closes the loop between the AI's view of the spec and the human's intent — without requiring the human to anticipate every gap themselves.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
+  <div class="io-cols">
+    <div class="io-col">
+      <h4>Inputs</h4>
       <ul>
-        <li>Specifications/{Name}/ (all)</li>
-        <li>RulesEngine/BUSINESS_RULES.md</li>
+        <li>spec_template/ (scaffolding)</li>
+        <li>Specifications/ (authored files)</li>
+        <li>Stack/ (technology patterns)</li>
+        <li>Technology_Rules/ (CLAUDE_RULES.md)</li>
       </ul>
     </div>
-    <div class="io-box">
-      <h4>Writes</h4>
+    <div class="io-col">
+      <h4>Outputs</h4>
       <ul>
-        <li>REFERENCE_GAPS.md (gap list, P0–P4)</li>
-        <li>SPEC_SCORECARD.md (7-dimension rating)</li>
-        <li>SPEC_ITERATION.md (next prompt)</li>
+        <li>Prototype/ (running codebase)</li>
+        <li>SCORECARD.md</li>
+        <li>git tag oneshot/{name}/{date}</li>
       </ul>
     </div>
-  </div>
-
-  <div class="learnings">
-    <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, letting the AI score its own input specification revealed blind spots that a human reviewer would consistently miss, particularly around error states and edge conditions.</p>
   </div>
 </div>
 
 <hr class="div">
 
-<!-- ── ITERATE.SH ── -->
-<div class="section">
-  <span class="section-tag tag-script">Script</span>
-  <h2>iterate.sh + tran_logger.sh</h2>
-  <p class="section-tagline">Incremental change management — each change expressed as a numbered ticket, applied by the agent, tracked by the specification.</p>
+<!-- 2. CHANGE ITERATION -->
+<div class="workflow">
+  <div class="workflow-num">Workflow 2</div>
+  <h2>Change Iteration</h2>
+  <p class="workflow-desc">Express each change as a file. The agent applies it against the prototype, scores the result, and merges to the project branch when ready.</p>
 
-  <p>After the initial build, every change enters the system as a ticket file. The ticket number (NNN) determines application order. <code>iterate.sh</code> reads all ticket files added since the last oneshot tag, assembles them with ARCHITECTURE and ACCEPTANCE_CRITERIA, and generates the iterate prompt. The agent applies each ticket, validates it, and on success deletes the ticket file. Rejected tickets get a <code>## Rejection Reason</code> section added and remain for the author to resolve.</p>
-
-  <p><code>tran_logger.sh</code> reads Claude Code session logs and converts interactive changes into ticket files automatically — closing the loop between informal exploration and the formal specification history.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
-      <ul>
-        <li>Ticket files since last oneshot tag</li>
-        <li>ARCHITECTURE.md</li>
-        <li>ACCEPTANCE_CRITERIA.md</li>
-        <li>Claude session logs (tran_logger)</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Writes</h4>
-      <ul>
-        <li>{Name}/iterate-prompt.md</li>
-        <li>PATCH-NNN-tl-*.md (tran_logger)</li>
-        <li>AC-NNN-tl-*.md (tran_logger)</li>
-        <li>Prototype docs/SCORECARD.md</li>
-      </ul>
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  CH{{"CHANGES.md"}}:::md      --> S1["iterate.sh"]:::script
+  PT1(["Prototype/"]):::dir   --> S1
+  SC1{{"SCORECARD.md"}}:::md  --> S1
+  S1 --> PT2(["Prototype/"]):::dir
+  S1 --> SC2{{"SCORECARD.md"}}:::md
+  PT2 --> S2["merge.sh"]:::script
+  SC2 --> S2
+  S2 --> PROJ(["Project"]):::dir
     </div>
   </div>
 
@@ -490,36 +282,48 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <div class="learnings-label">Learnings</div>
     <p>Lorem ipsum dolor sit amet, the ticket-as-file pattern with presence-equals-pending was simpler than any database-backed ticket system and worked naturally with git history and code review tooling.</p>
   </div>
+
+  <div class="io-cols">
+    <div class="io-col">
+      <h4>Inputs</h4>
+      <ul>
+        <li>CHANGES.md (ticket)</li>
+        <li>Prototype/ (current state)</li>
+        <li>SCORECARD.md</li>
+      </ul>
+    </div>
+    <div class="io-col">
+      <h4>Outputs</h4>
+      <ul>
+        <li>Prototype/ (updated)</li>
+        <li>SCORECARD.md (updated)</li>
+        <li>Project (squash-merged branch)</li>
+      </ul>
+    </div>
+  </div>
 </div>
 
 <hr class="div">
 
-<!-- ── RULES ENGINE ── -->
-<div class="section">
-  <span class="section-tag tag-rules">Object</span>
-  <h2>Rules Engine</h2>
-  <p class="section-tagline">A single source of behavioral contracts, distributed automatically to every project.</p>
+<!-- 3. RULES PROPAGATION -->
+<div class="workflow">
+  <div class="workflow-num">Workflow 3</div>
+  <h2>Rules Propagation</h2>
+  <p class="workflow-desc">Author behavioral contracts once; distribute them automatically to every project and verify compliance.</p>
 
-  <p>The Rules Engine is a directory of files in the Specifications repository. BUSINESS_RULES.md is the authoritative source — edited by the human, containing full rationale. CLAUDE_RULES.md is generated from it by <code>summarize_rules.sh</code> and is injected into every project's AGENTS.md. Projects never edit their CLAUDE_RULES block; they receive it from the distribution pipeline. This means behavioral standards are set once and applied uniformly — without manual compliance work per project.</p>
-
-  <div class="io-grid">
-    <div class="io-box">
-      <h4>Reads</h4>
-      <ul>
-        <li>RulesEngine/BUSINESS_RULES.md</li>
-        <li>RulesEngine/ONESHOT_BUILD_RULES.md</li>
-        <li>RulesEngine/templates/ (3 files)</li>
-        <li>RulesEngine/stack/ (14 files)</li>
-      </ul>
-    </div>
-    <div class="io-box">
-      <h4>Writes / Distributes</h4>
-      <ul>
-        <li>RulesEngine/CLAUDE_RULES.md (generated)</li>
-        <li>Each project's AGENTS.md (injected)</li>
-        <li>Each project's bin/common.sh</li>
-        <li>Each project's bin/common.py</li>
-      </ul>
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  RULES(["Technology Rules"]):::dir
+  --> S1["summarize_rules.sh"]:::script
+  --> CR{{"CLAUDE_RULES.md"}}:::md
+  --> S2["ProjectUpdate.sh"]:::script
+  --> PROJ(["Project"]):::dir
+  --> S3["ProjectValidate.sh"]:::script
+  --> KPI{{"KPI.md"}}:::md
     </div>
   </div>
 
@@ -527,21 +331,110 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <div class="learnings-label">Learnings</div>
     <p>Lorem ipsum dolor sit amet, separating the rationale document from the injected contract kept CLAUDE_RULES.md concise enough that agents actually followed it, rather than pattern-matching on length.</p>
   </div>
+
+  <div class="io-cols">
+    <div class="io-col">
+      <h4>Inputs</h4>
+      <ul>
+        <li>BUSINESS_RULES.md (source of truth)</li>
+        <li>templates/ (common.sh, common.py)</li>
+        <li>stack/ (technology patterns)</li>
+      </ul>
+    </div>
+    <div class="io-col">
+      <h4>Outputs</h4>
+      <ul>
+        <li>CLAUDE_RULES.md (generated)</li>
+        <li>Project AGENTS.md (injected)</li>
+        <li>KPI.md (compliance report)</li>
+      </ul>
+    </div>
+  </div>
 </div>
 
 <hr class="div">
 
-<!-- ── GAME: LIVING EXAMPLE ── -->
-<div class="section">
-  <span class="section-tag tag-proto">Living Example</span>
-  <h2>GAME — Framework Managing Itself</h2>
-  <p class="section-tagline">The dashboard that discovers, validates, and operates all other projects was itself built using SDD.</p>
+<!-- 4. SPECIFICATION REVIEW -->
+<div class="workflow">
+  <div class="workflow-num">Workflow 4</div>
+  <h2>Specification Review</h2>
+  <p class="workflow-desc">Run the AI against the specification itself — before writing tickets — to surface gaps, score quality, and draft the next specification files.</p>
 
-  <p>GAME (GEM Agentic Management Engine) is a Flask/SQLite dashboard that reads project METADATA.md files, validates their CLAUDE_RULES conformance levels, exposes their health endpoints, and surfaces their documentation. It was built from specification files in this repository using the same oneshot/iterate workflow it exists to manage. When new features were identified through spec_iterate.sh gap analysis, they were added as ranked ticket files, applied by the agent, and promoted through the merge workflow. No manual code editing. The specification led; the code followed.</p>
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  SPEC(["Specifications/"]):::dir
+  --> SI["spec_iterate.sh"]:::script
+  --> GAPS{{"REFERENCE_GAPS.md"}}:::md
+  SI --> SCORE{{"SPEC_SCORECARD.md"}}:::md
+  SI --> ITER{{"SPEC_ITERATION.md"}}:::md
+    </div>
+  </div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, building the framework tool with the framework process provided continuous real-world validation; gaps in the methodology surfaced immediately as specification gaps in GAME itself.</p>
+    <p>Lorem ipsum dolor sit amet, letting the AI score its own input specification revealed blind spots that a human reviewer would consistently miss, particularly around error states and edge conditions.</p>
+  </div>
+
+  <div class="io-cols">
+    <div class="io-col">
+      <h4>Inputs</h4>
+      <ul>
+        <li>Specifications/ (all files)</li>
+        <li>BUSINESS_RULES.md</li>
+      </ul>
+    </div>
+    <div class="io-col">
+      <h4>Outputs</h4>
+      <ul>
+        <li>REFERENCE_GAPS.md (P0–P4 gaps)</li>
+        <li>SPEC_SCORECARD.md (7-dimension rating)</li>
+        <li>SPEC_ITERATION.md (next prompt)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- 5. SESSION CAPTURE -->
+<div class="workflow">
+  <div class="workflow-num">Workflow 5</div>
+  <h2>Session Capture</h2>
+  <p class="workflow-desc">Convert informal Claude Code session activity into formal specification ticket files automatically, closing the loop between exploration and the spec history.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  PT(["Prototype/"]):::dir --> TL["tran_logger.sh"]:::script
+  TL --> SPEC(["Specifications/"]):::dir
+    </div>
+  </div>
+
+  <div class="learnings">
+    <div class="learnings-label">Learnings</div>
+    <p>Lorem ipsum dolor sit amet, formalizing interactive session changes into tickets retroactively kept the specification honest; changes made outside the ticket workflow were no longer invisible.</p>
+  </div>
+
+  <div class="io-cols">
+    <div class="io-col">
+      <h4>Inputs</h4>
+      <ul>
+        <li>Prototype/ (Claude session logs)</li>
+      </ul>
+    </div>
+    <div class="io-col">
+      <h4>Outputs</h4>
+      <ul>
+        <li>Specifications/ (PATCH-NNN-tl-*.md)</li>
+        <li>Specifications/ (AC-NNN-tl-*.md)</li>
+      </ul>
+    </div>
   </div>
 </div>
 
