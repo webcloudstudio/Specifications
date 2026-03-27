@@ -99,25 +99,47 @@ body {
 .io-col li::before { content: "· "; color: var(--accent); }
 
 hr.div { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+.defn {
+  background: #0a1a2e; border-left: 3px solid #3b82f6;
+  border-radius: 0 4px 4px 0; padding: 14px 18px; margin-bottom: 20px;
+}
+.defn-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: #60a5fa; margin-bottom: 10px;
+}
+.defn ul { list-style: none; padding: 0; }
+.defn li {
+  font-size: 12px; font-family: var(--font-mono); color: #93c5fd;
+  padding: 3px 0; border-bottom: 1px solid #1e3a5f;
+}
+.defn li:last-child { border-bottom: none; }
+.defn li::before { content: "· "; color: #3b82f6; }
+.defn li span { color: #e2e8f0; font-family: var(--font-body); font-size: 12px; }
+
+.gaps { margin-top: 64px; padding-top: 32px; border-top: 2px solid var(--border); }
+.gaps h2 { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.gaps-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+.gap-item { margin-bottom: 24px; }
+.gap-item h4 { font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.gap-item ul { list-style: none; padding: 0; }
+.gap-item li { font-size: 12px; font-family: var(--font-mono); color: var(--muted); padding: 2px 0; }
+.gap-item li::before { content: "! "; color: var(--amber); }
+.gap-note { font-size: 11px; color: #6b7280; font-style: italic; margin-top: 2px; padding-left: 14px; }
 </style>
 </head>
 <body>
 
 <div class="cover">
-  <div class="cover-eyebrow">Engineering Methodology</div>
+  <div class="cover-eyebrow">Ed Barlows Specificaiton Driven Design Methodology</div>
   <h1>Specification Driven Design</h1>
-  <div class="cover-sub">Spec files are the source of truth. Code is a derived artifact produced by an AI agent from those files.</div>
-  <div class="cover-meta">
-    <span>Ed Barlow</span>
-    <span>Web Cloud Studio</span>
-    <span>2026</span>
-  </div>
+  <div class="cover-sub">The following is my Specification design overview and one-shot framework. </div>
 </div>
 
 <div class="workflow">
-  <div class="workflow-num">Workflow 1</div>
-  <h2>Prototype Build</h2>
-  <p class="workflow-desc">Validates specification completeness, assembles spec files + stack patterns + agent rules into a single build prompt, tags the commit, and outputs a running prototype.</p>
+  <div class="workflow-num">Workflow #1</div>
+  <h2>One Shot Prototypes</h2>
+  <p class="workflow-desc">Scorecard for specification completeness; Prescriptive Specification Files; Single build prompt; Git Tags.</p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
@@ -127,22 +149,34 @@ flowchart LR
   S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
   SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
   STACK(["Stack/"]):::dir --> S3
-  TR(["Technology_Rules/"]):::dir --> S3
+  TR(["TechnologyRules/"]):::dir --> S3
   S3 --> PT(["Prototype/"]):::dir
   S3 --> SC{{"SCORECARD.md"}}:::md
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, the git tag as a build boundary was the key insight; without it there is no reliable way to distinguish what has been built from what is pending.</p>
+    <p>Requries Well Defined Specification Files Architecture</p>
+    <p>Requries Change Management - Feedback and Tickets</p>
+    <p>Requires Build State</p>
+    <p>Publishable Scorecards/Gap Analysis For Directionality</p>
+  </div>
+
+  <div class="defn">
+    <div class="defn-label">Specification File Types</div>
+    <ul>
+      <li>INTENT.md / README.md <span>— Application intent; high-value for quality</span></li>
+      <li>DATABASE.md / UI.md / FEATURE-*.md <span>— Typed canonical specifications</span></li>
+      <li>SCREEN-NNN-*.md / PATCH-NNN-*.md / AC-NNN-*.md <span>— Typed tickets applied in NNN order</span></li>
+      <li>## Open Questions <span>— Required section in every spec file; blocks execution until resolved</span></li>
+    </ul>
   </div>
 
   <div class="io-cols">
     <div class="io-col"><h4>Inputs</h4><ul>
-      <li>spec_template/</li>
       <li>Specifications/</li>
-      <li>Stack/</li>
-      <li>Technology_Rules/</li>
+      <li>Stack Specifications/</li>
+      <li>Technology_Specification/</li>
     </ul></div>
     <div class="io-col"><h4>Outputs</h4><ul>
       <li>Prototype/</li>
@@ -153,20 +187,18 @@ flowchart LR
 </div>
 
 <hr class="div">
-
 <div class="workflow">
-  <div class="workflow-num">Workflow 2</div>
-  <h2>Change Iteration</h2>
-  <p class="workflow-desc">Packages CHANGES.md with current prototype state into an iterate prompt; agent applies the change; squash-merges to project on completion.</p>
+  <div class="workflow-num">Workflow #2</div>
+  <h2>Application Change Propogation</h2>
+  <p class="workflow-desc">Flow Prototype or Package Updates for incremental builds. squash-merges on completion.</p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
   classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
   classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
   classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
-  CH{{"CHANGES.md"}}:::md      --> S1["iterate.sh"]:::script
+  CH{{"TICKETS.md"}}:::md      --> S1["iterate.sh"]:::script
   PT1(["Prototype/"]):::dir   --> S1
-  SC1{{"SCORECARD.md"}}:::md  --> S1
   S1 --> PT2(["Prototype/"]):::dir
   S1 --> SC2{{"SCORECARD.md"}}:::md
   PT2 --> S2["merge.sh"]:::script
@@ -176,14 +208,13 @@ flowchart LR
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, the change-as-file pattern with presence-equals-pending was simpler than any ticket system and worked naturally with git history — rejected changes stay in the file with a rejection reason appended.</p>
+    <p>I much prefer specification driven updates.  Tickets have numeric NNN in the name so they can be applied in order. Acceptance Criteria tickets keep specification drift minimal.</p>
   </div>
 
   <div class="io-cols">
     <div class="io-col"><h4>Inputs</h4><ul>
-      <li>CHANGES.md</li>
+      <li>TICKETS.md -- By Type (screen,feature...), Acceptance Criteria</li>
       <li>Prototype/</li>
-      <li>SCORECARD.md</li>
     </ul></div>
     <div class="io-col"><h4>Outputs</h4><ul>
       <li>Prototype/ (updated)</li>
@@ -196,9 +227,12 @@ flowchart LR
 <hr class="div">
 
 <div class="workflow">
-  <div class="workflow-num">Workflow 3</div>
-  <h2>Rules Propagation</h2>
-  <p class="workflow-desc">Generates CLAUDE_RULES.md from BUSINESS_RULES.md and distributes it to all projects via AGENTS.md injection; validates compliance per project.</p>
+  <div class="workflow-num">Workflow #3</div>
+  <h2>Technology Rules Propagation</h2>
+  <p class="workflow-desc">Technology interfaces are injected into projects using CLAUDE_RULES.md - an 
+    AI summarization from application perspective of Technology Rules (not Stack Build Rules).  This guidance
+    enables guidance other programs to call/control application behaviors and transparently 
+    lets the application interface with the technology ecosystem</p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
@@ -211,12 +245,13 @@ flowchart LR
   --> S2["ProjectUpdate.sh"]:::script
   --> PROJ(["Project"]):::dir
   --> S3["ProjectValidate.sh"]:::script
-  --> KPI{{"KPI.md"}}:::md
+  --> KPI{{"PROJECT_SCORECARD.md"}}:::md
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, keeping the rationale in BUSINESS_RULES.md and generating a short CLAUDE_RULES.md from it meant agents received a concise contract they actually followed, not a wall of text they pattern-matched around.</p>
+    <p>CLAUDE_RULES injection worked really well out of the box. Key insight: use a a crafted ai summary </p>
+    <p>An opinionated prescribed stack gave me working software first time</p>
   </div>
 
   <div class="io-cols">
@@ -228,7 +263,7 @@ flowchart LR
     <div class="io-col"><h4>Outputs</h4><ul>
       <li>CLAUDE_RULES.md</li>
       <li>Project AGENTS.md (injected)</li>
-      <li>KPI.md</li>
+      <li>PROJECT_SCORECARD.md</li>
     </ul></div>
   </div>
 </div>
@@ -236,7 +271,7 @@ flowchart LR
 <hr class="div">
 
 <div class="workflow">
-  <div class="workflow-num">Workflow 4</div>
+  <div class="workflow-num">Workflow #4</div>
   <h2>Specification Review</h2>
   <p class="workflow-desc">AI-scored gap analysis of the specification directory — produces a prioritized gap list (P0–P4), quality scorecard, and next iteration prompt.</p>
 
@@ -245,16 +280,15 @@ flowchart LR
   classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
   classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
   classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
-  SPEC(["Specifications/"]):::dir
-  --> SI["spec_iterate.sh"]:::script
-  --> GAPS{{"REFERENCE_GAPS.md"}}:::md
+  GAPS{{"REFERENCE_GAPS.md"}}:::md  --> SI["spec_iterate.sh"]:::script
+  SPEC(["Specifications/"]):::dir   --> SI
   SI --> SCORE{{"SPEC_SCORECARD.md"}}:::md
   SI --> ITER{{"SPEC_ITERATION.md"}}:::md
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, asking the AI to review the spec before the build revealed blind spots a human reviewer would miss consistently — missing error states, unspecified edge cases, ambiguous field names.</p>
+    <p>Lorem ipsum dolor sit amet, asking the AI to review the specification before the build revealed blind spots a human reviewer would miss consistently — missing error states, unspecified edge cases, ambiguous field names.</p>
   </div>
 
   <div class="io-cols">
@@ -273,9 +307,9 @@ flowchart LR
 <hr class="div">
 
 <div class="workflow">
-  <div class="workflow-num">Workflow 5</div>
+  <div class="workflow-num">Workflow #5</div>
   <h2>Session Capture</h2>
-  <p class="workflow-desc">Reads Claude Code session logs from the prototype directory and writes the changes back as formal ticket files in the specification directory.</p>
+  <p class="workflow-desc">Claude Internal Session Logs from the prototype directory are translated to formal ticket files and acceptance criteria specifications.</p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
@@ -287,7 +321,7 @@ flowchart LR
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, formalizing session changes into tickets retroactively kept the spec honest — changes made outside the ticket workflow were no longer invisible or lost between sessions.</p>
+    <p>Lorem ipsum dolor sit amet, formalizing session changes into tickets retroactively kept the specification honest — changes made outside the ticket workflow were no longer invisible or lost between sessions.</p>
   </div>
 
   <div class="io-cols">
@@ -298,6 +332,70 @@ flowchart LR
       <li>Specifications/ PATCH-NNN-tl-*.md</li>
       <li>Specifications/ AC-NNN-tl-*.md</li>
     </ul></div>
+  </div>
+</div>
+
+
+<div class="gaps">
+  <h2>Gaps / Pending Corrections</h2>
+  <p class="gaps-sub">Items below are missing from diagrams or IO lists. Each is a discrete edit — flag which to apply.</p>
+
+  <div class="gap-item">
+    <h4>W1 — One Shot Prototypes</h4>
+    <ul>
+      <li>Output missing: oneshot-prompt.md (written to stdout / file)</li>
+      <li>Output missing: git tag oneshot/{name}/{date.N} — build state marker; feeds W2 as baseline</li>
+      <li>Output gap: SCORECARD.md is written by the agent after build, not by oneshot.sh — attribution wrong</li>
+      <li>Input missing: METADATA.md (base_branch, git_repo fields read by oneshot.sh)</li>
+      <li>Input missing: .env (BUILD_FEATURE_BRANCH_NAME — Feature Branch mode only)</li>
+      <li>Input missing: ONESHOT_BUILD_RULES.md (assembled into prompt alongside stack files)</li>
+    </ul>
+  </div>
+
+  <div class="gap-item">
+    <h4>W2 — Application Change Propagation</h4>
+    <ul>
+      <li>Input missing: git tag / BUILD_TAG from W1 — iterate.sh uses this as diff baseline</li>
+      <li>Input missing: SPEC_COMMIT from prototype .env — on subsequent iterates, replaces BUILD_TAG as baseline</li>
+      <li>Output missing: iterate-prompt.md (written to stdout / file; agent runs from prototype dir)</li>
+      <li>Mermaid: SCORECARD.md removed from inputs by user edit — confirm intentional</li>
+    </ul>
+  </div>
+
+  <div class="gap-item">
+    <h4>W3 — Technology Rules Propagation</h4>
+    <ul>
+      <li>Flow gap: summarize_rules.sh outputs a PROMPT, not CLAUDE_RULES.md directly — human feeds prompt to AI, pastes output; intermediate human-AI step missing from diagram</li>
+      <li>Input missing: ONESHOT_BUILD_RULES.md feeds into summarize_rules.sh prompt</li>
+    </ul>
+  </div>
+
+  <div class="gap-item">
+    <h4>W4 — Specification Review</h4>
+    <ul>
+      <li>REFERENCE_GAPS.md moved to input — fixed in diagram above</li>
+      <li>Input missing: METADATA.md (read by spec_iterate.sh)</li>
+      <li>Output: REFERENCE_GAPS.md is updated (not created) — already exists as input from setup.sh</li>
+    </ul>
+  </div>
+
+  <div class="gap-item">
+    <h4>W5 — Session Capture</h4>
+    <ul>
+      <li>Input missing: ~/.claude/projects/{proto-path}/*.jsonl — Claude Code session logs (actual source read)</li>
+      <li>Input missing: prototype git log (last 20 commits — read for context)</li>
+      <li>Input missing: .env (tran_logger.sh reads prototype directory path from spec .env)</li>
+      <li>Output missing: IDEAS.md (written alongside PATCH-NNN and AC-NNN files)</li>
+    </ul>
+  </div>
+
+  <div class="gap-item">
+    <h4>Cross-Workflow Connections Not Shown</h4>
+    <ul>
+      <li>W1 git tag → W2: oneshot tag is the diff baseline for iterate.sh</li>
+      <li>W5 PATCH-NNN-tl-*.md → W2: session-captured tickets feed the next iterate run</li>
+      <li>W4 SPEC_ITERATION.md → W1/W2: output is a ready-to-run spec build prompt</li>
+    </ul>
   </div>
 </div>
 
