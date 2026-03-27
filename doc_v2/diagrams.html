@@ -8,17 +8,19 @@
 mermaid.initialize({
   startOnLoad: true,
   theme: 'dark',
-  flowchart: { curve: 'linear', nodeSpacing: 55, rankSpacing: 45, padding: 14 },
+  flowchart: { curve: 'linear', nodeSpacing: 60, rankSpacing: 50, padding: 16 },
   themeVariables: {
-    darkMode:           true,
-    background:         '#0f1117',
-    primaryColor:       '#0a5c38',
-    primaryBorderColor: '#2cb67d',
-    primaryTextColor:   '#ffffff',
-    secondaryColor:     '#1e2230',
-    lineColor:          '#2cb67d',
-    edgeLabelBackground:'#0f1117',
-    fontSize:           '14px'
+    darkMode:            true,
+    background:          '#0f1117',
+    primaryColor:        '#0a5c38',
+    primaryBorderColor:  '#2cb67d',
+    primaryTextColor:    '#ffffff',
+    secondaryColor:      '#1e2230',
+    lineColor:           '#2cb67d',
+    edgeLabelBackground: '#0f1117',
+    clusterBkg:          '#0a5c38',
+    clusterBorder:       '#2cb67d',
+    fontSize:            '14px'
   }
 });
 </script>
@@ -27,7 +29,7 @@ body { background:#0f1117; color:#e2e8f0;
   font-family:'Segoe UI',Arial,sans-serif; font-size:13px;
   padding:32px 40px 64px; max-width:1100px; margin:0 auto; }
 h2 { font-size:11px; font-weight:700; text-transform:uppercase;
-  letter-spacing:1.8px; color:#2cb67d; margin:36px 0 10px; }
+  letter-spacing:1.8px; color:#2cb67d; margin:40px 0 12px; }
 h2:first-of-type { margin-top:0; }
 .mermaid { margin-bottom:4px; }
 </style>
@@ -37,34 +39,48 @@ h2:first-of-type { margin-top:0; }
 <h2>One Shot</h2>
 <div class="mermaid">
 flowchart LR
-  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
-  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
   S1["setup.sh"]:::action
-  --> SPEC(["Specifications/\nPROJECT"]):::entity
+  --> SPEC(["Specifications/"]):::entity
   --> S2["validate.sh"]:::action
   --> S3["oneshot.sh"]:::action
-  --> PROTO(["Prototype/\nSCORECARD.md"]):::entity
+  --> PROTO_GRP
+
+  subgraph PROTO_GRP [" "]
+    direction TB
+    PT(["Prototype/"]):::entity
+    SC(["SCORECARD.md"]):::entity
+  end
 </div>
 
 <h2>Iterate</h2>
 <div class="mermaid">
 flowchart LR
-  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
-  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
-  PROTO1(["Prototype/\nSCORECARD.md"]):::entity
-  --> S1["iterate.sh"]:::action
-  --> PROTO2(["Prototype/\nSCORECARD.md"]):::entity
-  --> S2["merge.sh"]:::action
-  --> PROJ(["Project"]):::entity
+  PROTO1_GRP --> S1["iterate.sh"]:::action --> PROTO2_GRP --> S2["merge.sh"]:::action --> PROJ(["Project"]):::entity
+
+  subgraph PROTO1_GRP [" "]
+    direction TB
+    PT1(["Prototype/"]):::entity
+    SC1(["SCORECARD.md"]):::entity
+  end
+
+  subgraph PROTO2_GRP [" "]
+    direction TB
+    PT2(["Prototype/"]):::entity
+    SC2(["SCORECARD.md"]):::entity
+  end
 </div>
 
 <h2>Technology Rules</h2>
 <div class="mermaid">
 flowchart LR
-  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
-  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
   RULES(["Technology Rules"]):::entity
   --> S1["summarize_rules.sh"]:::action
@@ -78,10 +94,10 @@ flowchart LR
 <h2>Specification Iterate</h2>
 <div class="mermaid">
 flowchart LR
-  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
-  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
-  SPEC(["Specifications/\nPROJECT"]):::entity
+  SPEC(["Specifications/"]):::entity
   --> SI["spec_iterate.sh"]:::action
   --> GAPS(["REFERENCE_GAPS.md"]):::entity
 
@@ -92,12 +108,16 @@ flowchart LR
 <h2>Automated Transaction Logging</h2>
 <div class="mermaid">
 flowchart LR
-  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
-  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
-  PROTO(["Prototype/"]):::entity
-  --> TL["tran_logger.sh"]:::action
-  --> SPEC(["Specifications/\nPROJECT"]):::entity
+  PROTO_GRP --> TL["tran_logger.sh"]:::action --> SPEC(["Specifications/"]):::entity
+
+  subgraph PROTO_GRP [" "]
+    direction TB
+    PT(["Prototype/"]):::entity
+    SC(["SCORECARD.md"]):::entity
+  end
 </div>
 
 </body>
