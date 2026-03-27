@@ -69,6 +69,8 @@ Every field stored in the `projects` table, its source, and when it is read.
 | `has_node` | `node_modules/` directory present | Scan | Boolean flag |
 | `has_claude` | `CLAUDE.md` file present | Scan | Boolean flag; enables CLAUDE.md modal |
 | `has_docs` | Any subdir starting with `doc` containing `index.html` or `index.htm` (glob: `*/doc*/index.htm*`) | Scan | Boolean flag; enables 📖 Help button |
+| `has_tests` | `tests/` directory or `bin/test.sh` present | Scan | Boolean flag; used by Validation screen |
+| `has_specs` | `{SPECIFICATIONS_PATH}/{project.name}/` exists | Scan | Boolean flag; requires SPECIFICATIONS_PATH env var; defaults to 0 if not configured |
 | `card_title` | `METADATA.md` → `title:` (card section) | Scan | Portfolio card; overrides `display_name` if set |
 | `card_desc` | `METADATA.md` → `short_description:` or `description:` | Scan | Portfolio card description |
 | `card_tags` | `METADATA.md` → `tags:` | Scan | Portfolio card tags |
@@ -169,6 +171,8 @@ On startup, the scan runs in a **background thread** so the server is immediatel
 | has_node | INTEGER | 0 | node_modules/ present |
 | has_claude | INTEGER | 0 | CLAUDE.md present |
 | has_docs | INTEGER | 0 | doc[s]/index.htm[l] present |
+| has_tests | INTEGER | 0 | tests/ directory or bin/test.sh present |
+| has_specs | INTEGER | 0 | Matching spec directory exists in SPECIFICATIONS_PATH |
 | card_title | TEXT | NULL | Portfolio card title |
 | card_desc | TEXT | NULL | Portfolio card description |
 | card_tags | TEXT | NULL | Portfolio card tags |
@@ -399,6 +403,4 @@ Schema is authoritative in FEATURE-HEALTHCHECK.md. When these tables are impleme
 - **`title` column**: Duplicated by `display_name`. Remove once all templates reference `display_name` exclusively. Until then, keep it to avoid breaking existing renders.
 - **WAL PRAGMA per connection**: Harmless (WAL is persistent). Move to `init_db()` only as a cleanup task — not a blocking issue.
 - **Tag colors**: Promoted to `tag_colors` table above. `data/tag_colors.json` is legacy; migrate on first Settings / Tag load.
-- **`has_tests` flag**: Scanned from `tests/` directory or `bin/test.sh` presence. Add to scanner and `projects` table schema in same pass as `has_specs`.
-- **`has_specs` flag**: Scanned from `{SPECIFICATIONS_PATH}/{project.name}/` existence. Requires `SPECIFICATIONS_PATH` to be set; defaults to `false` when not configured.
 - **`git_last_commit_date`**: Not yet implemented. Would replace `version` date as the `LastUpdate` column source. Requires `git log --format=%ci -1` during scan and storing the ISO date. Add to `projects` table when scanner is updated.
