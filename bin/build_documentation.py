@@ -54,7 +54,7 @@ GUIDE_TITLES = {
     'PROTOTYPE-PROCESS':     'Prototype Process Spec',
     'PROJECT-SETUP':         'Project Creation',
     'ITERATION-PROCESS':     'Iteration Process',
-    'PROMOTE':               'Step 6 — Promote',
+    'PROMOTE':               'Step 6 — merge.sh',
     'CREATE-IMAGE':          'Create Image',
     'ENGINEERING-RULES':     'Engineering Rules Framework',
     'SDD-SPECIFICATIONS':    'SDD — Specifications',
@@ -307,8 +307,8 @@ def build_page(scripts, projects, guides):
     step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="tran_logger.sh" onclick="showScript(\'tran_logger.sh\')">tran_logger.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="spec_iterate.sh" onclick="showScript(\'spec_iterate.sh\')">spec_iterate.sh</a>\n'
-    step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', 6)">Step 6 — Promote</a>\n'
-    step_nav += f'  <a class="sn-sub" data-key="PROMOTE" onclick="showGuide(\'PROMOTE\')">Promote / Merge</a>\n'
+    step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', 6)">Step 6 — merge.sh</a>\n'
+    step_nav += f'  <a class="sn-sub" data-script="merge.sh" onclick="showScript(\'merge.sh\')">merge.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="ProjectUpdate.sh" onclick="showScript(\'ProjectUpdate.sh\')">ProjectUpdate.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
@@ -356,7 +356,7 @@ def build_page(scripts, projects, guides):
         wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
         wf_box('Iterate', 'iterate.sh'),
         wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
-        wf_box('Promote'),
+        wf_box('merge.sh', 'bin/merge.sh'),
         wf_box('Project', '', '../<PROJECT>', terminal=True),
     ])
     row_rules = ARR.join([

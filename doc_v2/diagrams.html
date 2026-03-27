@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SDD Workflows</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  flowchart: { curve: 'linear', nodeSpacing: 55, rankSpacing: 45, padding: 14 },
+  themeVariables: {
+    darkMode:           true,
+    background:         '#0f1117',
+    primaryColor:       '#0a5c38',
+    primaryBorderColor: '#2cb67d',
+    primaryTextColor:   '#ffffff',
+    secondaryColor:     '#1e2230',
+    lineColor:          '#2cb67d',
+    edgeLabelBackground:'#0f1117',
+    fontSize:           '14px'
+  }
+});
+</script>
+<style>
+body { background:#0f1117; color:#e2e8f0;
+  font-family:'Segoe UI',Arial,sans-serif; font-size:13px;
+  padding:32px 40px 64px; max-width:1100px; margin:0 auto; }
+h2 { font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.8px; color:#2cb67d; margin:36px 0 10px; }
+h2:first-of-type { margin-top:0; }
+.mermaid { margin-bottom:4px; }
+</style>
+</head>
+<body>
+
+<h2>One Shot</h2>
+<div class="mermaid">
+flowchart LR
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+
+  S1["setup.sh"]:::action
+  --> SPEC(["Specifications/\nPROJECT"]):::entity
+  --> S2["validate.sh"]:::action
+  --> S3["oneshot.sh"]:::action
+  --> PROTO(["Prototype/\nSCORECARD.md"]):::entity
+</div>
+
+<h2>Iterate</h2>
+<div class="mermaid">
+flowchart LR
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+
+  PROTO1(["Prototype/\nSCORECARD.md"]):::entity
+  --> S1["iterate.sh"]:::action
+  --> PROTO2(["Prototype/\nSCORECARD.md"]):::entity
+  --> S2["merge.sh"]:::action
+  --> PROJ(["Project"]):::entity
+</div>
+
+<h2>Technology Rules</h2>
+<div class="mermaid">
+flowchart LR
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+
+  RULES(["Technology Rules"]):::entity
+  --> S1["summarize_rules.sh"]:::action
+  --> CR(["CLAUDE_RULES.md"]):::entity
+  --> S2["ProjectUpdate.sh"]:::action
+  --> PROJ(["Project"]):::entity
+  --> S3["ProjectValidate.sh"]:::action
+  --> KPI(["Project KPIs"]):::entity
+</div>
+
+<h2>Specification Iterate</h2>
+<div class="mermaid">
+flowchart LR
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+
+  SPEC(["Specifications/\nPROJECT"]):::entity
+  --> SI["spec_iterate.sh"]:::action
+  --> GAPS(["REFERENCE_GAPS.md"]):::entity
+
+  SI --> SCORE(["SPEC_SCORECARD.md"]):::entity
+  SI --> ITER(["SPEC_ITERATION.md"]):::entity
+</div>
+
+<h2>Automated Transaction Logging</h2>
+<div class="mermaid">
+flowchart LR
+  classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0
+
+  PROTO(["Prototype/"]):::entity
+  --> TL["tran_logger.sh"]:::action
+  --> SPEC(["Specifications/\nPROJECT"]):::entity
+</div>
+
+</body>
+</html>
