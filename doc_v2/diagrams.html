@@ -8,7 +8,7 @@
 mermaid.initialize({
   startOnLoad: true,
   theme: 'dark',
-  flowchart: { curve: 'linear', nodeSpacing: 60, rankSpacing: 50, padding: 16 },
+  flowchart: { curve: 'linear', nodeSpacing: 40, rankSpacing: 35, padding: 16 },
   themeVariables: {
     darkMode:            true,
     background:          '#0f1117',
@@ -42,18 +42,10 @@ flowchart LR
   classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
   classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
-  S1["setup.sh"]:::action
-  --> SPEC(["Specifications/"]):::entity
-  --> S2["validate.sh"]:::action
-  --> S3["oneshot.sh"]:::action
-  --> PROTO_GRP
-
-  subgraph PROTO_GRP [" "]
-    direction TB
-    PT(["Prototype/"]):::entity
-    SC(["SCORECARD.md"]):::entity
-  end
-  style PROTO_GRP fill:none,stroke:none
+  S1["setup.sh"]:::action --> SPEC(["Specifications/"]):::entity
+  SPEC --> S2["validate.sh"]:::action --> S3["oneshot.sh"]:::action
+  S3 --> PT(["Prototype/"]):::entity
+  S3 --> SC(["SCORECARD.md"]):::entity
 </div>
 
 <h2>Iterate</h2>
@@ -62,21 +54,13 @@ flowchart LR
   classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
   classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
-  PROTO1_GRP --> S1["iterate.sh"]:::action --> PROTO2_GRP --> S2["merge.sh"]:::action --> PROJ(["Project"]):::entity
-
-  subgraph PROTO1_GRP [" "]
-    direction TB
-    PT1(["Prototype/"]):::entity
-    SC1(["SCORECARD.md"]):::entity
-  end
-  style PROTO1_GRP fill:none,stroke:none
-
-  subgraph PROTO2_GRP [" "]
-    direction TB
-    PT2(["Prototype/"]):::entity
-    SC2(["SCORECARD.md"]):::entity
-  end
-  style PROTO2_GRP fill:none,stroke:none
+  PT1(["Prototype/"]):::entity  --> S1["iterate.sh"]:::action
+  SC1(["SCORECARD.md"]):::entity --> S1
+  S1 --> PT2(["Prototype/"]):::entity
+  S1 --> SC2(["SCORECARD.md"]):::entity
+  PT2 --> S2["merge.sh"]:::action
+  SC2 --> S2
+  S2 --> PROJ(["Project"]):::entity
 </div>
 
 <h2>Technology Rules</h2>
@@ -114,14 +98,9 @@ flowchart LR
   classDef entity fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold,padding:10px
   classDef action fill:#1e2230,stroke:#3a4060,color:#e2e8f0,padding:8px
 
-  PROTO_GRP --> TL["tran_logger.sh"]:::action --> SPEC(["Specifications/"]):::entity
-
-  subgraph PROTO_GRP [" "]
-    direction TB
-    PT(["Prototype/"]):::entity
-    SC(["SCORECARD.md"]):::entity
-  end
-  style PROTO_GRP fill:none,stroke:none
+  PT(["Prototype/"]):::entity   --> TL["tran_logger.sh"]:::action
+  SC(["SCORECARD.md"]):::entity --> TL
+  TL --> SPEC(["Specifications/"]):::entity
 </div>
 
 </body>
