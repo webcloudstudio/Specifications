@@ -359,7 +359,7 @@ echo ""
 echo "# PROJECT SPECIFICATION"
 echo ""
 
-for spec_file in $(find "$PROJECT_DIR" -maxdepth 1 -name '*.md' ! -name 'METADATA.md' | sort); do
+for spec_file in $(find "$PROJECT_DIR" -maxdepth 1 -name '*.md' ! -name 'METADATA.md' ! -name 'SPEC_SCORECARD.md' ! -name 'SPEC_ITERATION.md' | sort); do
     fname="$(basename "$spec_file")"
     emit_file "$spec_file" "Spec: $fname"
 done
