@@ -174,29 +174,27 @@ Run: $(date '+%Y-%m-%d %H:%M:%S')"
 
     echo "OneShot (${ONESHOT_MODE}): $TAG_NAME → $(git rev-parse --short HEAD)" >&2
 
-    # Record prototype build tag, commit, and directory in .env
-    {
-        grep -v "^PROTOTYPE_BUILD_TAG=\|^PROTOTYPE_BUILD_COMMIT=\|^PROTOTYPE_DIR=" "$PROJECT_DIR/.env" 2>/dev/null || true
-        echo "PROTOTYPE_BUILD_TAG=$TAG_NAME"
-        echo "PROTOTYPE_BUILD_COMMIT=$COMMIT_SHA"
-        echo "PROTOTYPE_DIR=$TARGET_DIR"
-    } > "$PROJECT_DIR/.env.tmp" && mv "$PROJECT_DIR/.env.tmp" "$PROJECT_DIR/.env"
-    echo "  Prototype tag: $TAG_NAME → $PROJECT_DIR/.env" >&2
+    # Record deployment entry in shared deployments log
+    DATA_FILE="$REPO_DIR/data/deployments.jsonl"
+    python3 -c "
+import json
+from datetime import datetime, timezone
+entry = {
+    'ts':      datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
+    'project': '$PROJECT_NAME',
+    'dir':     '$TARGET_DIR',
+    'action':  'oneshot',
+    'tag':     '$TAG_NAME',
+    'commit':  '$(git rev-parse --short HEAD)',
+    'mode':    '$ONESHOT_MODE',
+    'source':  'bash',
+    'items':   0,
+    'summary': '',
+}
+print(json.dumps(entry))
+" >> "$DATA_FILE"
+    echo "  Deployment logged: $DATA_FILE" >&2
     echo "" >&2
-
-    # Append deploy log entry
-    DEPLOY_LOG="$PROJECT_DIR/DEPLOY_LOG.md"
-    if [ ! -f "$DEPLOY_LOG" ]; then
-        echo "# Deploy Log: $PROJECT_NAME" > "$DEPLOY_LOG"
-        echo "" >> "$DEPLOY_LOG"
-    fi
-    {
-        echo "## $(date '+%Y-%m-%d %H:%M') — oneshot ($ONESHOT_MODE)"
-        echo "- Tag:       $TAG_NAME"
-        echo "- Commit:    $(git rev-parse --short HEAD)"
-        echo "- Prototype: $TARGET_DIR"
-        echo ""
-    } >> "$DEPLOY_LOG"
 
     # Show diff from previous oneshot if one exists
     PREV_TAG=$(git tag -l "oneshot/${PROJECT_NAME}/*" --sort=-version:refname | head -2 | tail -1)
@@ -406,6 +404,12 @@ At the end of this session, print a summary of all specification files written o
 --- Specification Updates ---
 <filename>: <what changed>
 \`\`\`
+
+## Deployment Log
+Append one line to \`$REPO_DIR/data/deployments.jsonl\` using the Write tool:
+\`\`\`
+{"ts":"<ISO 8601 UTC>","project":"$PROJECT_NAME","dir":"<pwd>","action":"llm_complete","tag":"$TAG_NAME","commit":"","mode":"$ONESHOT_MODE","source":"llm","items":0,"summary":"<one-sentence summary of what was built>"}
+\`\`\`
 FOOTER
 else
 cat <<FOOTER
@@ -422,6 +426,12 @@ At the end of this session, print a summary of all files written:
 \`\`\`
 --- Build Summary ---
 <filename>: <what was created>
+\`\`\`
+
+## Deployment Log
+Append one line to \`$REPO_DIR/data/deployments.jsonl\` using the Write tool:
+\`\`\`
+{"ts":"<ISO 8601 UTC>","project":"$PROJECT_NAME","dir":"<pwd>","action":"llm_complete","tag":"$TAG_NAME","commit":"","mode":"$ONESHOT_MODE","source":"llm","items":0,"summary":"<one-sentence summary of what was built>"}
 \`\`\`
 FOOTER
 fi

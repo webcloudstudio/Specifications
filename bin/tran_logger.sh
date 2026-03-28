@@ -50,22 +50,33 @@ if [ ! -d "$SPEC_DIR" ]; then
     exit 1
 fi
 
-# Read prototype directory from .env (written by oneshot.sh / iterate.sh)
+# Read prototype directory from last deployment entry in deployments.jsonl
+DATA_FILE="$REPO_DIR/data/deployments.jsonl"
 PROTO_DIR=""
-ENV_FILE="$SPEC_DIR/.env"
-if [ -f "$ENV_FILE" ]; then
-    PROTO_DIR=$(grep "^PROTOTYPE_DIR=" "$ENV_FILE" 2>/dev/null | head -1 | sed 's/^PROTOTYPE_DIR=//' | tr -d '\r' || true)
+if [ -f "$DATA_FILE" ]; then
+    PROTO_DIR=$(python3 -c "
+import json, sys
+last = None
+for line in open('$DATA_FILE'):
+    try:
+        e = json.loads(line.strip())
+        if e.get('project') == '$PROJECT_NAME' and e.get('action') in ('oneshot', 'iterate'):
+            last = e
+    except: pass
+if last: print(last.get('dir', ''))
+else: sys.exit(1)
+" 2>/dev/null || true)
 fi
 
 if [ -z "$PROTO_DIR" ]; then
-    echo "ERROR: PROTOTYPE_DIR not set in $ENV_FILE" >&2
+    echo "ERROR: No deployment entry found for '$PROJECT_NAME' in $DATA_FILE" >&2
     echo "       Run bash bin/iterate.sh $PROJECT_NAME or bash bin/oneshot.sh $PROJECT_NAME first." >&2
     exit 1
 fi
 
 if [ ! -d "$PROTO_DIR" ]; then
     echo "ERROR: Prototype directory not found: $PROTO_DIR" >&2
-    echo "       Update PROTOTYPE_DIR in $ENV_FILE or re-run iterate.sh/oneshot.sh." >&2
+    echo "       Check 'dir' field for '$PROJECT_NAME' in $DATA_FILE or re-run iterate.sh/oneshot.sh." >&2
     exit 1
 fi
 

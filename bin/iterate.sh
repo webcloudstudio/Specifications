@@ -46,7 +46,7 @@ fi
 
 PROJECT_NAME="$POSITIONAL"
 SPEC_DIR="$REPO_DIR/$PROJECT_NAME"
-PROTO_DIR="$PROJECTS_DIR/$PROJECT_NAME"
+DATA_FILE="$REPO_DIR/data/deployments.jsonl"
 
 if [ ! -d "$SPEC_DIR" ]; then
     echo "ERROR: Specification directory not found: $SPEC_DIR" >&2
@@ -63,18 +63,38 @@ get_metadata() {
     grep "^${1}:" "$METADATA_FILE" 2>/dev/null | head -1 | sed "s/^${1}:[[:space:]]*//" | tr -d '\r'
 }
 
-# --- Read build tag from .env ---
-ENV_FILE="$SPEC_DIR/.env"
-BUILD_TAG=""
-BUILD_COMMIT=""
-if [ -f "$ENV_FILE" ]; then
-    BUILD_TAG=$(grep "^PROTOTYPE_BUILD_TAG=" "$ENV_FILE" 2>/dev/null | head -1 | sed 's/^PROTOTYPE_BUILD_TAG=//' | tr -d '\r' || true)
-    BUILD_COMMIT=$(grep "^PROTOTYPE_BUILD_COMMIT=" "$ENV_FILE" 2>/dev/null | head -1 | sed 's/^PROTOTYPE_BUILD_COMMIT=//' | tr -d '\r' || true)
+# --- Read last deployment for this project from deployments.jsonl ---
+if [ ! -f "$DATA_FILE" ]; then
+    echo "ERROR: $DATA_FILE not found." >&2
+    echo "       Run bash bin/oneshot.sh $PROJECT_NAME first to establish a build baseline." >&2
+    exit 1
 fi
 
-if [ -z "$BUILD_TAG" ]; then
-    echo "ERROR: PROTOTYPE_BUILD_TAG not found in $ENV_FILE" >&2
+LAST_ENTRY=$(python3 -c "
+import json, sys
+last = None
+for line in open('$DATA_FILE'):
+    try:
+        e = json.loads(line.strip())
+        if e.get('project') == '$PROJECT_NAME' and e.get('action') in ('oneshot', 'iterate'):
+            last = e
+    except: pass
+if last: print(json.dumps(last))
+else: sys.exit(1)
+" 2>/dev/null || true)
+
+if [ -z "$LAST_ENTRY" ]; then
+    echo "ERROR: No deployment entry found for '$PROJECT_NAME' in $DATA_FILE" >&2
     echo "       Run bash bin/oneshot.sh $PROJECT_NAME first to establish a build baseline." >&2
+    exit 1
+fi
+
+BUILD_TAG=$(python3 -c "import json,sys; e=json.loads(sys.stdin.read()); print(e.get('tag',''))" <<< "$LAST_ENTRY" 2>/dev/null || true)
+PROTO_DIR=$(python3 -c "import json,sys; e=json.loads(sys.stdin.read()); print(e.get('dir',''))" <<< "$LAST_ENTRY" 2>/dev/null || true)
+BUILD_COMMIT=$(python3 -c "import json,sys; e=json.loads(sys.stdin.read()); print(e.get('commit',''))" <<< "$LAST_ENTRY" 2>/dev/null || true)
+
+if [ -z "$BUILD_TAG" ]; then
+    echo "ERROR: No build tag found in last deployment entry for '$PROJECT_NAME'" >&2
     exit 1
 fi
 
@@ -83,16 +103,29 @@ if ! git -C "$REPO_DIR" rev-parse "$BUILD_TAG" >/dev/null 2>&1; then
     exit 1
 fi
 
-# --- Determine diff baseline: last iterate SPEC_COMMIT if available, else BUILD_TAG ---
-# On first iterate after oneshot: no SPEC_COMMIT in prototype .env yet → use BUILD_TAG.
-# On subsequent iterates: use the SPEC_COMMIT written by the previous iterate run.
+if [ -z "$PROTO_DIR" ]; then
+    echo "ERROR: No prototype directory found in last deployment entry for '$PROJECT_NAME'" >&2
+    exit 1
+fi
+
+# --- Determine diff baseline: last iterate commit if available, else BUILD_TAG ---
+# On first iterate after oneshot: no prior iterate entry → use BUILD_TAG.
+# On subsequent iterates: use the spec commit from the last iterate entry.
 # This advances the baseline automatically so only NEW tickets appear each run.
 DIFF_BASELINE="$BUILD_TAG"
-if [ -d "$PROTO_DIR" ]; then
-    PROTO_SPEC_COMMIT=$(grep "^SPEC_COMMIT=" "$PROTO_DIR/.env" 2>/dev/null | head -1 | sed 's/^SPEC_COMMIT=//' | tr -d '\r' || true)
-    if [ -n "$PROTO_SPEC_COMMIT" ] && git -C "$REPO_DIR" rev-parse "$PROTO_SPEC_COMMIT" >/dev/null 2>&1; then
-        DIFF_BASELINE="$PROTO_SPEC_COMMIT"
-    fi
+LAST_ITERATE_COMMIT=$(python3 -c "
+import json, sys
+last = None
+for line in open('$DATA_FILE'):
+    try:
+        e = json.loads(line.strip())
+        if e.get('project') == '$PROJECT_NAME' and e.get('action') == 'iterate':
+            last = e
+    except: pass
+if last: print(last.get('commit', ''))
+" 2>/dev/null || true)
+if [ -n "$LAST_ITERATE_COMMIT" ] && git -C "$REPO_DIR" rev-parse "$LAST_ITERATE_COMMIT" >/dev/null 2>&1; then
+    DIFF_BASELINE="$LAST_ITERATE_COMMIT"
 fi
 
 # --- Numbered ticket files added since the diff baseline ---
@@ -131,12 +164,6 @@ if [ "$ITEM_COUNT" -eq 0 ]; then
     echo "         Add SCREEN-NNN-*.md, FEATURE-NNN-*.md, PATCH-NNN-*.md, AC-NNN-*.md, or INTENT-NNN-*.md files." >&2
 fi
 
-# --- Record prototype directory and spec commit in Specifications/.env ---
-{
-    grep -v "^PROTOTYPE_DIR=" "$ENV_FILE" 2>/dev/null || true
-    echo "PROTOTYPE_DIR=$PROTO_DIR"
-} > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
-
 # --- Write spec commit to Prototype <PROJECT>/.env so prototype knows what specs it implements ---
 if [ -d "$PROTO_DIR" ]; then
     PROTO_ENV="$PROTO_DIR/.env"
@@ -148,19 +175,25 @@ if [ -d "$PROTO_DIR" ]; then
     echo "  Spec commit written to Prototype .env: $SPEC_COMMIT" >&2
 fi
 
-DEPLOY_LOG="$SPEC_DIR/DEPLOY_LOG.md"
-if [ ! -f "$DEPLOY_LOG" ]; then
-    echo "# Deploy Log: $PROJECT_NAME" > "$DEPLOY_LOG"
-    echo "" >> "$DEPLOY_LOG"
-fi
-{
-    echo "## $(date '+%Y-%m-%d %H:%M') — iterate"
-    echo "- Tag:       $BUILD_TAG (baseline)"
-    echo "- Spec:      $SPEC_COMMIT"
-    echo "- Prototype: $PROTO_DIR"
-    [ "$ITEM_COUNT" -gt 0 ] && echo "- Items:     $ITEM_COUNT"
-    echo ""
-} >> "$DEPLOY_LOG"
+# --- Record iterate entry in shared deployments log ---
+python3 -c "
+import json
+from datetime import datetime, timezone
+entry = {
+    'ts':      datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
+    'project': '$PROJECT_NAME',
+    'dir':     '$PROTO_DIR',
+    'action':  'iterate',
+    'tag':     '$BUILD_TAG',
+    'commit':  '$SPEC_COMMIT',
+    'mode':    '',
+    'source':  'bash',
+    'items':   $ITEM_COUNT,
+    'summary': '',
+}
+print(json.dumps(entry))
+" >> "$DATA_FILE"
+echo "  Deployment logged: $DATA_FILE" >&2
 
 # --- Helper ---
 emit_file() {
@@ -296,5 +329,11 @@ At the end of this session, print:
 <filename>: <what changed>
 --- Rejected ---
 <filename>: <reason>
+\`\`\`
+
+## Deployment Log
+Append one line to \`$DATA_FILE\` using the Write tool:
+\`\`\`
+{"ts":"<ISO 8601 UTC>","project":"$PROJECT_NAME","dir":"<pwd>","action":"llm_complete","tag":"$BUILD_TAG","commit":"","mode":"iterate","source":"llm","items":$ITEM_COUNT,"summary":"<one-sentence summary of what was applied>"}
 \`\`\`
 FOOTER
