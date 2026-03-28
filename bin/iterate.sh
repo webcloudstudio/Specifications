@@ -142,12 +142,12 @@ NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$DIFF_BASELINE"
     || true)
 
 # --- Spec files modified since the diff baseline (non-ticket, non-meta) ---
-# Excluded: METADATA, README, SPEC_SCORECARD, SPEC_ITERATION, REFERENCE_GAPS,
+# Excluded: METADATA, README, SPEC_* (all files with SPEC_ prefix), REFERENCE_GAPS,
 #           IDEAS, ACCEPTANCE_CRITERIA (handled separately), ARCHITECTURE (always full),
 #           numbered ticket files (handled above).
 MODIFIED_SPECS=$(git -C "$REPO_DIR" diff --diff-filter=M --name-only "$DIFF_BASELINE" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
-    | grep -Ev "^${PROJECT_NAME}/(METADATA|README|SPEC_SCORECARD|SPEC_ITERATION|REFERENCE_GAPS|IDEAS|ACCEPTANCE_CRITERIA|ARCHITECTURE)\." \
+    | grep -Ev "^${PROJECT_NAME}/(METADATA|README|SPEC_[A-Z_]+|REFERENCE_GAPS|IDEAS|ACCEPTANCE_CRITERIA|ARCHITECTURE)\." \
     | grep -Ev "^${PROJECT_NAME}/[A-Z]+-[0-9]{3}[-.]" \
     | sed "s|^${PROJECT_NAME}/||" \
     | sort \
