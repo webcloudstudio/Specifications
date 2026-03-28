@@ -21,8 +21,7 @@ claude .
 # paste <PROJECT>/oneshot-prompt.md
 ```
 
-`oneshot.sh` tags the commit, writes `PROTOTYPE_BUILD_TAG`, `PROTOTYPE_BUILD_COMMIT`,
-and `PROTOTYPE_DIR` to `<PROJECT>/.env`, and appends to `DEPLOY_LOG.md`.
+`oneshot.sh` tags the commit and appends an entry to `data/deployments.jsonl` (project, prototype dir, tag, commit). The LLM running the prompt appends a completion record to the same file.
 
 ---
 

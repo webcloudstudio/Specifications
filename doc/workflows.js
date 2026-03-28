@@ -16,9 +16,10 @@
   STACK(["Stack/"]):::dir --> S3
   TR(["TechnologyRules/"]):::dir --> S3
   S3 --> PT(["Prototype Prompt"]):::dir
-  S3 --> GI{{"METADATA.md"}}:::md
+  S3 --> DL{{"deployments.jsonl"}}:::md
   S3 --> SC{{"SCORECARD.md"}}:::md
-  S3 --> GAPS{{"REFERENCE_GAPS.md"}}:::md`,
+  S3 --> GAPS{{"REFERENCE_GAPS.md"}}:::md
+  PT --> DL`,
       learnings: [
         'A Well Defined Specification Files Architecture Works',
         'Opinionated Stack',
@@ -37,7 +38,7 @@
       },
       io: {
         inputs: ['Specifications/', 'Stack Specifications/', 'Technology_Specification/'],
-        outputs: ['Prototype/', 'SCORECARD.md', 'git tag oneshot/{name}/{date}']
+        outputs: ['Prototype/', 'SCORECARD.md', 'git tag oneshot/{name}/{date}', 'deployments.jsonl']
       }
     },
     {
@@ -45,17 +46,23 @@
       num: 'Workflow #2', title: 'Application Iteration',
       desc: 'Change specifications flow to Prototypes. Promote squash-merges to Projects.',
       mermaid: `flowchart LR${D}
-  TI{{"Commit Information"}}:::md --> S1["iterate.sh"]:::script
+  DL{{"deployments.jsonl"}}:::md --> S1["iterate.sh"]:::script
   CH{{"Specification Diff"}}:::md --> S1
   PT1(["Stack/"]):::dir --> S1
   TR1(["TechnologyRules/"]):::dir --> S1
   S1 --> PT2(["Prototype/"]):::dir
   S1 --> SC2{{"SCORECARD.md"}}:::md
+  S1 --> DL
+  PT2 --> DL
   PT2 --> S2["merge.sh"]:::script
   S2 --> PROJ(["Project"]):::dir`,
       learnings: [
         'Updates changing specification MUCH preferred. Scorecard tracks specification drift.'
-      ]
+      ],
+      io: {
+        inputs: ['deployments.jsonl (last dir + tag)', 'Specification Diff', 'Stack/', 'TechnologyRules/'],
+        outputs: ['Prototype/', 'SCORECARD.md', 'deployments.jsonl (new entry)']
+      }
     },
     {
       id: 'techrules', navLabel: 'Technology Rules',
@@ -101,7 +108,8 @@
       num: 'Workflow #5', title: 'Capturing Claude Edit Sessions',
       desc: 'Transform Claude internal logs into formal tickets and acceptance criteria.',
       mermaid: `flowchart LR${D}
-  PT([".claude JSONL"]):::dir --> TL["tran_logger.sh"]:::script
+  DL{{"deployments.jsonl"}}:::md --> TL["tran_logger.sh"]:::script
+  PT([".claude JSONL"]):::dir --> TL
   GI(["git logs"]):::dir --> TL
   TL --> SPEC(["Specifications/"]):::dir
   TL --> IDEAS{{"IDEAS.md"}}:::md`,
