@@ -45,7 +45,7 @@ Navigates to SCREEN-DRILLDOWN-PROJECT for the selected project.
 | Run operation | Click button | Launches script, button shows running state |
 | Stop operation | Click running button | Sends SIGTERM |
 | Filter | Text/tag/status/namespace controls | Client-side row filtering |
-| Rescan | Nav bar button | POST `/api/scan`, refreshes project list |
+| Rescan Your Projects | Nav bar button (Project Sub-Bar, right) | POST `/api/scan`, refreshes project list |
 | Push | Per-project (shown when `git_unpushed > 0`) | POST `/api/push/{id}` |
 
 ## Startup Behavior

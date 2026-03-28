@@ -1,6 +1,6 @@
 # Screen: Welcome
 
-**Description:** Landing screen shown when the user first enters the application. Welcome banner and information about automatic project discovery.
+**Description:** Landing screen shown when the user first enters the application. START HERE checklist, project discovery overview, and help resources.
 
 ## Menu Navigation
 
@@ -16,7 +16,7 @@ The app root (`/`) redirects to `/welcome` when no other default is set.
 
 ## Layout
 
-Single-column centered content, max-width 900px, padded. Two stacked sections:
+Single-column centered content, max-width 900px, padded. Four stacked sections:
 
 ```
 ┌────────────────────────────────────────────┐
@@ -25,11 +25,16 @@ Single-column centered content, max-width 900px, padded. Two stacked sections:
 │      Your local prototype operations hub   │
 │                                            │
 ├────────────────────────────────────────────┤
-│  Project Discovery                         │
+│  🟢 START HERE                             │
 │  ─────────────────────────────────────────│
-│  [projects directory info + scan details]  │
+│  [checklist with status indicators]        │
 ├────────────────────────────────────────────┤
-│  Service Help                              │
+│  📁 Project Discovery                      │
+│  ─────────────────────────────────────────│
+│  XX Projects | XX Prototypes               │
+│  [Alphabetical list of projects]           │
+├────────────────────────────────────────────┤
+│  ❓ Service Help                           │
 │  ─────────────────────────────────────────│
 │  [help page links]                         │
 └────────────────────────────────────────────┘
@@ -47,26 +52,57 @@ Full-width hero section at top of page. Dark surface (`--cc-surface`), large cen
 
 No buttons or actions in the banner. Visual only.
 
-## Project Discovery Card
+## START HERE Card
 
-Card (`cc-card`) below the banner. Purpose: inform the user about automatic project discovery and the projects directory structure.
+Card (`cc-card`) highlighted with an accent background color. Purpose: quick checklist to verify the application is properly configured.
 
 ### Card Header
 
-`Project Discovery` with a folder icon.
+`START HERE` — large, bold, highlighted in accent color with a green circle indicator (●).
 
-### Content
+### Checklist Items
 
-Informational text layout explaining how project discovery works.
+Four checklist items with status indicators. Status icons use a stoplight pattern:
 
-| Element | Content |
-|---------|---------|
-| Description | `Projects are automatically scanned on startup and when you request a rescan.` |
-| Directory Info | `Projects are discovered from the directory configured in PROJECTS_DIR environment variable.` |
-| What's Scanned | Listed as bullet points: METADATA.md for project identity, AGENTS.md for endpoints, bin/ directory for scripts |
-| Note | `There is no need to add command center operations to project files — the scanner finds and indexes executable scripts automatically.` |
+| Item | Status Source | Icon | Description |
+|------|---------------|------|-------------|
+| PROJECTS_DIR | Environment config | ✅/⚠️/❌ | Shows the configured directory path. Displays directory value inline. Green if accessible, amber if not found, red if missing. |
+| Startup Scan | Backend metric | ✅ | Displays: "Startup Scan Detected {count} Projects and {count} Prototypes" — produced by the startup scanner on app initialization. Green check always (informational, not a failure condition). |
+| Ready to Use | Derived state | ✅ | "Application ready" — shown when scan has completed and projects list is populated. Green check. |
+| Next Steps | — | 📌 | "Use the Projects tab above or Rescan to update" — informational only, not a failure state. |
 
-Use concise, scannable bullet points rather than prose paragraphs.
+Each item is a row with icon + label + value/description. Use emoji or Font Awesome icons for stoplight effect (● red, ⚠️ amber, ✅ green).
+
+### Content Layout
+
+Displayed as a vertical checklist. Not a form—purely informational with read-only values.
+
+## Project Discovery Card
+
+Card (`cc-card`) below the START HERE section. Purpose: show project discovery overview and list all discovered projects.
+
+### Card Header
+
+`Project Discovery` with a folder icon (📁).
+
+### Summary Line
+
+Two-column summary: `XX Projects | XX Prototypes` — count of discovered projects and prototypes from the startup scan.
+
+### Project List
+
+One-column alphabetical list of project names below the summary. Each project name is clickable and links to `/project/{id}` for detail view.
+
+Example:
+```
+Analytics
+Dashboard
+DataPipeline
+MLExperiment
+WebApp
+```
+
+List is sorted alphabetically. One project per row. Space reserved for future KPI columns (do not implement yet).
 
 ## Service Help Links Card
 
@@ -74,7 +110,7 @@ Card below the project discovery card. Purpose: quick links to commonly needed e
 
 ### Card Header
 
-`Help & Resources` with a question-mark icon.
+`Help & Resources` with a question-mark icon (❓).
 
 ### Links
 
@@ -93,12 +129,13 @@ All links open in a new tab. Cards are static — no data fetch required.
 
 | Reads | Writes |
 |-------|--------|
-| None — static content | None |
+| `projects` table (count + list) | None |
+| Startup scan metrics | |
 
-No API calls. Screen is fully static HTML rendered by the server template.
+Reads from backend: project count, project list, prototype count, PROJECTS_DIR value from env.
 
 ## Open Questions
 
 - Should the welcome banner display the logged-in username (if auth is added later)?
-- Should the project discovery card show a live count of currently discovered projects?
+- Should the START HERE checklist be collapsible once all items are green?
 - Should the help links be editable from the Settings screen?

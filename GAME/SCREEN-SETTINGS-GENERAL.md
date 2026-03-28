@@ -7,8 +7,6 @@
 
 `Settings / General`
 
-(Accessed via the Settings dropdown in the top navigation bar.)
-
 ## Route
 
 ```

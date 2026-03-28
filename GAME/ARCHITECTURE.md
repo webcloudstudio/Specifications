@@ -92,6 +92,7 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | GET | `/publisher` | Publisher page | Nav link |
 | POST | `/publisher/build` | Build status | Rebuild button |
 | POST | `/publisher/publish` | Publish status | Publish button |
+| POST | `/publisher/{project_id}/card` | Updated card row fragment | Card field edit or checkbox |
 | GET | `/project-config` | Configuration list | Nav link |
 | GET | `/monitoring` | Monitoring page | Nav link |
 | GET | `/workflow` | Workflow board | Nav link |
@@ -108,10 +109,11 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | GET | `/project-workflow` | Workflow screen | Nav link |
 | POST | `/api/spec-tickets` | JSON | Create spec ticket + write file |
 | POST | `/api/validate/{project_id}` | HTMX row fragment | Run validation checks |
-| GET | `/settings/general` | Settings page | Settings dropdown |
+| GET | `/settings/general` | Settings page | Settings gear icon → General tab |
 | POST | `/settings/general` | HTMX form fragment | Save settings |
-| GET | `/settings/tags` | Tag settings page | Settings dropdown |
+| GET | `/settings/tags` | Tag settings page | Settings gear icon → Tags tab |
 | POST | `/settings/tags` | JSON | Save tag colors |
+| GET | `/settings/help` | Help page | Settings gear icon → Help tab |
 | GET | `/api/catalog` | JSON | Service catalog (all projects + scripts) |
 | POST | `/api/{name}/run/{script}` | JSON 202 | Fire script headlessly |
 | GET | `/api/runs/{run_id}` | JSON | Poll run status |

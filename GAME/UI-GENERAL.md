@@ -25,7 +25,7 @@ No JS build step. Bootstrap 5 via CDN. HTMX via CDN.
 
 ## Navigation Bar
 
-Two-tier navigation. Top bar is always visible. Project sub-bar appears only when `Projects` is the active top-level item.
+Three-tier navigation. Top bar is always visible. Sub-bars appear when their respective top-level items are active.
 
 ### Top Bar
 
@@ -33,10 +33,10 @@ Fixed. Present on all screens. Components left to right:
 
 | Element | Behavior |
 |---------|----------|
-| **Brand** (`cc-brand`) | App name with command icon. Click → Dashboard (`/`). |
-| **Top-level tabs** | Welcome, Projects, Processes, Monitoring, Workflow, Publisher, Catalog, Prototypes. Active tab highlighted. Welcome is leftmost and is the default. |
+| **Brand** (`cc-brand`) | App name (🎮 icon or command-line symbol). Click → Dashboard (`/`). |
+| **Top-level tabs** | Each tab has an icon before the label. Welcome (🏠), Projects (📁), Processes (⚙️), Monitoring (📊), Workflow (📋), Publisher (📢), Catalog (📚), Prototypes (🚀). Active tab highlighted. Welcome is leftmost and is the default. |
 | **Documentation button** | Opens `docs/index.html` in new tab. |
-| **Settings dropdown** | Hamburger icon. Contains: Settings, Tags, Help. |
+| **Settings** (gear icon) | ⚙️ Settings (far right). Click → activates Settings context and displays Settings sub-bar below. |
 | **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
 
 ### Project Sub-Bar
@@ -47,9 +47,22 @@ Visible only when `Projects` is active in the top bar. Renders directly below th
 |---------|----------|----------|
 | **Dashboard** tab | Left | Links to `/` — default project list |
 | **Configuration** tab | Left | Links to `/project-config` — batch metadata editor |
+| **Rescan button** | Right | Text: "Rescan Your Projects". POST `/api/scan` on click, refreshes project list. |
 | **Filter button** | Right | Cycling view filter: `normal → all → idea → archive → normal`. State is a URL query param (`?filter=`). |
 
 Dashboard is the default sub-tab when Projects is first selected. All SCREEN-DEFAULT-based screens render in this Projects context.
+
+### Settings Sub-Bar
+
+Visible only when `Settings` (gear icon in top bar) is active. Renders directly below the top bar, replacing the Project Sub-Bar.
+
+| Element | Position | Behavior |
+|---------|----------|----------|
+| **General** tab | Left | Links to `/settings/general` — application settings |
+| **Tags** tab | Left | Links to `/settings/tags` — tag color configuration |
+| **Help** tab | Left | Links to `/settings/help` — application help |
+
+General is the default sub-tab when Settings is first selected.
 
 ---
 

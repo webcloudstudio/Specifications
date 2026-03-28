@@ -1,0 +1,1 @@
+The scanner, health poller, and log ingestor must not all commit to the DB simultaneously at startup. Bump SQLite's default 5s lock timeout to 30s in both get_db() and _get_raw_connection().

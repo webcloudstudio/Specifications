@@ -11,7 +11,7 @@ Each flow shows: what triggers it, what happens in sequence, what gets read, wha
 
 ## 1. Project Scan
 
-**Trigger:** Platform startup (first request), or user clicks Rescan button.
+**Trigger:** Platform startup (first request), or user clicks "Rescan Your Projects" button in the Project Sub-Bar.
 
 ```
 User clicks Rescan (or first page load)
