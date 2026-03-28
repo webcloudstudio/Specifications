@@ -1,11 +1,10 @@
 # Screen: Welcome
 
-**Version:** 20260324 V1
-**Description:** Landing screen shown when the user first enters the application. Welcome banner, Git SSH setup guide, and links to service help pages.
+**Description:** Landing screen shown when the user first enters the application. Welcome banner and information about automatic project discovery.
 
 ## Menu Navigation
 
-`Projects / Welcome` 
+`Projects / Welcome`
 
 ## Route
 
@@ -17,7 +16,7 @@ The app root (`/`) redirects to `/welcome` when no other default is set.
 
 ## Layout
 
-Single-column centered content, max-width 900px, padded. Three stacked sections:
+Single-column centered content, max-width 900px, padded. Two stacked sections:
 
 ```
 ┌────────────────────────────────────────────┐
@@ -26,9 +25,9 @@ Single-column centered content, max-width 900px, padded. Three stacked sections:
 │      Your local prototype operations hub   │
 │                                            │
 ├────────────────────────────────────────────┤
-│  Git SSH Setup                             │
+│  Project Discovery                         │
 │  ─────────────────────────────────────────│
-│  [setup instructions + link]               │
+│  [projects directory info + scan details]  │
 ├────────────────────────────────────────────┤
 │  Service Help                              │
 │  ─────────────────────────────────────────│
@@ -48,45 +47,30 @@ Full-width hero section at top of page. Dark surface (`--cc-surface`), large cen
 
 No buttons or actions in the banner. Visual only.
 
-## Git SSH Setup Card
+## Project Discovery Card
 
-Card (`cc-card`) below the banner. Purpose: guide the user to establish SSH connectivity to GitHub (or their Git host) so prototype operations (clone, push, pull) work correctly.
+Card (`cc-card`) below the banner. Purpose: inform the user about automatic project discovery and the projects directory structure.
 
 ### Card Header
 
-`Git SSH Setup` with a key icon.
+`Project Discovery` with a folder icon.
 
 ### Content
 
-Short checklist layout. Steps are displayed as numbered items, not a wall of text.
+Informational text layout explaining how project discovery works.
 
-| Step | Instruction |
-|------|-------------|
-| 1 | Check for existing SSH key: `ls ~/.ssh/id_ed25519.pub` |
-| 2 | If missing, generate one: `ssh-keygen -t ed25519 -C "your@email.com"` |
-| 3 | Copy your public key: `cat ~/.ssh/id_ed25519.pub` |
-| 4 | Add the key to your Git host's SSH keys page (link below) |
-| 5 | Test connectivity: `ssh -T git@github.com` |
+| Element | Content |
+|---------|---------|
+| Description | `Projects are automatically scanned on startup and when you request a rescan.` |
+| Directory Info | `Projects are discovered from the directory configured in PROJECTS_DIR environment variable.` |
+| What's Scanned | Listed as bullet points: METADATA.md for project identity, AGENTS.md for endpoints, bin/ directory for scripts |
+| Note | `There is no need to add command center operations to project files — the scanner finds and indexes executable scripts automatically.` |
 
-Code snippets rendered in monospace inline code style (not a full log block).
-
-### Link
-
-Single prominent button/link below the steps:
-
-| Label | Target | Style |
-|-------|--------|-------|
-| `Add SSH Key on GitHub →` | `https://github.com/settings/keys` | Outline button, opens new tab |
-
-Note: link text and target can be updated in a future iteration to support GitLab or other hosts.
-
-### Status indicator (future)
-
-Space reserved at bottom of card for a future SSH connectivity status indicator (e.g. `ssh -T git@github.com` result). Not implemented in V1 — leave a placeholder comment in template.
+Use concise, scannable bullet points rather than prose paragraphs.
 
 ## Service Help Links Card
 
-Card below the Git setup card. Purpose: quick links to commonly needed external help pages.
+Card below the project discovery card. Purpose: quick links to commonly needed external help pages.
 
 ### Card Header
 
@@ -99,9 +83,9 @@ Displayed as a grid of link buttons (2-column on desktop, 1-column on narrow).
 | Label | Destination | Notes |
 |-------|-------------|-------|
 | GitHub Docs | `https://docs.github.com` | Opens new tab |
-| SSH Troubleshooting | `https://docs.github.com/en/authentication/troubleshooting-ssh` | Opens new tab |
 | Flask Documentation | `https://flask.palletsprojects.com` | Opens new tab |
 | Bootstrap 5 Docs | `https://getbootstrap.com/docs/5.3` | Opens new tab |
+| Prototyper Workflow | `../doc/index.html` | Local documentation |
 
 All links open in a new tab. Cards are static — no data fetch required.
 
@@ -116,6 +100,5 @@ No API calls. Screen is fully static HTML rendered by the server template.
 ## Open Questions
 
 - Should the welcome banner display the logged-in username (if auth is added later)?
-- Should the Git host URL be configurable in `.env` to support GitLab/Bitbucket?
-- Should V2 add a live SSH connectivity check that pings `ssh -T git@github.com` and shows pass/fail inline?
+- Should the project discovery card show a live count of currently discovered projects?
 - Should the help links be editable from the Settings screen?
