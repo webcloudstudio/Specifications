@@ -4,10 +4,12 @@
 # Category: maintenance
 # Args: Spec
 
-# Generates a focused iteration prompt from numbered ticket files added to the
-# specification directory since the last oneshot build. Ticket types: SCREEN-NNN-*,
-# FEATURE-NNN-*, PATCH-NNN-*, AC-NNN-*, INTENT-NNN-*. The agent validates each item
-# before implementing — underspecified items are rejected. A scorecard is written after.
+# Generates a focused iteration prompt combining:
+#   1. Newly added numbered tickets (SCREEN-NNN-*, FEATURE-NNN-*, AC-NNN-*, etc.)
+#      since the last build — included as full content.
+#   2. Modified specification files (SCREEN-*.md, UI-GENERAL.md, etc.)
+#      since the last build — included as git diffs (context-efficient).
+# The agent validates tickets before implementing. A scorecard is written after.
 # Does not rebuild from scratch. Run claude -p from the prototype directory.
 #
 # Usage:
@@ -139,19 +141,36 @@ NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$DIFF_BASELINE"
     | sort \
     || true)
 
+# --- Spec files modified since the diff baseline (non-ticket, non-meta) ---
+# Excluded: METADATA, README, SPEC_SCORECARD, SPEC_ITERATION, REFERENCE_GAPS,
+#           IDEAS, ACCEPTANCE_CRITERIA (handled separately), ARCHITECTURE (always full),
+#           numbered ticket files (handled above).
+MODIFIED_SPECS=$(git -C "$REPO_DIR" diff --diff-filter=M --name-only "$DIFF_BASELINE" -- "${PROJECT_NAME}/" 2>/dev/null \
+    | grep '\.md$' \
+    | grep -Ev "^${PROJECT_NAME}/(METADATA|README|SPEC_SCORECARD|SPEC_ITERATION|REFERENCE_GAPS|IDEAS|ACCEPTANCE_CRITERIA|ARCHITECTURE)\." \
+    | grep -Ev "^${PROJECT_NAME}/[A-Z]+-[0-9]{3}[-.]" \
+    | sed "s|^${PROJECT_NAME}/||" \
+    | sort \
+    || true)
+
 # --- Summary ---
 DISPLAY_NAME=$(get_metadata "display_name")
 SHORT_COMMIT="${BUILD_COMMIT:0:8}"
 SPEC_COMMIT=$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || true)
 ITEM_COUNT=$(echo "$NEW_ITEMS" | grep -c '[^[:space:]]' 2>/dev/null || true)
+MODIFIED_COUNT=$(echo "$MODIFIED_SPECS" | grep -c '[^[:space:]]' 2>/dev/null || true)
 
 echo "Iterate: $PROJECT_NAME" >&2
 echo "  Baseline:  $DIFF_BASELINE${DIFF_BASELINE:+$( [ "$DIFF_BASELINE" = "$BUILD_TAG" ] && echo ' (oneshot tag)' || echo ' (last iterate)' )}" >&2
 echo "  Spec:      $SPEC_COMMIT" >&2
 echo "  Prototype: $PROTO_DIR" >&2
-echo "  Work items: $ITEM_COUNT" >&2
+echo "  New tickets: $ITEM_COUNT" >&2
 if [ -n "$NEW_ITEMS" ]; then
-    echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "    $f" >&2; done
+    echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "    + $f" >&2; done
+fi
+echo "  Modified specs: $MODIFIED_COUNT" >&2
+if [ -n "$MODIFIED_SPECS" ]; then
+    echo "$MODIFIED_SPECS" | while read -r f; do [ -n "$f" ] && echo "    ~ $f" >&2; done
 fi
 echo "" >&2
 echo "  Run from prototype directory:" >&2
@@ -159,9 +178,9 @@ echo "    cd $PROTO_DIR" >&2
 echo "    claude -p \"\$(cat $SPEC_DIR/iterate-prompt.md)\"" >&2
 echo "" >&2
 
-if [ "$ITEM_COUNT" -eq 0 ]; then
-    echo "WARNING: No numbered ticket files found since $DIFF_BASELINE." >&2
-    echo "         Add SCREEN-NNN-*.md, FEATURE-NNN-*.md, PATCH-NNN-*.md, AC-NNN-*.md, or INTENT-NNN-*.md files." >&2
+if [ "$ITEM_COUNT" -eq 0 ] && [ "$MODIFIED_COUNT" -eq 0 ]; then
+    echo "WARNING: No new tickets and no modified spec files found since $DIFF_BASELINE." >&2
+    echo "         Add SCREEN-NNN-*.md, FEATURE-NNN-*.md, etc. or edit existing spec files." >&2
 fi
 
 # --- Write spec commit to Prototype <PROJECT>/.env so prototype knows what specs it implements ---
@@ -180,22 +199,23 @@ python3 -c "
 import json
 from datetime import datetime, timezone
 entry = {
-    'ts':      datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
-    'project': '$PROJECT_NAME',
-    'dir':     '$PROTO_DIR',
-    'action':  'iterate',
-    'tag':     '$BUILD_TAG',
-    'commit':  '$SPEC_COMMIT',
-    'mode':    '',
-    'source':  'bash',
-    'items':   $ITEM_COUNT,
-    'summary': '',
+    'ts':       datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S'),
+    'project':  '$PROJECT_NAME',
+    'dir':      '$PROTO_DIR',
+    'action':   'iterate',
+    'tag':      '$BUILD_TAG',
+    'commit':   '$SPEC_COMMIT',
+    'mode':     '',
+    'source':   'bash',
+    'items':    $ITEM_COUNT,
+    'modified': $MODIFIED_COUNT,
+    'summary':  '',
 }
 print(json.dumps(entry))
 " >> "$DATA_FILE"
 echo "  Deployment logged: $DATA_FILE" >&2
 
-# --- Helper ---
+# --- Helpers ---
 emit_file() {
     local filepath="$1"
     local label="$2"
@@ -208,6 +228,21 @@ emit_file() {
         echo ""
         echo ""
     fi
+}
+
+emit_diff() {
+    local filepath_rel="$1"   # relative to project dir (e.g. SCREEN-PROJECTS-WELCOME.md)
+    local label="$2"
+    echo "---"
+    echo ""
+    echo "## Changed: $label"
+    echo ""
+    echo '```diff'
+    git -C "$REPO_DIR" diff "$DIFF_BASELINE" -- "${PROJECT_NAME}/${filepath_rel}" 2>/dev/null \
+        || echo "(diff unavailable)"
+    echo '```'
+    echo ""
+    echo ""
 }
 
 # --- Prompt header ---
@@ -225,11 +260,16 @@ Prototype directory: \`$PROTO_DIR\`
 HEADER
 
 if [ -n "$NEW_ITEMS" ]; then
-    echo "**Work items (in order):**"
+    echo "**New tickets (full content below):**"
     echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "- $f"; done
     echo ""
 fi
-if [ "$ITEM_COUNT" -eq 0 ]; then
+if [ -n "$MODIFIED_SPECS" ]; then
+    echo "**Modified specs (diffs below):**"
+    echo "$MODIFIED_SPECS" | while read -r f; do [ -n "$f" ] && echo "- $f"; done
+    echo ""
+fi
+if [ "$ITEM_COUNT" -eq 0 ] && [ "$MODIFIED_COUNT" -eq 0 ]; then
     echo "_(no pending work detected)_"
     echo ""
 fi
@@ -274,16 +314,26 @@ if [ -n "$NEW_ITEMS" ]; then
     done
 fi
 
+# --- Spec changes (diffs for modified non-ticket spec files) ---
+if [ -n "$MODIFIED_SPECS" ]; then
+    echo "# SPEC CHANGES"
+    echo ""
+    echo "The following specification files were updated since the last build."
+    echo "These are unified diffs — apply the corresponding changes to the existing implementation."
+    echo ""
+    echo "$MODIFIED_SPECS" | while read -r fname; do
+        [ -z "$fname" ] && continue
+        emit_diff "$fname" "$fname"
+    done
+fi
+
 # --- Context files ---
-if [ -f "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" ] || \
-   [ -f "$SPEC_DIR/IDEAS.md" ] || \
-   [ -f "$SPEC_DIR/REFERENCE_GAPS.md" ]; then
+if [ -f "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" ] || [ -f "$SPEC_DIR/IDEAS.md" ]; then
     echo "# CONTEXT"
     echo ""
 fi
 emit_file "$SPEC_DIR/ACCEPTANCE_CRITERIA.md" "ACCEPTANCE_CRITERIA.md — all criteria are required"
 emit_file "$SPEC_DIR/IDEAS.md"               "IDEAS.md"
-emit_file "$SPEC_DIR/REFERENCE_GAPS.md"      "REFERENCE_GAPS.md"
 
 # --- Footer with scorecard instruction ---
 cat <<FOOTER

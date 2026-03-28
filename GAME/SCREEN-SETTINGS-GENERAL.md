@@ -14,6 +14,8 @@ GET  /settings/general
 POST /settings/general
 ```
 
+Sub-bar is active when any `/settings/*` route is loaded. General is the default sub-tab.
+
 ## Layout
 
 Single-column centered form, max-width 600px. Card (`cc-card`) per logical group. Save and Cancel at the bottom.
