@@ -61,6 +61,8 @@ Visible only when `Settings` (gear icon in top bar) is active. Renders directly 
 | **General** tab | Left | Links to `/settings/general` — application settings |
 | **Tags** tab | Left | Links to `/settings/tags` — tag color configuration |
 | **Help** tab | Left | Links to `/settings/help` — application help |
+| **Voice** tab | Left | Links to `/settings/voiceforward/config` — voice button management |
+| **Voice Docs** tab | Left | Links to `/settings/voiceforward/docs` — phone setup documentation |
 
 General is the default sub-tab when Settings is first selected.
 
