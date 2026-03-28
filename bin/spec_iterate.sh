@@ -88,7 +88,6 @@ echo "" >&2
 SPEC_FILES=$(find "$SPEC_DIR" -maxdepth 1 -name "*.md" \
     ! -name "SPEC_SCORECARD.md" \
     ! -name "SPEC_ITERATION.md" \
-    ! -name "DEPLOY_LOG.md" \
     | sort)
 
 SPEC_FILE_COUNT=$(echo "$SPEC_FILES" | grep -c '.' 2>/dev/null || true)
@@ -144,7 +143,7 @@ Write all output files using your Write tool.
 Read all spec files in \`$SPEC_DIR\`. Compare the specification against the Business Rules
 and against the project's own stated scope.
 
-**Do not read or use as input:** \`SPEC_SCORECARD.md\`, \`SPEC_ITERATION.md\`, \`DEPLOY_LOG.md\`.
+**Do not read or use as input:** \`SPEC_SCORECARD.md\`, \`SPEC_ITERATION.md\`.
 These are outputs of this process, not specification inputs.
 
 Rules for updating REFERENCE_GAPS.md:

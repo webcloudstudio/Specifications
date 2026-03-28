@@ -27,25 +27,29 @@
 |-----------|---------|-----------|--------|
 | Scaffold spec | `bin/setup.sh <PROJECT>` | — → DRAFT | `Specifications/<PROJECT>/` with template files |
 | Validate | `bin/validate.sh <PROJECT>` | DRAFT → VALIDATED | exit 0 only |
-| Generate build prompt | `bin/oneshot.sh <PROJECT> > Specifications/<PROJECT>/oneshot-prompt.md` | VALIDATED → BUILT | git tag `oneshot/<PROJECT>/<date>.<n>` · `Specifications/<PROJECT>/.env` · `DEPLOY_LOG.md` |
-| Apply build | `cd Prototype <PROJECT> && claude -p "$(cat ...oneshot-prompt.md)"` | BUILT → ITERATING | `Prototype <PROJECT>/` code · `Prototype <PROJECT>/docs/SCORECARD.md` |
+| Generate build prompt | `bin/oneshot.sh <PROJECT> > Specifications/<PROJECT>/oneshot-prompt.md` | VALIDATED → BUILT | git tag `oneshot/<PROJECT>/<date>.<n>` · `data/deployments.jsonl` (bash entry) |
+| Apply build | `cd Prototype <PROJECT> && claude -p "$(cat ...oneshot-prompt.md)"` | BUILT → ITERATING | `Prototype <PROJECT>/` code · `Prototype <PROJECT>/docs/SCORECARD.md` · `data/deployments.jsonl` (LLM completion entry) |
 | Capture session | `bin/tran_logger.sh <PROJECT>` | ITERATING → ITERATING | `Specifications/<PROJECT>/PATCH-NNN-tl-*.md` · `AC-NNN-tl-*.md` · appends to `IDEAS.md` |
-| Generate iterate prompt | `bin/iterate.sh <PROJECT> > Specifications/<PROJECT>/iterate-prompt.md` | ITERATING → ITERATING | `Specifications/<PROJECT>/iterate-prompt.md` · `Specifications/<PROJECT>/.env` · `DEPLOY_LOG.md` |
-| Apply iterate | `cd Prototype <PROJECT> && claude -p "$(cat ...iterate-prompt.md)"` | ITERATING → ITERATING | updated code · `Prototype <PROJECT>/docs/SCORECARD.md` |
+| Generate iterate prompt | `bin/iterate.sh <PROJECT> > Specifications/<PROJECT>/iterate-prompt.md` | ITERATING → ITERATING | `Specifications/<PROJECT>/iterate-prompt.md` · `data/deployments.jsonl` (bash entry) |
+| Apply iterate | `cd Prototype <PROJECT> && claude -p "$(cat ...iterate-prompt.md)"` | ITERATING → ITERATING | updated code · `Prototype <PROJECT>/docs/SCORECARD.md` · `data/deployments.jsonl` (LLM completion entry) |
 | Promote | `bin/merge.sh <PROJECT>` | ITERATING → PROMOTED | squash commit on base branch |
 
 ---
 
-## Baseline Tracking (`.env`)
+## Baseline Tracking (`data/deployments.jsonl`)
 
-`oneshot.sh` and `iterate.sh` write values to `Specifications/<PROJECT>/.env` on every run.
-`tran_logger.sh` and `iterate.sh` read these to locate the prototype.
+`oneshot.sh` and `iterate.sh` append a JSON entry to `Specifications/data/deployments.jsonl` on every run.
+`tran_logger.sh` and `iterate.sh` read the last entry for a project to locate the prototype.
+The LLM running the build or iterate prompt appends a completion entry at session end.
 
-| Key | Example | Set by |
-|-----|---------|--------|
-| `PROTOTYPE_BUILD_TAG` | `oneshot/GAME/2026-03-22.4` | `oneshot.sh` |
-| `PROTOTYPE_BUILD_COMMIT` | `34c6af85a62e7b84aa83e35d61af0429819bee6` | `oneshot.sh` |
-| `PROTOTYPE_DIR` | `/mnt/c/Users/barlo/projects/GAME` | `oneshot.sh` / `iterate.sh` |
+| Field | Example | Set by |
+|-------|---------|--------|
+| `project` | `GAME` | `oneshot.sh` / `iterate.sh` |
+| `dir` | `/mnt/c/Users/barlo/projects/GAME_p2` | `oneshot.sh` / `iterate.sh` |
+| `tag` | `oneshot/GAME/2026-03-27.3` | `oneshot.sh` |
+| `commit` | `3a63454` | `oneshot.sh` / `iterate.sh` |
+| `action` | `oneshot` / `iterate` / `llm_complete` | all writers |
+| `source` | `bash` / `llm` | all writers |
 
 `iterate.sh` also writes to `Prototype <PROJECT>/.env` so the prototype knows its spec version:
 
@@ -54,7 +58,7 @@
 | `SPEC_COMMIT` | `8d56eb4...` | `iterate.sh` |
 | `SPEC_TAG` | `oneshot/GAME/2026-03-22.4` | `iterate.sh` |
 
-`iterate.sh` diffs from `PROTOTYPE_BUILD_TAG` to find numbered ticket files added since the build.
+`iterate.sh` diffs from the oneshot git tag (read from the last `deployments.jsonl` entry) to find numbered ticket files added since the build.
 
 ---
 
@@ -97,8 +101,8 @@ Numbered files are iterate work items. File presence = pending. File deletion = 
 | `ACCEPTANCE_CRITERIA.md` | `Specifications/<PROJECT>/` | `setup.sh` + author | Testable MUST/MUST NOT requirements (standing list) |
 | `IDEAS.md` | `Specifications/<PROJECT>/` | `setup.sh` + author / `tran_logger.sh` | Fuzzy observations; process on request |
 | `REFERENCE_GAPS.md` | `Specifications/<PROJECT>/` | `setup.sh` + author + LLM | Unspecified features by priority (P0–P4); LLM adds gaps found during build |
-| `DEPLOY_LOG.md` | `Specifications/<PROJECT>/` | `oneshot.sh` / `iterate.sh` | Record of every build and iterate run with target directory |
-| `.env` | `Specifications/<PROJECT>/` | `oneshot.sh` / `iterate.sh` | Baseline tracking: TAG, COMMIT, DIR (see above) |
+| `data/deployments.jsonl` | `Specifications/data/` | `oneshot.sh` / `iterate.sh` / LLM | Append-only log of all builds, iterates, and LLM completions across all projects |
+| `.env` | `Specifications/<PROJECT>/` | author | `BUILD_FEATURE_BRANCH_NAME` only — activates feature-branch build mode; gitignored |
 | `.tran_logger_cursor` | `Specifications/<PROJECT>/` | `tran_logger.sh` | Processed session basenames — prevents duplicate processing |
 | `PATCH-NNN[-tl]-*.md` | `Specifications/<PROJECT>/` | author / `tran_logger.sh` | Mutation ticket (pending until deleted after apply) |
 | `AC-NNN[-tl]-*.md` | `Specifications/<PROJECT>/` | author / `tran_logger.sh` | Acceptance criteria ticket (pending until deleted after apply) |

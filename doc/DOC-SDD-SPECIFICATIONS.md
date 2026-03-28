@@ -38,7 +38,6 @@ Ticket files are numbered variants of canonical types representing a single pend
 | `ACCEPTANCE_CRITERIA.md` | tracking | `setup.sh` | Standing MUST / MUST NOT list; always included in iterate prompt |
 | `IDEAS.md` | tracking | `setup.sh` | Fuzzy observations; processed on request |
 | `REFERENCE_GAPS.md` | tracking | as needed | Unspecified features by priority P0–P4; written by LLM |
-| `DEPLOY_LOG.md` | tracking | `oneshot.sh` | Record of every build and iterate run with target directory |
 | `.tran_logger_cursor` | tracking | — | Processed session basenames — prevents duplicate log processing |
 
 ---
@@ -51,8 +50,8 @@ States are inferred automatically from which commands have been run. Not stored 
 |-------|-------------|
 | `DRAFT` | Specification directory exists (`setup.sh` has run) |
 | `VALIDATED` | `validate.sh` last exited 0 |
-| `BUILT` | `.env` contains `PROTOTYPE_BUILD_TAG` (`oneshot.sh` has run) |
-| `ITERATING` | Prototype directory exists at `PROTOTYPE_DIR` |
+| `BUILT` | `data/deployments.jsonl` has an entry for this project (`oneshot.sh` has run) |
+| `ITERATING` | Prototype directory exists at `dir` in the last `deployments.jsonl` entry |
 | `PROMOTED` | `METADATA.md status` = ACTIVE / PRODUCTION (`merge.sh` has run) |
 
 ---
@@ -78,16 +77,26 @@ Required at: **`setup.sh`** (scaffold). Fields marked `†` are auto-managed by 
 | `version` | `oneshot.sh` | `oneshot.sh` `†` | Format `YYYY-MM-DD.N`; updated each oneshot run |
 | `updated` | `oneshot.sh` | `oneshot.sh` `†` | Format `YYYYMMDD`; updated each oneshot run |
 
+### data/deployments.jsonl (checked in)
+
+Append-only log shared across all projects. Written by `oneshot.sh`, `iterate.sh`, and the LLM at session end. Read by `tran_logger.sh` and `iterate.sh` to locate the prototype directory and build baseline.
+
+| Field | Set By | Purpose |
+|-------|--------|---------|
+| `project` | `oneshot.sh` / `iterate.sh` | Specification project name |
+| `dir` | `oneshot.sh` / `iterate.sh` | Absolute path to prototype directory |
+| `tag` | `oneshot.sh` | Git tag of the build baseline — e.g. `oneshot/GAME/2026-03-27.3` |
+| `commit` | `oneshot.sh` / `iterate.sh` | Specification repo commit hash |
+| `action` | all writers | `oneshot` · `iterate` · `llm_complete` |
+| `source` | all writers | `bash` · `llm` |
+
 ### .env (not committed)
 
-Auto-managed entirely. Written by `oneshot.sh` and `iterate.sh`; read by `tran_logger.sh` and `iterate.sh`. Gitignored.
+Author-managed. Only `BUILD_FEATURE_BRANCH_NAME` lives here. Gitignored.
 
 | Key | Set By | Purpose |
 |-----|--------|---------|
-| `PROTOTYPE_BUILD_TAG` | `oneshot.sh` | Git tag of specification commit used for last build — e.g. `oneshot/GAME/2026-03-22.4` |
-| `PROTOTYPE_BUILD_COMMIT` | `oneshot.sh` | Git commit hash at build time |
-| `PROTOTYPE_DIR` | `oneshot.sh` / `iterate.sh` | Absolute path to prototype directory |
-| `BUILD_FEATURE_BRANCH_NAME` | author | If set, activates feature-branch build mode |
+| `BUILD_FEATURE_BRANCH_NAME` | author | If set, activates feature-branch build mode in `oneshot.sh` |
 
 ---
 
@@ -113,7 +122,7 @@ oneshot/<PROJECT>/<YYYY-MM-DD.N>
 
 Annotated tags are permanent git objects — never pruned by `git gc`. They record the exact state of the specification directory at build time, making it possible to diff any two builds or restore a file to the version that was used for a specific oneshot run.
 
-`iterate.sh` reads `PROTOTYPE_BUILD_TAG` from the prototype's `.env` and diffs from that tag to HEAD to find ticket files added since the last build. The tag is the boundary between what has been built and what is pending — without it, iterate cannot determine which tickets are new.
+`iterate.sh` reads the last `deployments.jsonl` entry for the project to get the build tag and prototype directory, then diffs from that tag to HEAD to find ticket files added since the last build. The tag is the boundary between what has been built and what is pending — without it, iterate cannot determine which tickets are new.
 
 ```bash
 # Compare specifications between two builds
