@@ -11,15 +11,16 @@
 ## Documentation Serving
 **Target:** FUNCTIONALITY.md (Flow 1), SCREEN-PROJECT.md
 
-- Documentation MUST be served from a single `docs/` directory per project. There is no `doc/` directory — all documentation lives in `docs/`.
-- Doc route MUST resolve CSS and asset references that use relative paths within the `docs/` directory tree.
+- Documentation MUST be served from a single `docs/` directory per project
+- The master file is index.html.
+- If documentation is produced in `doc/`, change the process to move it to `docs/`.
+- Application documentation MUST resolve CSS and asset references that use relative paths within the `docs/` directory tree.
 - Scanner MUST detect `docs/index.html` for the `has_docs` flag.
 
 ## Script Conventions
 **Target:** ARCHITECTURE.md, FUNCTIONALITY.md (Flow 2)
 
 - bin/ shell scripts MUST NOT contain Windows line endings (CR+LF).
-- bin/ scripts MUST use Unix line endings (LF only).
 - Test suite SHOULD verify no `\r` exists in any `.sh` or `.py` file under `bin/`.
 
 ---

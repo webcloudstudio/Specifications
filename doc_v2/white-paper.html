@@ -131,7 +131,7 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 <body>
 
 <div class="cover">
-  <div class="cover-eyebrow">Ed Barlows Specificaiton Driven Design Methodology</div>
+  <div class="cover-eyebrow">Ed Barlows Specification Driven Design Methodology</div>
   <h1>Specification Driven Design</h1>
   <div class="cover-sub">The following is my Specification design overview and one-shot framework. </div>
 </div>
@@ -151,15 +151,15 @@ flowchart LR
   STACK(["Stack/"]):::dir --> S3
   TR(["TechnologyRules/"]):::dir --> S3
   S3 --> PT(["Prototype Prompt"]):::dir
-  S3 --> GI{{"Metadata"}}:::md
+  S3 --> GI{{"METADATA.md"}}:::md
   S3 --> SC{{"SCORECARD.md"}}:::md
+  S3 --> GAPS{{"REFERENCE_GAPS.md"}}:::md
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Requries Well Defined Specification Files Architecture</p>
-    <p>Requries Change Management - Feedback and Tickets</p>
-    <p>Track Exact Build State</p>
+    <p>A Well Defined Specification Files Architecture Works</p>
+    <p>Opinionated Stack</p>
     <p>Scorecards/Gap Analysis For Directionality</p>
   </div>
 
@@ -179,50 +179,36 @@ flowchart LR
 <div class="workflow">
   <div class="workflow-num">Workflow #2</div>
   <h2>Application Iteration</h2>
-  <p class="workflow-desc">Change specifications Flow to Prototypes. Promote squash-merges To Projects.</p>
+  <p class="workflow-desc">Specifications Changes Flow to Prototypes. Promote squash-merges To Projects.</p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
   classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
   classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
   classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
-  TI{{"Commit Information"}}:::md      --> S1["iterate.sh"]:::script
   CH{{"Specification Diff"}}:::md      --> S1["iterate.sh"]:::script
-  PT1(["Prototype/"]):::dir   --> S1
-  S1 --> PT2(["Prototype/"]):::dir
+  TI{{"Commit Information"}}:::md      --> CH
+  PT1(["Stack/"]):::dir   --> S1
+  TR1(["TechnologyRules/"]):::dir   --> S1
+  S1 --> PT2(["Prototype Prompt"]):::dir
+  PT2 --> PR(["Prototype"]):::dir
   S1 --> SC2{{"SCORECARD.md"}}:::md
-  PT2 --> S2["merge.sh"]:::script
-  SC2 --> S2
+  PR --> S2["merge.sh"]:::script
   S2 --> PROJ(["Project"]):::dir
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>I much prefer specification driven updates.  Tickets have numeric NNN in the name so they can be applied in order. Acceptance Criteria tickets keep specification drift minimal.</p>
+    <p>Updates changing specification MUCH preferred. Scorecard tracks specification drift.</p>
   </div>
-
-  <div class="io-cols">
-    <div class="io-col"><h4>Inputs</h4><ul>
-      <li>TICKETS.md -- By Type (screen,feature...), Acceptance Criteria</li>
-      <li>Prototype/</li>
-    </ul></div>
-    <div class="io-col"><h4>Outputs</h4><ul>
-      <li>Prototype/ (updated)</li>
-      <li>SCORECARD.md (updated)</li>
-      <li>Project (squash-merged)</li>
-    </ul></div>
-  </div>
-</div>
 
 <hr class="div">
 
 <div class="workflow">
   <div class="workflow-num">Workflow #3</div>
   <h2>Technology Rules Propagation</h2>
-  <p class="workflow-desc">Technology interfaces are injected into projects using CLAUDE_RULES.md - an 
-    AI summarization from application perspective of Technology Rules (not Stack Build Rules).  This guidance
-    enables guidance other programs to call/control application behaviors and transparently 
-    lets the application interface with the technology ecosystem</p>
+  <p class="workflow-desc">A summary of the application rules are injected to control prototype and project behavior.
+    Summarization by specific process is a solid context savings.  </p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
@@ -244,26 +230,14 @@ flowchart LR
     <p>An opinionated prescribed stack gave me working software first time</p>
   </div>
 
-  <div class="io-cols">
-    <div class="io-col"><h4>Inputs</h4><ul>
-      <li>BUSINESS_RULES.md</li>
-      <li>templates/</li>
-      <li>stack/</li>
-    </ul></div>
-    <div class="io-col"><h4>Outputs</h4><ul>
-      <li>CLAUDE_RULES.md</li>
-      <li>Project AGENTS.md (injected)</li>
-      <li>PROJECT_SCORECARD.md</li>
-    </ul></div>
-  </div>
 </div>
 
 <hr class="div">
 
 <div class="workflow">
   <div class="workflow-num">Workflow #4</div>
-  <h2>Specification Review</h2>
-  <p class="workflow-desc">AI-scored gap analysis of the specification directory — produces a prioritized gap list (P0–P4), quality scorecard, and next iteration prompt.</p>
+  <h2>Automated Specification Iteration</h2>
+  <p class="workflow-desc">AI-scored gap analysis prioritizes 1-2 features for which specifications are completed.</p>
 
   <div class="diagram"><div class="mermaid">
 flowchart LR
@@ -274,23 +248,12 @@ flowchart LR
   SPEC(["Specifications/"]):::dir   --> SI
   SI --> SCORE{{"SPEC_SCORECARD.md"}}:::md
   SI --> ITER{{"SPEC_ITERATION.md"}}:::md
+  SI --> GAPS2{{"REFERENCE_GAPS.md"}}:::md
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Lorem ipsum dolor sit amet, asking the AI to review the specification before the build revealed blind spots a human reviewer would miss consistently — missing error states, unspecified edge cases, ambiguous field names.</p>
-  </div>
-
-  <div class="io-cols">
-    <div class="io-col"><h4>Inputs</h4><ul>
-      <li>Specifications/</li>
-      <li>BUSINESS_RULES.md</li>
-    </ul></div>
-    <div class="io-col"><h4>Outputs</h4><ul>
-      <li>REFERENCE_GAPS.md</li>
-      <li>SPEC_SCORECARD.md</li>
-      <li>SPEC_ITERATION.md</li>
-    </ul></div>
+    <p>I was shocked but it works well... One gap at a time ... Best practices... Low Touch Review needed.</p>
   </div>
 </div>
 
@@ -298,7 +261,7 @@ flowchart LR
 
 <div class="workflow">
   <div class="workflow-num">Workflow #5</div>
-  <h2>Session Capture</h2>
+  <h2>Capturing Claude Edit Sessions</h2>
   <p class="workflow-desc">Transform Claude internal logs into formal tickets and acceptance criteria.</p>
 
   <div class="diagram"><div class="mermaid">
@@ -306,89 +269,14 @@ flowchart LR
   classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
   classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
   PT([".claude JSONL"]):::dir --> TL["tran_logger.sh"]:::script
-  TL --> SPEC(["Specifications/"]):::dir
+  GI(["git logs"]):::dir --> TL
+  TL --> PCH{{"PATCH-NNN-"}}:::md
+  TL --> AC{{"AC-NNN-"}}:::md
+  TL --> IDEAS{{"IDEAS.md"}}:::md
   </div></div>
 
   <div class="learnings">
     <div class="learnings-label">Learnings</div>
-    <p>Requires prompt to create Acceptance Criteria as well as Feature Changes.  
     <p>Approach abandoned by process -> I am doing specification driven design.</p>
   </div>
-
-  <div class="io-cols">
-    <div class="io-col"><h4>Inputs</h4><ul>
-      <li>Prototype/ (session logs)</li>
-    </ul></div>
-    <div class="io-col"><h4>Outputs</h4><ul>
-      <li>Specifications/ PATCH-NNN-tl-*.md</li>
-      <li>Specifications/ AC-NNN-tl-*.md</li>
-    </ul></div>
-  </div>
 </div>
-
-
-<div class="gaps">
-  <h2>Gaps / Pending Corrections</h2>
-  <p class="gaps-sub">Items below are missing from diagrams or IO lists. Each is a discrete edit — flag which to apply.</p>
-
-  <div class="gap-item">
-    <h4>W1 — One Shot Prototypes</h4>
-    <ul>
-      <li>Output missing: oneshot-prompt.md (written to stdout / file)</li>
-      <li>Output missing: git tag oneshot/{name}/{date.N} — build state marker; feeds W2 as baseline</li>
-      <li>Output gap: SCORECARD.md is written by the agent after build, not by oneshot.sh — attribution wrong</li>
-      <li>Input missing: METADATA.md (base_branch, git_repo fields read by oneshot.sh)</li>
-      <li>Input missing: .env (BUILD_FEATURE_BRANCH_NAME — Feature Branch mode only)</li>
-      <li>Input missing: ONESHOT_BUILD_RULES.md (assembled into prompt alongside stack files)</li>
-    </ul>
-  </div>
-
-  <div class="gap-item">
-    <h4>W2 — Application Change Propagation</h4>
-    <ul>
-      <li>Input missing: git tag / BUILD_TAG from W1 — iterate.sh uses this as diff baseline</li>
-      <li>Input missing: SPEC_COMMIT from prototype .env — on subsequent iterates, replaces BUILD_TAG as baseline</li>
-      <li>Output missing: iterate-prompt.md (written to stdout / file; agent runs from prototype dir)</li>
-      <li>Mermaid: SCORECARD.md removed from inputs by user edit — confirm intentional</li>
-    </ul>
-  </div>
-
-  <div class="gap-item">
-    <h4>W3 — Technology Rules Propagation</h4>
-    <ul>
-      <li>Flow gap: summarize_rules.sh outputs a PROMPT, not CLAUDE_RULES.md directly — human feeds prompt to AI, pastes output; intermediate human-AI step missing from diagram</li>
-      <li>Input missing: ONESHOT_BUILD_RULES.md feeds into summarize_rules.sh prompt</li>
-    </ul>
-  </div>
-
-  <div class="gap-item">
-    <h4>W4 — Specification Review</h4>
-    <ul>
-      <li>REFERENCE_GAPS.md moved to input — fixed in diagram above</li>
-      <li>Input missing: METADATA.md (read by spec_iterate.sh)</li>
-      <li>Output: REFERENCE_GAPS.md is updated (not created) — already exists as input from setup.sh</li>
-    </ul>
-  </div>
-
-  <div class="gap-item">
-    <h4>W5 — Session Capture</h4>
-    <ul>
-      <li>Input missing: ~/.claude/projects/{proto-path}/*.jsonl — Claude Code session logs (actual source read)</li>
-      <li>Input missing: prototype git log (last 20 commits — read for context)</li>
-      <li>Input missing: .env (tran_logger.sh reads prototype directory path from spec .env)</li>
-      <li>Output missing: IDEAS.md (written alongside PATCH-NNN and AC-NNN files)</li>
-    </ul>
-  </div>
-
-  <div class="gap-item">
-    <h4>Cross-Workflow Connections Not Shown</h4>
-    <ul>
-      <li>W1 git tag → W2: oneshot tag is the diff baseline for iterate.sh</li>
-      <li>W5 PATCH-NNN-tl-*.md → W2: session-captured tickets feed the next iterate run</li>
-      <li>W4 SPEC_ITERATION.md → W1/W2: output is a ready-to-run spec build prompt</li>
-    </ul>
-  </div>
-</div>
-
-</body>
-</html>
