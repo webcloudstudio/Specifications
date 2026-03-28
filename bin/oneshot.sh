@@ -130,8 +130,16 @@ if [ "$GIT_MODE" = true ]; then
         BASE_BRANCH=$(git -C "$TARGET_DIR" symbolic-ref --short HEAD 2>/dev/null || echo "main")
     fi
     if git -C "$TARGET_DIR" rev-parse --verify "$FEATURE_BRANCH" >/dev/null 2>&1; then
-        echo "  WARNING: Branch '$FEATURE_BRANCH' already exists — switching to it" >&2
-        git -C "$TARGET_DIR" checkout "$FEATURE_BRANCH" --quiet
+        if [ "$UPDATE" = true ]; then
+            git -C "$TARGET_DIR" checkout "$FEATURE_BRANCH" --quiet
+            echo "  Existing branch '$FEATURE_BRANCH' — update mode" >&2
+        else
+            echo "  Resetting '$FEATURE_BRANCH' to $BASE_BRANCH for full rebuild..." >&2
+            git -C "$TARGET_DIR" checkout "$BASE_BRANCH" --quiet 2>/dev/null || true
+            git -C "$TARGET_DIR" branch -D "$FEATURE_BRANCH"
+            git -C "$TARGET_DIR" checkout -b "$FEATURE_BRANCH" --quiet
+            echo "  Feature Branch Reset: $FEATURE_BRANCH" >&2
+        fi
     else
         git -C "$TARGET_DIR" checkout "$BASE_BRANCH" --quiet 2>/dev/null || true
         git -C "$TARGET_DIR" checkout -b "$FEATURE_BRANCH" --quiet
