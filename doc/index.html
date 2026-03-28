@@ -224,18 +224,8 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
 
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
-    <div class="wf-diagram"><p class="wf-section-h" style="margin:0 0 4px">Oneshot Rules</p><div class="wf-row"><div class="wf-box"><span class="wf-label">Setup</span><span class="wf-script">setup.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">Specifications</span><span class="wf-path">Specifications/&lt;PROJECT&gt;/</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Validate</span><span class="wf-script">validate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">OneShot</span><span class="wf-script">oneshot.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span><span class="wf-script">Feature: &lt;name&gt;</span><span class="wf-path">doc/SCORECARD.md</span></div></div><div class="wf-row"><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span><span class="wf-script">Feature: &lt;name&gt;</span><span class="wf-path">doc/SCORECARD.md</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">Iterate</span><span class="wf-script">iterate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">PROTOTYPE</span><span class="wf-script">Feature: &lt;name&gt;</span><span class="wf-path">doc/SCORECARD.md</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">merge.sh</span><span class="wf-script">bin/merge.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">Project</span><span class="wf-path">../&lt;PROJECT&gt;</span></div></div><p class="wf-section-h" style="margin:10px 0 4px">Business Rules</p><div class="wf-row"><div class="wf-box wf-terminal"><span class="wf-label">BUSINESS_RULES.md</span><span class="wf-path">RulesEngine/</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">summarize_rules.sh</span><span class="wf-script">bin/summarize_rules.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">CLAUDE_RULES.md</span><span class="wf-path">RulesEngine/</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">ProjectUpdate.sh</span><span class="wf-script">ProjectUpdate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">Project</span><span class="wf-path">../&lt;PROJECT&gt;</span></div><span class="wf-arr">&#8594;</span><div class="wf-box"><span class="wf-label">ProjectValidate.sh</span><span class="wf-script">bin/ProjectValidate.sh</span></div><span class="wf-arr">&#8594;</span><div class="wf-box wf-terminal"><span class="wf-label">Project KPIs</span></div></div></div>
-
-    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Dictionary</p>
-    <div class="proc-defs">
-      <div class="proc-item"><span class="proc-term">Specification</span><span class="proc-def">Markdown files in <code>Specifications/&lt;Name&gt;/</code> — concise tables and bullets defining what to build</span></div>
-      <div class="proc-item"><span class="proc-term">Project</span><span class="proc-def">A live git repository with <code>METADATA.md</code>, conforming to platform standards, discovered by Prototyper</span></div>
-      <div class="proc-item"><span class="proc-term">Prototype</span><span class="proc-def">A directory built by AI from the Specification — runnable and testable, iterated before merge</span></div>
-      <div class="proc-item"><span class="proc-term">Feature Branch</span><span class="proc-def">Configured in <code>.env</code> as <code>BUILD_FEATURE_BRANCH_NAME=feature/name</code> — contains AI-built code pending merge</span></div>
-      <div class="proc-item"><span class="proc-term">Build</span><span class="proc-def">Clones or fetches the project, creates the Feature Branch from base code, generates the AI build prompt</span></div>
-      <div class="proc-item"><span class="proc-term">Merge</span><span class="proc-def">Squash-merges the Feature Branch into the base branch — triggered via Prototyper UI, hides all git from the user</span></div>
-    </div>
+    <div id="wf-tab-bar"></div>
+    <div id="wf-content"></div>
   </div>
 
   <!-- ── Guide viewer ──────────────────────────── -->
@@ -255,6 +245,9 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad:false, theme:'dark', flowchart:{curve:'linear',nodeSpacing:40,rankSpacing:35,padding:16}, themeVariables:{darkMode:true,background:'#0f1117',lineColor:'#4a7fa0',fontSize:'14px'} });</script>
+<script src="workflows.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 const GUIDES = {
@@ -331,6 +324,9 @@ function show(id) {
   clearActive();
   document.querySelectorAll('[data-sec="' + id + '"]').forEach(a => a.classList.add('active'));
   if (id !== 'project') document.querySelector('main').scrollTop = 0;
+  if (id === 'workflow' && window.WORKFLOWS) {
+    window.initWorkflowNav(document.getElementById('wf-tab-bar'), document.getElementById('wf-content'));
+  }
 }
 
 function showGuide(key) {

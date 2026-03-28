@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SDD Workflows</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  flowchart: { curve: 'linear', nodeSpacing: 40, rankSpacing: 35, padding: 16 },
+  themeVariables: {
+    darkMode:            true,
+    background:          '#0f1117',
+    lineColor:           '#4a7fa0',
+    edgeLabelBackground: '#0f1117',
+    fontSize:            '14px'
+  }
+});
+</script>
+<style>
+body { background:#0f1117; color:#e2e8f0;
+  font-family:'Segoe UI',Arial,sans-serif; font-size:13px;
+  padding:32px 40px 64px; max-width:1100px; margin:0 auto; }
+h2 { font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.8px; color:#2cb67d; margin:40px 0 12px; }
+h2:first-of-type { margin-top:0; }
+.mermaid { margin-bottom:4px; }
+</style>
+</head>
+<body>
+
+<h2>One Shot</h2>
+<div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+
+  S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
+  SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
+  STACK(["Stack/"]):::dir --> S3
+  TR(["Technology_Rules/"]):::dir --> S3
+  S3 --> PT(["Prototype/"]):::dir
+  S3 --> SC{{"SCORECARD.md"}}:::md
+</div>
+
+<h2>Iterate</h2>
+<div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+
+  CH{{"CHANGES.md"}}:::md      --> S1["iterate.sh"]:::script
+  PT1(["Prototype/"]):::dir   --> S1
+  SC1{{"SCORECARD.md"}}:::md  --> S1
+  S1 --> PT2(["Prototype/"]):::dir
+  S1 --> SC2{{"SCORECARD.md"}}:::md
+  PT2 --> S2["merge.sh"]:::script
+  SC2 --> S2
+  S2 --> PROJ(["Project"]):::dir
+</div>
+
+<h2>Technology Rules</h2>
+<div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+
+  RULES(["Technology Rules"]):::dir
+  --> S1["summarize_rules.sh"]:::script
+  --> CR{{"CLAUDE_RULES.md"}}:::md
+  --> S2["ProjectUpdate.sh"]:::script
+  --> PROJ(["Project"]):::dir
+  --> S3["ProjectValidate.sh"]:::script
+  --> KPI{{"KPI.md"}}:::md
+</div>
+
+<h2>Specification Iterate</h2>
+<div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+
+  SPEC(["Specifications/"]):::dir
+  --> SI["spec_iterate.sh"]:::script
+  --> GAPS{{"REFERENCE_GAPS.md"}}:::md
+
+  SI --> SCORE{{"SPEC_SCORECARD.md"}}:::md
+  SI --> ITER{{"SPEC_ITERATION.md"}}:::md
+</div>
+
+<h2>Automated Transaction Logging</h2>
+<div class="mermaid">
+flowchart LR
+  classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+
+  PT(["Prototype/"]):::dir --> TL["tran_logger.sh"]:::script
+  TL --> SPEC(["Specifications/"]):::dir
+</div>
+
+</body>
+</html>
