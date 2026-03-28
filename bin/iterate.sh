@@ -78,7 +78,7 @@ last = None
 for line in open('$DATA_FILE'):
     try:
         e = json.loads(line.strip())
-        if e.get('project') == '$PROJECT_NAME' and e.get('action') in ('oneshot', 'iterate'):
+        if e.get('project') == '$PROJECT_NAME' and e.get('action') in ('oneshot', 'llm_complete'):
             last = e
     except: pass
 if last: print(json.dumps(last))
@@ -110,24 +110,12 @@ if [ -z "$PROTO_DIR" ]; then
     exit 1
 fi
 
-# --- Determine diff baseline: last iterate commit if available, else BUILD_TAG ---
-# On first iterate after oneshot: no prior iterate entry → use BUILD_TAG.
-# On subsequent iterates: use the spec commit from the last iterate entry.
-# This advances the baseline automatically so only NEW tickets appear each run.
+# --- Determine diff baseline: spec commit from last applied entry (llm_complete or oneshot) ---
+# The baseline only advances when a prompt is actually applied (llm_complete written).
+# Generating a prompt without applying it never moves the baseline.
 DIFF_BASELINE="$BUILD_TAG"
-LAST_ITERATE_COMMIT=$(python3 -c "
-import json, sys
-last = None
-for line in open('$DATA_FILE'):
-    try:
-        e = json.loads(line.strip())
-        if e.get('project') == '$PROJECT_NAME' and e.get('action') == 'iterate':
-            last = e
-    except: pass
-if last: print(last.get('commit', ''))
-" 2>/dev/null || true)
-if [ -n "$LAST_ITERATE_COMMIT" ] && git -C "$REPO_DIR" rev-parse "$LAST_ITERATE_COMMIT" >/dev/null 2>&1; then
-    DIFF_BASELINE="$LAST_ITERATE_COMMIT"
+if [ -n "$BUILD_COMMIT" ] && git -C "$REPO_DIR" rev-parse "$BUILD_COMMIT" >/dev/null 2>&1; then
+    DIFF_BASELINE="$BUILD_COMMIT"
 fi
 
 # --- Numbered ticket files added since the diff baseline ---
@@ -161,7 +149,7 @@ ITEM_COUNT=$(echo "$NEW_ITEMS" | grep -c '[^[:space:]]' 2>/dev/null || true)
 MODIFIED_COUNT=$(echo "$MODIFIED_SPECS" | grep -c '[^[:space:]]' 2>/dev/null || true)
 
 echo "Iterate: $PROJECT_NAME" >&2
-echo "  Baseline:  $DIFF_BASELINE${DIFF_BASELINE:+$( [ "$DIFF_BASELINE" = "$BUILD_TAG" ] && echo ' (oneshot tag)' || echo ' (last iterate)' )}" >&2
+echo "  Baseline:  $DIFF_BASELINE${DIFF_BASELINE:+$( [ "$DIFF_BASELINE" = "$BUILD_TAG" ] && echo ' (oneshot tag)' || echo ' (last applied)' )}" >&2
 echo "  Spec:      $SPEC_COMMIT" >&2
 echo "  Prototype: $PROTO_DIR" >&2
 echo "  New tickets: $ITEM_COUNT" >&2
@@ -384,6 +372,6 @@ At the end of this session, print:
 ## Deployment Log
 Append one line to \`$DATA_FILE\` using the Write tool:
 \`\`\`
-{"ts":"<ISO 8601 UTC>","project":"$PROJECT_NAME","dir":"<pwd>","action":"llm_complete","tag":"$BUILD_TAG","commit":"","mode":"iterate","source":"llm","items":$ITEM_COUNT,"summary":"<one-sentence summary of what was applied>"}
+{"ts":"<ISO 8601 UTC>","project":"$PROJECT_NAME","dir":"<pwd>","action":"llm_complete","tag":"$BUILD_TAG","commit":"$SPEC_COMMIT","mode":"iterate","source":"llm","items":$ITEM_COUNT,"summary":"<one-sentence summary of what was applied>"}
 \`\`\`
 FOOTER
