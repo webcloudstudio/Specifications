@@ -17,6 +17,21 @@
 - Application documentation MUST resolve CSS and asset references that use relative paths within the `docs/` directory tree.
 - Scanner MUST detect `docs/index.html` for the `has_docs` flag.
 
+## Default Landing Screen
+**Target:** SCREEN-PROJECTS-WELCOME.md, UI-GENERAL.md
+
+- `GET /` MUST redirect to `/welcome` — Welcome is the default landing screen.
+- The Welcome tab MUST be active (highlighted) when the application first loads.
+- The top navigation brand link MUST navigate to `/welcome`, not `/`.
+
+## Environment Setup
+**Target:** ARCHITECTURE.md (Configuration section)
+
+- Only `SECRET_KEY` and `PROJECTS_DIR` are required to start the application.
+- `PROJECTS_DIR` SHOULD be set to the parent directory of the GAME project (e.g. `..` resolved to an absolute path).
+- `APP_PORT` is NOT a valid env var — configuration reads `GAME_PORT`; port also defaults from `METADATA.md`.
+- All other env vars (`DATABASE_PATH`, `GAME_PORT`, `FLASK_DEBUG`, `FLASK_ENV`) are optional with working defaults and MUST NOT be required for a first run.
+
 ## Script Conventions
 **Target:** ARCHITECTURE.md, FUNCTIONALITY.md (Flow 2)
 
