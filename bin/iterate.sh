@@ -118,25 +118,23 @@ if [ -n "$BUILD_COMMIT" ] && git -C "$REPO_DIR" rev-parse "$BUILD_COMMIT" >/dev/
     DIFF_BASELINE="$BUILD_COMMIT"
 fi
 
-# --- Numbered ticket files added since the diff baseline ---
-# Ticket types: SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*, AC-NNN-*, INTENT-NNN-*
-# Any file matching PREFIX-[0-9]{3}[-.]*.md added after the baseline.
-# Order is preserved by the 3-digit number prefix.
+# --- New spec files added since the diff baseline ---
+# Includes numbered tickets (SCREEN-NNN-*, FEATURE-NNN-*, etc.) and any other
+# added spec file (FEATURE-*.md, SCREEN-*.md, etc.). All are emitted as full content.
+# Excluded: METADATA, README, SPEC_*, REFERENCE_GAPS, IDEAS, ACCEPTANCE_CRITERIA, ARCHITECTURE.
 NEW_ITEMS=$(git -C "$REPO_DIR" diff --diff-filter=A --name-only "$DIFF_BASELINE" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
-    | grep -E "^${PROJECT_NAME}/[A-Z]+-[0-9]{3}[-.]" \
+    | grep -Ev "^${PROJECT_NAME}/(METADATA|README|SPEC_[A-Z_]+|REFERENCE_GAPS|IDEAS|ACCEPTANCE_CRITERIA|ARCHITECTURE)\." \
     | sed "s|^${PROJECT_NAME}/||" \
     | sort \
     || true)
 
-# --- Spec files modified since the diff baseline (non-ticket, non-meta) ---
+# --- Spec files modified since the diff baseline (non-meta) ---
 # Excluded: METADATA, README, SPEC_* (all files with SPEC_ prefix), REFERENCE_GAPS,
-#           IDEAS, ACCEPTANCE_CRITERIA (handled separately), ARCHITECTURE (always full),
-#           numbered ticket files (handled above).
+#           IDEAS, ACCEPTANCE_CRITERIA (handled separately), ARCHITECTURE (always full).
 MODIFIED_SPECS=$(git -C "$REPO_DIR" diff --diff-filter=M --name-only "$DIFF_BASELINE" -- "${PROJECT_NAME}/" 2>/dev/null \
     | grep '\.md$' \
     | grep -Ev "^${PROJECT_NAME}/(METADATA|README|SPEC_[A-Z_]+|REFERENCE_GAPS|IDEAS|ACCEPTANCE_CRITERIA|ARCHITECTURE)\." \
-    | grep -Ev "^${PROJECT_NAME}/[A-Z]+-[0-9]{3}[-.]" \
     | sed "s|^${PROJECT_NAME}/||" \
     | sort \
     || true)
@@ -152,7 +150,7 @@ echo "Iterate: $PROJECT_NAME" >&2
 echo "  Baseline:  $DIFF_BASELINE${DIFF_BASELINE:+$( [ "$DIFF_BASELINE" = "$BUILD_TAG" ] && echo ' (oneshot tag)' || echo ' (last applied)' )}" >&2
 echo "  Spec:      $SPEC_COMMIT" >&2
 echo "  Prototype: $PROTO_DIR" >&2
-echo "  New tickets: $ITEM_COUNT" >&2
+echo "  New files: $ITEM_COUNT" >&2
 if [ -n "$NEW_ITEMS" ]; then
     echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "    + $f" >&2; done
 fi
@@ -248,7 +246,7 @@ Prototype directory: \`$PROTO_DIR\`
 HEADER
 
 if [ -n "$NEW_ITEMS" ]; then
-    echo "**New tickets (full content below):**"
+    echo "**New spec files (full content below):**"
     echo "$NEW_ITEMS" | while read -r f; do [ -n "$f" ] && echo "- $f"; done
     echo ""
 fi
