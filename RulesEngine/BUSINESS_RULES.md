@@ -1,6 +1,6 @@
 # Business Rules
 
-**Version:** 20260330 V3
+**Version:** 20260330 V4
 **Description:** Source for CLAUDE_RULES.md — edit here, then regenerate via `bin/summarize_rules.sh`.
 
 ---
@@ -305,6 +305,52 @@ ctx.log_event(severity, message)
 ```
 
 Call `heartbeat('OK')` at script start after `run()` if using long-running loops. Call `heartbeat('ERROR', msg)` before exiting on known failure conditions. These calls are advisory — never gate script logic on their success.
+
+### SCRIPTS_DEBUG_FLAG
+**Scope:** scripts
+**Applies at:** PROTOTYPE
+**Requirement:** Scripts that already parse flags or arguments should support `-d` / `--debug` to enable DEBUG-level logging.
+**Rationale:** A consistent debug flag means operators and agents always know how to get verbose output without reading each script individually.
+**Rule text:**
+Where a script already parses flags or arguments, add `-d` / `--debug` to enable DEBUG-level logging. Do not add an argument parser solely to support this flag. Do not implement if `-d` is already used for a different purpose in that script. When active, set the log level to DEBUG before any application logic runs.
+
+### SCRIPT_LOG_FORMAT
+**Scope:** scripts
+**Applies at:** PROTOTYPE
+**Requirement:** All programmatic scripts use a standard log format regardless of language.
+**Rationale:** Consistent log output across all scripts makes aggregation, filtering, and debugging predictable without per-script knowledge.
+**Rule text:**
+All log output must follow this format:
+
+```
+YYYY-MM-DD HH:MM:SS LEVEL    [ProjectName] message here
+```
+
+`LEVEL` is left-padded to 8 characters (`INFO    `, `DEBUG   `, `WARNING `, `ERROR   `) so message columns align.
+
+**Python** — `common.py`'s `op()` sets this up automatically. Scripts using `common.py` inherit the configuration and must not override it. The logger name is set to `ctx.project_name` so `[ProjectName]` appears in every line. Default level is `INFO`; set to `DEBUG` when `-d`/`--debug` is active. Do not use `print()` for operational messages — use `logger.info()`, `logger.debug()`, `logger.warning()`, `logger.error()`.
+
+```python
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
+logger = logging.getLogger(ctx.project_name)
+```
+
+**Bash** — `common.sh` provides log helpers that scripts must use instead of bare `echo` for operational messages:
+
+```bash
+log_info()  { echo "$(date '+%Y-%m-%d %H:%M:%S') INFO     [$PROJECT_NAME] $*"; }
+log_debug() { echo "$(date '+%Y-%m-%d %H:%M:%S') DEBUG    [$PROJECT_NAME] $*"; }
+log_warn()  { echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING  [$PROJECT_NAME] $*"; }
+log_error() { echo "$(date '+%Y-%m-%d %H:%M:%S') ERROR    [$PROJECT_NAME] $*"; }
+```
+
+`log_debug()` is a no-op unless `-d`/`--debug` was passed (per SCRIPTS_DEBUG_FLAG). Scripts using `common.sh` inherit these helpers automatically.
+
+> **Note:** `common.py` and `common.sh` templates must be updated to implement this standard. Until updated, individual scripts may need to configure logging manually.
 
 ### DOCS_GENERATED_BY_SCRIPT
 **Scope:** scripts
