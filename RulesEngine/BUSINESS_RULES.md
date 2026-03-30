@@ -1,6 +1,6 @@
 # Business Rules
 
-**Version:** 20260323 V2
+**Version:** 20260330 V3
 **Description:** Source for CLAUDE_RULES.md — edit here, then regenerate via `bin/summarize_rules.sh`.
 
 ---
@@ -97,7 +97,16 @@ ProjectName/
   logs/             Log files (gitignored)
   data/             Persistent data
   tests/            Test suite
+  archive/          Superseded files — gitignored, never committed (optional)
 ```
+
+### ARCHIVE_DIRECTORY
+**Scope:** project-layout
+**Applies at:** IDEA
+**Requirement:** An optional `archive/` directory may exist at the root of any specification directory or code project. It is always gitignored.
+**Rationale:** Superseded documents and files should be preserved for reference without polluting the working tree or version history. Gitignoring `archive/` prevents accidental commits of stale content and keeps the working tree clean.
+**Rule text:**
+`archive/` is an optional holding area for superseded files. Place it at the project root. It is listed in the standard `.gitignore` — never commit it. Do not treat files in `archive/` as current; they are historical reference only.
 
 ---
 
@@ -134,6 +143,21 @@ these should be the first lines of the file and there should be no other "# Name
 # Args: Arg1, Arg2          # omit if the script takes no positional arguments
 
 The `# Args:` line lists positional arguments in order, comma-separated. Include only positional arguments — not flags (e.g. `--verbose`, `--dry-run`). Omit the line entirely if the script takes no positional arguments. Platform consumers and tools use `Args:` to discover the script's calling convention without reading the body.
+
+**CommandCenter header field schema**
+
+The following fields are recognized in the first 20 lines of any `bin/` file carrying `# CommandCenter Operation`. This applies to any file type (`.sh`, `.py`, or other) — not only shell scripts.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `# CommandCenter Operation` | Yes — marker | Registers the file in the service catalog. Must appear within the first 20 lines. |
+| `# Name:` | Yes | Display name used in GAME and the service catalog. Use the Name String from the Standard Script Names table if applicable. |
+| `# Category:` | Yes | Operational category: `Operations`, `maintenance`, or `service`. |
+| `# Description:` | Required for programmatically called scripts | One-line summary of what the script does. Mandatory for any script that may be invoked by a scheduler, orchestrator, or external platform. |
+| `# Args:` | Required if positional arguments exist | Positional arguments in order, comma-separated. Omit if none. |
+| `# Port:` | Required if script binds or exposes a port | The port number the script listens on or uses. |
+
+Scripts that may be called programmatically (schedulers, orchestrators, GAME) MUST include `# Description:` and `# Args:` (if applicable) so callers can discover the contract without reading the body.
 
 ### HAS_TEST_SCRIPT
 **Scope:** scripts
@@ -208,7 +232,7 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 # e.g. Flask: export FLASK_DEBUG=1 && flask run --port "$PORT"
 ```
 
-`common.sh` handles: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, standardized exit logging, and the `[$PROJECT_NAME] Starting:` message. Use `$PORT` as the service port — never hardcode a port number. Override the trap after sourcing if the script needs custom cleanup.
+`common.sh` handles: `SCRIPT_NAME`, `PROJECT_DIR`, `cd`, `PROJECT_NAME`, `PORT`, venv activation, `.secrets`/`.env` loading, timestamped log file, SIGTERM trap, standardized exit logging, and the `[$PROJECT_NAME] HH:MM Starting` message. Use `$PORT` as the service port — never hardcode a port number. Override the trap after sourcing if the script needs custom cleanup.
 
 ### SCRIPTS_PYTHON_PATTERN
 **Scope:** scripts
@@ -231,26 +255,27 @@ if __name__ == '__main__':
     op(__file__).run(main)
 ```
 
-`op(__file__).run(main)` handles the same concerns as `common.sh`: path setup, METADATA.md parsing, env loading, logging, SIGTERM, and standardized exit logging. On clean exit it logs `EXIT - OK`; on unhandled exception it logs `EXIT - ERROR: <message>` and exits 1.
+`op(__file__).run(main)` handles the same concerns as `common.sh`: path setup, METADATA.md parsing, env loading, logging, SIGTERM, and standardized exit logging. On clean exit it logs `[ProjectName] HH:MM Completed OK`; on unhandled exception it logs `[ProjectName] HH:MM Completed ERROR <message>` and exits 1.
 
 Use Linux line endings (no `\r`). Run `chmod +x bin/*.sh`.
 
 ### SCRIPTS_EXIT_LOGGING
 **Scope:** scripts
 **Applies at:** PROTOTYPE
-**Requirement:** Every script must log a standardized exit line on completion.
-**Rationale:** The log ingestor and operators need a single unambiguous token to know whether a script succeeded or failed without parsing arbitrary output.
+**Requirement:** Every script must emit standardized start and completion lines.
+**Rationale:** The log ingestor and operators need unambiguous tokens to know when a script started and whether it succeeded or failed, without parsing arbitrary output.
 **Rule text:**
-Every script must emit one of these lines as its final log output:
+Every script must emit these lines as its operational log output:
 
 ```
-[ProjectName] EXIT - OK
-[ProjectName] EXIT - ERROR: <reason>
+[ProjectName] HH:MM Starting
+[ProjectName] HH:MM Completed OK
+[ProjectName] HH:MM Completed ERROR <reason>
 ```
 
-`common.sh` emits these automatically via the `EXIT` trap (code 0 → OK; non-zero → ERROR with code).
-`common.py`'s `run()` emits them automatically: clean exit → OK; unhandled exception → ERROR with message.
-Do not print additional "done" or "completed" lines after these — they are the canonical terminal tokens.
+`common.sh` emits `Starting` at script open and `Completed OK` or `Completed ERROR <reason>` via the EXIT trap (code 0 → OK; non-zero → ERROR with reason).
+`common.py`'s `run()` emits the same: `Starting` at entry, `Completed OK` on clean exit, `Completed ERROR <message>` on unhandled exception.
+These are the canonical terminal tokens — do not add additional completion lines after them.
 
 ### SCRIPTS_HEARTBEAT
 **Scope:** scripts
@@ -280,6 +305,14 @@ ctx.log_event(severity, message)
 ```
 
 Call `heartbeat('OK')` at script start after `run()` if using long-running loops. Call `heartbeat('ERROR', msg)` before exiting on known failure conditions. These calls are advisory — never gate script logic on their success.
+
+### DOCS_GENERATED_BY_SCRIPT
+**Scope:** scripts
+**Applies at:** PROTOTYPE
+**Requirement:** If project documentation is assembled by a program, it must be generated through `bin/build_documentation.sh`.
+**Rationale:** A single named entry point for documentation generation ensures GAME and operators know how to rebuild docs without reading project internals. It also satisfies the CommandCenter header contract so the platform can invoke it.
+**Rule text:**
+Generated documentation must be produced by `bin/build_documentation.sh`. If the script delegates to a Python file or other tool, the shell script remains the canonical entry point. Output goes to `docs/`. Do not generate documentation through ad-hoc commands or undeclared scripts.
 
 ---
 

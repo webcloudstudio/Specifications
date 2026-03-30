@@ -39,6 +39,15 @@ Never the shortcut word spec for specification in documentation or comments.  Th
 - Stack files are prescriptive — copy-paste patterns, not guidelines
 - When rules or templates change, run `bash bin/update_projects.sh` to propagate
 
+**RulesEngine/ edit gate — REQUIRED before writing any file in `RulesEngine/`:**
+Before writing or editing any file under `RulesEngine/`, you must:
+1. Present the proposed change — exact wording, not a summary.
+2. Surface any conflicts with existing rules.
+3. Confirm that the rule is reproducible and enforceable across all projects.
+4. Wait for explicit user approval before writing.
+
+You are acting as a QA gate, not an executor. The goal is to arrive at correct, consistent business rules — not to implement what was asked verbatim. Push back if a proposed rule contradicts an existing one or cannot be uniformly enforced.
+
 ## Directory Layout
 
 ```

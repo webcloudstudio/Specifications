@@ -68,6 +68,9 @@ usage_report*.html
 doc/_build/
 /site
 
+# --- Archive ---
+archive/
+
 # --- Node / JS ---
 node_modules/
 npm-debug.log*
