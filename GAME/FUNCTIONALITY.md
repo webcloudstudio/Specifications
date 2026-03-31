@@ -200,62 +200,78 @@ Execute: git -C {path} push
 
 ## 5. Portfolio Publish
 
-**Trigger:** User clicks Rebuild or Publish on the Publisher screen.
+**Trigger:** User clicks Rebuild or Publish on the Publisher screen, or runs scripts directly.
 
 ```
 BUILD:
-  User clicks Rebuild
+  User clicks Rebuild (or runs bin/homepage_build.sh)
     |
     v
-  POST /publisher/build
+  POST /publisher/build  →  spawns bin/homepage_build.sh
     |
     v
-  Query projects WHERE show_on_homepage = true
+  Step 0: Template sync (optional)
+    |  If $SPECIFICATIONS_PATH set:
+    |    Copy $SPECIFICATIONS_PATH/GAME/templates/*.j2
+    |         → $PUBLISHER_TARGET/templates/
     |
     v
-  For each published project:
-    |
-    +---> Resolve card fields (with defaults):
-    |       card_title    --> fallback to display_name
-    |       card_desc     --> fallback to short_description
-    |       card_image    --> fallback to logo
-    |       card_tags     --> fallback to tags
-    |       card_type     --> fallback to project_type
-    |       card_url      --> fallback to deploy_url or git_repo
-    |
-    +---> Check for docs/index.html --> add Documentation link if exists
-    |
-    +---> Generate card HTML fragment
+  Step 1: Load config/site_config.md
+    |  YAML frontmatter --> site branding (logo, name, email, phone, copyright, ...)
+    |  Markdown body    --> site["home_html"] via markdown.markdown()
+    |  Derive base_path from GITHUB_PAGES_BASE_URL
     |
     v
-  Load config/site_config.md
-    |  YAML frontmatter --> site title, branding
-    |  Markdown body --> home page content
+  Step 2: Scan $PROJECTS_DIR
+    |  For each project with show_on_homepage = true in METADATA.md:
+    |    Resolve card fields (with fallbacks)
+    |    Resolve tags → {label, bg, text} dicts from data/tag_colors.json
+    |    Detect doc/ dir → docs_url
     |
     v
-  Assemble static site: card grid + home page + resume page
+  Step 3: Render Jinja2 templates
+    |  index.html.j2       → $PUBLISHER_TARGET/publish/index.html
+    |  projects.html.j2    → $PUBLISHER_TARGET/publish/projects/index.html
+    |  resume.html.j2      → $PUBLISHER_TARGET/publish/resume/index.html
     |
     v
-  Write output files
+  Step 4: Copy static assets
+    |  static/project_images/*.webp → publish/images/
+    |  static/diagrams/*            → publish/diagrams/
+    |  project doc/ dirs            → publish/project-docs/{name}/
+    |
+    v
   Flash "Build complete" with timestamp
 
+REVIEW (optional, when GAME server is not used):
+  Run bin/homepage_review.sh
+    |
+    v
+  python3 -m http.server $HOMEPAGE_PREVIEW_PORT
+    |  Serves $PUBLISHER_TARGET/publish/ at localhost:4321
+    |  Note: rebuild with GITHUB_PAGES_BASE_URL=http://localhost:4321 for accurate nav links
+
 PUBLISH:
-  User clicks Publish
+  User clicks Publish (or runs bin/homepage_publish.sh)
     |
     v
-  POST /publisher/publish
+  POST /publisher/publish  →  spawns bin/homepage_publish.sh
     |
     v
-  Execute PushAndPublish.sh
-    |  git add, commit, push to GitHub Pages branch
+  cd $PUBLISHER_TARGET
+  git add -A
+  git commit -m "Update homepage YYYY-MM-DD HH:MM"
+  git push origin main
     |
     v
   Flash publish status
 ```
 
-**Reads:** `projects` table (card fields), `config/site_config.md`, `doc/` directories, `static/images/`
-**Writes:** Static site output files, GitHub Pages branch
+**Reads:** `config/site_config.md`, `$PROJECTS_DIR/*/METADATA.md`, `data/tag_colors.json`, `static/`, `$PUBLISHER_TARGET/templates/`
+**Writes:** `$PUBLISHER_TARGET/publish/` (static HTML), GitHub Pages branch
 **Events emitted:** `build_completed`, `deploy_completed`
+
+See `HOMEPAGE-PUBLISHER.md` for full build algorithm and template variable contract.
 
 ---
 

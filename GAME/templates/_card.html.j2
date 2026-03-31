@@ -1,0 +1,48 @@
+{# Single project card partial. Included by projects.html.j2.
+   Variable: card (dict with keys: card_title, card_desc, card_image, card_url, docs_url, tags[])
+   Tags are pre-resolved dicts: {"label": str, "bg": "#hex", "text": "#hex"}
+#}
+<article class="card">
+
+  {# Image — full bleed at top #}
+  {% if card.card_image %}
+  <div class="card-image-wrapper">
+    <img src="{{ card.card_image }}" alt="{{ card.card_title }}" class="card-image" loading="lazy" />
+  </div>
+  {% else %}
+  <div class="card-image-wrapper card-image-placeholder"></div>
+  {% endif %}
+
+  <div class="card-content">
+
+    {# Tags — first 3 on row 1, remainder on row 2 via flex-break #}
+    {% if card.tags %}
+    <div class="card-tags">
+      {% for tag in card.tags %}
+        {% if loop.index0 == 3 %}<span class="tag-break"></span>{% endif %}
+        <span class="tag" style="background:{{ tag.bg }};color:{{ tag.text }};">{{ tag.label }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h3 class="card-title">{{ card.card_title }}</h3>
+
+    {% if card.card_desc %}
+    <p class="card-desc">{{ card.card_desc }}</p>
+    {% endif %}
+
+  </div>
+
+  {# Action buttons — pinned to bottom of card #}
+  {% if card.docs_url or card.card_url %}
+  <div class="card-actions">
+    {% if card.docs_url %}
+    <a href="{{ card.docs_url }}" target="_blank" rel="noopener" class="card-link-btn">Documentation ↗</a>
+    {% endif %}
+    {% if card.card_url %}
+    <a href="{{ card.card_url }}" target="_blank" rel="noopener" class="card-link-btn">Details ↗</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</article>

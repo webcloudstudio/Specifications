@@ -1,0 +1,73 @@
+{% extends "base.html.j2" %}
+
+{% block title %}{{ site.logo }} — {{ site.name }}{% endblock %}
+
+{% block extra_css %}
+  .home-intro { padding: 4rem 0 3rem; }
+
+  .home-name {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 2rem;
+  }
+
+  .home-body { max-width: 860px; }
+
+  .home-body p {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.75;
+    margin: 0 0 1.25rem;
+  }
+
+  .home-body h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 2rem 0 0.75rem;
+    letter-spacing: 0.01em;
+  }
+
+  .home-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .home-body li {
+    font-size: 0.95rem;
+    color: var(--muted);
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .home-body li::before {
+    content: '\2014';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .home-body strong { color: var(--text); font-weight: 600; }
+
+  .home-body em {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.92rem;
+  }
+{% endblock %}
+
+{% block content %}
+  <section class="home-intro">
+    <div class="section-inner">
+      <h1 class="home-name">{{ site.name }}</h1>
+      <div class="home-body">
+        {{ site.home_html | safe }}
+      </div>
+    </div>
+  </section>
+{% endblock %}

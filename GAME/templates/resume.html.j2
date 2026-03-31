@@ -1,0 +1,131 @@
+{% extends "base.html.j2" %}
+
+{% block title %}About — {{ site.name }}{% endblock %}
+
+{% block extra_css %}
+  .resume-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  /* Name & contact block */
+  .resume-container h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.4rem;
+    color: var(--text);
+  }
+
+  /* Section headings */
+  .resume-container h2 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Company / institution names */
+  .resume-container h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 1.5rem 0 0.2rem;
+  }
+
+  .resume-container p {
+    font-size: 0.93rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0.4rem 0;
+  }
+
+  .resume-container strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* Bullet lists */
+  .resume-container ul {
+    margin: 0.5rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .resume-container li {
+    font-size: 0.91rem;
+    color: var(--muted);
+    line-height: 1.65;
+    padding-left: 1.1rem;
+    position: relative;
+    margin-bottom: 0.3rem;
+  }
+
+  .resume-container li::before {
+    content: '\2013';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  /* Nested lists */
+  .resume-container li li {
+    padding-left: 1.1rem;
+    margin-top: 0.2rem;
+  }
+
+  .resume-container li li::before {
+    content: '\00b7';
+    color: var(--muted);
+  }
+
+  /* Pitch card */
+  .resume-container blockquote {
+    margin: 1.5rem 0;
+    padding: 1.1rem 1.4rem;
+    border-left: 3px solid var(--accent);
+    background: var(--surface2);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .resume-container blockquote p {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .resume-container blockquote strong { color: var(--accent); }
+
+  .resume-container hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  .resume-container a { color: var(--accent); text-decoration: none; }
+  .resume-container a:hover { text-decoration: underline; }
+
+  @media print {
+    body { background: white; color: black; }
+    .resume-container { padding: 0; max-width: 100%; }
+    .resume-container h1 { color: black; }
+    .resume-container h2 { color: #333; border-color: #ccc; }
+    .resume-container h3 { color: black; }
+    .resume-container p, .resume-container li { color: #333; }
+    .resume-container strong { color: black; }
+    .resume-container hr { border-color: #ddd; }
+    header, footer { display: none; }
+  }
+{% endblock %}
+
+{% block content %}
+  <div class="resume-container">
+    {{ resume_html | safe }}
+  </div>
+{% endblock %}

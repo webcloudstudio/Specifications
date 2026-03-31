@@ -49,7 +49,9 @@ My Methods provide standards conformity:
 
 ![AI Workflow](/webcloudstudio/diagrams/v3-ai-workflow.png)
 
-## Open Questions
+## Notes
 
-- Should the Publisher read HOMEPAGE.md from the Specifications repo or from the project's own directory?
-- Should image paths be relative (to the built site) or absolute URLs?
+- Site config is read from `GAME/config/site_config.md` (the project's own directory, not the Specifications repo). `HOMEPAGE.md` in the Specifications repo is the human-readable reference for branding values; `site_config.md` is the live editable source.
+- Image paths are `base_path`-relative absolute paths (e.g., `/sitename/images/name.webp`), generated at build time by `homepage_build.py` using the `GITHUB_PAGES_BASE_URL` env var.
+
+See `HOMEPAGE-PUBLISHER.md` for the full build specification.

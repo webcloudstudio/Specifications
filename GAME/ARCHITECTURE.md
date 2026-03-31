@@ -47,15 +47,34 @@ Launches bin/ scripts as background subprocesses.
 
 Provides: `launch(project_id, operation_id)`, `stop(run_id)`, `get_running()`, `get_log(run_id)`.
 
-### Publisher (`publisher.py`)
+### Publisher (`publisher.py` → `bin/homepage_build.py`)
 
-Builds static portfolio site from METADATA.md fields.
+Builds static portfolio site from METADATA.md fields using Jinja2 templates. No Astro, no npm.
 
-1. Query projects where `show_on_homepage = true`
-2. Generate card HTML from title, short_description, tags, image
-3. If project has `docs/index.html`, add documentation link
-4. Write static site to output directory
-5. Optionally push to GitHub Pages
+1. Optionally sync templates from `$SPECIFICATIONS_PATH/GAME/templates/` → `$PUBLISHER_TARGET/templates/`
+2. Load `config/site_config.md` (YAML frontmatter + Markdown body → `home_html`)
+3. Scan `$PROJECTS_DIR` for projects where `show_on_homepage = true`; resolve card fields and tag colors
+4. Render `$PUBLISHER_TARGET/templates/*.j2` with Jinja2 → write to `$PUBLISHER_TARGET/publish/`
+5. Copy static assets (images, diagrams, project docs) to `$PUBLISHER_TARGET/publish/`
+
+**Scripts:**
+
+| Script | Purpose |
+|--------|---------|
+| `bin/homepage_build.sh` | Bash wrapper; delegates to `homepage_build.py` |
+| `bin/homepage_review.sh` | Serve `$PUBLISHER_TARGET/publish/` via `python3 -m http.server` |
+| `bin/homepage_publish.sh` | `git add -A && git commit && git push origin main` in `$PUBLISHER_TARGET` |
+
+Deprecated: `bin/RebuildYourHomepage.sh`, `bin/LocalPreview.sh`, `bin/PushAndPublish.sh`.
+
+**New env vars:**
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PUBLISHER_TARGET` | sibling `My_Github/` | TARGET directory (configurable on install) |
+| `HOMEPAGE_PREVIEW_PORT` | `4321` | Port for `homepage_review.sh` |
+
+See `HOMEPAGE-PUBLISHER.md` for full specification including template variable contract and build algorithm.
 
 ### Health Monitor (`monitoring.py`)
 
