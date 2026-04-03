@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Specification Driven Design — White Paper</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script>mermaid.initialize({ startOnLoad:false, theme:'dark', flowchart:{curve:'linear',nodeSpacing:40,rankSpacing:35,padding:16}, themeVariables:{darkMode:true,background:'#0f1117',lineColor:'#4a7fa0',fontSize:'14px'} });</script>
+<script>mermaid.initialize({ startOnLoad:false, theme:'neutral', flowchart:{curve:'linear',nodeSpacing:40,rankSpacing:35,padding:16} });</script>
 <script src="workflows.js"></script>
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 :root {
-  --bg:#0f1117; --surface:#1a1d27; --border:#2a2e3d;
-  --accent:#2cb67d; --amber:#d4a017; --text:#e2e8f0; --muted:#94a3b8;
+  --bg:#FAFAF8; --surface:#FFFFFF; --border:#D5D8DE;
+  --accent:#2cb67d; --amber:#d4a017; --text:#2A2E35; --muted:#505A68;
   --font-body:'Segoe UI','Trebuchet MS',Arial,sans-serif;
   --font-mono:'Cascadia Code',Consolas,'Courier New',monospace;
 }
@@ -19,11 +19,11 @@ body { background:var(--bg); color:var(--text); font-family:var(--font-body);
   font-size:15px; line-height:1.7; max-width:860px; margin:0 auto; padding:36px 36px 80px; }
 .cover { border-bottom:2px solid var(--accent); padding-bottom:16px; margin-bottom:24px; }
 .cover-eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:12px; }
-.cover h1 { font-size:36px; font-weight:800; color:#fff; line-height:1.15; margin-bottom:10px; }
+.cover h1 { font-size:36px; font-weight:800; color:#1E2328; line-height:1.15; margin-bottom:10px; }
 .cover-sub { font-size:15px; color:var(--muted); margin-bottom:18px; }
 .cover-meta { font-size:12px; color:var(--muted); display:flex; gap:24px; }
 .gaps { margin-top:40px; padding-top:28px; border-top:2px solid var(--border); }
-.gaps h2 { font-size:18px; font-weight:800; color:#fff; margin-bottom:4px; }
+.gaps h2 { font-size:18px; font-weight:800; color:#1E2328; margin-bottom:4px; }
 .gaps-sub { font-size:13px; color:var(--muted); margin-bottom:24px; }
 .gap-item { margin-bottom:20px; }
 .gap-item h4 { font-size:12px; font-weight:700; color:var(--amber); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; }
@@ -42,54 +42,6 @@ body { background:var(--bg); color:var(--text); font-family:var(--font-body);
 </div>
 
 <div id="wp-workflows"></div>
-
-<div class="gaps">
-  <h2>Gaps / Pending Corrections</h2>
-  <p class="gaps-sub">Items below are missing from diagrams or IO lists. Each is a discrete edit.</p>
-
-  <div class="gap-item">
-    <h4>W1 — One Shot Prototypes</h4>
-    <ul>
-      <li>Output: oneshot-prompt.md written to stdout/file — not shown</li>
-      <li>Output: SCORECARD.md written by agent after build, not by oneshot.sh</li>
-      <li>Input: ONESHOT_BUILD_RULES.md assembled into prompt alongside stack files</li>
-    </ul>
-  </div>
-  <div class="gap-item">
-    <h4>W2 — Application Iteration</h4>
-    <ul>
-      <li>Input: SPEC_COMMIT from prototype .env — replaces BUILD_TAG as baseline on subsequent runs</li>
-      <li>Output: iterate-prompt.md written to stdout/file — not shown</li>
-    </ul>
-  </div>
-  <div class="gap-item">
-    <h4>W3 — Technology Rules Propagation</h4>
-    <ul>
-      <li>Flow gap: summarize_rules.sh outputs a prompt, not CLAUDE_RULES.md directly — human-AI step missing</li>
-    </ul>
-  </div>
-  <div class="gap-item">
-    <h4>W4 — Automated Specification Iteration</h4>
-    <ul>
-      <li>Input: METADATA.md read by spec_iterate.sh — not shown</li>
-      <li>REFERENCE_GAPS.md is updated in place (input and output)</li>
-    </ul>
-  </div>
-  <div class="gap-item">
-    <h4>W5 — Session Capture</h4>
-    <ul>
-      <li>Input: .env (tran_logger reads prototype directory path from spec .env)</li>
-    </ul>
-  </div>
-  <div class="gap-item">
-    <h4>Cross-Workflow Connections Not Shown</h4>
-    <ul>
-      <li>W1 git tag → W2: oneshot tag is the diff baseline for iterate.sh</li>
-      <li>W5 PATCH-NNN-tl-*.md → W2: session-captured tickets feed the next iterate run</li>
-      <li>W4 SPEC_ITERATION.md → W1/W2: output is a ready-to-run build prompt</li>
-    </ul>
-  </div>
-</div>
 
 <script>
 window.addEventListener('DOMContentLoaded', function () {

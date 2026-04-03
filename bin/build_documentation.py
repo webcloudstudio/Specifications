@@ -325,93 +325,15 @@ def build_page(scripts, projects, guides):
                      f'onclick="showProject(\'{h.escape(p["name"])}\', \'{url}\')">'
                      f'{h.escape(p["display"])}</a>\n')
 
-    # ── Two-row workflow diagram ───────────────────────────────────────────────
-    def wf_box(label, script='', path='', terminal=False, ai=False, extra_label='', feature=''):
-        cls = 'wf-box'
-        if terminal: cls += ' wf-terminal'
-        if ai:       cls += ' wf-ai'
-        inner = f'<span class="wf-label">{h.escape(label)}</span>'
-        if extra_label:
-            inner += f'<span class="wf-label">{h.escape(extra_label)}</span>'
-        if feature:
-            inner += f'<span class="wf-script">Feature: {h.escape(feature)}</span>'
-        if script:
-            inner += f'<span class="wf-script">{h.escape(script)}</span>'
-        if path:
-            inner += f'<span class="wf-path">{h.escape(path)}</span>'
-        return f'<div class="{cls}">{inner}</div>'
-
-    ARR = '<span class="wf-arr">&#8594;</span>'
-
-    AND = '<span style="color:#1E2328;font-weight:700;padding:0 8px;align-self:center;font-size:12px">and</span>'
-
-    row1 = ARR.join([
-        wf_box('Setup', 'setup.sh'),
-        wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True),
-        wf_box('Validate', 'validate.sh'),
-        wf_box('OneShot', 'oneshot.sh'),
-        wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
-    ])
-    row2 = ARR.join([
-        wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
-        wf_box('Iterate', 'iterate.sh'),
-        wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True),
-        wf_box('merge.sh', 'bin/merge.sh'),
-        wf_box('Project', '', '../<PROJECT>', terminal=True),
-    ])
-    row_rules = ARR.join([
-        wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('summarize_rules.sh', 'bin/summarize_rules.sh'),
-        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('ProjectUpdate.sh', 'ProjectUpdate.sh'),
-        wf_box('Project', '', '../<PROJECT>', terminal=True),
-        wf_box('ProjectValidate.sh', 'bin/ProjectValidate.sh'),
-        wf_box('Project KPIs', terminal=True),
-    ])
-
-    iter_r1 = (wf_box('Specifications', '', 'Specifications/<PROJECT>/', terminal=True) + ARR +
-               wf_box('oneshot.sh', 'bin/oneshot.sh <PROJECT>') + ARR +
-               wf_box('PROTOTYPE', feature='<name>', path='doc/SCORECARD.md', terminal=True))
-    iter_r2 = (wf_box('Edit spec files', '', 'Specifications/<PROJECT>/', terminal=True) + ARR +
-               wf_box('iterate.sh', 'bin/iterate.sh <PROJECT>') + ARR +
-               wf_box('PROTOTYPE', feature='<name>', terminal=True))
-
-    wf_diagram = (f'<div class="wf-diagram">'
-                  f'<p class="wf-section-h" style="margin:0 0 4px">Oneshot Rules</p>'
-                  f'<div class="wf-row">{row1}</div>'
-                  f'<div class="wf-row">{row2}</div>'
-                  f'<p class="wf-section-h" style="margin:10px 0 4px">Business Rules</p>'
-                  f'<div class="wf-row">{row_rules}</div>'
-                  f'</div>')
-
-    eng_row = ARR.join([
-        wf_box('BUSINESS_RULES.md', '', 'RulesEngine/', terminal=True),
-        wf_box('summarize_rules.sh', 'bin/summarize_rules.sh'),
-        wf_box('CLAUDE_RULES.md', '', 'RulesEngine/', terminal=True),
-    ])
-    eng_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
-                   f'<div class="wf-row">{eng_row}</div>'
-                   f'</div>')
-
-    iter_diagram = (f'<div class="wf-diagram" style="margin-bottom:22px">'
-                    f'<div class="wf-row">{iter_r1}</div>'
-                    f'<div class="wf-row">{iter_r2}</div>'
-                    f'</div>')
-
-    guide_diagrams_js = (f'const GUIDE_DIAGRAMS = {{\n'
-                         f'  "ENGINEERING-RULES": {json.dumps(eng_diagram)},\n'
-                         f'  "ITERATION-PROCESS": {json.dumps(iter_diagram)},\n'
-                         f'}};')
-
-    # ── Workflow steps table (Prototyper steps only) ───────────────────────────
-    wf_step_data = [
-        (1, 'bin/setup.sh &lt;Project&gt;', 'Scaffold Specifications directory from templates'),
-        (2, 'bin/validate.sh &lt;Project&gt;', 'Check Specification files, naming, fields'),
-        (3, 'bin/oneshot.sh &lt;Project&gt; &gt; prompt.md', 'Validate + detect mode + generate build prompt'),
-    ]
-    wf_rows = ''
-    for n, cmd, desc in wf_step_data:
-        wf_rows += f'<tr><td class="wn">{n}</td><td class="wcmd"><code>{cmd}</code></td><td class="wdesc">{desc}</td></tr>\n'
+    workflow_maps_js = (
+        'const WORKFLOW_GUIDE_MAP = {\n'
+        '  "ENGINEERING-RULES": [2],\n'
+        '  "ITERATION-PROCESS": [1, 3, 4],\n'
+        '};\n'
+        'const STEP_WORKFLOW_MAP = {\n'
+        '  1: [0], 2: [0], 3: [0], 4: [0]\n'
+        '};'
+    )
 
     # ── Other scripts (with child support) ───────────────────────────────────
     all_children = {c for kids in SCRIPT_CHILDREN.values() for c in kids}
@@ -441,6 +363,9 @@ def build_page(scripts, projects, guides):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prototyper — Documentation</title>
 <link rel="stylesheet" href="styles/spec.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="workflows.js"></script>
+<script>mermaid.initialize({{ startOnLoad:false, theme:'neutral', flowchart:{{curve:'linear',nodeSpacing:40,rankSpacing:35,padding:16}} }});</script>
 <style>
 *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
 
@@ -491,25 +416,6 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 #project {{ max-width: none; height: 100%; }}
 #project.active {{ display: flex; }}
 #project-frame {{ flex: 1; border: none; width: 100%; height: 100%; display: block; }}
-
-/* ── Two-row workflow diagram ── */
-.wf-diagram {{ display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }}
-.wf-row {{ display: flex; align-items: stretch; flex-wrap: nowrap; gap: 8px; }}
-.wf-row-r {{ display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; }}
-.wf-box {{
-  background: var(--c-side-bg); border: 1px solid var(--c-side-border);
-  border-radius: 4px; padding: 5px 10px; text-align: center;
-  display: inline-flex; flex-direction: column; gap: 2px; align-items: center; }}
-.wf-terminal {{ border-color: var(--c-accent); background: #0a5c38; }}
-.wf-label {{ font-size: 12px; color: #fff; font-weight: 700; white-space: nowrap; display: block; }}
-.wf-script {{ font-size: 10px; color: #fff;
-  font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
-.wf-path {{ font-size: 9.5px; color: #fff;
-  font-family: 'Cascadia Code', Consolas, monospace; display: block; white-space: nowrap; }}
-.wf-arr {{ color: var(--c-accent); padding: 0 6px; font-size: 22px; font-weight: 700; align-self: center;
-  display: inline-block; line-height: 1; }}
-.wf-ai {{ border-style: dashed; border-color: #d4a017; background: #2a2000; }}
-.wf-ai {{ border-style: dashed; border-color: #d4a017; background: #2a2000; }}
 
 /* ── Rendered markdown ── */
 .md h1 {{ font-size: 22px; font-weight: 700; color: var(--c-accent);
@@ -578,24 +484,11 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
   border-radius: 4px; line-height: 1.5; white-space: pre; overflow-x: auto;
   border: 1px solid var(--c-td-border); }}
 
-/* ── Workflow table ── */
+/* ── Workflow section heading ── */
 .wf-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
   color: var(--c-h3); margin: 20px 0 8px; padding-bottom: 3px;
   border-bottom: 1px solid var(--c-td-border); }}
 .wf-section-h:first-child {{ margin-top: 0; }}
-.wf-table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 14px; }}
-.wf-table th {{ background: var(--c-th-bg); color: var(--c-th-text); padding: 5px 10px;
-  text-align: left; font-weight: 600; font-size: 12px; }}
-.wf-table td {{ padding: 5px 10px; border-bottom: 1px solid var(--c-td-border); vertical-align: top; }}
-.wf-table tr:last-child td {{ border-bottom: none; }}
-.wn {{ width: 24px; color: var(--c-accent); font-weight: 700; font-size: 12px; }}
-.wcmd {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; white-space: nowrap; }}
-.wcmd code {{ background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
-.wdesc {{ color: var(--c-h3); font-size: 12.5px; }}
-.note {{ font-size: 12.5px; color: var(--c-h3); padding: 7px 12px; margin-top: 10px;
-  background: var(--c-callout-bg); border-left: 3px solid var(--c-accent); border-radius: 0 4px 4px 0; }}
-.note code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px;
-  background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
 
 section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin-bottom: 12px; }}
@@ -637,7 +530,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
-    {wf_diagram}
+    <div id="wf-main"></div>
 
     <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
     <p class="wf-section-h">Dictionary</p>
@@ -672,7 +565,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 <script>
 {guides_js}
 {guides_meta_js}
-{guide_diagrams_js}
+{workflow_maps_js}
 {scripts_js}
 
 marked.setOptions({{ gfm: true, breaks: false }});
@@ -699,23 +592,37 @@ function show(id) {{
   if (id !== 'project') document.querySelector('main').scrollTop = 0;
 }}
 
+function renderGuideWorkflows(idxs) {{
+  if (!idxs || !idxs.length || !window.WORKFLOWS || !window.renderWorkflow) return '';
+  var parts = idxs.map(function(i, pos) {{
+    return (pos > 0 ? '<hr class="wp-div">' : '') + window.renderWorkflow(window.WORKFLOWS[i]);
+  }});
+  return parts.join('') + '<hr style="border:none;border-top:1px solid var(--c-td-border);margin:20px 0 16px">';
+}}
+
+function runMermaid(container) {{
+  if (window.mermaid) {{
+    var nodes = Array.from(container.querySelectorAll('.mermaid:not([data-processed])'));
+    if (nodes.length) window.mermaid.run({{ nodes: nodes }});
+  }}
+}}
+
 function showGuide(key) {{
   var content = GUIDES[key];
   if (!content) return;
   var meta = GUIDES_META[key] || {{}};
-  var diagram = GUIDE_DIAGRAMS[key] || '';
+  var wfIdxs = WORKFLOW_GUIDE_MAP[key] || [];
   var guideEl = document.getElementById('guide-content');
+  var diagramHtml = renderGuideWorkflows(wfIdxs);
   var htmlContent;
   if (meta.is_html) {{
-    // HTML content (e.g., Features.html) — extract body and wrap
     var parser = new DOMParser();
     var doc = parser.parseFromString(content, 'text/html');
     var bodyContent = doc.body.innerHTML;
-    htmlContent = diagram + bodyContent;
+    htmlContent = diagramHtml + bodyContent;
     guideEl.classList.add('html-content');
   }} else {{
-    // Markdown content — parse and render
-    htmlContent = diagram + marked.parse(content);
+    htmlContent = diagramHtml + marked.parse(content);
     guideEl.classList.remove('html-content');
   }}
   guideEl.innerHTML = htmlContent;
@@ -723,16 +630,21 @@ function showGuide(key) {{
   clearActive();
   var el = document.querySelector('[data-key="' + key + '"]');
   if (el) el.classList.add('active');
+  runMermaid(guideEl);
 }}
 
 function showGuideStep(key, step) {{
   var content = GUIDES[key];
   if (!content) return;
-  document.getElementById('guide-content').innerHTML = marked.parse(content);
+  var wfIdxs = STEP_WORKFLOW_MAP[step] || [];
+  var guideEl = document.getElementById('guide-content');
+  guideEl.innerHTML = renderGuideWorkflows(wfIdxs) + marked.parse(content);
+  guideEl.classList.remove('html-content');
   show('guide');
   clearActive();
   var el = document.querySelector('[data-step="' + step + '"]');
   if (el) el.classList.add('active');
+  runMermaid(guideEl);
   setTimeout(function() {{
     var headings = document.querySelectorAll('#guide-content h2, #guide-content h3');
     var label = 'Step ' + step;
@@ -817,6 +729,8 @@ function showProject(name, url) {{
 
 (function() {{
   initGuideList();
+  var wfMain = document.getElementById('wf-main');
+  if (wfMain && window.renderAllWorkflows) window.renderAllWorkflows(wfMain);
   show('workflow');
 }})();
 </script>
