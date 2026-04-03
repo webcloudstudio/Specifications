@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototyper — Specification Driven Design White Paper</title>
+<link rel="stylesheet" href="styles/spec.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad:false, theme:'neutral', flowchart:{curve:'linear',nodeSpacing:40,rankSpacing:35,padding:16} });</script>
+<script src="workflows.js"></script>
+<style>
+body {
+  background: var(--c-bg); color: var(--c-text);
+  font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
+  margin: 0; padding: 0; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+.page-content {
+  max-width: 860px; margin: 0 auto; padding: 36px 36px 80px;
+  flex: 1;
+}
+
+/* ---- Cover section ---- */
+.cover { border-bottom: 2px solid var(--c-accent); padding-bottom: 16px; margin-bottom: 28px; }
+.cover-eyebrow {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--c-accent); margin-bottom: 12px;
+}
+.cover h1 { font-size: 32px; font-weight: 800; color: var(--c-h1); line-height: 1.15; margin-bottom: 10px; }
+.cover-sub { font-size: 15px; color: var(--c-h3); margin-bottom: 18px; line-height: 1.6; }
+.cover-meta { font-size: 12px; color: var(--c-h3); display: flex; gap: 24px; }
+
+/* ---- Body prose ---- */
+.wp-section { margin-top: 36px; }
+.wp-section h2 {
+  font-size: 17px; font-weight: 700; color: var(--c-h1);
+  border-bottom: 2px solid var(--c-accent); padding-bottom: 4px; margin-bottom: 12px;
+}
+.wp-section h3 { font-size: 14px; font-weight: 600; color: var(--c-h3); margin: 16px 0 6px; }
+.wp-section p { margin: 8px 0; line-height: 1.7; font-size: 14px; }
+.wp-section ul { margin: 6px 0 6px 20px; }
+.wp-section li { margin: 3px 0; font-size: 14px; line-height: 1.6; }
+.wp-section code {
+  font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
+  background: var(--c-code-bg); color: var(--c-code-text);
+  padding: 1px 5px; border-radius: 3px;
+}
+
+/* ---- Workflow diagrams ---- */
+#wp-workflows { margin-top: 28px; }
+
+/* ---- Footer ---- */
+footer {
+  padding: 14px 36px; border-top: 1px solid var(--c-td-border);
+  font-size: 11px; color: var(--c-h3);
+  display: flex; justify-content: space-between;
+  max-width: 860px; margin: 0 auto; width: 100%;
+}
+</style>
+</head>
+<body class="gem-topbar">
+
+<header class="gem-header">
+  <div class="gem-header-left">
+    <span class="gem-header-logo">Prototyper</span>
+    <span class="gem-header-title">White Paper</span>
+  </div>
+  <nav class="gem-header-nav">
+    <a href="index.html">Documentation</a>
+    <a href="Features.html">Features</a>
+    <a href="white-paper.html" style="border-bottom-color: var(--c-accent);">White Paper</a>
+  </nav>
+  <span class="gem-header-copyright">Ed Barlow &middot; Web Cloud Studio</span>
+</header>
+
+<div class="page-content">
+
+<div class="cover">
+  <div class="cover-eyebrow">Specification Driven Design Methodology</div>
+  <h1>Specification Driven Design</h1>
+  <div class="cover-sub">
+    A methodology for building software from structured specifications using AI agents.
+    One specification set produces one working prototype &mdash; no ambiguity, no drift.
+  </div>
+  <div class="cover-meta"><span>Ed Barlow</span><span>Web Cloud Studio</span><span>2026</span></div>
+</div>
+
+<div class="wp-section">
+  <h2>The Problem</h2>
+  <p>AI code generation works well for small, self-contained tasks. But building a complete
+  application &mdash; with a database, multiple screens, shared UI patterns, and operational
+  concerns &mdash; requires more than a single prompt. Without structure, AI builds diverge
+  from intent, accumulate inconsistencies, and become harder to iterate on with each cycle.</p>
+</div>
+
+<div class="wp-section">
+  <h2>The Approach</h2>
+  <p>Specification Driven Design separates <em>what to build</em> from <em>how to build it</em>.
+  The developer writes concise, structured specification files. An opinionated technology stack
+  and a set of business rules provide the <em>how</em>. A build script assembles everything into
+  a single prompt that an AI agent executes in one pass.</p>
+
+  <h3>Specification Files</h3>
+  <p>Each project is defined by a small set of markdown files, each with a specific role:</p>
+  <ul>
+    <li><code>METADATA.md</code> &mdash; identity, stack, status (the service catalog entry)</li>
+    <li><code>ARCHITECTURE.md</code> &mdash; modules, routes, directory layout</li>
+    <li><code>DATABASE.md</code> &mdash; tables, columns, types (schema only)</li>
+    <li><code>FUNCTIONALITY.md</code> &mdash; what the application does at a high level</li>
+    <li><code>SCREEN-*.md</code> &mdash; per-screen: route, layout, interactions</li>
+    <li><code>FEATURE-*.md</code> &mdash; per-feature: trigger, sequence, reads, writes</li>
+    <li><code>UI-GENERAL.md</code> &mdash; shared UI patterns across screens</li>
+  </ul>
+
+  <h3>Technology Rules</h3>
+  <p>A shared rules engine (<code>CLAUDE_RULES.md</code>) defines agent behavior: file structure,
+  naming conventions, error handling, security, commit standards. Stack files
+  (<code>flask.md</code>, <code>sqlite.md</code>, etc.) provide copy-paste implementation patterns.
+  The AI agent follows these rules exactly &mdash; no creative interpretation.</p>
+
+  <h3>One-Shot Build</h3>
+  <p>The <code>oneshot.sh</code> script validates the specification, concatenates all inputs
+  (specification files + rules + stack patterns), and produces a single prompt. The AI agent
+  reads this prompt and builds the entire application in one pass. The result is tagged in git
+  so every build is traceable to the exact specification state that produced it.</p>
+</div>
+
+<div class="wp-section">
+  <h2>Iteration</h2>
+  <p>After the initial build, changes flow through the specification &mdash; not through ad-hoc
+  code edits. Numbered tickets (<code>SCREEN-NNN-*.md</code>, <code>FEATURE-NNN-*.md</code>,
+  <code>PATCH-NNN-*.md</code>) describe focused changes. The <code>iterate.sh</code> script
+  assembles these into an iteration prompt that the AI agent applies to the existing codebase.</p>
+  <p>Quality tools keep things on track: <code>scorecard.sh</code> measures specification-to-code
+  alignment, <code>spec_iterate.sh</code> identifies specification gaps, and
+  <code>tran_logger.sh</code> extracts bugs and ideas from AI session logs.</p>
+</div>
+
+<div class="wp-section">
+  <h2>Promotion</h2>
+  <p>When a prototype is ready, <code>merge.sh</code> squash-merges the feature branch into the
+  base branch. <code>ProjectValidate.sh</code> checks compliance against maturity-level rules
+  (IDEA &rarr; PROTOTYPE &rarr; ACTIVE &rarr; PRODUCTION). <code>ProjectUpdate.sh</code>
+  propagates the latest rules and templates to promoted projects.</p>
+</div>
+
+<div id="wp-workflows"></div>
+
+</div>
+
+<footer>
+  <span>Ed Barlow</span>
+  <span>Web Cloud Studio &middot; 2026</span>
+</footer>
+
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  window.renderAllWorkflows(document.getElementById('wp-workflows'));
+});
+</script>
+</body>
+</html>

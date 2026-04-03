@@ -9,7 +9,7 @@
 #   python3 bin/generate_image.py
 #
 # Output:
-#   doc/images/prototyper.webp            — used in the Prototyper sidebar header
+#   docs/images/prototyper.webp            — used in the Prototyper sidebar header
 #   ../GAME/static/project_images/prototyper.webp — used on the GAME portfolio card
 #
 # Re-run any time the image_description in METADATA.md changes and you want
@@ -345,7 +345,7 @@ def main():
     img = create_prototyper_image()
 
     # Destination 1: Specifications/doc/images/
-    dest1 = Path('/mnt/c/Users/barlo/projects/Specifications/doc/images/prototyper.webp')
+    dest1 = Path('/mnt/c/Users/barlo/projects/Specifications/docs/images/prototyper.webp')
     os.makedirs(dest1.parent, exist_ok=True)
     img.save(dest1, 'WEBP', quality=90)
     print(f"Saved {dest1}  ({dest1.stat().st_size / 1024:.1f} KB)")

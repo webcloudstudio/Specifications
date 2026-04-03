@@ -1,7 +1,4 @@
 #!/bin/bash
-# CommandCenter Operation
-# Name: Build Doc
-# Category: Operations
 set -euo pipefail
 SCRIPT_NAME="$(basename "$0" .sh)"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,7 +9,7 @@ cd "$PROJECT_DIR"
 PROJECT_NAME="$(grep '^name:' METADATA.md | head -1 | sed 's/^name:[[:space:]]*//')"
 
 LOG_FILE="logs/${PROJECT_NAME}_${SCRIPT_NAME}_$(date +%Y%m%d_%H%M%S).log"
-mkdir -p logs doc/styles/themes
+mkdir -p logs docs/styles/themes
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 # Parse --theme=<name> argument (default: slate)
@@ -23,7 +20,7 @@ for arg in "$@"; do
   esac
 done
 
-STYLES_DIR="$PROJECT_DIR/doc/styles"
+STYLES_DIR="$PROJECT_DIR/docs/styles"
 THEME_FILE="$STYLES_DIR/themes/${THEME}.css"
 
 if [ ! -f "$THEME_FILE" ]; then
@@ -40,4 +37,4 @@ echo "  CSS: themes/${THEME}.css + spec-base.css → styles/spec.css"
 
 python3 "$SCRIPT_DIR/build_documentation.py"
 echo "[$PROJECT_NAME] Done: $SCRIPT_NAME"
-echo "Output: doc/index.html"
+echo "Output: docs/index.html"

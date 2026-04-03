@@ -54,7 +54,7 @@ Specifications/
 
   GAME/                            GAME project specification
   data/                            HTML viewer templates (used by build_documentation.py)
-  doc/                             Generated documentation
+  docs/                            Generated documentation
   archive/                         Superseded documents — not current spec
 ```
 

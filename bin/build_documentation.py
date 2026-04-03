@@ -3,7 +3,7 @@
 # Name: Build Documentation
 # Category: maintenance
 """
-Build doc/index.html — single-page documentation for the Prototyper system.
+Build docs/index.html — single-page documentation for the Prototyper system.
 Also rebuilds root index.html (redirect) and per-project index.html viewers.
 
 Layout: sidebar (dark chrome) + content (light).
@@ -16,12 +16,12 @@ import re as _re
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).parent.parent
-DOC_DIR = PROJECT_DIR / "doc"
+DOC_DIR = PROJECT_DIR / "docs"
 BIN_DIR = PROJECT_DIR / "bin"
 
 SKIP_DIRS = {
     '__pycache__', '.git', 'venv', 'archive', 'stack', 'bin', 'templates',
-    'doc', 'logs', 'data', 'RulesEngine',
+    'docs', 'logs', 'data', 'RulesEngine',
 }
 
 # Scripts that appear in the sidebar as Workflow Scripts (in this order)
@@ -43,10 +43,13 @@ SCRIPT_DESCRIPTIONS = {
     'spec_iterate.sh':             'AI-powered spec gap analysis — updates REFERENCE_GAPS.md, writes SPEC_SCORECARD.md (7-dimension quality rating) and SPEC_ITERATION.md (focused prompt targeting 1–2 highest-priority gaps)',
     'summarize_rules.sh': 'Generate prompt to regenerate CLAUDE_RULES.md from BUSINESS_RULES.md',
     'test.sh':                 'Run self-tests on the specification system',
-    'build_documentation.py':  'Build this documentation page (doc/index.html)',
+    'build_documentation.py':  'Build this documentation page (docs/index.html)',
     'build_documentation.sh':  'Wrapper — runs build_documentation.py with the slate theme',
     'ProjectValidate.sh':      'Verify a promoted code project against CLAUDE_RULES compliance — shows pass/fail by level',
     'ProjectUpdate.sh':        'Update a promoted project with latest CLAUDE_RULES and templates',
+    'decompose.sh':             'Reverse-engineer an existing project into specification files',
+    'scorecard.sh':             'Generate SCORECARD.md — specification-to-code alignment checklist',
+    'update_reference_gaps.sh': 'Update REFERENCE_GAPS.md from specification vs prototype comparison',
 }
 
 GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'SDD-SPECIFICATIONS', 'FEATURES']
@@ -203,9 +206,9 @@ def generate_indexes():
     """Rebuild root index.html (redirect) and per-project index.html viewers."""
     # Root redirect
     root_html = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n'
-                 '<meta http-equiv="refresh" content="0; url=doc/index.html">\n'
+                 '<meta http-equiv="refresh" content="0; url=docs/index.html">\n'
                  '<title>Prototyper — Redirecting...</title>\n</head>\n<body>\n'
-                 '<p>Redirecting to <a href="doc/index.html">Prototyper Documentation</a>...</p>\n'
+                 '<p>Redirecting to <a href="docs/index.html">Prototyper Documentation</a>...</p>\n'
                  '</body>\n</html>')
     (PROJECT_DIR / 'index.html').write_text(root_html, encoding='utf-8')
     print('  Generated index.html (redirect)')
@@ -244,12 +247,12 @@ def generate_indexes():
         (entry / 'index.html').write_text(page_html, encoding='utf-8')
         print(f'  Generated {entry.name}/index.html ({len(docs)} docs)')
 
-        # Also write into doc/projects/<name>/ so doc/ is fully portable (self-contained)
-        portable_html = page_html.replace('../doc/styles/', '../../styles/')
+        # Also write into docs/projects/<name>/ so docs/ is fully portable (self-contained)
+        portable_html = page_html.replace('../docs/styles/', '../../styles/')
         proj_doc_dir = DOC_DIR / 'projects' / entry.name
         proj_doc_dir.mkdir(parents=True, exist_ok=True)
         (proj_doc_dir / 'index.html').write_text(portable_html, encoding='utf-8')
-        print(f'  Generated doc/projects/{entry.name}/index.html (portable copy)')
+        print(f'  Generated docs/projects/{entry.name}/index.html (portable copy)')
 
 
 # ── Build HTML ────────────────────────────────────────────────────────────────
@@ -464,6 +467,8 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 .sd-item {{ font-size: 12.5px; color: var(--c-text); padding: 2px 0;
   font-family: 'Cascadia Code', Consolas, monospace; }}
 .sd-empty {{ font-size: 13px; color: var(--c-h3); font-style: italic; }}
+.sd-footer {{ margin-top: 28px; padding-top: 10px; border-top: 1px solid var(--c-td-border);
+  font-size: 11px; color: var(--c-h3); font-family: 'Cascadia Code', Consolas, monospace; }}
 
 /* ── Scripts (expandable, for Other Scripts section) ── */
 .sc-section-h {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
@@ -659,6 +664,17 @@ function showGuideStep(key, step) {{
 
 function esc(t) {{ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
+// Map script header section names to standard man-page section names
+var MAN_SECTION_MAP = {{
+  'Arguments': 'OPTIONS', 'Options': 'OPTIONS', 'Flags': 'OPTIONS',
+  'Exit codes': 'EXIT STATUS', 'Exit': 'EXIT STATUS',
+  'Writes': 'FILES', 'Creates': 'FILES', 'Output': 'FILES', 'Reads': 'FILES',
+  'Examples': 'EXAMPLES', 'Example': 'EXAMPLES',
+  'Modes': 'MODES', 'Checks': 'DESCRIPTION', 'Workflow': 'DESCRIPTION',
+  'Template source': 'SEE ALSO',
+}};
+var MAN_SECTION_ORDER = ['SYNOPSIS','DESCRIPTION','OPTIONS','MODES','FILES','EXAMPLES','EXIT STATUS','SEE ALSO'];
+
 function showScript(file) {{
   var s = SCRIPTS[file] || {{}};
   var desc = s.desc || '';
@@ -667,7 +683,7 @@ function showScript(file) {{
   var html = '<div class="sd-man">';
 
   // NAME
-  html += '<div class="sd-sec">Name</div>';
+  html += '<div class="sd-sec">NAME</div>';
   html += '<div class="sd-body"><span class="sd-name-line">' + esc(file) + '</span>';
   if (desc) html += '<span class="sd-name-dash"> &mdash; ' + esc(desc) + '</span>';
   html += '</div>';
@@ -675,38 +691,77 @@ function showScript(file) {{
   // SYNOPSIS
   var syn = secs['Usage'] || secs['Synopsis'] || '';
   if (syn) {{
-    html += '<div class="sd-sec">Synopsis</div><div class="sd-body">';
+    html += '<div class="sd-sec">SYNOPSIS</div><div class="sd-body">';
     syn.split('\\n').forEach(function(line) {{
       if (line.trim()) html += '<code class="sd-cmd">' + esc(line.trim()) + '</code>';
     }});
     html += '</div>';
   }}
 
-  // DESCRIPTION
+  // DESCRIPTION (combine _desc + any sections mapped to DESCRIPTION)
   var body = secs['_desc'] || '';
-  if (body) {{
-    html += '<div class="sd-sec">Description</div><div class="sd-body">';
-    body.split('\\n\\n').forEach(function(para) {{
-      var t = para.trim().replace(/\\n/g, ' ');
-      if (t) html += '<p>' + esc(t) + '</p>';
+  var descExtra = [];
+  Object.keys(secs).forEach(function(key) {{
+    if (MAN_SECTION_MAP[key] === 'DESCRIPTION' && secs[key].trim()) descExtra.push(secs[key]);
+  }});
+  if (body || descExtra.length) {{
+    html += '<div class="sd-sec">DESCRIPTION</div><div class="sd-body">';
+    if (body) {{
+      body.split('\\n\\n').forEach(function(para) {{
+        var t = para.trim().replace(/\\n/g, ' ');
+        if (t) html += '<p>' + esc(t) + '</p>';
+      }});
+    }}
+    descExtra.forEach(function(extra) {{
+      extra.split('\\n').forEach(function(line) {{
+        if (line.trim()) html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
+      }});
     }});
     html += '</div>';
   }}
 
-  // Additional sections (Writes, Options, Modes, Examples, etc.)
+  // Remaining sections in man-page order
   var skip = {{'_desc':1,'Usage':1,'Synopsis':1}};
-  var codeKeys = {{'Examples':1}};
-  Object.keys(secs).forEach(function(key) {{
-    if (skip[key] || !secs[key].trim()) return;
-    html += '<div class="sd-sec">' + esc(key) + '</div><div class="sd-body">';
-    secs[key].split('\\n').forEach(function(line) {{
-      if (line.trim()) {{
-        if (codeKeys[key]) html += '<code class="sd-cmd">' + esc(line.trim()) + '</code>';
-        else html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
-      }}
+  var codeKeys = {{'EXAMPLES':1,'SYNOPSIS':1}};
+  var rendered = {{'DESCRIPTION':1}};
+
+  MAN_SECTION_ORDER.forEach(function(manKey) {{
+    if (manKey === 'SYNOPSIS' || manKey === 'DESCRIPTION') return;
+    var parts = [];
+    Object.keys(secs).forEach(function(key) {{
+      if (skip[key] || !secs[key].trim()) return;
+      var mapped = MAN_SECTION_MAP[key] || key.toUpperCase();
+      if (mapped === manKey) parts.push(secs[key]);
+    }});
+    if (!parts.length) return;
+    rendered[manKey] = 1;
+    html += '<div class="sd-sec">' + esc(manKey) + '</div><div class="sd-body">';
+    parts.forEach(function(text) {{
+      text.split('\\n').forEach(function(line) {{
+        if (line.trim()) {{
+          if (codeKeys[manKey]) html += '<code class="sd-cmd">' + esc(line.trim()) + '</code>';
+          else html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
+        }}
+      }});
     }});
     html += '</div>';
   }});
+
+  // Any unmapped sections
+  Object.keys(secs).forEach(function(key) {{
+    if (skip[key] || !secs[key].trim()) return;
+    var mapped = MAN_SECTION_MAP[key] || key.toUpperCase();
+    if (rendered[mapped]) return;
+    rendered[mapped] = 1;
+    html += '<div class="sd-sec">' + esc(mapped) + '</div><div class="sd-body">';
+    secs[key].split('\\n').forEach(function(line) {{
+      if (line.trim()) html += '<div class="sd-item">' + esc(line.trim()) + '</div>';
+    }});
+    html += '</div>';
+  }});
+
+  // Footer
+  html += '<div class="sd-footer">Prototyper &middot; bin/' + esc(file) + '</div>';
 
   if (!desc && !syn && !body) html += '<div class="sd-empty">(no documentation available)</div>';
   html += '</div>';

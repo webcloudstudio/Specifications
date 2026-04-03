@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototyper — Features</title>
+<link rel="stylesheet" href="styles/spec.css">
+<style>
+body {
+  background: var(--c-bg); color: var(--c-text);
+  font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif;
+  margin: 0; padding: 0; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+.page-content {
+  max-width: 1200px; margin: 0 auto; padding: 28px 48px 40px;
+  flex: 1;
+}
+
+/* ---- Grid ---- */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.col h2 {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.8px; color: var(--c-accent);
+  padding-bottom: 5px; border-bottom: 2px solid var(--c-accent);
+  margin: 0 0 12px;
+}
+
+.col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.col li {
+  font-size: 13.5px; font-weight: 500; color: var(--c-text);
+  padding: 6px 0 6px 24px; position: relative; line-height: 1.35;
+}
+.col li::before {
+  content: ''; position: absolute; left: 0; top: 10px;
+  width: 12px; height: 12px; border-radius: 3px;
+  background: var(--c-callout-bg); border: 1.5px solid var(--c-accent);
+}
+.col li span {
+  display: block; font-size: 11.5px; font-weight: 400;
+  color: var(--c-h3); margin-top: 2px;
+}
+
+/* ---- Starred items ---- */
+.col li.star::before {
+  content: '\2605'; background: var(--c-accent); border-color: var(--c-accent);
+  color: #fff; font-size: 8px; display: flex; align-items: center;
+  justify-content: center; line-height: 1;
+}
+.col li.star { font-weight: 700; }
+
+/* ---- Footer ---- */
+footer {
+  padding: 14px 48px; border-top: 1px solid var(--c-td-border);
+  font-size: 11px; color: var(--c-h3);
+  display: flex; justify-content: space-between;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+}
+</style>
+</head>
+<body class="gem-topbar">
+
+<header class="gem-header">
+  <div class="gem-header-left">
+    <span class="gem-header-logo">Prototyper</span>
+    <span class="gem-header-title">Features</span>
+  </div>
+  <nav class="gem-header-nav">
+    <a href="index.html">Documentation</a>
+    <a href="Features.html" style="border-bottom-color: var(--c-accent);">Features</a>
+    <a href="white-paper.html">White Paper</a>
+  </nav>
+  <span class="gem-header-copyright">Ed Barlow &middot; Web Cloud Studio</span>
+</header>
+
+<div class="page-content">
+
+<div class="columns">
+
+  <div class="col">
+    <h2>Build</h2>
+    <ul>
+      <li class="star">One-Shot Prototypes<span>Specifications in, working application out &mdash; iterating specifications</span></li>
+      <li>Opinionated Stack Templates<span>Prescriptive patterns per technology</span></li>
+      <li>Feature Branch Pipeline<span>Automated feature branch lifecycle per epic</span></li>
+      <li>Automated Specification Updates<span>Specifications automatically stay current</span></li>
+      <li>Spec-to-Code Traceability<span>Specifications to commits to tickets, fully linked</span></li>
+      <li>AI Transaction Log<span>Decisions and rationale tracked per build</span></li>
+    </ul>
+  </div>
+
+  <div class="col">
+    <h2>Development</h2>
+    <ul>
+      <li class="star">Project Kanban Board<span>Configurable workflow with validated transitions</span></li>
+      <li class="star">Common Technology Rules<span>Across your projects</span></li>
+      <li>Project Maturity Levels<span>IDEA &rarr; PROTOTYPE &rarr; PROJECT</span></li>
+      <li>Compliance Validation<span>Guardrails and KPIs (specification drift / scorecards)</span></li>
+      <li>Secrets Management<span>Loaded automatically, never committed</span></li>
+      <li>Smart Git Commits<span>Descriptive labels, auto commit</span></li>
+      <li>AI Agent Submission<span>Tickets submitted for automated implementation</span></li>
+    </ul>
+  </div>
+
+  <div class="col">
+    <h2>Operations</h2>
+    <ul>
+      <li class="star">Health Monitoring<span>Endpoint polling with alerting thresholds</span></li>
+      <li class="star">Transparent Job Scheduling<span>Extracted from script headers</span></li>
+      <li>Missed-Run Recovery<span>Catches up &mdash; suited for your laptop</span></li>
+      <li>Process Lifecycle<span>Start, stop, SIGTERM per process group</span></li>
+      <li>Intelligent Alerts<span>State transitions with snooze</span></li>
+      <li>Standard Logging<span>Consolidated system events</span></li>
+      <li>Dynamic Port Management<span>And forwarding</span></li>
+    </ul>
+  </div>
+
+  <div class="col">
+    <h2>Publish</h2>
+    <ul>
+      <li class="star">Full Service Catalog<span>Service/agent interoperability</span></li>
+      <li class="star">Personal Portfolio Page<span>Projects publish to GitHub Pages automatically</span></li>
+      <li>Common Documentation<span>Standard structure and branding across all projects</span></li>
+      <li>Published Service API<span>REST endpoints for all platform capabilities</span></li>
+      <li>Project Health KPIs<span>Compliance, health, self-test, specification-drift</span></li>
+      <li>Production Pipelines<span>Deploy, test, and release workflows built in</span></li>
+    </ul>
+  </div>
+
+</div>
+</div>
+
+<footer>
+  <span>Ed Barlow</span>
+  <span>Web Cloud Studio &middot; 2026</span>
+</footer>
+
+</body>
+</html>

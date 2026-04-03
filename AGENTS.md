@@ -11,7 +11,7 @@ This repository has two roles:
 1. **Global standards** (`RulesEngine/`) — distributing CLAUDE_RULES.md, ONESHOT_BUILD_RULES.md,
    templates (common.sh, common.py), stack reference patterns, and branding standards
    to every project via `bin/create_project.py`.
-2. **Project specifications** (`GAME/`, `AlexaPrototypeOne/`, etc.) — concise
+2. **Project specifications** (`GAME/`, etc.) — concise
    specs organized by screen, feature, and component that define what to build.
 
 Tooling in `bin/` creates projects, validates compliance, propagates standards, converts
@@ -55,8 +55,11 @@ Specifications/
   RulesEngine/                    Global standards distributed to all projects
     BUSINESS_RULES.md              Source for agent behavior rules — edit this, not CLAUDE_RULES.md
     CLAUDE_RULES.md                Generated agent behavior contract (injected into AGENTS.md)
-    ONESHOT_BUILD_RULES.md                     Specification expansion rules (global methodology)
+    CLAUDE_PROTOTYPE.md            Agent behavior contract for prototype-phase projects
+    ONESHOT_BUILD_RULES.md         Specification expansion rules (global methodology)
+    DOCUMENTATION.md               Documentation build standard (output structure, themes)
     DOCUMENTATION_BRANDING.md      Documentation theming and color standards
+    PROTOTYPE_PROCESS.md           Prototype workflow process guide (sourced by docs)
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
     spec_template/                 Template files for setup.sh
     templates/                     Canonical common.sh and common.py (code projects)
@@ -66,19 +69,24 @@ Specifications/
     setup.sh                       Scaffold new specification directory (or update existing) from templates
     validate.sh                    Validate a specification directory for completeness and correctness
     convert.sh                     Generate conversion prompt (concise → detailed)
-    merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
     oneshot.sh                     Validate + detect mode + generate build prompt (canonical build command)
-    summarize_rules.sh       Generate prompt to regenerate CLAUDE_RULES.md
+    iterate.sh                     Generate iteration prompt from pending tickets and specification diffs
+    merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
+    tran_logger.sh                 Extract bugs and ideas from AI session transaction logs
+    spec_iterate.sh                AI-powered specification gap analysis and quality scoring
+    scorecard.sh                   Generate SCORECARD.md — specification-to-code alignment
+    update_reference_gaps.sh       Update REFERENCE_GAPS.md from specification vs prototype comparison
+    decompose.sh                   Reverse-engineer an existing project into specification files
+    summarize_rules.sh             Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
-    build_documentation.sh         Build doc/index.html
+    build_documentation.sh         Build docs/index.html
     project_manager.py             Python backend for project verify/update operations
     ProjectValidate.sh             Verify a promoted code project against CLAUDE_RULES compliance
     ProjectUpdate.sh               Update a promoted code project with latest rules and templates
 
   GAME/                            Project specification (GAME dashboard)
-  AlexaPrototypeOne/               Project specification (numbered sequence)
   archive/                         Superseded documents — not current spec
-  doc/                             Documentation: process guide, project setup guide
+  docs/                            Generated documentation (index.html, Features.html, white-paper.html)
 ```
 
 **Reference standards in RulesEngine/ (not auto-distributed):**
@@ -90,23 +98,39 @@ Specifications/
 - `{ProjectName}/` = what a specific prototype specification should be and do
 - `bin/` specification scripts = work on prototype directories inside this repo only
 - `bin/` Project* scripts = push standards to promoted code projects (absolute path or project name)
-- `doc/` = documentation about the specification system itself
+- `docs/` = documentation about the specification system itself
 - GAME project (`../GAME/bin/`) = create_project.py (scaffold new projects); wrappers delegate validate/update to project_manager.py
 
 ## Specification File Types
 
-| Prefix | Purpose | Required |
-|--------|---------|----------|
+| File | Purpose | Required |
+|------|---------|----------|
 | `METADATA.md` | Project identity (name, display_name, short_description, status) | Yes |
 | `README.md` | One-line description + `## Intent` section (why it exists, who it's for) | Yes |
+| `INTENT.md` | Standalone intent document — goals, constraints, success criteria | Yes |
 | `ARCHITECTURE.md` | Modules, routes, directory layout | Yes |
+| `FUNCTIONALITY.md` | What the application does — high-level feature summary | Yes |
 | `DATABASE.md` | Tables, columns, types (schema only) | If has DB |
-| `UI.md` | Shared UI patterns across screens | If has UI |
+| `UI-GENERAL.md` | Shared UI patterns across screens | If has UI |
 | `SCREEN-{Name}.md` | Per-screen: route, layout, interactions | If has UI |
 | `FEATURE-{Name}.md` | Per-feature: trigger, sequence, reads, writes | As needed |
 | `HOMEPAGE.md` | Portfolio homepage: branding, contact, bio, diagram links | If publishes a portfolio |
+| `HOMEPAGE-PUBLISHER.md` | Template-based homepage publishing configuration | If publishes a portfolio |
+| `IDEAS.md` | Feature ideas and backlog (written by tran_logger.sh or manually) | No |
+| `ACCEPTANCE_CRITERIA.md` | Acceptance criteria for the current build | No |
+| `REFERENCE_GAPS.md` | Specification completeness gaps (written by spec_iterate.sh) | No |
+| `SPEC_SCORECARD.md` | 7-dimension quality rating (written by spec_iterate.sh) | No |
 
-specification files (DATABASE, UI, ARCHITECTURE, SCREEN-*, FEATURE-*) end with `## Open Questions`. README and METADATA do not.
+**Numbered ticket files** (applied in NNN order by iterate.sh):
+
+| Pattern | Purpose |
+|---------|---------|
+| `SCREEN-NNN-{Name}.md` | Screen change ticket |
+| `FEATURE-NNN-{Name}.md` | Feature change ticket |
+| `PATCH-NNN-{Name}.md` | Targeted code patch ticket |
+| `AC-NNN-{Name}.md` | Acceptance criteria ticket |
+
+Specification files (DATABASE, UI-GENERAL, ARCHITECTURE, SCREEN-*, FEATURE-*, FUNCTIONALITY) end with `## Open Questions`. README, METADATA, and generated files (IDEAS, REFERENCE_GAPS, SPEC_SCORECARD) do not.
 
 ## Dev Commands
 
@@ -146,12 +170,37 @@ bash bin/convert.sh <ProjectName> > convert-prompt.md
 #   Update mode (apply specification changes to existing code):
 #     bash bin/oneshot.sh <ProjectName> --update > oneshot-prompt.md
 
+# Iterate: generate iteration prompt from pending tickets and specification diffs
+bash bin/iterate.sh <ProjectName> > iterate-prompt.md
+
 # Merge: squash-merge Feature Branch into base branch (GAME calls this automatically)
 bash bin/merge.sh <ProjectName>
 bash bin/merge.sh <ProjectName> --feature feature/name --base main --dry-run
 
 # Test the specification system itself
 bash bin/test.sh
+```
+
+### Iteration and quality tools
+
+```bash
+# Extract bugs and ideas from AI session transaction log
+bash bin/tran_logger.sh <ProjectName>
+bash bin/tran_logger.sh <ProjectName> --model=claude-haiku-4-5-20251001
+
+# AI-powered specification gap analysis and quality scoring
+bash bin/spec_iterate.sh <ProjectName>
+bash bin/spec_iterate.sh <ProjectName> --model opus
+
+# Generate SCORECARD.md — specification-to-code alignment checklist
+bash bin/scorecard.sh <ProjectName>
+
+# Update REFERENCE_GAPS.md from specification vs prototype comparison
+bash bin/update_reference_gaps.sh <ProjectName>
+
+# Reverse-engineer an existing project into specification files
+bash bin/decompose.sh /path/to/project > decompose-prompt.md
+bash bin/decompose.sh /path/to/project --spec-name MyProject > decompose-prompt.md
 ```
 
 ### Promoted project management (code projects outside this repo)
@@ -234,6 +283,9 @@ Generates a prompt for an AI agent to regenerate `RulesEngine/CLAUDE_RULES.md` f
 
 Use `bin/oneshot.sh` directly — it handles both Bootstrap and Feature Branch modes automatically.
 
+### bin/iterate.sh
+Generates an iteration prompt from pending change tickets (SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*, AC-NNN-*) and modified specification diffs. The agent validates each ticket before implementing. Does not rebuild from scratch — applies targeted changes to the existing codebase.
+
 ### bin/merge.sh
 Squash-merges a feature branch into the base branch and deletes it. Reads feature branch from `.env` and base branch from `METADATA.md`. Accepts `--feature`, `--base`, and `--dry-run` overrides. Called by GAME UI — can also be run directly.
 
@@ -241,6 +293,21 @@ Squash-merges a feature branch into the base branch and deletes it. Reads featur
 Python backend for promoted project operations. Two subcommands:
 - `verify <project>` — runs CLAUDE_RULES compliance checks grouped by level (IDEA → PROTOTYPE → ACTIVE → PRODUCTION), shows "you are here" status from METADATA.md, and previews the next level's requirements. Accepts project name or absolute path.
 - `update <project>` — injects latest CLAUDE_RULES.md into AGENTS.md, copies template files (common.sh, common.py, index.html), adds missing METADATA.md default fields, and updates git_repo from the git remote. Supports `--dry-run`. Project must already have CLAUDE_RULES_START marker.
+
+### bin/tran_logger.sh
+Reads the Claude Code session transaction log (JSONL), analyzes git history plus session logs, and extracts bugs and ideas via an AI model. Writes PATCH-NNN-tl-*.md (mutations), AC-NNN-tl-*.md (acceptance criteria), and updates IDEAS.md. Default model: claude-haiku-4-5-20251001.
+
+### bin/spec_iterate.sh
+AI-powered specification gap analysis using `claude -p` (subscription, not API tokens). Updates REFERENCE_GAPS.md, writes SPEC_SCORECARD.md (7-dimension quality rating), and SPEC_ITERATION.md (focused prompt targeting 1-2 highest-priority gaps). Accepts `--model opus|sonnet|haiku`.
+
+### bin/scorecard.sh
+Generates SCORECARD.md in the prototype directory by checking code against specification files. Reads specification markdown, prototype routes.py, STUBS.md, and tests/. Outputs a checklist of KPIs measuring specification-to-code alignment.
+
+### bin/update_reference_gaps.sh
+Compares specification files against the prototype and optionally a reference implementation. Uses `claude -p` to identify gaps. Writes REFERENCE_GAPS.md in the specification directory.
+
+### bin/decompose.sh
+Reverse-engineers an existing project into specification files. Reads source code, detects stack, and generates a prompt for an AI agent to produce structured specification files (METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, etc.). Output to stdout — pipe to a file and feed to an AI agent.
 
 ### bin/ProjectValidate.sh
 Thin wrapper calling `project_manager.py verify`. Operates on promoted code projects only — not spec directories in this repo.
@@ -258,7 +325,7 @@ One file per technology (flask.md, sqlite.md, etc.). Prescriptive patterns inclu
 
 | File | Source | Purpose |
 |------|--------|---------|
-| `index.html` | `RulesEngine/templates/index.html` | Redirect to `doc/index.html` — entry point for browsers |
+| `index.html` | `RulesEngine/templates/index.html` | Redirect to `docs/index.html` — entry point for browsers |
 | `bin/common.sh` | `RulesEngine/templates/common.sh` | Shared shell utilities |
 | `bin/common.py` | `RulesEngine/templates/common.py` | Shared Python utilities |
 | `CLAUDE.md` | Generated by `create_project.py` | `@AGENTS.md` pointer |

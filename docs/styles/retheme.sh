@@ -1,10 +1,10 @@
 #!/bin/bash
 # Apply a documentation theme to this project.
-# Usage: doc/styles/retheme.sh [theme-name]
+# Usage: docs/styles/retheme.sh [theme-name]
 # Default: slate
 # Available: slate  midnight  green  purple  midnight-green  mughal  rainforest  ivory  clean
 #
-# Works for any project that has doc/styles/ — independent of the documentation
+# Works for any project that has docs/styles/ — independent of the documentation
 # build process.  Run any time to switch themes without rebuilding documentation.
 
 THEME=${1:-slate}
@@ -20,4 +20,4 @@ if [ ! -f "$THEME_FILE" ]; then
 fi
 
 cat "$THEME_FILE" "$BASE_FILE" > "$OUT_FILE"
-echo "Theme applied: $THEME  →  doc/styles/spec.css"
+echo "Theme applied: $THEME  →  docs/styles/spec.css"
