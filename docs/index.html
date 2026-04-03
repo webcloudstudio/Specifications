@@ -90,24 +90,30 @@ main.project-mode { padding: 0; overflow: hidden; }
 .md hr { border: none; border-top: 1px solid var(--c-td-border); margin: 16px 0; }
 
 /* ── Script man page ── */
-.sd-man { max-width: 700px; padding: 2px 0; }
-.sd-sec { font-size: 10.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--c-accent); margin: 20px 0 6px; }
+.sd-man { max-width: 740px; padding: 0;
+  font-family: 'Cascadia Code', Consolas, 'Courier New', monospace; font-size: 13px;
+  line-height: 1.55; color: var(--c-text);
+  background: var(--c-bg); }
+.sd-man-header { display: flex; justify-content: space-between; align-items: baseline;
+  padding: 8px 0; border-bottom: 1px solid var(--c-td-border); margin-bottom: 16px; }
+.sd-man-header-left { font-weight: 700; font-size: 13px; text-transform: uppercase; }
+.sd-man-header-right { font-size: 11px; color: var(--c-h3); }
+.sd-sec { font-size: 13px; font-weight: 700; color: var(--c-h1);
+  margin: 22px 0 4px; padding: 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .sd-sec:first-child { margin-top: 0; }
-.sd-body { padding-left: 22px; }
-.sd-name-line { font-size: 15px; font-weight: 700; color: var(--c-h1);
-  font-family: 'Cascadia Code', Consolas, monospace; }
-.sd-name-dash { font-size: 14px; color: var(--c-h3); font-family: 'Segoe UI', Arial, sans-serif; font-weight: 400; }
-.sd-body p { margin: 0 0 7px; color: var(--c-text); font-size: 13px; line-height: 1.65;
+.sd-body { padding-left: 28px; margin-bottom: 4px; }
+.sd-name-line { font-size: 14px; font-weight: 700; color: var(--c-accent); }
+.sd-name-dash { font-size: 13px; color: var(--c-text); font-weight: 400; }
+.sd-body p { margin: 3px 0 8px; color: var(--c-text); font-size: 13px; line-height: 1.6;
   font-family: 'Segoe UI', Arial, sans-serif; }
 .sd-cmd { display: block; font-family: 'Cascadia Code', Consolas, monospace; font-size: 12.5px;
-  color: var(--c-pre-text); background: var(--c-pre-bg); padding: 5px 12px; border-radius: 3px;
-  margin: 4px 0; border: 1px solid var(--c-side-border); }
-.sd-item { font-size: 12.5px; color: var(--c-text); padding: 2px 0;
-  font-family: 'Cascadia Code', Consolas, monospace; }
+  color: var(--c-pre-text); background: var(--c-pre-bg); padding: 4px 10px; border-radius: 3px;
+  margin: 3px 0; border-left: 3px solid var(--c-accent); }
+.sd-item { font-size: 13px; color: var(--c-text); padding: 2px 0; line-height: 1.55; }
 .sd-empty { font-size: 13px; color: var(--c-h3); font-style: italic; }
-.sd-footer { margin-top: 28px; padding-top: 10px; border-top: 1px solid var(--c-td-border);
-  font-size: 11px; color: var(--c-h3); font-family: 'Cascadia Code', Consolas, monospace; }
+.sd-footer { display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: 28px; padding-top: 8px; border-top: 1px solid var(--c-td-border);
+  font-size: 11px; color: var(--c-h3); }
 
 /* ── Scripts (expandable, for Other Scripts section) ── */
 .sc-section-h { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
@@ -166,6 +172,7 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
   </div>
   <a class="sn" data-step="1" onclick="showGuideStep('PROTOTYPE-PROCESS', 1)">Step 1 — Setup</a>
   <a class="sn-sub" data-script="setup.sh" onclick="showScript('setup.sh')">setup.sh</a>
+  <a class="sn-sub" data-script="decompose.sh" onclick="showScript('decompose.sh')">decompose.sh</a>
   <a class="sn-sub" data-key="CREATE-IMAGE" onclick="showGuide('CREATE-IMAGE')">Create Image (AI)</a>
   <a class="sn" data-step="2" onclick="showGuideStep('PROTOTYPE-PROCESS', 2)">Step 2 — Create</a>
   <a class="sn-sub" data-key="PROJECT-SETUP" onclick="showGuide('PROJECT-SETUP')">Project Creation</a>
@@ -311,11 +318,11 @@ function show(id) {
 }
 
 function renderGuideWorkflows(idxs) {
-  if (!idxs || !idxs.length || !window.WORKFLOWS || !window.renderWorkflow) return '';
-  var parts = idxs.map(function(i, pos) {
-    return (pos > 0 ? '<hr class="wp-div">' : '') + window.renderWorkflow(window.WORKFLOWS[i]);
+  if (!idxs || !idxs.length || !window.WORKFLOWS || !window.renderWorkflowDiagram) return '';
+  var parts = idxs.map(function(i) {
+    return window.renderWorkflowDiagram(window.WORKFLOWS[i]);
   });
-  return parts.join('') + '<hr style="border:none;border-top:1px solid var(--c-td-border);margin:20px 0 16px">';
+  return parts.join('');
 }
 
 function runMermaid(container) {
@@ -392,13 +399,20 @@ function showScript(file) {
   var s = SCRIPTS[file] || {};
   var desc = s.desc || '';
   var secs = s.sections || {};
+  var basename = file.replace(/\..*$/, '').toUpperCase();
 
   var html = '<div class="sd-man">';
+
+  // Man-page header bar
+  html += '<div class="sd-man-header">';
+  html += '<span class="sd-man-header-left">' + esc(basename) + '(1)</span>';
+  html += '<span class="sd-man-header-right">Prototyper Manual</span>';
+  html += '</div>';
 
   // NAME
   html += '<div class="sd-sec">NAME</div>';
   html += '<div class="sd-body"><span class="sd-name-line">' + esc(file) + '</span>';
-  if (desc) html += '<span class="sd-name-dash"> &mdash; ' + esc(desc) + '</span>';
+  if (desc) html += ' <span class="sd-name-dash">&mdash; ' + esc(desc) + '</span>';
   html += '</div>';
 
   // SYNOPSIS
@@ -473,10 +487,14 @@ function showScript(file) {
     html += '</div>';
   });
 
-  // Footer
-  html += '<div class="sd-footer">Prototyper &middot; bin/' + esc(file) + '</div>';
-
   if (!desc && !syn && !body) html += '<div class="sd-empty">(no documentation available)</div>';
+
+  // Man-page footer bar
+  html += '<div class="sd-footer">';
+  html += '<span>Prototyper</span>';
+  html += '<span>bin/' + esc(file) + '</span>';
+  html += '</div>';
+
   html += '</div>';
 
   document.getElementById('sd-content').innerHTML = html;

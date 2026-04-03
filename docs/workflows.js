@@ -3,82 +3,84 @@
   const D = `
   classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
   classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
-  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff`;
+  classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  classDef output fill:#6d28d9,stroke:#8b5cf6,color:#fff,font-weight:bold`;
 
   window.WORKFLOWS = [
     {
       id: 'oneshot', navLabel: 'One Shot',
-      num: 'Workflow #1', title: 'Specification Driven Design - One Shot',
-      desc: 'Scorecard for specification completeness; Prescriptive Specification Files; Single build prompt; Git Tags.',
+      num: 'Workflow #1', title: 'Specification Driven Design — One Shot',
+      desc: 'Structured specification files and opinionated stack patterns produce a single AI build prompt. Git-tagged for traceability.',
       mermaid: `flowchart LR${D}
-  S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
+  S0["decompose.sh"]:::script --> SPEC(["Specifications/"]):::dir
+  S1["setup.sh"]:::script --> SPEC
   SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
   STACK(["Stack/"]):::dir --> S3
   TR(["TechnologyRules/"]):::dir --> S3
-  S3 --> PT(["Prompt"]):::dir
+  S3 --> PT(["Prompt"]):::output
   S3 --> SC{{"SCORECARD.md"}}:::md
   S3 --> GAPS{{"REFERENCE_GAPS.md"}}:::md
-  PT --> PT2(["Prototype"]):::dir
+  PT --> PT2(["Prototype"]):::output
   PT --> DL{{"deployments.jsonl"}}:::md`,
       learnings: [
-        'A Well Defined Specification Files Architecture Works',
-        'Opinionated Stack',
-        'Scorecards/Gap Analysis For Directionality'
+        'A well defined specification file architecture works.',
+        'Opinionated stack — prescriptive patterns, not guidelines.',
+        'Scorecards and gap analysis provide directionality.'
       ],
       defn: {
         label: 'Specifications/',
         items: [
-          ['METADATA.md', 'Service Catalog'],
-          ['INTENT.md', 'High Impact on Quality'],
-          ['DATABASE.md', 'Core persistence structure - DATA FIRST!'],
-          ['UI.md / SCREEN-*.md', 'UI defined separate from Features'],
-          ['FUNCTIONALITY.md / FEATURE-*.md', 'Feature Definitions'],
-          ['SCREEN-NNN-*.md / PATCH-NNN-*.md / AC-NNN-*.md', 'Typed tickets applied in NNN order']
+          ['METADATA.md', 'Service catalog entry'],
+          ['INTENT.md', 'High impact on quality'],
+          ['DATABASE.md', 'Core persistence — data first'],
+          ['UI-GENERAL.md / SCREEN-*.md', 'UI defined separate from features'],
+          ['FUNCTIONALITY.md / FEATURE-*.md', 'Feature definitions'],
+          ['SCREEN-NNN-*.md / PATCH-NNN-*.md / AC-NNN-*.md', 'Typed tickets applied in order']
         ]
       },
       io: {
         inputs: ['Specifications/', 'Stack/', 'TechnologyRules/'],
-        outputs: ['Prototype', 'SCORECARD.md', 'REFERENCE_GAPS.md', 'deployments.jsonl']
+        outputs: ['Prompt', 'Prototype', 'SCORECARD.md', 'REFERENCE_GAPS.md', 'deployments.jsonl']
       }
     },
     {
       id: 'iterate', navLabel: 'Iterate',
       num: 'Workflow #2', title: 'Application Iteration',
-      desc: 'Change specifications flow to Prototypes. Promote squash-merges to Projects.',
+      desc: 'Specification changes flow to prototypes as targeted iteration prompts. Promotion squash-merges to projects.',
       mermaid: `flowchart LR${D}
-  DL{{"deployments.jsonl"}}:::md --> CH{{"Specification Diff"}}:::md 
+  DL{{"deployments.jsonl"}}:::md --> CH{{"Specification Diff"}}:::md
   CH --> S1["iterate.sh"]:::script
   PT1(["Stack/"]):::dir --> S1
   TR1(["TechnologyRules/"]):::dir --> S1
-  S1 --> PT(["Prompt"]):::dir
-  PT --> PT2(["Prototype"]):::dir
+  S1 --> PT(["Prompt"]):::output
+  PT --> PT2(["Prototype"]):::output
   S1 --> SC2{{"SCORECARD.md"}}:::md
   PT2 --> S2["merge.sh"]:::script
   PT --> DL2{{"deployments.jsonl"}}:::md
-  S2 --> PROJ(["Project"]):::dir`,
+  S2 --> PROJ(["Project"]):::output`,
       learnings: [
-        'Updates changing specification MUCH preferred. Scorecard tracks specification drift.'
+        'Updating specifications much preferred over ad-hoc code edits. Scorecard tracks specification drift.'
       ],
       io: {
         inputs: ['deployments.jsonl', 'Stack/', 'TechnologyRules/'],
-        outputs: ['Prototype', 'SCORECARD.md', 'deployments.jsonl', 'Project']
+        outputs: ['Prompt', 'Prototype', 'SCORECARD.md', 'deployments.jsonl', 'Project']
       }
     },
     {
       id: 'techrules', navLabel: 'Technology Rules',
       num: 'Workflow #3', title: 'Technology Rules Propagation',
-      desc: 'Technology interfaces injected into projects via CLAUDE_RULES.md — AI summarization of Technology Rules enabling inter-project compatibility.',
+      desc: 'Business rules are AI-summarized into CLAUDE_RULES.md and injected into every project, enabling inter-project compatibility.',
       mermaid: `flowchart LR${D}
   RULES(["Technology Rules"]):::dir
   --> S1["summarize_rules.sh"]:::script
   --> CR{{"CLAUDE_RULES.md"}}:::md
   --> S2["ProjectUpdate.sh"]:::script
-  --> PROJ(["Project"]):::dir
+  --> PROJ(["Project"]):::output
   --> S3["ProjectValidate.sh"]:::script
   --> KPI{{"SCORECARD.md"}}:::md`,
       learnings: [
-        'CLAUDE_RULES injection worked really well out of the box. Key insight: use a crafted AI summary.',
-        'An opinionated prescribed stack gave me working software first time.'
+        'CLAUDE_RULES injection works well out of the box — key insight: use a crafted AI summary.',
+        'An opinionated prescribed stack gave working software first time.'
       ],
       io: {
         inputs: ['TechnologyRules/'],
@@ -88,16 +90,16 @@
     {
       id: 'speciterate', navLabel: 'Self Iteration',
       num: 'Workflow #4', title: 'Automated Specification Iteration',
-      desc: 'AI-scored gap analysis prioritizes 1-2 features for which specifications are completed.',
+      desc: 'AI-scored gap analysis prioritises 1–2 features, completes specifications, and feeds them back into the build pipeline.',
       mermaid: `flowchart LR${D}
   GAPS{{"REFERENCE_GAPS.md"}}:::md --> SI["spec_iterate.sh"]:::script
   SPEC(["Specifications/"]):::dir  --> SI
   SI --> SCORE{{"SCORECARD.md"}}:::md
-  SI --> PROMPT{{"Prompt"}}:::dir
+  SI --> PROMPT(["Prompt"]):::output
   PROMPT --> DL{{"deployments.jsonl"}}:::md
-  PROMPT --> Prototype{{"Prototype"}}:::dir`,
+  PROMPT --> Proto(["Prototype"]):::output`,
       learnings: [
-        'I was shocked but it works well... One gap at a time ... Best practices... Low Touch Review needed.'
+        'Works well — one gap at a time, best practices, low-touch review needed.'
       ],
       io: {
         inputs: ['Specifications/', 'BUSINESS_RULES.md'],
@@ -107,15 +109,15 @@
     {
       id: 'tran', navLabel: 'Transaction Logs',
       num: 'Workflow #5', title: 'Capturing Claude Edit Sessions',
-      desc: 'Transform Claude internal logs into formal tickets and acceptance criteria.',
+      desc: 'Transform Claude internal session logs into formal specification tickets and acceptance criteria.',
       mermaid: `flowchart LR${D}
   DL{{"deployments.jsonl"}}:::md --> TL["tran_logger.sh"]:::script
   PT([".claude JSONL"]):::dir --> TL
   GI(["git logs"]):::dir --> TL
   TL --> SPEC(["Specifications/"]):::dir`,
       learnings: [
-        'Requires prompt to create Acceptance Criteria as well as Feature Changes.',
-        'Approach abandoned by process \u2192 I am doing specification driven design.'
+        'Requires prompt to create acceptance criteria as well as feature changes.',
+        'Approach yielded to specification driven design — used selectively now.'
       ],
       ioCols: [
         { h4: 'Specifications', items: ['PATCH-NNN-tl-*.md', 'AC-NNN-tl-*.md'] }
@@ -128,6 +130,12 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  /** Render diagram only — no learnings, no I/O, no definitions. */
+  window.renderWorkflowDiagram = function (wf) {
+    return `<div class="wp-diagram"><div class="mermaid">${wf.mermaid}</div></div>`;
+  };
+
+  /** Render full workflow block with all sections. */
   window.renderWorkflow = function (wf) {
     let h = `
 <div class="wp-wf">
