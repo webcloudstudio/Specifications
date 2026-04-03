@@ -4,6 +4,7 @@
   classDef dir    fill:#0a5c38,stroke:#2cb67d,color:#fff,font-weight:bold
   classDef md     fill:#d4a017,stroke:#a07810,color:#111,font-weight:bold
   classDef script fill:#1e40af,stroke:#3b5fc0,color:#fff
+  classDef prompt fill:#c2410c,stroke:#ea580c,color:#fff,font-weight:bold
   classDef output fill:#6d28d9,stroke:#8b5cf6,color:#fff,font-weight:bold`;
 
   window.WORKFLOWS = [
@@ -17,7 +18,7 @@
   SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
   STACK(["Stack/"]):::dir --> S3
   TR(["TechnologyRules/"]):::dir --> S3
-  S3 --> PT(["Prompt"]):::output
+  S3 --> PT(["Prompt"]):::prompt
   S3 --> SC{{"SCORECARD.md"}}:::md
   S3 --> GAPS{{"REFERENCE_GAPS.md"}}:::md
   PT --> PT2(["Prototype"]):::output
@@ -52,7 +53,7 @@
   CH --> S1["iterate.sh"]:::script
   PT1(["Stack/"]):::dir --> S1
   TR1(["TechnologyRules/"]):::dir --> S1
-  S1 --> PT(["Prompt"]):::output
+  S1 --> PT(["Prompt"]):::prompt
   PT --> PT2(["Prototype"]):::output
   S1 --> SC2{{"SCORECARD.md"}}:::md
   PT2 --> S2["merge.sh"]:::script
@@ -95,7 +96,7 @@
   GAPS{{"REFERENCE_GAPS.md"}}:::md --> SI["spec_iterate.sh"]:::script
   SPEC(["Specifications/"]):::dir  --> SI
   SI --> SCORE{{"SCORECARD.md"}}:::md
-  SI --> PROMPT(["Prompt"]):::output
+  SI --> PROMPT(["Prompt"]):::prompt
   PROMPT --> DL{{"deployments.jsonl"}}:::md
   PROMPT --> Proto(["Prototype"]):::output`,
       learnings: [

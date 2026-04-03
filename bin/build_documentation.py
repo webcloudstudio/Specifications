@@ -52,21 +52,19 @@ SCRIPT_DESCRIPTIONS = {
     'update_reference_gaps.sh': 'Update REFERENCE_GAPS.md from specification vs prototype comparison',
 }
 
-GUIDE_ORDER = ['PROTOTYPE-PROCESS', 'PROJECT-SETUP', 'ITERATION-PROCESS', 'PROMOTE', 'CREATE-IMAGE', 'ENGINEERING-RULES', 'SDD-SPECIFICATIONS', 'FEATURES']
+GUIDE_ORDER = ['SETUP', 'ONESHOT', 'ITERATE', 'MERGE', 'AUTOMATE', 'ENGINEERING-RULES', 'CREATE-IMAGE', 'SDD-SPECIFICATIONS']
 GUIDE_TITLES = {
-    'PROTOTYPE-PROCESS':     'Prototype Process Spec',
-    'PROJECT-SETUP':         'Project Creation',
-    'ITERATION-PROCESS':     'Iteration Process',
-    'PROMOTE':               'Step 6 — merge.sh',
+    'SETUP':                 'Step 1 — Setup',
+    'ONESHOT':               'Step 2 — OneShot',
+    'ITERATE':               'Step 3 — Iterate',
+    'MERGE':                 'Step 4 — Merge',
+    'AUTOMATE':              'Step 5 — Automate',
+    'ENGINEERING-RULES':     'Engineering Rules',
     'CREATE-IMAGE':          'Create Image',
-    'ENGINEERING-RULES':     'Engineering Rules Framework',
     'SDD-SPECIFICATIONS':    'SDD — Specifications',
-    'FEATURES':              'Features',
 }
 RULES_ENGINE_DIR = PROJECT_DIR / "RulesEngine"
-GUIDE_EXTRA = {
-    'PROTOTYPE-PROCESS': RULES_ENGINE_DIR / 'PROTOTYPE_PROCESS.md',
-}
+GUIDE_EXTRA = {}
 
 # Scripts hidden from the scripts list (generate_*.py are per-project image generators)
 SCRIPTS_HIDDEN = set()  # pattern-filtered below: any generate_*.py is hidden
@@ -180,10 +178,6 @@ def discover_guides():
     for key, path in GUIDE_EXTRA.items():
         if path.exists():
             found[key] = path
-    # Include Features.html
-    features_path = DOC_DIR / 'Features.html'
-    if features_path.exists():
-        found['FEATURES'] = features_path
     guides = []
     for key in GUIDE_ORDER:
         if key in found:
@@ -281,15 +275,22 @@ def build_page(scripts, projects, guides):
                         key=lambda s: wf_order.get(s['file'], 999))
     other_scripts = [s for s in scripts if s['file'] not in wf_set]
 
-    # ── Sidebar: steps with sub-items (script or guide) ──────────────────────
-    # Each entry: (step_num, label, [(sub_label, 'script'|'guide', target), ...])
+    # ── Sidebar: steps with sub-items ──────────────────────────────────────
+    # (guide_key, label, [(sub_label, 'script'|'guide', target), ...])
     STEP_NAV = [
-        (1, 'Step 1 — Setup',    [('setup.sh',             'script', 'setup.sh'),
-                                   ('decompose.sh',       'script', 'decompose.sh'),
-                                   ('Create Image (AI)',   'guide',  'CREATE-IMAGE')]),
-        (2, 'Step 2 — Create',   [('Project Creation',    'guide',  'PROJECT-SETUP')]),
-        (3, 'Step 3 — Validate', [('validate.sh',       'script', 'validate.sh')]),
-        (4, 'Step 4 — OneShot',  [('oneshot.sh',        'script', 'oneshot.sh')]),
+        ('SETUP',    'Step 1 — Setup',    [('setup.sh',             'script', 'setup.sh'),
+                                            ('decompose.sh',        'script', 'decompose.sh'),
+                                            ('validate.sh',         'script', 'validate.sh'),
+                                            ('Create Image',        'guide',  'CREATE-IMAGE')]),
+        ('ONESHOT',  'Step 2 — OneShot',  [('oneshot.sh',          'script', 'oneshot.sh'),
+                                            ('convert.sh',          'script', 'convert.sh')]),
+        ('ITERATE',  'Step 3 — Iterate',  [('iterate.sh',          'script', 'iterate.sh'),
+                                            ('tran_logger.sh',      'script', 'tran_logger.sh')]),
+        ('MERGE',    'Step 4 — Merge',    [('merge.sh',            'script', 'merge.sh'),
+                                            ('ProjectValidate.sh',  'script', 'ProjectValidate.sh'),
+                                            ('ProjectUpdate.sh',    'script', 'ProjectUpdate.sh')]),
+        ('AUTOMATE', 'Step 5 — Automate', [('spec_iterate.sh',     'script', 'spec_iterate.sh'),
+                                            ('scorecard.sh',        'script', 'scorecard.sh')]),
     ]
 
     # Warn if STEP_NAV references a script not found in bin/ (catches renames)
@@ -300,25 +301,16 @@ def build_page(scripts, projects, guides):
                 print(f"  WARNING: nav references '{sub_target}' — not found in bin/ (renamed?)")
 
     step_nav = ''
-    for num, label, subs in STEP_NAV:
-        step_nav += f'  <a class="sn" data-step="{num}" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', {num})">{h.escape(label)}</a>\n'
+    for guide_key, label, subs in STEP_NAV:
+        step_nav += f'  <a class="sn" data-key="{h.escape(guide_key)}" onclick="showGuide(\'{guide_key}\')">{h.escape(label)}</a>\n'
         for sub_label, sub_type, sub_target in subs:
             if sub_type == 'script':
                 step_nav += f'  <a class="sn-sub" data-script="{h.escape(sub_target)}" onclick="showScript(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
             else:
                 step_nav += f'  <a class="sn-sub" data-key="{h.escape(sub_target)}" onclick="showGuide(\'{sub_target}\')">{h.escape(sub_label)}</a>\n'
-    step_nav += f'  <a class="sn" data-key="ITERATION-PROCESS" onclick="showGuide(\'ITERATION-PROCESS\')">Step 5 — Iterate</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="iterate.sh" onclick="showScript(\'iterate.sh\')">iterate.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="tran_logger.sh" onclick="showScript(\'tran_logger.sh\')">tran_logger.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="spec_iterate.sh" onclick="showScript(\'spec_iterate.sh\')">spec_iterate.sh</a>\n'
-    step_nav += f'  <a class="sn" data-step="6" onclick="showGuideStep(\'PROTOTYPE-PROCESS\', 6)">Step 6 — merge.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="merge.sh" onclick="showScript(\'merge.sh\')">merge.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="ProjectValidate.sh" onclick="showScript(\'ProjectValidate.sh\')">ProjectValidate.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-script="ProjectUpdate.sh" onclick="showScript(\'ProjectUpdate.sh\')">ProjectUpdate.sh</a>\n'
     step_nav += '  <div class="nav-sep"></div>\n'
     step_nav += f'  <a class="sn" data-key="ENGINEERING-RULES" onclick="showGuide(\'ENGINEERING-RULES\')">Engineering Rules</a>\n'
     step_nav += f'  <a class="sn-sub" data-script="summarize_rules.sh" onclick="showScript(\'summarize_rules.sh\')">summarize_rules.sh</a>\n'
-    step_nav += f'  <a class="sn-sub" data-key="FEATURES" onclick="showGuide(\'FEATURES\')">Features</a>\n'
     step_nav += f'  <a class="sn" data-key="SDD-SPECIFICATIONS" onclick="showGuide(\'SDD-SPECIFICATIONS\')">SDD — Specifications</a>\n'
 
     # ── Sidebar: project links ────────────────────────────────────────────────
@@ -331,11 +323,12 @@ def build_page(scripts, projects, guides):
 
     workflow_maps_js = (
         'const WORKFLOW_GUIDE_MAP = {\n'
+        '  "SETUP": [0],\n'
+        '  "ONESHOT": [0],\n'
+        '  "ITERATE": [1],\n'
+        '  "MERGE": [1],\n'
+        '  "AUTOMATE": [3],\n'
         '  "ENGINEERING-RULES": [2],\n'
-        '  "ITERATION-PROCESS": [1, 3, 4],\n'
-        '};\n'
-        'const STEP_WORKFLOW_MAP = {\n'
-        '  1: [0], 2: [0], 3: [0], 4: [0]\n'
         '};'
     )
 
@@ -504,25 +497,7 @@ main.project-mode {{ padding: 0; overflow: hidden; }}
 
 section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   border-bottom: 2px solid var(--c-h1-border); padding-bottom: 4px; margin-bottom: 12px; }}
-/* ── Process definitions ── */
-.proc-defs {{ margin-bottom: 4px; }}
-.proc-item {{ display: flex; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--c-td-border); align-items: baseline; }}
-.proc-item:last-child {{ border-bottom: none; }}
-.proc-term {{ font-size: 12px; font-weight: 700; color: #1E2328; white-space: nowrap; min-width: 110px; }}
-.proc-def {{ font-size: 12.5px; color: var(--c-h3); }}
-.proc-def code {{ font-family: 'Cascadia Code', Consolas, monospace; font-size: 11.5px;
-  background: var(--c-code-bg); color: var(--c-code-text); padding: 1px 4px; border-radius: 3px; }}
-/* ── Documentation guide list ── */
-.doc-guide-list {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 14px; }}
-.doc-guide-card {{ background: var(--c-side-bg); border: 1px solid var(--c-side-border); border-radius: 5px;
-  padding: 12px 14px; cursor: pointer; transition: background .2s, border-color .2s; }}
-.doc-guide-card:hover {{ background: rgba(255,255,255,.08); border-color: var(--c-accent); }}
-.doc-guide-card-title {{ font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 3px; }}
-.doc-guide-card-desc {{ font-size: 11px; color: rgba(255,255,255,.7); }}
-/* ── HTML content wrapper (for Features.html, etc.) ── */
-#guide-content.html-content {{ background: #FAFBFC; color: #1B2434; padding: 20px; border-radius: 4px; }}
-#guide-content.html-content * {{ box-sizing: border-box; }}
-#guide-content.html-content body {{ height: auto !important; display: block !important; flex: none !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }}
+/* ── Workflow section heading ── (kept for wf-section-h) */
 </style>
 </head>
 <body>
@@ -543,17 +518,6 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
   <!-- ── Workflow ──────────────────────────── -->
   <div id="workflow" class="content-section">
     <div id="wf-main"></div>
-
-    <hr style="border:none;border-top:1px solid var(--c-td-border);margin:18px 0 14px;">
-    <p class="wf-section-h">Dictionary</p>
-    <div class="proc-defs">
-      <div class="proc-item"><span class="proc-term">Specification</span><span class="proc-def">Markdown files in <code>Specifications/&lt;Name&gt;/</code> — concise tables and bullets defining what to build</span></div>
-      <div class="proc-item"><span class="proc-term">Project</span><span class="proc-def">A live git repository with <code>METADATA.md</code>, conforming to platform standards, discovered by Prototyper</span></div>
-      <div class="proc-item"><span class="proc-term">Prototype</span><span class="proc-def">A directory built by AI from the Specification — runnable and testable, iterated before merge</span></div>
-      <div class="proc-item"><span class="proc-term">Feature Branch</span><span class="proc-def">Configured in <code>.env</code> as <code>BUILD_FEATURE_BRANCH_NAME=feature/name</code> — contains AI-built code pending merge</span></div>
-      <div class="proc-item"><span class="proc-term">Build</span><span class="proc-def">Clones or fetches the project, creates the Feature Branch from base code, generates the AI build prompt</span></div>
-      <div class="proc-item"><span class="proc-term">Merge</span><span class="proc-def">Squash-merges the Feature Branch into the base branch — triggered via Prototyper UI, hides all git from the user</span></div>
-    </div>
   </div>
 
   <!-- ── Guide viewer ──────────────────────────── -->
@@ -581,14 +545,6 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
 {scripts_js}
 
 marked.setOptions({{ gfm: true, breaks: false }});
-
-// ── Initialize documentation guide list on page load ──
-function initGuideList() {{
-  var container = document.querySelector('.doc-guide-list');
-  if (!container) return;
-  // All guides are now in sidebar navigation, so Documentation section is empty
-  // This function is kept for future reference docs
-}}
 
 function clearActive() {{
   document.querySelectorAll('.sn, .sn-sub').forEach(a => a.classList.remove('active'));
@@ -626,47 +582,12 @@ function showGuide(key) {{
   var wfIdxs = WORKFLOW_GUIDE_MAP[key] || [];
   var guideEl = document.getElementById('guide-content');
   var diagramHtml = renderGuideWorkflows(wfIdxs);
-  var htmlContent;
-  if (meta.is_html) {{
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(content, 'text/html');
-    var bodyContent = doc.body.innerHTML;
-    htmlContent = diagramHtml + bodyContent;
-    guideEl.classList.add('html-content');
-  }} else {{
-    htmlContent = diagramHtml + marked.parse(content);
-    guideEl.classList.remove('html-content');
-  }}
-  guideEl.innerHTML = htmlContent;
+  guideEl.innerHTML = diagramHtml + marked.parse(content);
   show('guide');
   clearActive();
   var el = document.querySelector('[data-key="' + key + '"]');
   if (el) el.classList.add('active');
   runMermaid(guideEl);
-}}
-
-function showGuideStep(key, step) {{
-  var content = GUIDES[key];
-  if (!content) return;
-  var wfIdxs = STEP_WORKFLOW_MAP[step] || [];
-  var guideEl = document.getElementById('guide-content');
-  guideEl.innerHTML = renderGuideWorkflows(wfIdxs) + marked.parse(content);
-  guideEl.classList.remove('html-content');
-  show('guide');
-  clearActive();
-  var el = document.querySelector('[data-step="' + step + '"]');
-  if (el) el.classList.add('active');
-  runMermaid(guideEl);
-  setTimeout(function() {{
-    var headings = document.querySelectorAll('#guide-content h2, #guide-content h3');
-    var label = 'Step ' + step;
-    for (var i = 0; i < headings.length; i++) {{
-      if (headings[i].textContent.trim().indexOf(label) === 0) {{
-        headings[i].scrollIntoView({{ behavior: 'smooth', block: 'start' }});
-        break;
-      }}
-    }}
-  }}, 80);
 }}
 
 function esc(t) {{ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
@@ -801,7 +722,6 @@ function showProject(name, url) {{
 }}
 
 (function() {{
-  initGuideList();
   var wfMain = document.getElementById('wf-main');
   if (wfMain && window.renderAllWorkflows) window.renderAllWorkflows(wfMain);
   show('workflow');
