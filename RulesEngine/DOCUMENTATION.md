@@ -89,10 +89,13 @@ When a project has multiple HTML pages (e.g., index.html, Features.html, white-p
 all pages must:
 
 1. **Link spec.css** — `<link rel="stylesheet" href="styles/spec.css">`
-2. **Use the shared header bar** — `gem-header` classes from spec-base.css:
+2. **Light body background** — `body { background: var(--c-bg); color: var(--c-text); }`
+   The body is ALWAYS light. Never use `body.gem-topbar` on sub-pages — it turns the
+   entire page dark and makes all content text invisible.
+3. **Dark header bar confined to the header element** — the header gets its own dark background:
    ```html
-   <body class="gem-topbar">
-   <header class="gem-header">
+   <body>
+   <header class="page-header gem-header">
      <div class="gem-header-left">
        <span class="gem-header-logo">ProjectName</span>
        <span class="gem-header-title">Page Title</span>
@@ -104,11 +107,19 @@ all pages must:
      <span class="gem-header-copyright">Author &middot; Org</span>
    </header>
    ```
-3. **Mark the active page** — inline `style="border-bottom-color: var(--c-accent);"` on the current nav link
-4. **Use CSS variables for colors** — never hardcode color values; use `var(--c-accent)`, `var(--c-text)`, etc.
+   Add this CSS to confine the dark background:
+   ```css
+   .page-header { background: var(--c-topbar-bg); border-bottom: 1px solid var(--c-side-border); }
+   ```
+4. **Mark the active page** — inline `style="border-bottom-color: var(--c-accent);"` on the current nav link
+5. **Use CSS variables for colors** — never hardcode color values; use `var(--c-accent)`, `var(--c-text)`, etc.
 
 The sidebar (dynamic content, script discovery, project listing) lives only in `index.html`.
 Sub-pages use the header bar for consistent chrome and inter-page navigation.
+
+**Readability rule:** dark text on light backgrounds, white text on dark backgrounds — always.
+Never use `--c-text`, `--c-h1`, or `--c-h3` on a dark surface. See `DOCUMENTATION_BRANDING.md`
+for the full readability contract.
 
 ---
 

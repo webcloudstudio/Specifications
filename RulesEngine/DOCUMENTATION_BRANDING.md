@@ -321,10 +321,32 @@ Single shared `spec.css` means one theme change re-styles the entire multi-page 
 | Dark content area (`--c-bg` dark) | Content is always light — `#FAFAF8` or equivalent |
 | Pure black sidebar (`#000` or `#0d1117`) | Minimum charcoal — `#22262E`; black reads as broken |
 | Dark text on dark sidebar bg | `--c-side-section` must be lighter than `--c-side-bg` |
+| Dark/charcoal text on ANY dark background | Text on dark backgrounds must be white (`#FFFFFF`) or light grey (`#C0C0C0`+) — never `--c-text`, `--c-h1`, `--c-h3` or any color below `#999` |
+| `body.gem-topbar` on sub-pages | Sub-pages must set `body { background: var(--c-bg) }` (light). Only the header element gets the dark background, not the body |
 | Purple visited links | Keep `a:visited` the same blue as `a:link` |
 | Arrows connecting separate workflow rows | Two independent left-to-right rows, no DOWN arrow |
 | Expand/collapse toggles for script details | Always show details inline |
-| Relative `../` paths escaping `doc/` | Copy project viewers into `doc/projects/` at build time |
+| Relative `../` paths escaping `docs/` | Copy project viewers into `docs/projects/` at build time |
 | Edit `spec.css` directly | Edit the theme file and rebuild |
-| Edit `spec.css` / `gem.css` directly | Edit the theme file (`doc/styles/themes/<name>.css`) and rebuild |
+| Edit `spec.css` / `gem.css` directly | Edit the theme file (`docs/styles/themes/<name>.css`) and rebuild |
 | Dark h2 banner | h2 must use a light accent tint, not dark sidebar color — users confuse dark h2 for a header bar |
+
+---
+
+## Readability Contract
+
+All documentation must be human-readable. This is a hard constraint, not a guideline.
+
+**Rule: light text on dark, dark text on light — always.**
+
+- Content areas use a light background (`--c-bg: #FAFAF8`). Text is dark (`--c-text: #2A2E35`).
+- Dark panels (sidebar, header bar) use white text (`#FFFFFF`) or light grey. Never use
+  `--c-text`, `--c-h1`, `--c-h3`, or any colour value darker than `#999999` on a dark background.
+- Sub-pages (Features.html, white-paper.html, etc.) must set `body { background: var(--c-bg) }`
+  so the page content is always on a light surface. The header bar gets its dark background
+  from a class on the `<header>` element, not from `body`.
+- The `body.gem-topbar` class must NEVER be used on multi-page sub-pages — it sets the
+  entire body to the dark topbar colour, making all content text invisible.
+
+**Test:** if any text colour and its background colour have a contrast ratio below 4.5:1
+(WCAG AA), it is a bug.

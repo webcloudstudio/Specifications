@@ -16,6 +16,12 @@ body {
   display: flex; flex-direction: column;
 }
 
+/* Header bar — dark background confined to the header element only */
+.page-header {
+  background: var(--c-topbar-bg);
+  border-bottom: 1px solid var(--c-side-border);
+}
+
 .page-content {
   max-width: 860px; margin: 0 auto; padding: 36px 36px 80px;
   flex: 1;
@@ -59,9 +65,9 @@ footer {
 }
 </style>
 </head>
-<body class="gem-topbar">
+<body>
 
-<header class="gem-header">
+<header class="page-header gem-header">
   <div class="gem-header-left">
     <span class="gem-header-logo">Prototyper</span>
     <span class="gem-header-title">White Paper</span>
