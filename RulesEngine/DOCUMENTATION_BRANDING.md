@@ -190,15 +190,15 @@ To inspect what would be rebuilt without writing:
 ## CSS File Assembly
 
 ```bash
-# Built at documentation build time — do not edit spec.css directly
-cat doc/styles/themes/slate.css doc/styles/spec-base.css > doc/styles/spec.css
+# Built at documentation build time — do not edit specification.css directly
+cat doc/styles/themes/slate.css doc/styles/specification-base.css > doc/styles/specification.css
 ```
 
 | File | Location | Edit? |
 |------|----------|-------|
-| `spec.css` | `doc/styles/spec.css` | Never — generated |
+| `specification.css` | `doc/styles/specification.css` | Never — generated |
 | `slate.css` (or other theme) | `doc/styles/themes/` | Yes — theme colors only |
-| `spec-base.css` | `doc/styles/` | Rarely — structural CSS, no colors |
+| `specification-base.css` | `doc/styles/` | Rarely — structural CSS, no colors |
 
 For a new project: copy `doc/styles/` from `Specifications/doc/styles/` and choose a theme.
 
@@ -283,11 +283,11 @@ doc/styles/
     midnight.css
     purple.css
     …
-  spec-base.css        ← all structural CSS, zero colors (rarely edit)
-  spec.css             ← GENERATED: themes/<active>.css + spec-base.css concatenated
+  specification-base.css        ← all structural CSS, zero colors (rarely edit)
+  specification.css             ← GENERATED: themes/<active>.css + specification-base.css concatenated
 ```
 
-**Rule:** Change colors by editing the theme file and rebuilding — never touch `spec.css`.
+**Rule:** Change colors by editing the theme file and rebuilding — never touch `specification.css`.
 One command updates all colors across the entire documentation:
 ```bash
 bin/build_documentation.sh --theme=midnight
@@ -295,7 +295,7 @@ bin/build_documentation.sh --theme=midnight
 
 All themes enforce the same two-zone rule: **right/content is always light** (`#FAFAF8`),
 **left/sidebar is always dark** but never pure black (minimum `#22262E` charcoal).
-This constraint is structural — `--c-bg` lives in `spec-base.css`, not in themes,
+This constraint is structural — `--c-bg` lives in `specification-base.css`, not in themes,
 ensuring no theme can accidentally put dark text on a dark content background.
 
 ---
@@ -304,13 +304,13 @@ ensuring no theme can accidentally put dark text on a dark content background.
 
 For projects with many pages (e.g., a game with separate guides per topic):
 
-- Each page links `<link rel="stylesheet" href="style.css">` pointing to `spec.css`
+- Each page links `<link rel="stylesheet" href="style.css">` pointing to `specification.css`
 - Sidebar nav uses `<a href="page.html">` standard links (not JS `show()`)
 - All pages share the same sidebar markup — include via server-side template or duplicate
 - Active page: add `class="active"` to the current nav link
 - `doc/` folder: `index.html` is the landing page; other pages sit beside it
 
-Single shared `spec.css` means one theme change re-styles the entire multi-page set.
+Single shared `specification.css` means one theme change re-styles the entire multi-page set.
 
 ---
 
@@ -327,8 +327,8 @@ Single shared `spec.css` means one theme change re-styles the entire multi-page 
 | Arrows connecting separate workflow rows | Two independent left-to-right rows, no DOWN arrow |
 | Expand/collapse toggles for script details | Always show details inline |
 | Relative `../` paths escaping `docs/` | Copy project viewers into `docs/projects/` at build time |
-| Edit `spec.css` directly | Edit the theme file and rebuild |
-| Edit `spec.css` / `gem.css` directly | Edit the theme file (`docs/styles/themes/<name>.css`) and rebuild |
+| Edit `specification.css` directly | Edit the theme file and rebuild |
+| Edit `specification.css` / `gem.css` directly | Edit the theme file (`docs/styles/themes/<name>.css`) and rebuild |
 | Dark h2 banner | h2 must use a light accent tint, not dark sidebar color — users confuse dark h2 for a header bar |
 
 ---

@@ -1,7 +1,7 @@
 # Screen: Prototypes
 
 **Version:** 20260324 V2
-**Description:** Top-level screen listing all known prototypes (spec directories inside the Specifications repo) with their names and current status.
+**Description:** Top-level screen listing all known prototypes (specification directories inside the Specifications repo) with their names and current status.
 
 ## Menu Navigation
 
@@ -30,14 +30,14 @@ Full-width single-panel list. Action bar at top (New Prototype button + filter/s
 
 ## Prototype List
 
-One row per prototype spec directory found in the Specifications repo. Sorted by name (default). Each row:
+One row per prototype specification directory found in the Specifications repo. Sorted by name (default). Each row:
 
 | Element | Content | Source |
 |---------|---------|--------|
 | Status badge | Colored pill (see UI-GENERAL status colors) | `METADATA.md → status` |
 | Name | `display_name` | `METADATA.md → display_name` |
 | Short description | One-line summary | `METADATA.md → short_description` |
-| Spec link | `View Spec →` | Links to `/prototypes/{name}` (detail — future) |
+| Specification link | `View Specification →` | Links to `/prototypes/{name}` (detail — future) |
 
 Clicking a row (or the link) navigates to the prototype detail view (not yet implemented — placeholder route).
 
@@ -110,7 +110,7 @@ Shown centered, muted text, inside the list area.
 
 ## Open Questions
 
-- Should clicking a row open a detail view (parsed spec files rendered as HTML) or just link to the raw Specifications directory? A future SCREEN-PROTOTYPES-DETAIL.md will define a rendered detail view. Until it exists, clicking a row shows the spec file list as a plain index.
+- Should clicking a row open a detail view (parsed specification files rendered as HTML) or just link to the raw Specifications directory? A future SCREEN-PROTOTYPES-DETAIL.md will define a rendered detail view. Until it exists, clicking a row shows the specification file list as a plain index.
 - Should this screen also show prototypes that are missing `METADATA.md` (as "unconfigured")? Yes — show them with a dim "unconfigured" badge so the user can investigate. A missing METADATA.md is a setup issue, not a reason to hide the entry.
 - Should status badges on this screen be clickable to cycle status? Read-only here — status changes go through SCREEN-DRILLDOWN-PROJECT or the Dashboard.
 - Should `SPECIFICATIONS_PATH` default to a sibling directory? Yes — default to `../Specifications` relative to `PROJECTS_DIR` when `SPECIFICATIONS_PATH` is not explicitly set in `.env`.

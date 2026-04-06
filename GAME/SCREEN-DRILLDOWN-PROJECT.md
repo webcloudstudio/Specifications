@@ -1,7 +1,7 @@
 # Screen: Project Detail
 
 **Version:** 20260320 V1  
-**Description:** Spec for the Project Detail screen
+**Description:** Specification for the Project Detail screen
 
 **Single-project deep view.** Shows all configuration information for a project grouped by source.  Fields are correctly edittable.  Script headers and other items can be just described (ie. all bin scripts should have a listing for their relevant metadata) .env file variables etc.  ALl metadata for one project should be editable. Lets users edit file based  serves as the metadata editor for the project.
 
@@ -22,7 +22,7 @@ Rest call should return service catalog data for the project enabling completed 
 ## Behavior
 
 - Should the metadata editor support adding new custom fields not in the METADATA.md template?
-    METADATA.md template needs to be updated in RulesEngine but i think it is possible the template version in the project is out of date.  this is a display program - The UI should render it after the other fields.  Indicate on the UI that the field is newly discovered / out of spec and colorize it - MAKE IT NOTICEABLE SO I CAN UPDATE THE TEMPLATE. 
+    METADATA.md template needs to be updated in RulesEngine but i think it is possible the template version in the project is out of date.  this is a display program - The UI should render it after the other fields.  Indicate on the UI that the field is newly discovered / out of specification and colorize it - MAKE IT NOTICEABLE SO I CAN UPDATE THE TEMPLATE. 
 
 ## Layout
 
@@ -77,7 +77,7 @@ Last 20 events for this project from the `events` table. Each row: timestamp, ev
 | Documentation | `extra.doc_path` | Opens doc index in new tab |
 | CLAUDE.md | `has_claude` | Opens AGENTS.md content in modal |
 | Git repo | `extra.links` | Opens repo URL in new tab |
-| Specifications | `has_specs` | Opens spec directory index in new tab |
+| Specifications | `has_specs` | Opens specification directory index in new tab |
 
 ## Interactions
 

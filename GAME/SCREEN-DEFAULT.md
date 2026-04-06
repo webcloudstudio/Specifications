@@ -63,7 +63,7 @@ State cycles on click, encoded as URL query param `?filter=`:
 | `Maintenance` | Maintenance | `operations` (category = maintenance) | Operation buttons |
 | `LastUpdate` | Updated | `projects.version` | Date portion only; strips `.N` suffix |
 | `Configuration` | Configuration | `projects.port`, `card_show`, `tags` | Inline-editable fields per SCREEN-CONFIGURATION |
-| `Workflows` | Workflows | `workflow_types` (is_active = 1) + `projects.has_specs` | One button per active workflow type; disabled with "No specs" tooltip when `has_specs = false` |
+| `Workflows` | Workflows | `workflow_types` (is_active = 1) + `projects.has_specs` | One button per active workflow type; disabled with "No specifications" tooltip when `has_specs = false` |
 
 ## Open Questions
 

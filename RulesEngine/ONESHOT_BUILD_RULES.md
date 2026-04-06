@@ -1,9 +1,9 @@
 # Specification Conversion Rules
 
 **Version:** 20260320 V1  
-**Description:** Rules for expanding concise spec files into implementation-ready detailed specs
+**Description:** Rules for expanding concise specification files into implementation-ready detailed specifications
 
-**How to expand concise project specs into detailed, implementation-ready specifications.**
+**How to expand concise project specifications into detailed, implementation-ready specifications.**
 
 These rules are global — they apply to all projects regardless of stack. Stack-specific expansion is handled by the corresponding `stack/*.md` file.
 
@@ -11,10 +11,10 @@ These rules are global — they apply to all projects regardless of stack. Stack
 
 ## Expansion Principles
 
-1. **The spec author writes the WHAT.** Column names, screen layouts, triggers, sequences.
+1. **The specification author writes the WHAT.** Column names, screen layouts, triggers, sequences.
 2. **The conversion expands the HOW.** Types, defaults, constraints, HTMX attributes, error handling — all inferred from stack rules and conventions.
 3. **Stack implies conventions.** If METADATA.md says `stack: Python/Flask/SQLite`, apply every pattern from `stack/python.md`, `stack/flask.md`, `stack/sqlite.md` without the author restating them.
-4. **Don't duplicate stack rules into specs.** If `stack/sqlite.md` says "WAL mode, FK pragma, Row factory" then DATABASE.md should NOT repeat that. The build prompt includes both.
+4. **Don't duplicate stack rules into specifications.** If `stack/sqlite.md` says "WAL mode, FK pragma, Row factory" then DATABASE.md should NOT repeat that. The build prompt includes both.
 5. **[ROADMAP] items preserve intent only.** Do not expand implementation detail for roadmap features. Keep the description and Open Questions.
 
 ---
@@ -101,7 +101,7 @@ These rules are global — they apply to all projects regardless of stack. Stack
 
 ## Testing
 
-Every Python project build must include a complete pytest suite regardless of whether the spec mentions tests. Do not skip this — a project without tests does not satisfy ACTIVE conformity (see BUSINESS_RULES.md `PYTEST_FRAMEWORK`).
+Every Python project build must include a complete pytest suite regardless of whether the specification mentions tests. Do not skip this — a project without tests does not satisfy ACTIVE conformity (see BUSINESS_RULES.md `PYTEST_FRAMEWORK`).
 
 ### Files to create
 
@@ -162,11 +162,11 @@ Add `pytest` to `requirements.txt`.
 
 ### CHANGE Tickets (iteration only)
 
-Mutations to existing specifications are expressed as CHANGE tickets, not edits fed raw to the build. Tickets live in `changes/CHANGE-NNN-description.md` within the spec directory.
+Mutations to existing specifications are expressed as CHANGE tickets, not edits fed raw to the build. Tickets live in `changes/CHANGE-NNN-description.md` within the specification directory.
 
 | Prefix | Contains | Location |
 |--------|----------|----------|
-| `changes/CHANGE-NNN-description.md` | Targeted mutation to existing spec | `changes/` subdirectory |
+| `changes/CHANGE-NNN-description.md` | Targeted mutation to existing specification | `changes/` subdirectory |
 
 **Ticket format:**
 
@@ -194,7 +194,7 @@ Rejected tickets gain a `## Rejection Reason` section. Applied tickets are kept 
 
 ## Open Questions Section
 
-Spec files end with `## Open Questions` — except README.md and METADATA.md which do not have this section.
+Specification files end with `## Open Questions` — except README.md and METADATA.md which do not have this section.
 
 ```markdown
 ## Open Questions
@@ -214,7 +214,7 @@ When `bin/build.sh` runs, it creates an annotated git tag:
 build/{project}/{YYYY-MM-DD.N}
 ```
 
-Annotated tags are permanent git objects — never pruned by `git gc`. This preserves the exact spec state used for each build. Diff between builds:
+Annotated tags are permanent git objects — never pruned by `git gc`. This preserves the exact specification state used for each build. Diff between builds:
 
 ```bash
 git diff build/Game-Build/2026-03-19.1..build/Game-Build/2026-03-19.2 -- Game-Build/
@@ -231,11 +231,11 @@ setup.sh  →  (author edits)  →  validate.sh  →  convert.sh  →  build.sh
 
 | Step | Script | Output |
 |------|--------|--------|
-| CREATE | `bin/setup.sh <name> ["desc"]` | Spec directory with template files |
-| DRAFT | (author edits files) | Concise specs |
+| CREATE | `bin/setup.sh <name> ["desc"]` | Specification directory with template files |
+| DRAFT | (author edits files) | Concise specifications |
 | VALIDATED | `bin/validate.sh <name>` | Exit 0 = ready, exit 1 = fix issues |
-| CONVERTED | `bin/convert.sh <name> > convert-prompt.md` | Detailed specs (optional — build handles inline) |
+| CONVERTED | `bin/convert.sh <name> > convert-prompt.md` | Detailed specifications (optional — build handles inline) |
 | BUILT | `bin/build.sh <name> > build-prompt.md` | Tagged commit + complete build prompt |
-| PROMOTED | (copy spec dir to own repo) | Independent project |
+| PROMOTED | (copy specification dir to own repo) | Independent project |
 
 One-shot path: skip CONVERTED, go straight from VALIDATED to BUILT. `bin/build.sh` includes ONESHOT_BUILD_RULES.md so the AI agent handles expansion and building in a single pass.

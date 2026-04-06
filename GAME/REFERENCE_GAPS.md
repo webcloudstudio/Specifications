@@ -2,9 +2,9 @@
 
 **Version:** 20260326 V3
 **Build-ref:** oneshot/GAME/2026-03-26.1
-**Purpose:** Features not yet specified, organized by target spec file. Drives iteration priority.
+**Purpose:** Features not yet specified, organized by target specification file. Drives iteration priority.
 
-> Format: Sections are spec filenames. `(NEW)` = file does not exist yet. Each gap is a checkbox: `- [ ]` open, `- [x]` specified. Include GAME reference file, priority (P0=critical → P10=someday), and one-line description.
+> Format: Sections are specification filenames. `(NEW)` = file does not exist yet. Each gap is a checkbox: `- [ ]` open, `- [x]` specified. Include GAME reference file, priority (P0=critical → P10=someday), and one-line description.
 
 ## Priority Levels
 
@@ -16,7 +16,7 @@
 | P3 | Should have — operational feature |
 | P4 | Should have — testing/validation |
 | P5 | Nice to have — analytics/intelligence |
-| P6 | Nice to have — spec tooling |
+| P6 | Nice to have — specification tooling |
 | P7 | Nice to have — publishing polish |
 | P8 | Someday — infrastructure improvements |
 | P9–P10 | Backlog |
@@ -28,7 +28,7 @@
 - [x] **P0 — Service Catalog API (Flow 12):** `GET /api/catalog` returns every project, its endpoints, bin/ scripts, health path, port. Specified in FEATURE-SERVICE-CATALOG.md.
 - [x] **P0 — Script Endpoint API (Flow 11):** `POST /api/{name}/run/{script}` exposes bin/ scripts as REST. Specified in FEATURE-SERVICE-CATALOG.md.
 - [x] **P0 — Project Health API (Flow 13):** `GET /api/{name}/health` proxies to each project's health endpoint. Specified in FEATURE-HEALTHCHECK.md.
-- [ ] **P0 — CLI/Bash Gateway:** `bin/game-cli.sh` wrapper for catalog, run, health commands from bash without curl. No spec yet.
+- [ ] **P0 — CLI/Bash Gateway:** `bin/game-cli.sh` wrapper for catalog, run, health commands from bash without curl. No specification yet.
 - [x] **P2 — Heartbeat Polling (Flow 6):** Background poller fully specified in FEATURE-HEALTHCHECK.md (concurrent threading, state transitions, uptime_pct).
 - [x] **P3 — Schedule Fire (Flow 7):** Cron loop specified in SCREEN-DASHBOARDS-SCHEDULER.md; startup catch-up in FUNCTIONALITY.md Flow 7.
 - [x] **P3 — Missed-Run Recovery:** FUNCTIONALITY.md Flow 7 startup catch-up fires ONE immediate run for each missed schedule.
@@ -57,7 +57,7 @@
 
 ## SCREEN-PROTOTYPES-DETAIL.md (NEW)
 
-- [ ] **P2 — Prototype detail view:** `GET /prototypes/{name}` is referenced in SCREEN-PROTOTYPES.md but has no spec. Should show parsed spec files as a rendered HTML index with file list, Open Questions, and links to the oneshot flow.
+- [ ] **P2 — Prototype detail view:** `GET /prototypes/{name}` is referenced in SCREEN-PROTOTYPES.md but has no specification. Should show parsed specification files as a rendered HTML index with file list, Open Questions, and links to the oneshot flow.
 
 ## SCREEN-SETTINGS-WORKFLOWS.md (NEW)
 
@@ -77,7 +77,7 @@
 
 - [ ] **P2 — AI agent submission mechanism:** READY tickets can be "submitted to an AI agent" but the trigger mechanism (queue, webhook, API call to Claude) is unspecified. Needs a concrete flow or FEATURE-AI-SUBMISSION.md.
 
-## tests/ (no spec file needed)
+## tests/ (no specification file needed)
 
 - [ ] **P4 — Test framework:** Create `tests/` with conftest.py, fixtures (app, client, db).
 - [ ] **P4 — Unit tests — db layer:** init_db, query, execute, upsert, migrations.
@@ -88,11 +88,11 @@
 - [ ] **P4 — Unit tests — claude_convention:** parse_agents_md, @AGENTS.md redirect.
 - [ ] **P4 — Integration tests:** scan → discover → run → check → view log.
 
-## bin/ scripts (no spec file needed)
+## bin/ scripts (no specification file needed)
 
-- [ ] **P0 — Published API docs:** Auto-generate API reference at `/api/docs`. No spec yet.
+- [ ] **P0 — Published API docs:** Auto-generate API reference at `/api/docs`. No specification yet.
 - [ ] **P3 — bin/test.sh:** Run test suite.
-- [ ] **P3 — bin/PushAndPublish.sh:** Full GitHub Pages publish pipeline (referenced in FUNCTIONALITY.md Flow 5, not yet a formal script spec).
+- [ ] **P3 — bin/PushAndPublish.sh:** Full GitHub Pages publish pipeline (referenced in FUNCTIONALITY.md Flow 5, not yet a formal script specification).
 - [ ] **P3 — bin/LocalPreview.sh:** Astro preview server (referenced in SCREEN-HOMEPAGE.md).
 - [ ] **P6 — bin/create_project.py:** Scaffold new projects from templates (lives in GAME project, referenced from Specifications AGENTS.md).
 
@@ -100,8 +100,8 @@
 
 - [ ] **P5 — Usage analytics:** `usage_analyzer.py` (454 LOC). Token tracking, cost estimation, HTML reports.
 - [ ] **P5 — AI Transaction Log UI:** `ai_decisions` table exists in DATABASE.md; no screen renders it outside of ticket detail.
-- [ ] **P5 — Health KPIs dashboard:** Compliance, uptime, self-test, spec-drift aggregated in one view. Partially covered by SCREEN-PROJECTS-VALIDATION.md.
-- [ ] **P6 — Spec-to-code traceability:** Specs → commits → tickets linked.
+- [ ] **P5 — Health KPIs dashboard:** Compliance, uptime, self-test, specification-drift aggregated in one view. Partially covered by SCREEN-PROJECTS-VALIDATION.md.
+- [ ] **P6 — Specification-to-code traceability:** Specifications → commits → tickets linked.
 - [ ] **P7 — Consistent doc branding:** Standard structure across all projects.
 - [ ] **P9 — Smart git commits:** Descriptive labels, auto-commit integration.
 - [ ] **P9 — Secrets management:** Detect/protect .env files, warn on commit.

@@ -19,7 +19,7 @@ project-name/
 │   └── backups/        # Database and file backups
 ├── docs/               # Project documentation
 ├── tests/              # Test suite
-├── PROJECT/            # Build specification (optional, for spec-driven projects)
+├── PROJECT/            # Build specification (optional, for specification-driven projects)
 ├── .env                # Environment config — gitignored
 ├── .env.example        # Template with placeholder values — committed
 ├── .gitignore

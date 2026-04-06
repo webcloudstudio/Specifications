@@ -150,7 +150,7 @@ project:
   title: "My Project Title"
   port: 5001
 
-specs:
+specifications:
   - 01-OVERVIEW.md
   - 02-ARCHITECTURE.md
   # ... etc

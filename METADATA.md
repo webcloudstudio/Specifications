@@ -1,10 +1,9 @@
 # AUTHORITATIVE PROJECT METADATA - THE FIELDS IN THIS FILE SHOULD BE CURRENT
 
 name: Prototyper
-display_name: OneShot Prototyper
+display_name: Specification Driven Design
 git_repo: https://github.com/webcloudstudio/GAME_Spec
-short_description: <ul><li>OneShot methedology - Specification Driven Design framework <li>
-Integrated Technology Best Practice framework. </ul>
+short_description: Full Practice Develoipment Framework With Opinionated Stack and Enterprise Technology Business Rules. 
 status: ACTIVE
 version: 2026-03-14.1
 updated: 20260316_000000

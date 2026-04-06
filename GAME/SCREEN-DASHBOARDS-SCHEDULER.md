@@ -1,7 +1,7 @@
 # Screen: Scheduler
 
 **Version:** 20260325 V1
-**Description:** Spec for the Scheduler screen — view and manage all scheduled operations across projects
+**Description:** Specification for the Scheduler screen — view and manage all scheduled operations across projects
 
 Overview of all operations that have a `# Schedule:` header. Allows enabling/disabling schedules and editing cron expressions. The scheduler itself runs as a background loop in the platform (see FUNCTIONALITY.md Flow 7).
 

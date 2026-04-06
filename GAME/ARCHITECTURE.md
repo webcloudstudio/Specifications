@@ -126,7 +126,7 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | GET | `/project-validation` | Validation page | Nav link |
 | GET | `/project-maintenance` | Maintenance page | Nav link |
 | GET | `/project-workflow` | Workflow screen | Nav link |
-| POST | `/api/spec-tickets` | JSON | Create spec ticket + write file |
+| POST | `/api/specification-tickets` | JSON | Create specification ticket + write file |
 | POST | `/api/validate/{project_id}` | HTMX row fragment | Run validation checks |
 | GET | `/settings/general` | Settings page | Settings gear icon → General tab |
 | POST | `/settings/general` | HTMX form fragment | Save settings |

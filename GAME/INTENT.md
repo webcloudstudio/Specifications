@@ -16,4 +16,4 @@ Standard workflow benefits any Technical Product Owner:
 
 - Feature tickets tracked from idea to done
 - AI transaction logs capture decisions and rationale
-- Specification management links specs to running code
+- Specification management links specifications to running code

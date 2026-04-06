@@ -2,7 +2,7 @@
 
 **Version:** 20260323 V1
 **Row structure from:** SCREEN-DEFAULT (status badge, icon, project name — row header only; does not use Baseline table or filter button)
-**Description:** Spec for the Service Catalog screen — browse exposed API endpoints, fire scripts, and stream logs
+**Description:** Specification for the Service Catalog screen — browse exposed API endpoints, fire scripts, and stream logs
 
 API-oriented view of all projects and their registered scripts. Each project shows its endpoint surface; scripts can be run directly from the screen. Active and past runs are visible inline with live log output.
 

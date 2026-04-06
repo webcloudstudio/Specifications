@@ -1,7 +1,7 @@
 # Screen: Monitoring
 
 **Version:** 20260320 V1  
-**Description:** Spec for the Monitoring screen
+**Description:** Specification for the Monitoring screen
 
 **Service health dashboard and event timeline.** Polls running services, shows status, alerts on failure.
 

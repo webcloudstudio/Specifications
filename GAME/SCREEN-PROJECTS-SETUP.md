@@ -1,7 +1,7 @@
 # Screen: Project Setup
 
 **Version:** 20260325 V1
-**Description:** Spec for the Project Setup screen — discover unregistered GitHub repos and bring them into GAME
+**Description:** Specification for the Project Setup screen — discover unregistered GitHub repos and bring them into GAME
 
 Fetches the user's GitHub repository list and compares against projects already registered in GAME. Shows un-registered repos with a `Make A Project` action and registered projects with a `Conform` action.
 

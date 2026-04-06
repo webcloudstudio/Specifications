@@ -2,9 +2,9 @@
 
 **Version:** 20260326 V1
 **Extends:** SCREEN-DEFAULT
-**Description:** Spec for the Project Workflow screen — create spec ticket files for any project from a configurable set of workflow types
+**Description:** Specification for the Project Workflow screen — create specification ticket files for any project from a configurable set of workflow types
 
-One-click entry point for raising spec tickets (PATCH-NNN, SCREEN-NNN, FEATURE-NNN, etc.) against any project that has a linked specification directory. Each active `workflow_types` row appears as a button per project row. Clicking opens a modal; submitting writes the file to disk and records it in `spec_tickets`.
+One-click entry point for raising specification tickets (PATCH-NNN, SCREEN-NNN, FEATURE-NNN, etc.) against any project that has a linked specification directory. Each active `workflow_types` row appears as a button per project row. Clicking opens a modal; submitting writes the file to disk and records it in `spec_tickets`.
 
 ## Menu Navigation
 
@@ -24,8 +24,8 @@ One button per row in `workflow_types` where `is_active = 1`, ordered by `sort_o
 
 | State | Appearance |
 |-------|------------|
-| Project has specs (`has_specs = true`) | Active buttons, one per workflow type |
-| Project has no specs (`has_specs = false`) | Buttons rendered dim/disabled; tooltip: "No specification directory found" |
+| Project has specifications (`has_specs = true`) | Active buttons, one per workflow type |
+| Project has no specifications (`has_specs = false`) | Buttons rendered dim/disabled; tooltip: "No specification directory found" |
 
 Buttons use the workflow type's `name` as label. Style: small outline buttons, consistent width within the column.
 
@@ -50,7 +50,7 @@ Live preview below the description input:
 PATCH-004-fix-nav-scroll.md
 ```
 
-NNN is calculated server-side on submit (scan for highest existing `{PREFIX}-NNN-*` in the spec directory + 1). Preview shows `NNN` as `???` until submit.
+NNN is calculated server-side on submit (scan for highest existing `{PREFIX}-NNN-*` in the specification directory + 1). Preview shows `NNN` as `???` until submit.
 
 ### Buttons
 
@@ -68,7 +68,7 @@ NNN is calculated server-side on submit (scan for highest existing `{PREFIX}-NNN
 
 ### Submit Sequence
 
-1. `POST /api/spec-tickets` with `{ project_id, workflow_type_id, title, body }`
+1. `POST /api/specification-tickets` with `{ project_id, workflow_type_id, title, body }`
 2. Server scans `{SPECIFICATIONS_PATH}/{project.name}/` for existing `{PREFIX}-NNN-*` files → calculates next NNN
 3. Renders file content from `workflow_types.template` substituting `{title}` and `{body}`
 4. Writes file: `{SPECIFICATIONS_PATH}/{project.name}/{PREFIX}-{NNN}-{slug}.md`
@@ -80,7 +80,7 @@ On error: modal stays open, error shown in red below the Body field.
 
 ## Pending Tickets Indicator
 
-In the Workflows column, if a project has any `spec_tickets` rows with `status = pending`, a small amber badge shows the count next to the button group: e.g. `3 pending`. Clicking it links to the spec directory (if `has_specs` and `SPECIFICATIONS_PATH` configured).
+In the Workflows column, if a project has any `spec_tickets` rows with `status = pending`, a small amber badge shows the count next to the button group: e.g. `3 pending`. Clicking it links to the specification directory (if `has_specs` and `SPECIFICATIONS_PATH` configured).
 
 ## Data Flow
 
@@ -99,4 +99,4 @@ Workflow types are managed via Settings (future: Settings / Workflow Types scree
 
 - Should the Body textarea render a live markdown preview pane? Yes — split-pane preview is useful given that body content is markdown. Implement as a toggle (Edit / Preview) rather than always-split to keep the modal compact.
 - Should submitting a ticket also trigger a git commit in the Specifications repo? Yes — auto-commit with message `Add {PREFIX}-{NNN}-{slug}.md for {project_name}` immediately after the file is written. No-op if the Specifications repo has no `.git/` or git is unavailable.
-- Should the pending badge click navigate to the Prototypes screen filtered to that project? Yes — navigate to `/prototypes?filter={project.name}` so the user sees all spec files for that project in context.
+- Should the pending badge click navigate to the Prototypes screen filtered to that project? Yes — navigate to `/prototypes?filter={project.name}` so the user sees all specification files for that project in context.

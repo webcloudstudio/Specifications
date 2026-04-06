@@ -2,7 +2,7 @@
 
 **Version:** 20260326 V1
 **Extends:** SCREEN-DEFAULT
-**Description:** Spec for the Maintenance screen — project list showing maintenance-category operations for each project
+**Description:** Specification for the Maintenance screen — project list showing maintenance-category operations for each project
 
 ## Menu Navigation
 

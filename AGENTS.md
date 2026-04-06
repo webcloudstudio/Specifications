@@ -18,18 +18,22 @@ Tooling in `bin/` creates projects, validates compliance, propagates standards, 
 concise specs, and generates build prompts. Operational tasks (push all repos, start
 services, etc.) live in the GAME project, not here.
 
+## Wording
+
+Use the word specification in preference to spec except in program names
+
 ## Design Intent
 
 The rules system exists so that any AI agent, given CLAUDE_RULES.md and a project's
-spec files, can build, operate, and maintain that project without additional context.
+specification files, can build, operate, and maintain that project without additional context.
 The platform (GAME) then discovers and integrates projects automatically by reading
 the same standards (METADATA.md, bin/ headers, AGENTS.md).
 
-**Specification methodology:** You write concise specs (tables, bullets, short descriptions).
+**Specification methodology:** You write concise specifications (tables, bullets, short descriptions).
 ONESHOT_BUILD_RULES.md defines expansion rules. Stack files define technology patterns. The build
 pipeline combines everything into a single prompt an AI agent can execute.
 
-Never the shortcut word spec for specification in documentation or comments.  That shortcut is only to be used in script naming where brevity matters.
+**Word choice:** Use "specification" in preference to "spec" in documentation, comments, and prose. "spec" is only acceptable in program/script names (e.g. `spec_iterate.sh`) and directory suffix conventions where brevity matters.
 
 **What this means for changes to RulesEngine/:**
 - BUSINESS_RULES.md is the source for agent behavioral rules — full rationale lives there
@@ -260,23 +264,23 @@ bash bin/update_projects.sh [--dry-run]       # push rules/templates to all set-
 Every `bin/oneshot.sh` run creates an annotated git tag: `oneshot/{spec}/{YYYY-MM-DD.N}`.
 
 Annotated tags are permanent git objects — never pruned by `git gc`. They preserve the exact
-specification state used for each build, enabling spec-to-spec diffs between builds.
+specification state used for each build, enabling specification-to-specification diffs between builds.
 
 ## Architecture
 
 ### bin/setup.sh
-Scaffolds a new specification directory from `RulesEngine/spec_template/`, or updates an existing one. Accepts a spec name (created as `Specifications/<name>/`). `--update` copies only new template files; `--force` overwrites all. Substitutes project name, slug, description, and date into template placeholders.
+Scaffolds a new specification directory from `RulesEngine/spec_template/`, or updates an existing one. Accepts a specification name (created as `Specifications/<name>/`). `--update` copies only new template files; `--force` overwrites all. Substitutes project name, slug, description, and date into template placeholders.
 
 ### bin/validate.sh
-Validates a specification directory inside this repo: required files, METADATA fields, conformity level, naming conventions, Open Questions sections, stack file existence, template cleanup. Accepts a spec name only. Exit 0 = valid, exit 1 = errors.
+Validates a specification directory inside this repo: required files, METADATA fields, conformity level, naming conventions, Open Questions sections, stack file existence, template cleanup. Accepts a specification name only. Exit 0 = valid, exit 1 = errors.
 
 ### bin/convert.sh
 Generates a conversion prompt: ONESHOT_BUILD_RULES.md expansion rules + stack reference files + all
-concise spec files from the project directory. Output is fed to an AI agent for expansion.
+concise specification files from the project directory. Output is fed to an AI agent for expansion.
 
 ### bin/oneshot.sh
 The canonical build command. Validates the spec, detects build mode, then generates a
-complete one-shot build prompt: ONESHOT_BUILD_RULES.md + CLAUDE_RULES.md + stack files + all spec files.
+complete one-shot build prompt: ONESHOT_BUILD_RULES.md + CLAUDE_RULES.md + stack files + all specification files.
 
 **New project mode** (no `git_repo` or no `BUILD_FEATURE_BRANCH_NAME`): generates
 the prompt only. Create the target directory manually (`mkdir` + `git init`), then open
@@ -331,16 +335,16 @@ HTML assembler called by `document.sh`. Reads `DOC-*.md` from the target's `docs
 Reverse-engineers an existing project into specification files. Reads source code, detects stack, and generates a prompt for an AI agent to produce structured specification files (METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, etc.). Output to stdout — pipe to a file and feed to an AI agent.
 
 ### bin/ProjectValidate.sh
-Thin wrapper calling `project_manager.py verify`. Operates on promoted code projects only — not spec directories in this repo.
+Thin wrapper calling `project_manager.py verify`. Operates on promoted code projects only — not specification directories in this repo.
 
 ### ProjectUpdate.sh
-Thin wrapper calling `project_manager.py update`. Operates on promoted code projects only — not spec directories in this repo.
+Thin wrapper calling `project_manager.py update`. Operates on promoted code projects only — not specification directories in this repo.
 
 ### RulesEngine/ONESHOT_BUILD_RULES.md
 Global specification expansion rules. Defines how each file type (DATABASE, SCREEN, FEATURE, UI, ARCHITECTURE) should be expanded from concise author input to detailed implementation-ready specs. Stack-specific expansion defers to `stack/*.md` files.
 
 ### RulesEngine/stack/
-One file per technology (flask.md, sqlite.md, etc.). Prescriptive patterns included in oneshot prompts and used during spec conversion.
+One file per technology (flask.md, sqlite.md, etc.). Prescriptive patterns included in oneshot prompts and used during specification conversion.
 
 ## Standard Files in Every Code Project
 

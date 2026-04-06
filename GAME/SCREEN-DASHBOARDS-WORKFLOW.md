@@ -1,7 +1,7 @@
 # Screen: Workflow
 
 **Version:** 20260320 V1  
-**Description:** Spec for the Workflow screen
+**Description:** Specification for the Workflow screen
 
 **Kanban board for prototype lifecycle management.** Tracks features and prototypes from idea through implementation to completion. Sources from `spec_tickets` — the same table used by the Projects / Workflow screen, so tickets created there appear here immediately.
 
@@ -45,7 +45,7 @@ Each card shows:
 | Project | Project badge (colored by project) | `projects.display_name` |
 | Priority | Low / Medium / High / Critical indicator | `spec_tickets.priority` |
 | Tags | Ticket-level tag pills | `spec_tickets.tags` |
-| File | Filename pill when a spec file has been written | `spec_tickets.filename`; amber if `file_status = pending`, green if `applied` |
+| File | Filename pill when a specification file has been written | `spec_tickets.filename`; amber if `file_status = pending`, green if `applied` |
 | Age | Time since creation or last transition | `spec_tickets.created_at` |
 
 ## Ticket Detail (modal or slide-out)

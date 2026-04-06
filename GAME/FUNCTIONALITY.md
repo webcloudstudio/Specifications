@@ -469,20 +469,20 @@ Flash confirmation
 
 ## 10. Specification Management [ROADMAP]
 
-**Trigger:** User edits spec content via the platform, or agent commits spec changes during ticket work.
+**Trigger:** User edits specification content via the platform, or agent commits specification changes during ticket work.
 
 ```
 VIEWING:
-  User clicks Specs link on project with has_specs = true
+  User clicks Specifications link on project with has_specs = true
     |
     v
   Load file list from Specifications/{project_name}/
     |
     v
-  Display spec index with file names, last modified, sizes
+  Display specification index with file names, last modified, sizes
 
 EDITING (via platform):
-  User opens a spec file for editing
+  User opens a specification file for editing
     |
     v
   Load file content, render in editor
@@ -504,7 +504,7 @@ EDITING (via platform):
     |  linked to ticket (if in context)
 
 AI AGENT FLOW (during ticket IN DEVELOPMENT):
-  Agent modifies spec file as part of ticket work
+  Agent modifies specification file as part of ticket work
     |
     v
   Agent commits with descriptive message
@@ -516,7 +516,7 @@ AI AGENT FLOW (during ticket IN DEVELOPMENT):
 ```
 
 **Reads:** Specifications/{name}/ directory, git log
-**Writes:** Spec files, Specifications repo commits, transaction log
+**Writes:** Specification files, Specifications repo commits, transaction log
 **Events emitted:** `spec_updated`
 
 ---
@@ -653,7 +653,7 @@ Return JSON:
 | 7 | Schedule Fire | Cron tick / startup catch-up | ROADMAP |
 | 8 | Ticket Lifecycle | Create / drag ticket | Partial |
 | 9 | Configuration Edit | Cog icon / inline edit | Yes |
-| 10 | Specification Management | Spec link / agent commit | ROADMAP |
+| 10 | Specification Management | Specification link / agent commit | ROADMAP |
 | 11 | Script Endpoint API | External POST to /api/{name}/run/{script} | ROADMAP |
 | 12 | Service Catalog API | External GET /api/catalog | ROADMAP |
 | 13 | Project Health API | External GET /api/{name}/health | ROADMAP |
@@ -697,4 +697,4 @@ The browser replaces the targeted DOM element. No full page reload unless naviga
 ## Open Questions
 
 - Flow 8 (Ticket Lifecycle): The AI agent integration trigger mechanism for READY tickets is unspecified — needs FEATURE-AI-SUBMISSION.md or a concrete webhook/API design.
-- Flow 10 (Specification Management): The agent commit auto-detection (linking spec changes to active tickets via git diff) requires a scan-triggered diff check not currently in the scanner. Needs design.
+- Flow 10 (Specification Management): The agent commit auto-detection (linking specification changes to active tickets via git diff) requires a scan-triggered diff check not currently in the scanner. Needs design.

@@ -10,10 +10,10 @@ You are performing a gap analysis for a oneshot-built prototype. Compare the pro
 2. Read the prototype's `routes.py`, `STUBS.md`, and key Python modules
 3. Read the reference implementation's `routes.py` for feature comparison
 4. Update `REFERENCE_GAPS.md` with:
-   - New gaps discovered (features in spec or reference not in prototype)
+   - New gaps discovered (features in specification or reference not in prototype)
    - Gaps that have been closed (check the box, note the date)
    - Priority adjustments based on what you observe
-5. Keep the existing format: sections by spec filename, checkboxes, priority levels
+5. Keep the existing format: sections by specification filename, checkboxes, priority levels
 
 ## Rules
 

@@ -172,7 +172,7 @@ On startup, the scan runs in a **background thread** so the server is immediatel
 | has_claude | INTEGER | 0 | CLAUDE.md present |
 | has_docs | INTEGER | 0 | doc[s]/index.htm[l] present |
 | has_tests | INTEGER | 0 | tests/ directory or bin/test.sh present |
-| has_specs | INTEGER | 0 | Matching spec directory exists in SPECIFICATIONS_PATH |
+| has_specs | INTEGER | 0 | Matching specification directory exists in SPECIFICATIONS_PATH |
 | card_title | TEXT | NULL | Portfolio card title |
 | card_desc | TEXT | NULL | Portfolio card description |
 | card_tags | TEXT | NULL | Portfolio card tags |
@@ -268,7 +268,7 @@ Append-only log. Rows are never updated or deleted.
 
 ### transaction_log
 
-Spec decision log. One row per decision, change, question, or rationale entry.
+Specification decision log. One row per decision, change, question, or rationale entry.
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -278,7 +278,7 @@ Spec decision log. One row per decision, change, question, or rationale entry.
 | category | TEXT | decision / change / question / rationale |
 | title | TEXT | One-line summary |
 | body | TEXT | Full description, context, alternatives considered |
-| files_affected | TEXT | JSON array of spec file paths modified |
+| files_affected | TEXT | JSON array of specification file paths modified |
 | ticket_id | INTEGER FK | Optional link to tickets.id |
 
 ### ai_decisions
@@ -296,7 +296,7 @@ Per-ticket AI decision log. Written when a ticket enters IN DEVELOPMENT.
 
 ### workflow_types
 
-Configurable spec ticket type definitions. Seeded once on first startup; rows are never deleted by the scanner — only by user action via Settings. Each row defines one button in the Projects / Workflow screen.
+Configurable specification ticket type definitions. Seeded once on first startup; rows are never deleted by the scanner — only by user action via Settings. Each row defines one button in the Projects / Workflow screen.
 
 | Column | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -321,7 +321,7 @@ Configurable spec ticket type definitions. Seeded once on first startup; rows ar
 
 ### spec_tickets
 
-Unified ticket store shared by the Projects / Workflow screen (file creation) and the Dashboards / Workflow Kanban (lifecycle tracking). One row per ticket regardless of whether a spec file has been generated yet.
+Unified ticket store shared by the Projects / Workflow screen (file creation) and the Dashboards / Workflow Kanban (lifecycle tracking). One row per ticket regardless of whether a specification file has been generated yet.
 
 Supersedes the `tickets` table — see note below.
 

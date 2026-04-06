@@ -4,7 +4,7 @@
 **Build-ref:** oneshot/GAME/2026-03-22.1
 **Purpose:** Testable MUST/MUST NOT statements discovered during prototype iteration.
 
-> Format: Grouped by topic. Each group has a `**Target:**` line naming the spec file(s) it refines. Each criterion uses MUST/MUST NOT. When folded into the target spec, move to `## Folded` at the bottom.
+> Format: Grouped by topic. Each group has a `**Target:**` line naming the specification file(s) it refines. Each criterion uses MUST/MUST NOT. When folded into the target specification, move to `## Folded` at the bottom.
 
 ---
 
@@ -41,5 +41,5 @@
 ---
 
 ## Folded
-<!-- Criteria that have been incorporated into their target spec files. Keep for history. -->
+<!-- Criteria that have been incorporated into their target specification files. Keep for history. -->
 

@@ -9,11 +9,11 @@
 
 ## When Working in This Prototype
 
-### 1. Fix code, then fix the spec
+### 1. Fix code, then fix the specification
 
-After any code change that reveals a spec gap or defect, update the corresponding file in the Specifications directory in the same session.
+After any code change that reveals a specification gap or defect, update the corresponding file in the Specifications directory in the same session.
 
-- Defect found → fix code → add MUST statement to `ACCEPTANCE_CRITERIA.md` → update the target spec file
+- Defect found → fix code → add MUST statement to `ACCEPTANCE_CRITERIA.md` → update the target specification file
 - Feature added → update or create the relevant `SCREEN-*.md` or `FUNCTIONALITY.md`
 - Gap closed → check the box in `REFERENCE_GAPS.md`
 
@@ -24,7 +24,7 @@ When told "process ideas" or "update the specification":
 2. For each idea, determine where it belongs:
    - Defect/constraint → `ACCEPTANCE_CRITERIA.md`
    - Missing feature → `REFERENCE_GAPS.md`
-   - Spec clarification → direct edit to `SCREEN-*.md` or `FUNCTIONALITY.md`
+   - Specification clarification → direct edit to `SCREEN-*.md` or `FUNCTIONALITY.md`
 3. Delete each processed idea from `IDEAS.md`
 4. Commit with message: "Process ideas: [summary]"
 

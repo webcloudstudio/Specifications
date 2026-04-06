@@ -13,8 +13,8 @@
 
 | State | Description | Entry Condition |
 |-------|-------------|-----------------|
-| `DRAFT` | Spec directory exists, files being written | `setup.sh` run |
-| `VALIDATED` | Spec passes all checks, ready to build | `validate.sh` exits 0 |
+| `DRAFT` | Specification directory exists, files being written | `setup.sh` run |
+| `VALIDATED` | Specification passes all checks, ready to build | `validate.sh` exits 0 |
 | `BUILT` | Build prompt generated; baseline tag set | `oneshot.sh` run |
 | `ITERATING` | Prototype exists; changes are being applied | `iterate.sh` / `claude -p` cycle |
 | `PROMOTED` | Code merged to main or in independent repo | `merge.sh` run |
@@ -25,7 +25,7 @@
 
 | Transition | Command | From → To | Writes |
 |-----------|---------|-----------|--------|
-| Scaffold spec | `bin/setup.sh <PROJECT>` | — → DRAFT | `Specifications/<PROJECT>/` with template files |
+| Scaffold specification | `bin/setup.sh <PROJECT>` | — → DRAFT | `Specifications/<PROJECT>/` with template files |
 | Validate | `bin/validate.sh <PROJECT>` | DRAFT → VALIDATED | exit 0 only |
 | Generate build prompt | `bin/oneshot.sh <PROJECT> > Specifications/<PROJECT>/oneshot-prompt.md` | VALIDATED → BUILT | git tag `oneshot/<PROJECT>/<date>.<n>` · `data/deployments.jsonl` (bash entry) |
 | Apply build | `cd Prototype <PROJECT> && claude -p "$(cat ...oneshot-prompt.md)"` | BUILT → ITERATING | `Prototype <PROJECT>/` code · `Prototype <PROJECT>/docs/SCORECARD.md` · `data/deployments.jsonl` (LLM completion entry) |
@@ -51,7 +51,7 @@ The LLM running the build or iterate prompt appends a completion entry at sessio
 | `action` | `oneshot` / `iterate` / `llm_complete` | all writers |
 | `source` | `bash` / `llm` | all writers |
 
-`iterate.sh` also writes to `Prototype <PROJECT>/.env` so the prototype knows its spec version:
+`iterate.sh` also writes to `Prototype <PROJECT>/.env` so the prototype knows its specification version:
 
 | Key | Example | Set by |
 |-----|---------|--------|
@@ -68,8 +68,8 @@ Numbered files are iterate work items. File presence = pending. File deletion = 
 
 | Prefix | Type | Created by | Purpose |
 |--------|------|-----------|---------|
-| `SCREEN-NNN-*.md` | Screen spec | author | New or revised screen |
-| `FEATURE-NNN-*.md` | Feature spec | author | New or revised feature |
+| `SCREEN-NNN-*.md` | Screen specification | author | New or revised screen |
+| `FEATURE-NNN-*.md` | Feature specification | author | New or revised feature |
 | `PATCH-NNN-*.md` | Mutation | author / `tran_logger.sh` | Bug fix, behavioral correction, refactor |
 | `AC-NNN-*.md` | Acceptance criteria | author / `tran_logger.sh` | Testable MUST/MUST NOT batch |
 
@@ -79,13 +79,13 @@ Numbered files are iterate work items. File presence = pending. File deletion = 
 - Numbered files MUST NOT exist when running `oneshot.sh` (they signal pending iterate work)
 - `iterate.sh` finds ALL files matching `PREFIX-[0-9]{3}[-.]*.md` added since the build tag
 
-**Canonical (non-numbered) spec files** — oneshot territory, kept permanently:
+**Canonical (non-numbered) specification files** — oneshot territory, kept permanently:
 
 | Prefix | Purpose |
 |--------|---------|
-| `SCREEN-Name.md` | Canonical screen spec |
-| `FEATURE-Name.md` | Canonical feature spec |
-| `UI-Name.md` | Reusable UI component spec |
+| `SCREEN-Name.md` | Canonical screen specification |
+| `FEATURE-Name.md` | Canonical feature specification |
+| `UI-Name.md` | Reusable UI component specification |
 
 ---
 
@@ -121,7 +121,7 @@ These files define HOW things are built (prescriptive patterns). Included in `on
 | File | Location | Purpose |
 |------|----------|---------|
 | `CLAUDE_RULES.md` | `RulesEngine/` | Agent behavior contract — injected into every project's `AGENTS.md` |
-| `ONESHOT_BUILD_RULES.md` | `RulesEngine/` | How to expand concise specs into implementation-ready code |
+| `ONESHOT_BUILD_RULES.md` | `RulesEngine/` | How to expand concise specifications into implementation-ready code |
 | `CLAUDE_PROTOTYPE.md` | `RulesEngine/` | Agent rules for working inside a prototype directory; injected into prototype `AGENTS.md` |
 | `stack/<tech>.md` | `RulesEngine/stack/` | Prescriptive patterns per technology (flask, sqlite, bootstrap5, …) |
 
@@ -136,7 +136,7 @@ edit Specifications/<PROJECT>/  ──►  iterate.sh  ──►  claude -p iter
             └───────────── review + edit tickets ◄──────────────────┘
 ```
 
-1. Edit spec files — canonical truth; never modify prototype code for tracked changes without a ticket
+1. Edit specification files — canonical truth; never modify prototype code for tracked changes without a ticket
 2. Add numbered ticket files (`PATCH-NNN-*.md`, `FEATURE-NNN-*.md`, etc.) — or run `tran_logger.sh` to auto-generate them from session logs
 3. `bin/iterate.sh <PROJECT> > Specifications/<PROJECT>/iterate-prompt.md`
 4. `cd Prototype <PROJECT> && claude -p "$(cat ...iterate-prompt.md)"`
@@ -188,12 +188,12 @@ Written to `Prototype <PROJECT>/docs/SCORECARD.md` by LLM after each apply sessi
 
 ## Rules
 
-1. **Spec is canonical truth.** Edit spec files; never modify prototype code for tracked changes without a ticket.
-2. **Fix code, then fix spec.** Every code change revealing a gap must produce an AC entry or spec update in the same session.
+1. **Specification is canonical truth.** Edit specification files; never modify prototype code for tracked changes without a ticket.
+2. **Fix code, then fix specification.** Every code change revealing a gap must produce an AC entry or specification update in the same session.
 3. **Tran_logger before iterate.** Run `tran_logger.sh` after any interactive prototype session before the next `iterate.sh` run.
 4. **Validate before building.** `oneshot.sh` calls `validate.sh` and aborts on failure.
-5. **Open Questions block items.** Unresolved Open Questions in a spec file cause its iterate items to be rejected.
+5. **Open Questions block items.** Unresolved Open Questions in a specification file cause its iterate items to be rejected.
 6. **Review tl- tickets.** Auto-generated tickets must be reviewed before iterate — edit, delete, or promote as needed.
 7. **Cursor prevents duplicates.** `tran_logger.sh` is safe to run at any time; `.tran_logger_cursor` tracks processed sessions.
 8. **Prototype docs in `docs/`.** All prototype documentation including SCORECARD.md lives in `Prototype <PROJECT>/docs/`.
-9. **Numbered files are iterate-only.** `oneshot.sh` warns if numbered ticket files (`PREFIX-NNN-*.md`) exist in the spec directory.
+9. **Numbered files are iterate-only.** `oneshot.sh` warns if numbered ticket files (`PREFIX-NNN-*.md`) exist in the specification directory.

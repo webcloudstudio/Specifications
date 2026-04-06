@@ -1,7 +1,7 @@
 # Screen: General Settings
 
 **Version:** 20260326 V1
-**Description:** Spec for the General Settings screen — application-level configuration
+**Description:** Specification for the General Settings screen — application-level configuration
 
 ## Menu Navigation
 

@@ -2,7 +2,7 @@
 
 **Version:** 20260320 V1
 **Extends:** SCREEN-DEFAULT
-**Description:** Spec for the Dashboard screen
+**Description:** Specification for the Dashboard screen
 
 **The main view.** Shows every discovered project with status, operations, and quick links. This is the landing page.
 

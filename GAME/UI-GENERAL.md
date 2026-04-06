@@ -5,7 +5,7 @@
 
 **Shared UI patterns, components, and conventions used across all screens.**
 
-All SCREEN-*.md files reference this document for shared elements. Screen specs define only what is unique to that screen.
+All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
 
 ---
 

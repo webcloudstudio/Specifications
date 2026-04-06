@@ -2,7 +2,7 @@
 
 **Version:** 20260320 V1
 **Extends:** SCREEN-DEFAULT
-**Description:** Spec for the Configuration screen
+**Description:** Specification for the Configuration screen
 
 A screen for editing project metadata across projects in a view
 

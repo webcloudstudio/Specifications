@@ -252,7 +252,7 @@ git push origin main
 | `PUBLISHER_TARGET` | Yes | `$(dirname $GAME_DIR)/My_Github` | Path to the TARGET directory |
 | `PROJECTS_DIR` | Yes | — | Path containing all project repos |
 | `GITHUB_PAGES_BASE_URL` | No | `""` | Full URL; drives `base_path` derivation |
-| `SPECIFICATIONS_PATH` | No | — | If set, templates are synced from spec on each build |
+| `SPECIFICATIONS_PATH` | No | — | If set, templates are synced from specification on each build |
 | `HOMEPAGE_PREVIEW_PORT` | No | `4321` | Port for `homepage_review.sh` |
 
 ---
@@ -287,4 +287,4 @@ The old scripts called `publisher.rebuild_pages()` which generated Astro `.astro
 - **Option A (default):** `publish/` is a subdirectory of `PUBLISHER_TARGET`. Commit and push happen at `PUBLISHER_TARGET` root. Lowest-friction migration — `My_Github/` already has the right git remote; `publish/` replaces the Astro `dist/` subdirectory.
 - **Option B:** `publish/` is itself a standalone git repo with its own `origin` remote pointing directly to the GitHub Pages source. Cleaner separation; requires re-initializing a git repo in `publish/`.
 
-Spec default: Option A. Document Option B as an advanced configuration in `.env.sample`.
+Specification default: Option A. Document Option B as an advanced configuration in `.env.sample`.

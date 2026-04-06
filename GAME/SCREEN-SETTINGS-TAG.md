@@ -1,7 +1,7 @@
 # Screen: Tag Settings
 
 **Version:** 20260325 V1
-**Description:** Spec for the Tag Settings screen — assign display colors to tags from a curated preset palette
+**Description:** Specification for the Tag Settings screen — assign display colors to tags from a curated preset palette
 
 Tags are discovered automatically from `projects.tags` across all projects. This screen assigns a foreground/background color pair to each tag. Colors are drawn from a curated preset list chosen for legibility on the dark theme.
 

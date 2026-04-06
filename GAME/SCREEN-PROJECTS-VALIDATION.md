@@ -2,7 +2,7 @@
 
 **Version:** 20260325 V1
 **Extends:** SCREEN-DEFAULT
-**Description:** Spec for the Validation screen — run and review project compliance checks across all registered projects
+**Description:** Specification for the Validation screen — run and review project compliance checks across all registered projects
 
 A SCREEN-DEFAULT-based list view where each project row shows its current validation state and exposes controls to run checks individually or as a batch. Two validation categories: **Repo/Project Quality** and **Workflow Conformity**.
 
