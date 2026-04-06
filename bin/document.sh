@@ -358,7 +358,7 @@ echo "" >&2
 
 mkdir -p "$TARGET_DOCS"
 
-cd "$TARGET" && claude -p "$PROMPT" \
+cd "$TARGET" && echo "$PROMPT" | claude -p \
     --model "$MODEL" \
     --allowedTools "Read,Write,Glob,Grep"
 
