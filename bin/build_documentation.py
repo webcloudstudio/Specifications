@@ -50,15 +50,18 @@ SCRIPT_DESCRIPTIONS = {
     'decompose.sh':             'Reverse-engineer an existing project into specification files',
     'scorecard.sh':             'Generate SCORECARD.md — specification-to-code alignment checklist',
     'update_reference_gaps.sh': 'Update REFERENCE_GAPS.md from specification vs prototype comparison',
+    'document.sh':              'Agent program — generate project documentation from specification files via AI summarization and HTML assembly',
+    'build_project_docs.py':    'Assemble project documentation HTML from DOC-*.md files and bin/ scripts',
 }
 
-GUIDE_ORDER = ['SETUP', 'ONESHOT', 'ITERATE', 'MERGE', 'AUTOMATE', 'ENGINEERING-RULES', 'CREATE-IMAGE', 'SDD-SPECIFICATIONS']
+GUIDE_ORDER = ['SETUP', 'ONESHOT', 'ITERATE', 'MERGE', 'AUTOMATE', 'DOCUMENT', 'ENGINEERING-RULES', 'CREATE-IMAGE', 'SDD-SPECIFICATIONS']
 GUIDE_TITLES = {
     'SETUP':                 'Step 1 — Setup',
     'ONESHOT':               'Step 2 — OneShot',
     'ITERATE':               'Step 3 — Iterate',
     'MERGE':                 'Step 4 — Merge',
     'AUTOMATE':              'Step 5 — Automate',
+    'DOCUMENT':              'Step 6 — Document',
     'ENGINEERING-RULES':     'Engineering Rules',
     'CREATE-IMAGE':          'Create Image',
     'SDD-SPECIFICATIONS':    'SDD — Specifications',
@@ -291,6 +294,8 @@ def build_page(scripts, projects, guides):
                                             ('ProjectUpdate.sh',    'script', 'ProjectUpdate.sh')]),
         ('AUTOMATE', 'Step 5 — Automate', [('spec_iterate.sh',     'script', 'spec_iterate.sh'),
                                             ('scorecard.sh',        'script', 'scorecard.sh')]),
+        ('DOCUMENT', 'Step 6 — Document', [('document.sh',          'script', 'document.sh'),
+                                            ('build_project_docs.py', 'script', 'build_project_docs.py')]),
     ]
 
     # Warn if STEP_NAV references a script not found in bin/ (catches renames)
@@ -329,6 +334,7 @@ def build_page(scripts, projects, guides):
         '  "MERGE": [1],\n'
         '  "AUTOMATE": [3],\n'
         '  "ENGINEERING-RULES": [2],\n'
+        '  "DOCUMENT": [5],\n'
         '};'
     )
 

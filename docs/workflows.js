@@ -105,8 +105,24 @@
       ]
     },
     {
+      id: 'document', navLabel: 'Document',
+      num: 'Workflow #6', title: 'Specification-Driven Documentation',
+      desc: 'document.sh reads specification files and calls an AI agent (claude -p, sonnet) to curate DOC-*.md summaries for each documentation section. build_project_docs.py then assembles those summaries, along with discovered bin/ scripts, into a Prototyper-style single-page documentation app. The result is a versioned docs/index.html that can be rebuilt on demand from the specification files.',
+      mermaid: `flowchart LR${D}
+  SPEC(["Specifications/"]):::dir --> D["document.sh"]:::script
+  D --> PT(["Prompt"]):::prompt
+  PT --> DOC{{"DOC-*.md"}}:::md
+  DOC --> B["build_project_docs.py"]:::script
+  B --> HTML(["Documentation/"]):::output`,
+      learnings: [
+        'Two-phase pipeline keeps AI content generation separate from HTML assembly.',
+        'DOC-*.md files persist in the target — human-editable sources for rebuilds.',
+        'Spec format warnings in validate.sh and document.sh guide authors toward documentation-ready specifications.'
+      ]
+    },
+    {
       id: 'decompose', navLabel: 'Decompose',
-      num: 'Workflow #6', title: 'Reverse-Engineering Existing Applications',
+      num: 'Workflow #7', title: 'Reverse-Engineering Existing Applications',
       desc: 'decompose.sh reads an existing project\'s source code, detects the technology stack, and generates an AI prompt that produces structured specification files — METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, and more. The output feeds directly into Workflow #1, bringing unspecified applications under specification control.',
       mermaid: `flowchart LR${D}
   PROJ(["Existing Project"]):::dir --> D["decompose.sh"]:::script
