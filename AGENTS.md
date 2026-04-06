@@ -79,7 +79,9 @@ Specifications/
     decompose.sh                   Reverse-engineer an existing project into specification files
     summarize_rules.sh             Generate prompt to regenerate CLAUDE_RULES.md
     test.sh                        Test the specification system itself
-    build_documentation.sh         Build docs/index.html
+    document.sh                    Generate project documentation from specifications (AI + assembler)
+    build_documentation.sh         Build docs/index.html (Prototyper docs only)
+    build_project_docs.py          Assemble project docs HTML from DOC-*.md files (called by document.sh)
     project_manager.py             Python backend for project verify/update operations
     ProjectValidate.sh             Verify a promoted code project against CLAUDE_RULES compliance
     ProjectUpdate.sh               Update a promoted code project with latest rules and templates
@@ -217,6 +219,19 @@ bash ProjectUpdate.sh /abs/path/to/project      # absolute path
 bash ProjectUpdate.sh <project-name> --dry-run  # preview without writing
 ```
 
+### Project documentation (generates docs for a promoted project from its specs)
+
+```bash
+# Generate documentation for a project from its specification files
+bash bin/document.sh <ProjectName>
+bash bin/document.sh <ProjectName> --theme=slate --target=../GAME_p2
+bash bin/document.sh <ProjectName> --model=opus
+
+# Phase 1: AI (claude -p) reads specs, writes DOC-*.md summaries into target docs/
+# Phase 2: build_project_docs.py assembles DOC-*.md + bin/ scripts into docs/index.html
+# Also installs bin/build_documentation.sh in the target project for rebuilds
+```
+
 ### Build tag operations
 
 ```bash
@@ -305,6 +320,12 @@ Generates SCORECARD.md in the prototype directory by checking code against speci
 
 ### bin/update_reference_gaps.sh
 Compares specification files against the prototype and optionally a reference implementation. Uses `claude -p` to identify gaps. Writes REFERENCE_GAPS.md in the specification directory.
+
+### bin/document.sh
+Generates project documentation from specification files. Two-phase pipeline: (1) calls `claude -p` (sonnet by default) to read specs and write curated `DOC-*.md` summaries into the target project's `docs/`, (2) calls `build_project_docs.py` to assemble those summaries + bin/ script headers into `docs/index.html`. Also copies CSS theme files and installs `bin/build_documentation.sh` in the target for rebuilds. Accepts `--theme`, `--target`, `--model`.
+
+### bin/build_project_docs.py
+HTML assembler called by `document.sh`. Reads `DOC-*.md` from the target's `docs/`, discovers CommandCenter scripts from the target's `bin/`, and generates a single-page documentation app matching the Prototyper docs look and feel (sidebar, nav sections, man-pages, marked.js rendering). Output: `docs/index.html` with versioned footer.
 
 ### bin/decompose.sh
 Reverse-engineers an existing project into specification files. Reads source code, detects stack, and generates a prompt for an AI agent to produce structured specification files (METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, etc.). Output to stdout — pipe to a file and feed to an AI agent.

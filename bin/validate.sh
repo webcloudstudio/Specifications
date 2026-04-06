@@ -251,6 +251,52 @@ if [ "$TICKET_COUNT" -eq 0 ]; then
 fi
 echo ""
 
+# --- Documentation readiness ---
+echo "Documentation readiness:"
+DOC_READY=true
+
+# SCREEN files should have Route and Description
+for f in "$PROJECT_DIR"/SCREEN-*.md; do
+    [ -f "$f" ] || continue
+    fname=$(basename "$f")
+    # Skip numbered tickets and examples
+    [[ "$fname" =~ ^SCREEN-[0-9]{3}- ]] && continue
+    [ "$fname" = "SCREEN-Example.md" ] && continue
+    if ! grep -q '## Route' "$f" 2>/dev/null; then
+        warn "$fname missing ## Route — documentation will lack route info"
+        DOC_READY=false
+    fi
+    if ! grep -q '\*\*Description:\*\*' "$f" 2>/dev/null; then
+        warn "$fname missing **Description:** — documentation will lack summary"
+        DOC_READY=false
+    fi
+done
+
+# FEATURE files should have Description
+for f in "$PROJECT_DIR"/FEATURE-*.md; do
+    [ -f "$f" ] || continue
+    fname=$(basename "$f")
+    [[ "$fname" =~ ^FEATURE-[0-9]{3}- ]] && continue
+    [ "$fname" = "FEATURE-Example.md" ] && continue
+    if ! grep -q '\*\*Description:\*\*' "$f" 2>/dev/null; then
+        warn "$fname missing **Description:** — documentation will lack summary"
+        DOC_READY=false
+    fi
+done
+
+# ARCHITECTURE should have Directory Layout
+if [ -f "$PROJECT_DIR/ARCHITECTURE.md" ]; then
+    if ! grep -q '## Directory Layout' "$PROJECT_DIR/ARCHITECTURE.md" 2>/dev/null; then
+        warn "ARCHITECTURE.md missing ## Directory Layout"
+        DOC_READY=false
+    fi
+fi
+
+if [ "$DOC_READY" = true ]; then
+    pass "All specification files have documentation-ready structure"
+fi
+echo ""
+
 # --- Summary ---
 echo "─────────────────────────────"
 if [ "$ERRORS" -gt 0 ]; then
