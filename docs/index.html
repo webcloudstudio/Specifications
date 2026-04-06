@@ -11,9 +11,11 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body { display: flex; height: 100vh; overflow: hidden;
+body { display: flex; flex-direction: column; height: 100vh; overflow: hidden;
   background: var(--c-bg); color: var(--c-text);
   font-family: 'Segoe UI', 'Trebuchet MS', Arial, sans-serif; font-size: 14px; line-height: 1.65; }
+
+.layout { display: flex; flex: 1; overflow: hidden; }
 
 /* ── Sidebar — invariant ── */
 .sidebar { width: 220px; min-width: 220px; display: flex; flex-direction: column;
@@ -146,6 +148,21 @@ section h2 { font-size: 18px; font-weight: 700; color: var(--c-h1);
 </style>
 </head>
 <body>
+
+<header class="page-header gem-header">
+  <div class="gem-header-left">
+    <span class="gem-header-logo">Prototyper</span>
+    <span class="gem-header-title">Documentation</span>
+  </div>
+  <nav class="gem-header-nav">
+    <a href="index.html" style="border-bottom-color: var(--c-accent);">Documentation</a>
+    <a href="Features.html">Features</a>
+    <a href="white-paper.html">White Paper</a>
+  </nav>
+  <span class="gem-header-copyright">Ed Barlow &middot; Web Cloud Studio</span>
+</header>
+
+<div class="layout">
 
 <nav class="sidebar">
   <div class="sidebar-header" onclick="show('workflow')">
@@ -447,5 +464,7 @@ function showProject(name, url) {
   show('workflow');
 })();
 </script>
+
+</div><!-- .layout -->
 </body>
 </html>
