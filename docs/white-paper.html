@@ -83,36 +83,40 @@ footer {
 <div class="page-content">
 
 <div class="cover">
-  <div class="cover-eyebrow">Specification Driven Design Methodology</div>
-  <h1>Specification Driven Design</h1>
+  <div class="cover-eyebrow">Ed Barlows Specification Driven Design Methodology</div>
   <div class="cover-sub">
-    A methodology for building software from structured specifications using AI agents.
-    One specification set produces one working prototype &mdash; no ambiguity, no drift.
+    Best Practices for a full life cycle specification driven design methodology.  
+    Describes various workflows and artifacts and integrates an opinionated structured stack 
+    of business, design, and technology rules targeting reproducable supportable easy-to-develop and 
+    easy-to-maintain.
   </div>
   <div class="cover-meta"><span>Ed Barlow</span><span>Web Cloud Studio</span><span>2026</span></div>
 </div>
 
 <div class="wp-section">
   <h2>The Problem</h2>
-  <p>AI code generation works well for small, self-contained tasks. But building a complete
-  application &mdash; with a database, multiple screens, shared UI patterns, and operational
-  concerns &mdash; requires more than a single prompt. Without structure, AI builds diverge
-  from intent, accumulate inconsistencies, and become harder to iterate on with each cycle.</p>
+  <ul>
+  <li>In 2026 Agentic code generation works very well for small, self-contained tasks. </li>
+  <li>Without specifications, these projects do not scale and because each project is different they ar hard to support.</li>
+  <li>Supportability and Interoperability is out-of-the-box manual and it can be automaticly consistently for all projects</li>
+  <li>Token usage...</li>
+  <li>The ai generates software tools but there IS no framework for non technical users to manage their code</li>
+</ul>
 </div>
 
 <div class="wp-section">
   <h2>The Approach</h2>
   <p>Specification Driven Design separates <em>what to build</em> from <em>how to build it</em>.
   The developer writes concise, structured specification files. An opinionated technology stack
-  and a set of business rules provide the <em>how</em>. A build script assembles everything into
+  and a set of techology/business rules provide the <em>how</em>. A build script assembles everything into
   a single prompt that an AI agent executes in one pass.</p>
 
-  <h3>Specification Files</h3>
-  <p>Each project is defined by a small set of markdown files, each with a specific role:</p>
+  <h2>Specification Files</h2>
+  <p>Each project is defined by a small set of markdown files in a permissioned Specification repository:</p>
   <ul>
-    <li><code>METADATA.md</code> &mdash; identity, stack, status (the service catalog entry)</li>
-    <li><code>ARCHITECTURE.md</code> &mdash; modules, routes, directory layout</li>
-    <li><code>DATABASE.md</code> &mdash; tables, columns, types (schema only)</li>
+    <li><code>METADATA.md</code> &mdash; identity, stack, status, manual metadata for the project </li>
+    <li><code>ARCHITECTURE.md</code> &mdash; Mandatory architecture (modules, routes, directory layout...)</li>
+    <li><code>DATABASE.md</code> &mdash; tables, columns, types (schema only - implementation separate)</li>
     <li><code>FUNCTIONALITY.md</code> &mdash; what the application does at a high level</li>
     <li><code>SCREEN-*.md</code> &mdash; per-screen: route, layout, interactions</li>
     <li><code>FEATURE-*.md</code> &mdash; per-feature: trigger, sequence, reads, writes</li>
@@ -120,16 +124,12 @@ footer {
   </ul>
 
   <h3>Technology Rules</h3>
-  <p>A shared rules engine (<code>CLAUDE_RULES.md</code>) defines agent behavior: file structure,
-  naming conventions, error handling, security, commit standards. Stack files
-  (<code>flask.md</code>, <code>sqlite.md</code>, etc.) provide copy-paste implementation patterns.
-  The AI agent follows these rules exactly &mdash; no creative interpretation.</p>
+  <p>A shared rules engine (<code>CLAUDE_RULES.md</code> which is injected and automanaged in AGENTS.md) 
+    provides structure for agents to build your code: file structure, naming conventions, error handling, 
+    security, commit standards. </p>
+  <p>Stack files  (example: <code>flask.md</code>, <code>sqlite.md</code>, etc.) provide exact 
+    implementation patterns the AI software build agents follows exactly &mdash; no creative interpretation.</p>
 
-  <h3>One-Shot Build</h3>
-  <p>The <code>oneshot.sh</code> script validates the specification, concatenates all inputs
-  (specification files + rules + stack patterns), and produces a single prompt. The AI agent
-  reads this prompt and builds the entire application in one pass. The result is tagged in git
-  so every build is traceable to the exact specification state that produced it.</p>
 </div>
 
 <div class="wp-section">
@@ -162,7 +162,7 @@ footer {
 
 <script>
 window.addEventListener('DOMContentLoaded', function () {
-  window.renderAllWorkflows(document.getElementById('wp-workflows'));
+  window.renderAllWorkflowsCompact(document.getElementById('wp-workflows'));
 });
 </script>
 </body>

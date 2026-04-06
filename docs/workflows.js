@@ -11,10 +11,9 @@
     {
       id: 'oneshot', navLabel: 'One Shot',
       num: 'Workflow #1', title: 'Specification Driven Design — One Shot',
-      desc: 'Structured specification files and opinionated stack patterns produce a single AI build prompt. Git-tagged for traceability.',
+      desc: 'oneshot.sh validates the specification directory, then concatenates specification files, technology rules, and stack patterns into a single prompt. The AI agent builds the entire application in one pass. Each build is git-tagged — every prototype is fully traceable to the exact specification state that produced it.',
       mermaid: `flowchart LR${D}
-  S0["decompose.sh"]:::script --> SPEC(["Specifications/"]):::dir
-  S1["setup.sh"]:::script --> SPEC
+  S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
   SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
   STACK(["Stack/"]):::dir --> S3
   TR(["TechnologyRules/"]):::dir --> S3
@@ -24,7 +23,7 @@
   PT --> PT2(["Prototype"]):::output
   PT --> DL{{"deployments.jsonl"}}:::md`,
       learnings: [
-        'A well defined specification file architecture works.',
+        'A well-defined specification file architecture works.',
         'Opinionated stack — prescriptive patterns, not guidelines.',
         'Scorecards and gap analysis provide directionality.'
       ],
@@ -38,16 +37,12 @@
           ['FUNCTIONALITY.md / FEATURE-*.md', 'Feature definitions'],
           ['SCREEN-NNN-*.md / PATCH-NNN-*.md / AC-NNN-*.md', 'Typed tickets applied in order']
         ]
-      },
-      io: {
-        inputs: ['Specifications/', 'Stack/', 'TechnologyRules/'],
-        outputs: ['Prompt', 'Prototype', 'SCORECARD.md', 'REFERENCE_GAPS.md', 'deployments.jsonl']
       }
     },
     {
       id: 'iterate', navLabel: 'Iterate',
       num: 'Workflow #2', title: 'Application Iteration',
-      desc: 'Specification changes flow to prototypes as targeted iteration prompts. Promotion squash-merges to projects.',
+      desc: 'Changes flow through specifications, not ad-hoc code edits. iterate.sh assembles pending change tickets (SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*) into a targeted prompt applied to the existing codebase. Once ready, merge.sh squash-merges the prototype branch into a promoted project.',
       mermaid: `flowchart LR${D}
   DL{{"deployments.jsonl"}}:::md --> CH{{"Specification Diff"}}:::md
   CH --> S1["iterate.sh"]:::script
@@ -60,17 +55,13 @@
   PT --> DL2{{"deployments.jsonl"}}:::md
   S2 --> PROJ(["Project"]):::output`,
       learnings: [
-        'Updating specifications much preferred over ad-hoc code edits. Scorecard tracks specification drift.'
-      ],
-      io: {
-        inputs: ['deployments.jsonl', 'Stack/', 'TechnologyRules/'],
-        outputs: ['Prompt', 'Prototype', 'SCORECARD.md', 'deployments.jsonl', 'Project']
-      }
+        'Updating specifications is far preferable to ad-hoc code edits. The scorecard tracks specification drift over time.'
+      ]
     },
     {
       id: 'techrules', navLabel: 'Technology Rules',
       num: 'Workflow #3', title: 'Technology Rules Propagation',
-      desc: 'Business rules are AI-summarized into CLAUDE_RULES.md and injected into every project, enabling inter-project compatibility.',
+      desc: 'BUSINESS_RULES.md is the source of truth for agent behavior. summarize_rules.sh generates a compact CLAUDE_RULES.md that is injected into every project via ProjectUpdate.sh. All projects share the same behavioral contract, making them interoperable and consistently structured. ProjectValidate.sh verifies compliance.',
       mermaid: `flowchart LR${D}
   RULES(["Technology Rules"]):::dir
   --> S1["summarize_rules.sh"]:::script
@@ -82,16 +73,12 @@
       learnings: [
         'CLAUDE_RULES injection works well out of the box — key insight: use a crafted AI summary.',
         'An opinionated prescribed stack gave working software first time.'
-      ],
-      io: {
-        inputs: ['TechnologyRules/'],
-        outputs: ['CLAUDE_RULES.md', 'Project AGENTS.md (injected)']
-      }
+      ]
     },
     {
       id: 'speciterate', navLabel: 'Self Iteration',
       num: 'Workflow #4', title: 'Automated Specification Iteration',
-      desc: 'AI-scored gap analysis prioritises 1–2 features, completes specifications, and feeds them back into the build pipeline.',
+      desc: 'spec_iterate.sh uses AI to score specification quality across seven dimensions, identify 1–2 highest-priority gaps, and generate a focused iteration prompt. REFERENCE_GAPS.md and SPEC_SCORECARD.md are updated automatically, closing the loop between specification quality and build quality without manual review.',
       mermaid: `flowchart LR${D}
   GAPS{{"REFERENCE_GAPS.md"}}:::md --> SI["spec_iterate.sh"]:::script
   SPEC(["Specifications/"]):::dir  --> SI
@@ -101,27 +88,35 @@
   PROMPT --> Proto(["Prototype"]):::output`,
       learnings: [
         'Works well — one gap at a time, best practices, low-touch review needed.'
-      ],
-      io: {
-        inputs: ['Specifications/', 'BUSINESS_RULES.md'],
-        outputs: ['SPEC_SCORECARD.md', 'SPEC_ITERATION.md', 'REFERENCE_GAPS.md (updated)']
-      }
+      ]
     },
     {
       id: 'tran', navLabel: 'Transaction Logs',
       num: 'Workflow #5', title: 'Capturing Claude Edit Sessions',
-      desc: 'Transform Claude internal session logs into formal specification tickets and acceptance criteria.',
+      desc: 'Claude edit sessions for diagnostics and feature changes are automatically captured for updates to your specifications. tran_logger.sh reads the Claude session JSONL and git history, then converts them into numbered specification tickets — PATCH-NNN-* for feature changes and AC-NNN-* for acceptance criteria. Numbered files apply in order, giving reproducible build patterns and the ability to work backwards from code to specification.',
       mermaid: `flowchart LR${D}
   DL{{"deployments.jsonl"}}:::md --> TL["tran_logger.sh"]:::script
   PT([".claude JSONL"]):::dir --> TL
   GI(["git logs"]):::dir --> TL
   TL --> SPEC(["Specifications/"]):::dir`,
       learnings: [
-        'Requires prompt to create acceptance criteria as well as feature changes.',
-        'Approach yielded to specification driven design — used selectively now.'
-      ],
-      ioCols: [
-        { h4: 'Specifications', items: ['PATCH-NNN-tl-*.md', 'AC-NNN-tl-*.md'] }
+        'Requires prompting the agent to produce acceptance criteria alongside feature changes.',
+        'Numbered PATCH-NNN-* and AC-NNN-* files give the best reproducible build patterns.'
+      ]
+    },
+    {
+      id: 'decompose', navLabel: 'Decompose',
+      num: 'Workflow #6', title: 'Reverse-Engineering Existing Applications',
+      desc: 'decompose.sh reads an existing project\'s source code, detects the technology stack, and generates an AI prompt that produces structured specification files — METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, and more. The output feeds directly into Workflow #1, bringing unspecified applications under specification control.',
+      mermaid: `flowchart LR${D}
+  PROJ(["Existing Project"]):::dir --> D["decompose.sh"]:::script
+  TR(["TechnologyRules/"]):::dir --> D
+  D --> PT(["Prompt"]):::prompt
+  PT --> SPEC(["Specifications/"]):::dir
+  SPEC --> WF1(["Workflow #1 →"]):::output`,
+      learnings: [
+        'Effective for bringing existing applications under specification control without a full rewrite.',
+        'Stack detection (Flask, SQLite, Bootstrap) scopes the relevant technology rules automatically.'
       ]
     }
   ];
@@ -173,6 +168,29 @@
   window.renderAllWorkflows = function (container) {
     container.innerHTML = window.WORKFLOWS.map((wf, i) =>
       (i > 0 ? '<hr class="wp-div">' : '') + window.renderWorkflow(wf)
+    ).join('');
+    _runMermaid(container);
+  };
+
+  /** Render workflow block without I/O columns — for white-paper and summary views. */
+  window.renderWorkflowCompact = function (wf) {
+    let h = `
+<div class="wp-wf">
+  <div class="wp-num">${esc(wf.num)}</div>
+  <h2 class="wp-title">${esc(wf.title)}</h2>
+  <p class="wp-desc">${esc(wf.desc)}</p>
+  <div class="wp-diagram"><div class="mermaid">${wf.mermaid}</div></div>`;
+    if (wf.learnings && wf.learnings.length) {
+      h += `<div class="wp-learn"><div class="wp-learn-lbl">Learnings</div>`;
+      wf.learnings.forEach(l => { h += `<p>${esc(l)}</p>`; });
+      h += `</div>`;
+    }
+    return h + `</div>`;
+  };
+
+  window.renderAllWorkflowsCompact = function (container) {
+    container.innerHTML = window.WORKFLOWS.map((wf, i) =>
+      (i > 0 ? '<hr class="wp-div">' : '') + window.renderWorkflowCompact(wf)
     ).join('');
     _runMermaid(container);
   };
