@@ -51,7 +51,6 @@ SCRIPT_DESCRIPTIONS = {
     'scorecard.sh':             'Generate SCORECARD.md — specification-to-code alignment checklist',
     'update_reference_gaps.sh': 'Update REFERENCE_GAPS.md from specification vs prototype comparison',
     'document.sh':              'Agent program — generate project documentation from specification files via AI summarization and HTML assembly',
-    'build_project_docs.py':    'Assemble project documentation HTML from DOC-*.md files and bin/ scripts',
 }
 
 GUIDE_ORDER = ['SETUP', 'ONESHOT', 'ITERATE', 'MERGE', 'AUTOMATE', 'DOCUMENT', 'ENGINEERING-RULES', 'CREATE-IMAGE', 'SDD-SPECIFICATIONS']
@@ -294,8 +293,7 @@ def build_page(scripts, projects, guides):
                                             ('ProjectUpdate.sh',    'script', 'ProjectUpdate.sh')]),
         ('AUTOMATE', 'Step 5 — Automate', [('spec_iterate.sh',     'script', 'spec_iterate.sh'),
                                             ('scorecard.sh',        'script', 'scorecard.sh')]),
-        ('DOCUMENT', 'Step 6 — Document', [('document.sh',          'script', 'document.sh'),
-                                            ('build_project_docs.py', 'script', 'build_project_docs.py')]),
+        ('DOCUMENT', 'Step 6 — Document', [('document.sh',          'script', 'document.sh')]),
     ]
 
     # Warn if STEP_NAV references a script not found in bin/ (catches renames)
