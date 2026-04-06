@@ -372,6 +372,8 @@ body {{ display: flex; flex-direction: column; height: 100vh; overflow: hidden;
 
 .layout {{ display: flex; flex: 1; overflow: hidden; }}
 
+.page-header {{ background: var(--c-topbar-bg); border-bottom: 1px solid var(--c-side-border); }}
+
 /* ── Sidebar — invariant ── */
 .sidebar {{ width: 220px; min-width: 220px; display: flex; flex-direction: column;
   background: var(--c-side-bg); border-right: 1px solid var(--c-side-border);
