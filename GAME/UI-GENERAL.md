@@ -215,14 +215,15 @@ Content panels use a card pattern:
 
 ## Modals
 
-Two global modals defined in `base.html`:
+Three global modals defined in `base.html`:
 
 | Modal | ID | Purpose |
 |-------|----|---------|
 | CLAUDE.md Viewer | `claudeModal` | Shows AGENTS.md content for a project |
 | Command Output | `opOutputModal` | Shows operation stdout/stderr output |
+| Script Viewer | `scriptViewerModal` | Shows script file content with gateway endpoint — opened from Service Catalog |
 
-Modals use dark surface background with themed borders.
+Modals use dark surface background with themed borders. See Script Viewer Modal section for full specification.
 
 ---
 
@@ -244,21 +245,60 @@ Server returns HTML fragments, never JSON (except `/health`).
 
 ## Operation Buttons
 
-Rendered per-operation on dashboard rows and project detail:
+Rendered per-operation on Dashboard rows, project detail, and the Service Catalog.
+
+### Run States (Dashboard / Project Detail)
 
 | State | Appearance | Action |
 |-------|------------|--------|
-| Idle | `op-btn` styled button with operation name | Click --> run |
-| Running | Green pulsing indicator, "Stop" label | Click --> SIGTERM |
-| Recently completed | Brief success/error flash | Auto-reverts to idle |
+| Idle | Category-styled button with operation name | Click → run |
+| Running | Green pulsing ring, label becomes "Stop" | Click → SIGTERM |
+| Recently completed | Brief success (green) or error (red) flash | Auto-reverts to idle after 2s |
 
-Category determines button style:
+### Category Button Styles
 
-| Category | Style Class |
-|----------|-------------|
-| `service` | `op-btn--service` |
-| `local` | `op-btn--local` |
-| `maintenance` | `op-btn--maintenance` |
+Three categories map to distinct visual styles. The style signals what kind of action the script performs and whether it reaches outside the project.
+
+| Category | Style class | Color | Icon prefix | Meaning |
+|----------|-------------|-------|-------------|---------|
+| `Operations` | `op-btn--operations` | Green `#00c875` | ▶ / ■ / ⚙ / 🧪 | Core lifecycle: start, stop, build, test. Primary actions. |
+| `Workflow` | `op-btn--workflow` | Blue `#0073ea` | → | Project tools: analysis, generation, maintenance scripts. Secondary. |
+| `Global` | `op-btn--global` | Amber `#fdab3d` | ⤴ | Crosses repo boundaries. Visually distinct to signal cross-project impact. |
+
+**Icon prefix rules** (Operations only — other categories use → or ⤴):
+
+| Script name | Icon |
+|-------------|------|
+| `start.sh` | ▶ |
+| `stop.sh` | ■ |
+| `build.sh`, `build_documentation.sh` | ⚙ |
+| `test.sh` | 🧪 |
+
+Button text is the script's `# Name:` header value.
+
+### Service Catalog Buttons (reference mode)
+
+On the Service Catalog screen, buttons are **not run buttons** — clicking shows the Script Viewer modal instead. Same category colors and icons apply. Tooltip on hover: "Click to view script".
+
+---
+
+## Script Viewer Modal
+
+Global modal (`scriptViewerModal`) defined in `base.html`. Opened when a script button is clicked on the Service Catalog screen.
+
+| Element | Content |
+|---------|---------|
+| Header | `{filename} — {# Name:}` (bold) |
+| Subtitle | `Category: {category}  ·  {project display_name}` |
+| Body | Full script content in a monospace scrollable `<pre><code>` block. Syntax highlighted (Bash or Python depending on extension). Max height 60vh, scrollable. |
+| Footer | `Gateway endpoint: POST /api/{project_name}/run/{script_stem}` — muted monospace. `[Copy]` button copies endpoint to clipboard. |
+| Close | × button (top right), click-outside, Escape key. |
+
+Content fetched via `GET /api/{project_name}/script/{script_stem}` on modal open. Shows a loading spinner until the fetch resolves.
+
+Global scripts (`Category: Global`) show an amber warning banner in the modal header:
+
+> ⚠ This script modifies files in other repositories.
 
 ---
 

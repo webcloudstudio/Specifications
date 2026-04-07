@@ -36,24 +36,50 @@ Returns all active projects with their exposed scripts.
 {
   "projects": [
     {
-      "name": "myapp",
-      "display_name": "My App",
-      "status": "ACTIVE",
-      "port": 5001,
+      "name": "conquer_2026",
+      "display_name": "Conquer 2026",
+      "short_description": "2026 strategy game",
+      "port": 5010,
       "health_path": "/health",
-      "base_url": "http://localhost:5001",
+      "base_url": "http://localhost:5010",
       "scripts": [
         {
           "script": "start",
           "name": "Start Server",
-          "category": "service",
-          "run_endpoint": "POST /api/myapp/run/start",
+          "category": "Operations",
+          "run_endpoint": "POST /api/conquer_2026/run/start",
+          "script_endpoint": "GET /api/conquer_2026/script/start",
           "timeout": 300,
           "schedule": null,
           "last_run_id": 42,
           "last_run_status": "done",
           "last_run_at": "20260323_110000"
+        },
+        {
+          "script": "scorecard",
+          "name": "Scorecard",
+          "category": "Workflow",
+          "run_endpoint": "POST /api/conquer_2026/run/scorecard",
+          "script_endpoint": "GET /api/conquer_2026/script/scorecard",
+          "timeout": 60,
+          "schedule": null,
+          "last_run_id": null,
+          "last_run_status": null,
+          "last_run_at": null
         }
+      ],
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/user/conquer_2026" },
+        { "label": "Live Site", "url": "https://user.github.io/conquer_2026" }
+      ],
+      "endpoints": [
+        { "method": "GET",  "path": "/health",          "description": "Health check" },
+        { "method": "POST", "path": "/api/game/move",   "description": "Make a move" },
+        { "method": "GET",  "path": "/api/game/state",  "description": "Get game state" }
+      ],
+      "mcp_tools": [
+        { "name": "get_state",    "description": "Get current game state" },
+        { "name": "make_move",    "description": "Submit a move" }
       ]
     }
   ],
@@ -67,21 +93,58 @@ Returns all active projects with their exposed scripts.
 |-------|--------|
 | `name` | `projects.name` |
 | `display_name` | `projects.display_name` |
-| `status` | `projects.status` |
+| `short_description` | `projects.card_desc` or `projects.display_name` |
 | `port` | `projects.port` |
 | `health_path` | `projects.health_endpoint` |
 | `base_url` | Constructed: `http://localhost:{port}` (null if no port) |
 | `scripts[].script` | Basename of `operations.cmd` without `bin/` and extension |
 | `scripts[].name` | `operations.name` |
-| `scripts[].category` | `operations.category` |
+| `scripts[].category` | `operations.category` — one of `Operations`, `Workflow`, `Global` |
 | `scripts[].run_endpoint` | Constructed: `POST /api/{name}/run/{script}` |
+| `scripts[].script_endpoint` | Constructed: `GET /api/{name}/script/{script}` — returns script content |
 | `scripts[].timeout` | `operations.timeout` |
 | `scripts[].schedule` | `operations.schedule` |
 | `scripts[].last_run_*` | Most recent `op_runs` row for this operation |
+| `links[]` | `projects.extra.links` — from `METADATA.md → ## Links` table |
+| `endpoints[]` | `projects.extra.endpoints` — from `AGENTS.md → ## Endpoints` table |
+| `mcp_tools[]` | `service_tools` table where `service_id` matches this project's MCP service |
 
 Only projects with `is_active = 1` appear. Scripts with `is_url = 1` are excluded (not executable).
 
 **Script slug derivation:** `bin/start.sh` → `start`, `bin/deploy.py` → `deploy`. If two scripts share the same base name, `.sh` takes priority.
+
+---
+
+### Script Content
+
+```
+GET /api/{name}/script/{script}
+```
+
+Returns the full content of a registered script. Used by the Service Catalog Script Viewer modal.
+
+**Response 200:**
+
+```json
+{
+  "project": "conquer_2026",
+  "script": "start",
+  "filename": "start.sh",
+  "name": "Start Server",
+  "category": "Operations",
+  "content": "#!/bin/bash\n# CommandCenter Operation\n...",
+  "run_endpoint": "POST /api/conquer_2026/run/start"
+}
+```
+
+**Errors:**
+
+| Code | Reason |
+|------|--------|
+| 404 | Project `{name}` not found |
+| 404 | Script `{script}` not registered for that project |
+
+Content is read directly from the script file at request time (not from the DB). This is intentional — the modal shows the actual current file, not a cached version.
 
 ---
 
@@ -257,13 +320,14 @@ STARTING → RUNNING → DONE
 
 | Method | Path | Returns |
 |--------|------|---------|
-| GET | `/api/catalog` | Full catalog JSON |
+| GET | `/api/catalog` | Full catalog JSON (scripts, links, endpoints, MCP tools) |
+| GET | `/api/{name}/script/{script}` | Script file content JSON |
 | POST | `/api/{name}/run/{script}` | Run record JSON (202) |
 | GET | `/api/runs/{run_id}` | Run status JSON |
 | GET | `/api/runs/{run_id}/log` | Log content JSON |
 | POST | `/api/runs/{run_id}/stop` | Stop confirmation JSON |
 
-Screen route added by SCREEN-CATALOG: `GET /catalog`.
+Screen route: `GET /servicecatalog`.
 
 ---
 

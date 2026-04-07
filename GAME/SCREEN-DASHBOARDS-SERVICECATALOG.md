@@ -1,7 +1,7 @@
 # Screen: Service Catalog
 
-**Version:** 20260407 V3
-**Description:** Simple flat list of all projects and prototypes with their endpoints grouped by type.
+**Version:** 20260407 V4
+**Description:** Surface area reference for every project and prototype. Shows all callable endpoints grouped by type — scripts, links, REST routes, and MCP tools. Read-only reference with script viewer.
 
 ## Menu Navigation
 
@@ -13,28 +13,77 @@
 GET /servicecatalog
 ```
 
+---
+
+## What the Catalog Tracks
+
+For each project (discovered via `PROJECTS_DIR`) and each prototype (discovered via `SPECIFICATIONS_PATH`), the platform maps its complete callable surface area at startup:
+
+| Surface type | Source | Stored as |
+|-------------|--------|-----------|
+| **Operations scripts** | `bin/*.sh` / `bin/*.py` with `# Category: Operations` | `operations` table |
+| **Workflow scripts** | `bin/*.sh` / `bin/*.py` with `# Category: Workflow` | `operations` table |
+| **Global scripts** | `bin/*.sh` / `bin/*.py` with `# Category: Global` | `operations` table |
+| **Links** | `METADATA.md → ## Links` table | `extra.links` JSON |
+| **REST endpoints** | `AGENTS.md → ## Endpoints` table | `extra.endpoints` JSON |
+| **MCP tools** | `mcp/*.service.yaml` or `.mcp.json` | `service_tools` table |
+
+All sources are read during the startup scan and on every rescan. Page rendering reads the database only — no file I/O at display time.
+
+### REST Endpoints Standard (AGENTS.md)
+
+Each project documents its REST API in AGENTS.md under a standard `## Endpoints` section:
+
+```markdown
+## Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET    | /health           | Health check |
+| POST   | /api/items        | Create item  |
+| GET    | /api/items/{id}   | Get item     |
+```
+
+The scanner parses this table and stores the rows in `extra.endpoints`. Projects without an `## Endpoints` section show no REST rows in the catalog. The section is optional — omit it when the project has no HTTP API.
+
+### Script Run Endpoints (Gateway)
+
+Every registered script is also callable via the platform REST gateway:
+
+```
+POST /api/{project_name}/run/{script_stem}
+```
+
+Examples:
+- `POST /api/conquer_2026/run/start` → runs `bin/start.sh` in the conquer_2026 project
+- `POST /api/ezdocs/run/photo_scan` → runs `bin/photo_scan.sh` in ezdocs
+
+These gateway routes are derived at runtime from the `operations` table — no AGENTS.md entry needed.
+
+---
+
 ## Layout
 
-Single-column list. Action bar at top. One card per project/prototype below.
+Single-column list. Action bar at top. One card per project/prototype below, sorted alphabetically.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│  [🔍 Filter...]    [Projects ▼]    [Endpoint type ▼]     │
+│  [🔍 Filter...]   [All Sources ▼]   [All Types ▼]        │
 │  ──────────────────────────────────────────────────────  │
 │                                                          │
-│  MyApp  ·  My application short description              │
+│  Conquer 2026  ·  2026 strategy game                     │
 │  ─────────────────────────────────────────────────────   │
-│  REST          GET /api/health                           │
-│                POST /api/data                            │
-│                POST /api/data/{id}                       │
-│  Service       start  ·  stop                            │
-│  Maintenance   backup  ·  cleanup  ·  rebuild            │
-│  MCP           get_data  ·  run_analysis                 │
+│  [▶ Start]  [■ Stop]  [⚙ Build]  [🧪 Test]               │  ← Operations buttons
+│  [→ Scorecard]  [→ Photo Scan]                           │  ← Workflow buttons
+│  Links    GitHub →  ·  Live Site →                       │
+│  REST     GET /health  ·  POST /api/game/move            │
+│  MCP      get_state  ·  make_move  ·  list_players       │
 │                                                          │
-│  CoreService  ·  Core platform service                   │
+│  ezdocs  ·  Document and photo management                │
 │  ─────────────────────────────────────────────────────   │
-│  REST          GET /api/status                           │
-│  Local         build  ·  test                            │
+│  [▶ Start]  [■ Stop]  [⚙ Build]                          │  ← Operations
+│  [→ Photo Analyze]  [→ Photo Dedup]  [→ Photo Scan]      │  ← Workflow
+│  Links    Docs →                                         │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -45,99 +94,109 @@ Single-column list. Action bar at top. One card per project/prototype below.
 
 | Control | Type | Behavior |
 |---------|------|----------|
-| Text filter | Input (`🔍 Filter…`) | Client-side substring match on project name, description, endpoint names. |
+| Text filter | Input (`🔍 Filter…`) | Client-side substring match on project name, description, script names, endpoint paths. |
 | Source filter | Dropdown | All / Projects / Prototypes |
-| Endpoint type filter | Dropdown | All / REST / Service / Maintenance / Local / MCP |
+| Type filter | Dropdown | All / Operations / Workflow / Global / Links / REST / MCP |
 
-All filters are client-side. No round-trip.
+All filters are client-side.
 
 ---
 
-## Project / Prototype Card
+## Card Layout
 
-One card per project (from scanner) and per prototype (from `SPECIFICATIONS_PATH`). Cards sorted alphabetically by display name. Projects and prototypes are interleaved in the same list.
+### Header
 
-### Card Header
-
-One line only:
+One line:
 
 ```
 {display_name}  ·  {short_description}
 ```
 
-- `display_name` — bold
-- Separator `·` — muted
-- `short_description` — normal weight, truncated at 100 chars
+`display_name` bold. Separator `·` muted. `short_description` normal weight, truncated at 100 chars.
 
-No status badge. No stack. No port. No AGENTS.md link.
+No status badge. No stack. No port.
 
-### Endpoint Rows
+### Script Buttons (Operations, Workflow, Global)
 
-Below the header, endpoints are grouped by type. Each type is a labeled row:
+Scripts are rendered as **buttons**, not text labels. Button style per category — see UI-GENERAL Category Button Styles.
+
+All three categories appear on the same card, in separate rows if multiple categories are present. Row order: Operations first, then Workflow, then Global.
+
+Each button label is the script's `# Name:` header value (fallback: filename stem without extension).
+
+**Clicking a script button:** Opens the Script Viewer modal — see Script Viewer below.
+
+> Run actions are NOT on this screen. The Service Catalog is a reference view. To run a script, use the Dashboard or call `POST /api/{name}/run/{script}` directly.
+
+### Links Row
+
+If the project has entries in `extra.links` (from `METADATA.md → ## Links`):
 
 ```
-{Type}    {endpoint1}  ·  {endpoint2}  ·  ...
+Links    GitHub →  ·  Live Site →  ·  Docs →
 ```
 
-The type label is left-aligned in a fixed-width column (~120px). Endpoints listed inline, separated by `·`. Types with no endpoints for this project are omitted entirely.
+Each link is a small anchor tag opening in a new tab. No label prefix needed — the link label comes from the `## Links` table.
 
-**Endpoint types and their sources:**
+### REST Row
 
-| Type label | Source | What is listed |
-|-----------|--------|----------------|
-| `REST` | Project's route specifications (ARCHITECTURE.md route table, or `## Route` sections in SCREEN-*.md files) | HTTP method + path for each route, e.g. `GET /api/health`, `POST /api/items` |
-| `Gateway` | Platform internal routes for calling this project's operations via the REST gateway | `POST /api/run/{project_id}/{op_name}` per operation; shown only when project has operations |
-| `Service` | `bin/` scripts with `# Category: service` header | Script `# Name:` value (or filename stem) |
-| `Maintenance` | `bin/` scripts with `# Category: maintenance` header | Script `# Name:` value (or filename stem) |
-| `Local` | `bin/` scripts with `# Category: local` header | Script `# Name:` value (or filename stem) |
-| `MCP` | `.mcp.json` tool list, or service manifest | Tool name |
-| `{Other}` | `bin/` scripts with any other `# Category:` value | Script name; category label used verbatim |
+If the project has entries in `extra.endpoints` (from `AGENTS.md → ## Endpoints`):
 
-If a project has no discoverable endpoints of any type, the card shows:
+```
+REST     GET /health  ·  POST /api/items  ·  GET /api/items/{id}
+```
 
-> *No endpoints discovered.*
+Each entry shows `METHOD /path`. Clicking an entry copies it to clipboard with a brief "Copied" tooltip.
 
-in muted text below the header.
+### MCP Row
+
+If the project has MCP tools registered in `service_tools`:
+
+```
+MCP      tool_name  ·  another_tool  ·  third_tool
+```
+
+Each tool name is shown. Clicking copies the tool name to clipboard.
+
+### Empty State
+
+If a project has no surface area of any type:
+
+> *No endpoints discovered. Add `# CommandCenter Operation` headers to bin/ scripts, or add an `## Endpoints` section to AGENTS.md.*
 
 ---
 
-## Data Sources
+## Script Viewer Modal
 
-### REST Endpoints
+Clicking any script button opens a modal showing the full script content.
 
-Server scans each project's linked specification directory for route definitions:
-1. `ARCHITECTURE.md` — route table (rows matching `GET|POST|PUT|DELETE|PATCH` patterns)
-2. `SCREEN-*.md` files — `## Route` sections
+```
+┌─────────────────────────────────────────────────────────┐
+│  start.sh — Start Server                          [×]   │
+│  Category: Operations  ·  conquer_2026                  │
+│  ─────────────────────────────────────────────────────  │
+│  #!/bin/bash                                            │
+│  # CommandCenter Operation                              │
+│  # Name: Start Server                                   │
+│  # Category: Operations                                 │
+│  source "$(cd "$(dirname "$0")" && pwd)/common.sh"      │
+│  ...                                                    │
+│  ─────────────────────────────────────────────────────  │
+│  Gateway endpoint:  POST /api/conquer_2026/run/start    │
+│                                        [Copy endpoint]  │
+└─────────────────────────────────────────────────────────┘
+```
 
-For projects without a linked specification directory, REST endpoints are not shown (no source of truth).
+| Element | Content |
+|---------|---------|
+| Title | `{filename} — {# Name:}` |
+| Subtitle | `Category: {category}  ·  {project display_name}` |
+| Body | Full script content in a monospace scrollable code block. Syntax highlighted (Bash or Python). |
+| Footer | Gateway endpoint: `POST /api/{project_name}/run/{script_stem}` + `[Copy endpoint]` button |
 
-### Script Endpoints
+Modal fetched via `GET /api/{project_name}/script/{script_stem}` which returns `{ "filename": "start.sh", "content": "...", "name": "Start Server", "category": "Operations", "run_endpoint": "POST /api/..." }`.
 
-Server reads `bin/` headers for each project. Parses:
-- `# Category:` — determines type label
-- `# Name:` — display name for the endpoint (fallback: filename stem)
-
-### MCP Endpoints
-
-Server reads `.mcp.json` (if present) for tool names. Falls back to service manifest if registered.
-
-### Gateway Routes
-
-Derived from the operations table for each project. One route per operation:
-`POST /api/run/{project_id}/{op_name}`
-
----
-
-## Interactions
-
-| Action | Trigger | Effect |
-|--------|---------|--------|
-| Filter | Type in search | Hides cards / endpoint rows not matching; real-time |
-| Filter by source | Dropdown | Shows only projects or only prototypes |
-| Filter by type | Dropdown | Shows only cards that have endpoints of that type |
-| Copy endpoint | Click endpoint | Copies to clipboard; brief "Copied" tooltip |
-
-No run buttons. No detail panel. No status controls. This screen is read-only reference.
+Modal is dismissable by clicking ×, clicking outside, or pressing Escape.
 
 ---
 
@@ -145,15 +204,25 @@ No run buttons. No detail panel. No status controls. This screen is read-only re
 
 | Reads | Writes |
 |-------|--------|
-| `projects` table (display_name, short_description) | None |
-| `operations` table (name, category per project) | None |
-| Specification files (ARCHITECTURE.md, SCREEN-*.md, route parsing) | None |
-| `bin/` script headers (Category, Name) | None |
-| `.mcp.json` per project (tool list) | None |
+| `projects` table (display_name, short_description) | None — read-only screen |
+| `operations` table (name, category, cmd per project) | |
+| `extra.links` (from `projects.extra` JSON) | |
+| `extra.endpoints` (from `projects.extra` JSON) | |
+| `service_tools` table (MCP tool names) | |
+| Script file content (on demand, for modal only) | |
+
+---
+
+## Startup Scan Integration
+
+The catalog is fully populated at server startup via `scanner.py`. No additional scan steps needed. Page rendering reads only from the database.
+
+Rescan (Rescan button on Dashboard, or server restart) refreshes all surface area data including new scripts, updated links, and modified `## Endpoints` tables.
 
 ---
 
 ## Open Questions
 
-- Should REST endpoint discovery parse specification files server-side on page load, or be pre-computed by the scanner and stored in a `project_routes` table?
-- Should clicking a REST endpoint open a simple "try it" panel (method + path + body textarea)?
+- Should the Script Viewer modal support a "Run" button (fire the script via the gateway endpoint) for Operations and Workflow scripts?
+- Should REST endpoints be click-to-try (open a simple form with method + path + body) rather than click-to-copy?
+- Should Global scripts show a warning in the modal: "This script modifies other repositories"?

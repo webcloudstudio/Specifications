@@ -89,6 +89,7 @@ Every field stored in the `projects` table, its source, and when it is read.
 |-----|--------|-------|
 | `links` | `METADATA.md` → `## Links` table | List of `{label, url}` shown in Links column |
 | `bookmarks` | `AGENTS.md` / `CLAUDE.md` → `## Bookmarks` | Quick-access links for AI context |
+| `endpoints` | `AGENTS.md` → `## Endpoints` table | List of `{method, path, description}` — the project's own REST API routes |
 | `doc_path` | Filesystem detection | Relative path to doc index (e.g., `docs/index.html`); used to build Flask proxy URL `/project/{id}/doc/index.html` |
 | `tech_stack` | Auto-detected from `app.py`, `package.json`, etc. | Fallback for `stack` column |
 | `has_start_sh` | `bin/start.sh` present | Legacy flag; bin operations supersede this |
@@ -134,7 +135,9 @@ On startup, the scan runs in a **background thread** so the server is immediatel
       - Read first 20 lines of each bin/*.sh and bin/*.py
       - Look for `# CommandCenter Operation` marker
       - Extract Name, Category, Port, Schedule, Timeout, Health headers
-   d. parse claude/agents if has_claude → extra.bookmarks
+   d. parse_agents_md() if has_claude:
+      - `## Bookmarks` section → extra.bookmarks (quick-access links for AI context)
+      - `## Endpoints` table → extra.endpoints (list of {method, path, description} for Service Catalog)
    e. upsert_project()
       - UPDATE if exists (preserves user-edited fields via COALESCE)
       - INSERT if new

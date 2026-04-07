@@ -26,7 +26,7 @@ Single blueprint `cc` registered on `/`. All routes live in `routes.py`.
 
 Scans `$PROJECTS_DIR` for project directories. For each:
 1. Read METADATA.md → parse key:value fields
-2. Read AGENTS.md / CLAUDE.md → extract endpoints, bookmarks
+2. Read AGENTS.md / CLAUDE.md → extract `## Bookmarks` (AI quick-links) and `## Endpoints` table (project REST routes → `extra.endpoints`)
 3. Read bin/ scripts → parse CommandCenter headers (any language: sh, py, js, pl)
 4. Upsert into `projects` and `operations` tables
 
