@@ -109,8 +109,14 @@ echo ""
 
 emit_file "$BUSINESS_RULES" "BUSINESS_RULES.md (RulesEngine/BUSINESS_RULES.md)"
 
-# Include PROTOTYPE_PROCESS.md for lifecycle context
-emit_file "$RULES_ENGINE_DIR/PROTOTYPE_PROCESS.md" "PROTOTYPE_PROCESS.md (RulesEngine/PROTOTYPE_PROCESS.md)"
+# All other .md files in RulesEngine/ for context
+for f in $(find "$RULES_ENGINE_DIR" -maxdepth 1 -name '*.md' | sort); do
+    fname="$(basename "$f")"
+    case "$fname" in
+        README.md|CLAUDE_RULES.md|BUSINESS_RULES.md) continue ;;
+        *) emit_file "$f" "$fname (RulesEngine/$fname)" ;;
+    esac
+done
 
 # --- Current CLAUDE_RULES.md for reference ---
 echo "---"
