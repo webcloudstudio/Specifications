@@ -39,6 +39,18 @@ Fixed. Present on all screens. Components left to right:
 | **Settings** (gear icon) | ⚙️ Settings (far right). Click → activates Settings context and displays Settings sub-bar below. |
 | **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
 
+### Welcome Sub-Bar
+
+Visible only when `Welcome` (🏠) is active in the top bar. Renders directly below the top bar.
+
+| Element | Position | Behavior |
+|---------|----------|----------|
+| **Summary** tab | Left | Links to `/welcome/summary` — read-only configuration health view. Default. |
+| **Prototypes** tab | Left | Links to `/welcome/prototypes` — searchable prototype list |
+| **Projects** tab | Left | Links to `/welcome/projects` — searchable project list |
+
+Summary is the default sub-tab when Welcome is first selected.
+
 ### Project Sub-Bar
 
 Visible only when `Projects` is active in the top bar. Renders directly below the top bar.

@@ -30,8 +30,16 @@ Single-column centered form, max-width 600px. Card (`cc-card`) per logical group
 │  The name displayed in the upper-left corner    │
 │                                                 │
 │  Homepage URL                                   │
-│  [ https://webcloudstudio.github.io           ] │
-│  Your live homepage URL (shown on Homepage)     │
+│  [ https://username.github.io                 ] │
+│  Your GitHub Pages URL (e.g. https://user.github.io) │
+│                                                 │
+│  ── GitHub Pages Setup ──────────────────────  │
+│  (shown only when homepage_url is empty)        │
+│  GitHub Pages format:                           │
+│    User/org site:    https://{username}.github.io       │
+│    Project site:     https://{username}.github.io/{repo}│
+│  To enable: go to your GitHub repo → Settings  │
+│  → Pages → Source: Deploy from branch (main)   │
 │                                                 │
 │  [Save Settings]  [Cancel]                      │
 └─────────────────────────────────────────────────┘
@@ -42,9 +50,25 @@ Single-column centered form, max-width 600px. Card (`cc-card`) per logical group
 | Field | Key | Type | Default | Description shown below field |
 |-------|-----|------|---------|-------------------------------|
 | Application Name | `app_name` | Text input | `Command Center` | The name displayed in the upper-left corner of the application |
-| Homepage URL | `homepage_url` | URL input | `` | Your live homepage URL (shown on Homepage) |
+| Homepage URL | `homepage_url` | URL input | `` (empty) | Your GitHub Pages URL — must start with `https://`. Shown on the Homepage screen. |
 
 Fields are populated from the `settings` table on page load. All values are optional — saving an empty field stores an empty string (not NULL).
+
+### GitHub Pages Setup Assistant
+
+Shown inline below the Homepage URL field **only when `homepage_url` is empty or not a valid `https://` URL**. Static instructional block, no interactivity required.
+
+Content:
+
+> **GitHub Pages URL format**
+> - User/org site: `https://{username}.github.io`
+> - Project site: `https://{username}.github.io/{repo-name}`
+>
+> To enable GitHub Pages: open your GitHub repo → **Settings** → **Pages** → set Source to *Deploy from branch* (main / root).
+>
+> Once enabled, paste the URL above and save.
+
+When `homepage_url` is a valid `https://` URL, the setup assistant is hidden.
 
 ## Buttons
 
@@ -66,7 +90,13 @@ No full-page reload on save — HTMX `hx-post` replaces the form fragment; succe
 | Key | Where used |
 |-----|-----------|
 | `app_name` | Top-bar brand label (replaces `Command Center` / `cc-brand` text) |
-| `homepage_url` | Homepage screen — live site link; shown next to the Publish button |
+| `homepage_url` | Homepage screen — live site link shown next to the Publish button; also shown (read-only) on Welcome / Summary with ✅/⚠️ status |
+
+## Validation
+
+| Field | Rule |
+|-------|------|
+| `homepage_url` | If non-empty, must start with `https://`. Server rejects bare hostnames (e.g. `username.github.io` without scheme). Client-side warning shown before submit. |
 
 ## Open Questions
 

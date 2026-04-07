@@ -1,141 +1,198 @@
 # Screen: Welcome
 
-**Description:** Landing screen shown when the user first enters the application. START HERE checklist, project discovery overview, and help resources.
+**Description:** Landing screen with three sub-tabs: Summary (read-only health/config overview), Prototypes (searchable list), and Projects (searchable list).
 
 ## Menu Navigation
 
-`Projects / Welcome`
+`Welcome` — top-level. Sub-bar tabs: `Summary` (default) | `Prototypes` | `Projects`
 
-## Route
-
-```
-GET /welcome   (default — also served at GET /)
-```
-
-The app root (`/`) redirects to `/welcome` when no other default is set.
-
-## Layout
-
-Single-column centered content, max-width 900px, padded. Four stacked sections:
+## Routes
 
 ```
-┌────────────────────────────────────────────┐
-│                                            │
-│         ██ WELCOME TO PROTOTYPER ██        │
-│      Your local prototype operations hub   │
-│                                            │
-├────────────────────────────────────────────┤
-│  🟢 START HERE                             │
-│  ─────────────────────────────────────────│
-│  [checklist with status indicators]        │
-├────────────────────────────────────────────┤
-│  📁 Project Discovery                      │
-│  ─────────────────────────────────────────│
-│  XX Projects | XX Prototypes               │
-│  [Alphabetical list of projects]           │
-├────────────────────────────────────────────┤
-│  ❓ Service Help                           │
-│  ─────────────────────────────────────────│
-│  [help page links]                         │
-└────────────────────────────────────────────┘
+GET /welcome              → redirects to /welcome/summary
+GET /welcome/summary      Default sub-tab. Read-only configuration health view.
+GET /welcome/prototypes   Searchable prototype list.
+GET /welcome/projects     Searchable project list.
 ```
 
-## Welcome Banner
+The app root (`/`) redirects to `/welcome/summary` when no other default is set.
 
-Full-width hero section at top of page. Dark surface (`--cc-surface`), large centered text.
+---
+
+## Welcome Sub-Bar
+
+Visible only when `Welcome` is the active top-level tab. Three tabs:
+
+| Tab | Route | Default |
+|-----|-------|---------|
+| Summary | `/welcome/summary` | Yes |
+| Prototypes | `/welcome/prototypes` | No |
+| Projects | `/welcome/projects` | No |
+
+---
+
+## Sub-Tab: Summary
+
+Single-column read-only view. Max-width 900px, centered. No form inputs — use Settings (`/settings/general`) to change values.
+
+### Welcome Banner
+
+Full-width hero at top. Dark surface (`--cc-surface`). Centered text.
 
 | Element | Content |
 |---------|---------|
-| Headline | `Welcome to Prototyper` — large (32px), bold, accent color |
+| Headline | `Welcome to Prototyper` — 32px, bold, accent color |
 | Subheadline | `Your local prototype operations hub` — muted, 16px |
-| Decoration | Subtle horizontal rule below subheadline |
 
 No buttons or actions in the banner. Visual only.
 
-## START HERE Card
+### START HERE Card
 
-Card (`cc-card`) highlighted with an accent background color. Purpose: quick checklist to verify the application is properly configured.
+Card (`cc-card`) highlighted with an accent background. Purpose: verify configuration is complete and healthy.
 
-### Card Header
+#### Card Header
 
-`START HERE` — large, bold, highlighted in accent color with a green circle indicator (●).
+`START HERE` — large, bold, accent color, green circle indicator (●).
 
-### Checklist Items
+#### Checklist Items
 
-Four checklist items with status indicators. Status icons use a stoplight pattern:
+Each item is a read-only row: icon + label + current value/description. Items with a problem show a link to the relevant settings page.
 
-| Item | Status Source | Icon | Description |
-|------|---------------|------|-------------|
-| PROJECTS_DIR | Environment config | ✅/⚠️/❌ | Shows the configured directory path. Displays directory value inline. Green if accessible, amber if not found, red if missing. |
-| Startup Scan | Backend metric | ✅ | Displays: "Startup Scan Detected {count} Projects and {count} Prototypes" — produced by the startup scanner on app initialization. Green check always (informational, not a failure condition). |
-| Ready to Use | Derived state | ✅ | "Application ready" — shown when scan has completed and projects list is populated. Green check. |
-| Next Steps | — | 📌 | "Use the Projects tab above or Rescan to update" — informational only, not a failure state. |
+Status icon pattern:
 
-Each item is a row with icon + label + value/description. Use emoji or Font Awesome icons for stoplight effect (● red, ⚠️ amber, ✅ green).
+| Icon | Meaning |
+|------|---------|
+| ✅ | Configured and accessible |
+| ⚠️ | Set but may need attention |
+| ❌ | Missing or inaccessible — action required |
+| 📌 | Informational |
 
-### Content Layout
+**Configuration items:**
 
-Displayed as a vertical checklist. Not a form—purely informational with read-only values.
+| # | Item | Key | Status logic | Instructions when not set |
+|---|------|-----|-------------|--------------------------|
+| 1 | Application Name | `app_name` (settings table) | ✅ if set and not the default `Command Center`; ⚠️ if still default | "Set a custom name in [Settings → General](/settings/general)" |
+| 2 | Projects Directory | `PROJECTS_DIR` (env) | ✅ if path exists and is readable; ❌ if missing or inaccessible | "Set `PROJECTS_DIR` in `.env` and restart the server" |
+| 3 | Specifications Path | `SPECIFICATIONS_PATH` (env) | ✅ if path exists and is readable; ⚠️ if not set (defaults to `../Specifications`) | "Set `SPECIFICATIONS_PATH` in `.env` if the default is wrong" |
+| 4 | Startup Scan | backend metric | 📌 | "Discovered {N} Projects and {N} Prototypes" — always shown, green |
+| 5 | Homepage URL | `homepage_url` (settings table) | ✅ if a valid `https://` URL is stored; ⚠️ if empty | "Set your GitHub Pages URL in [Settings → General](/settings/general)" |
+| 6 | GitHub SSH | runtime check | ✅ if `ssh -T git@github.com` exits with code 1 (authenticated); ❌ if exits 255 (no key/timeout) | "No SSH key found for GitHub. [How to set up SSH keys →](https://docs.github.com/authentication/connecting-to-github-with-ssh)" |
 
-## Project Discovery Card
+Each ❌ or ⚠️ row renders instructions inline below the value, including a link to the relevant fix. ✅ rows show only the current value.
 
-Card (`cc-card`) below the START HERE section. Purpose: show project discovery overview and list all discovered projects.
+#### GitHub Connectivity Note
 
-### Card Header
+Below the SSH row, if SSH is ❌, show a collapsible "Alternatives" block:
 
-`Project Discovery` with a folder icon (📁).
+> **Other ways to push commits:**
+> - HTTPS with a stored credential (`git credential-store` or macOS Keychain)
+> - GitHub CLI: run `gh auth login` to authenticate via browser
 
-### Summary Line
+Collapsed by default when SSH is ✅.
 
-Two-column summary: `XX Projects | XX Prototypes` — count of discovered projects and prototypes from the startup scan.
+### Layout ASCII
 
-### Project List
-
-One-column alphabetical list of project names below the summary. Each project name is clickable and links to `/project/{id}` for detail view.
-
-Example:
 ```
-Analytics
-Dashboard
-DataPipeline
-MLExperiment
-WebApp
+┌────────────────────────────────────────────┐
+│         ██ WELCOME TO PROTOTYPER ██        │
+│      Your local prototype operations hub   │
+├────────────────────────────────────────────┤
+│  🟢 START HERE                             │
+│  ─────────────────────────────────────────│
+│  ✅ Application Name      My Prototyper    │
+│  ✅ Projects Directory    /home/user/...   │
+│  ⚠️  Specifications Path  (default)        │
+│  📌 Startup Scan          12 Projects, 4 Prototypes │
+│  ⚠️  Homepage URL         (not set)        │
+│       → Set in Settings / General          │
+│  ❌ GitHub SSH            No key found     │
+│       → How to set up SSH keys             │
+└────────────────────────────────────────────┘
 ```
 
-List is sorted alphabetically. One project per row. Space reserved for future KPI columns (do not implement yet).
-
-## Service Help Links Card
-
-Card below the project discovery card. Purpose: quick links to commonly needed external help pages.
-
-### Card Header
-
-`Help & Resources` with a question-mark icon (❓).
-
-### Links
-
-Displayed as a grid of link buttons (2-column on desktop, 1-column on narrow).
-
-| Label | Destination | Notes |
-|-------|-------------|-------|
-| GitHub Docs | `https://docs.github.com` | Opens new tab |
-| Flask Documentation | `https://flask.palletsprojects.com` | Opens new tab |
-| Bootstrap 5 Docs | `https://getbootstrap.com/docs/5.3` | Opens new tab |
-| Prototyper Workflow | `../doc/index.html` | Local documentation |
-
-All links open in a new tab. Cards are static — no data fetch required.
-
-## Data Flow
+## Data Flow — Summary
 
 | Reads | Writes |
 |-------|--------|
-| `projects` table (count + list) | None |
-| Startup scan metrics | |
+| `settings` table (`app_name`, `homepage_url`) | None |
+| `PROJECTS_DIR`, `SPECIFICATIONS_PATH` from env | None |
+| Startup scan metrics (project + prototype counts) | None |
+| `ssh -T git@github.com` exit code (runtime check) | None |
 
-Reads from backend: project count, project list, prototype count, PROJECTS_DIR value from env.
+Summary is fully read-only. All writes go through `Settings / General`.
+
+---
+
+## Sub-Tab: Prototypes
+
+Simple searchable pane. No action buttons. Full-width, no max-width cap.
+
+### Layout
+
+```
+┌────────────────────────────────────────────┐
+│  [🔍 Search prototypes...               ]  │
+│  ──────────────────────────────────────── │
+│  PROTOTYPE  MyApp       dev   My app desc  │
+│  IDEA       NewThing    dev   New idea     │
+│  ACTIVE     CoreService prod  Core service │
+│  ...                                       │
+└────────────────────────────────────────────┘
+```
+
+### List
+
+One row per prototype from `GET /api/prototypes`. Columns:
+
+| Column | Source | Notes |
+|--------|--------|-------|
+| Status badge | `METADATA.md → status` | Colored pill per UI-GENERAL status colors |
+| Name | `METADATA.md → display_name` | Plain text, no link |
+| Namespace | `METADATA.md → namespace` | Muted, omit if empty |
+| Short description | `METADATA.md → short_description` | Truncate at 80 chars |
+
+Sorted by name by default.
+
+### Search
+
+Single text input above the list. Client-side. Filters on any visible field: name, status, namespace, short_description. Case-insensitive substring match. No round-trip.
+
+### Empty State
+
+If no prototypes found:
+
+> *No prototypes found. Configure `SPECIFICATIONS_PATH` in `.env`.*
+
+---
+
+## Sub-Tab: Projects
+
+Identical layout and behavior to the Prototypes sub-tab, applied to discovered projects.
+
+### List
+
+One row per project from `GET /api/projects` (or the scanner results). Columns:
+
+| Column | Source | Notes |
+|--------|--------|-------|
+| Status badge | `projects.status` | Colored pill per UI-GENERAL status colors |
+| Name | `projects.display_name` | Plain text, no link |
+| Namespace | `projects.namespace` | Muted, omit if `development` |
+| Short description | `projects.short_description` | Truncate at 80 chars |
+
+### Search
+
+Same as Prototypes: single text input, client-side, any-field substring match.
+
+### Empty State
+
+If no projects found:
+
+> *No projects found. Configure `PROJECTS_DIR` in `.env`.*
+
+---
 
 ## Open Questions
 
-- Should the welcome banner display the logged-in username (if auth is added later)?
-- Should the START HERE checklist be collapsible once all items are green?
-- Should the help links be editable from the Settings screen?
+- Should the SSH check run on page load or be an explicit "Check" button (to avoid startup delay)?
+- Should Summary show the Prototyper version or last-restart timestamp?
