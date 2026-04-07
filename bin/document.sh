@@ -235,13 +235,14 @@ $(cat "$filepath")
 done <<< "$SPEC_FILES"
 
 # --- Assemble prompt from template ---
-PROMPT=$(sed \
+# Escape & and \ in SHORT_DESC so sed doesn't misinterpret them in the replacement
+SHORT_DESC_SAFE=$(printf '%s' "${SHORT_DESC:-}" | sed 's/[&\]/\\&/g')
+PROMPT=$(tr -d '\r' < "$REPO_DIR/prompts/document.md" | sed \
     -e "s|{{DISPLAY_NAME}}|${DISPLAY_NAME:-$PROJECT_NAME}|g" \
-    -e "s|{{SHORT_DESC}}|${SHORT_DESC:-}|g" \
+    -e "s|{{SHORT_DESC}}|$SHORT_DESC_SAFE|g" \
     -e "s|{{STATUS}}|${STATUS:-PROTOTYPE}|g" \
     -e "s|{{TARGET_DOCS}}|$TARGET_DOCS|g" \
-    -e "s|{{CURRENT_DATE}}|$CURRENT_DATE|g" \
-    "$REPO_DIR/prompts/document.md")
+    -e "s|{{CURRENT_DATE}}|$CURRENT_DATE|g")
 
 # Append dynamic specification file content
 PROMPT="$PROMPT

@@ -109,15 +109,16 @@ if [ -f "$SPEC_DIR/REFERENCE_GAPS.md" ]; then
 fi
 
 # --- Assemble prompt from template ---
-PROMPT=$(sed \
+# Escape & and \ in SHORT_DESC so sed doesn't misinterpret them in the replacement
+SHORT_DESC_SAFE=$(printf '%s' "${SHORT_DESC:-}" | sed 's/[&\]/\\&/g')
+PROMPT=$(tr -d '\r' < "$REPO_DIR/prompts/spec_iterate.md" | sed \
     -e "s|{{DISPLAY_NAME}}|${DISPLAY_NAME:-$PROJECT_NAME}|g" \
-    -e "s|{{SHORT_DESC}}|${SHORT_DESC:-}|g" \
+    -e "s|{{SHORT_DESC}}|$SHORT_DESC_SAFE|g" \
     -e "s|{{STATUS}}|${STATUS:-PROTOTYPE}|g" \
     -e "s|{{SPEC_DIR}}|$SPEC_DIR|g" \
     -e "s|{{CURRENT_DATE}}|$CURRENT_DATE|g" \
     -e "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" \
-    -e "s|{{REPO_DIR}}|$REPO_DIR|g" \
-    "$REPO_DIR/prompts/spec_iterate.md")
+    -e "s|{{REPO_DIR}}|$REPO_DIR|g")
 
 # Append dynamic content as appendices
 PROMPT="$PROMPT

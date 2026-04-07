@@ -60,7 +60,7 @@ echo "  Reference: $REF_DIR" >&2
 echo "" >&2
 
 # --- Assemble context ---
-PROMPT="$(cat "$PROMPT_FILE")
+PROMPT="$(tr -d '\r' < "$PROMPT_FILE")
 
 ---
 
