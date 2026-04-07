@@ -94,6 +94,55 @@ Queries `operations` where `schedule IS NOT NULL AND schedule_enabled = 1`. Eval
 
 Provides: `start_scheduler()`, `stop_scheduler()`, `tick()`.
 
+### Service Registry (`service_registry.py`)
+
+Discovers and manages platform services. On startup (after project scan), scans for service manifests:
+
+1. **Platform services** — `services/*.service.yaml` within the GAME project directory
+2. **Project services** — `{project}/services/*.service.yaml` for each managed project
+3. **MCP servers** — `{project}/mcp/*.service.yaml` for MCP-enabled services
+
+For each manifest: parse name, description, version, transports, and tool definitions. Upsert into `services` and `service_tools` tables. Services removed from disk are marked `is_active = 0`.
+
+Provides: `scan_services()`, `get_service(name)`, `get_all_services()`, `dispatch_tool(service, tool, inputs)`.
+
+**Tool dispatch:** The `dispatch_tool()` function is the generic entry point for all service calls. It resolves the service, validates inputs against the tool's schema, and delegates to the appropriate handler module. Platform services (batch-runner, workflow, async-queue) have Python handler functions. Project services with `rest: true` are proxied to the project's endpoint if it has a port. MCP services delegate to the MCP server process.
+
+### MCP Host (`mcp_host.py`)
+
+Manages the lifecycle of developer-created MCP servers. See FEATURE-MCP-Hosting.md for full specification.
+
+1. Discovers MCP server manifests during service scan (`mcp/*.service.yaml`)
+2. Registers entries in `mcp_servers` table
+3. Starts/stops MCP server processes on expose/unexpose (delegates to process engine)
+4. Assigns ports from configurable range (default 9100-9199)
+5. Generates `.mcp.json` config snippets for developers
+
+Provides: `get_mcp_servers()`, `start_mcp(id)`, `stop_mcp(id)`, `expose(id)`, `unexpose(id)`, `get_config_snippet(id)`.
+
+### Workflow Engine (`workflow_engine.py`)
+
+Generic state machine service. See FEATURE-Workflow-Service.md for full specification.
+
+1. Loads workflow templates from `workflow_templates` table (seeded from YAML on first startup)
+2. Creates workflow instances with initial state from template
+3. Validates and executes state transitions
+4. Records transition history
+5. Emits `workflow_transition` events
+
+Provides: `create_workflow(name, type, project, payload)`, `transition(id, to_state, comment)`, `get_status(id)`, `list_workflows(filters)`, `list_types()`.
+
+### AsyncQueue (`async_queue.py`)
+
+File-based store-and-forward message queue. See FEATURE-AsyncQueue.md for full specification.
+
+1. Reads/writes JSONL files in `data/queues/`
+2. Submits messages by appending lines (no server required for file-based submit via common.py)
+3. Drains pending messages by dispatching to the service registry's `dispatch_tool()`
+4. Manages queue rotation and archival
+
+Provides: `submit(queue, service, tool, payload)`, `drain(queue)`, `get_status(id, queue)`, `list_messages(queue)`, `list_queues()`.
+
 ## Routes (HTMX)
 
 All screen interactions use HTMX for partial page updates. Server returns HTML fragments, not JSON.
@@ -144,6 +193,25 @@ All screen interactions use HTMX for partial page updates. Server returns HTML f
 | GET | `/api/health/{name}` | JSON | Current health for one project |
 | POST | `/api/logs/ingest` | JSON | Trigger immediate log ingest |
 | GET | `/api/github/repos` | JSON | Fetch GitHub repo list |
+| GET | `/api/services` | JSON | List all registered services |
+| GET | `/api/services/{name}` | JSON | Get one service manifest with tools |
+| POST | `/api/services/{name}/{tool}` | JSON | Generic service tool dispatch |
+| GET | `/api/mcp` | JSON | List registered MCP servers |
+| POST | `/api/mcp/{id}/start` | JSON | Start MCP server |
+| POST | `/api/mcp/{id}/stop` | JSON | Stop MCP server |
+| POST | `/api/mcp/{id}/expose` | JSON | Expose MCP server on network port |
+| POST | `/api/mcp/{id}/unexpose` | JSON | Unexpose MCP server |
+| GET | `/api/mcp/{id}/config` | JSON | Get .mcp.json snippet |
+| POST | `/api/services/workflow/create` | JSON | Create workflow instance |
+| POST | `/api/services/workflow/transition` | JSON | Transition workflow state |
+| GET | `/api/services/workflow/status` | JSON | Get workflow status + history |
+| GET | `/api/services/workflow/list` | JSON | List workflows with filters |
+| GET | `/api/services/workflow/list_types` | JSON | List workflow templates |
+| POST | `/api/services/async-queue/submit` | JSON | Submit message to queue |
+| GET | `/api/services/async-queue/status` | JSON | Check message status |
+| GET | `/api/services/async-queue/list` | JSON | List queue messages |
+| POST | `/api/services/async-queue/drain` | JSON | Drain pending messages |
+| GET | `/api/services/async-queue/list_queues` | JSON | List queues with counts |
 
 ## Directory Layout
 
@@ -157,6 +225,10 @@ GAME/
   publisher.py           Portfolio builder
   monitoring.py          Health poller + log ingestor (background threads)
   scheduler.py           Cron loop for scheduled operations
+  service_registry.py    Service discovery and tool dispatch
+  mcp_host.py            MCP server lifecycle management
+  workflow_engine.py     Generic state machine service
+  async_queue.py         File-based store-and-forward queue
   models.py              PROJECT_TYPES registry
   db.py                  Database access helpers
   claude_convention.py   CLAUDE.md / AGENTS.md parsing
@@ -171,9 +243,16 @@ GAME/
     start.sh             Start Flask dev server
     stop.sh              Stop server
     build_documentation.sh  Generate docs/ and docs/index.html
+  services/
+    batch-runner.service.yaml   Platform service manifest
+    workflow.service.yaml       Platform service manifest
+    async-queue.service.yaml    Platform service manifest
   data/
-    game.db        SQLite database
-    tag_colors.json  Tag color assignments
+    game.db              SQLite database
+    tag_colors.json      Tag color assignments
+    queues/              AsyncQueue JSONL files
+      queue_config.yaml  Per-queue configuration
+      archive/           Rotated completed messages
   docs/                  Generated documentation
   logs/                  Operation log files
   .env                   Local environment config (gitignored)
@@ -195,6 +274,8 @@ Environment variables loaded from `.env` at startup (via `python-dotenv`). A `.e
 | `GITHUB_TOKEN` | No | — | GitHub personal access token (required for private repos) |
 | `GAME_PORT` | No | `5000` | Port the GAME server listens on |
 | `DATABASE_PATH` | No | `data/game.db` | Path to SQLite database file |
+| `MCP_PORT_RANGE_START` | No | `9100` | First port in the MCP server port range |
+| `MCP_PORT_RANGE_END` | No | `9199` | Last port in the MCP server port range |
 
 `.env.sample` ships in the repo as a reference template; `.env` is gitignored.
 

@@ -386,6 +386,116 @@ These three tables support `monitoring.py` (health poller + log ingestor). Full 
 
 Schema is authoritative in FEATURE-HEALTHCHECK.md. When these tables are implemented, add their full column definitions here and remove this reference.
 
+### services
+
+Registry of all platform and project services discovered from `.service.yaml` manifests. See FEATURE-ServiceInterfaces.md.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| id | INTEGER PK | auto | Auto-increment |
+| name | TEXT UNIQUE | — | Service name slug (e.g. `batch-runner`) |
+| display_name | TEXT | — | Human-readable name |
+| description | TEXT | — | One-line description from manifest |
+| source | TEXT | — | `platform` / `project:{name}` / `mcp:{name}` |
+| source_project_id | INTEGER FK | NULL | References projects.id if source is a project |
+| manifest_path | TEXT | — | Path to the .service.yaml file |
+| transports | TEXT | '{}' | JSON: which transports are enabled (`{"rest":true,"cli":true,"mcp":false,"async":false}`) |
+| tool_count | INTEGER | 0 | Number of tools defined |
+| version | TEXT | NULL | Service version from manifest |
+| is_active | INTEGER | 1 | 0 if removed from disk |
+| created_at | TEXT | datetime('now') | First discovery |
+| updated_at | TEXT | datetime('now') | Last scan |
+
+### service_tools
+
+Tool definitions for each service. One row per tool per service.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Auto-increment |
+| service_id | INTEGER FK | References services.id |
+| name | TEXT | Tool name (unique within service) |
+| description | TEXT | Tool description (shown to agents and in Service Catalog UI) |
+| input_schema | TEXT | JSON schema for inputs |
+| output_schema | TEXT | JSON schema for outputs |
+| sort_order | INTEGER | Display order |
+
+### mcp_servers
+
+MCP server instances discovered from project `mcp/` directories. See FEATURE-MCP-Hosting.md.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| id | INTEGER PK | auto | Auto-increment |
+| service_id | INTEGER FK | — | References services.id |
+| project_id | INTEGER FK | — | References projects.id |
+| entry_script | TEXT | — | Relative path to server script within the project |
+| runtime | TEXT | 'python' | python / node / binary |
+| requirements | TEXT | NULL | Path to requirements file (relative to project) |
+| default_transport | TEXT | 'stdio' | stdio / sse / streamable-http |
+| exposed | INTEGER | 0 | 1 = running on network port |
+| assigned_port | INTEGER | NULL | Port assigned when exposed |
+| pid | INTEGER | NULL | OS process ID when running |
+| status | TEXT | 'stopped' | stopped / starting / running / error |
+| last_started | TEXT | NULL | Timestamp |
+| last_error | TEXT | NULL | Last error message if status = error |
+| created_at | TEXT | datetime('now') | |
+| updated_at | TEXT | datetime('now') | |
+
+### workflow_templates
+
+Configurable state machine definitions. Seeded on first startup with built-in templates (specification-ticket, deployment, review). See FEATURE-Workflow-Service.md.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| id | INTEGER PK | auto | Auto-increment |
+| name | TEXT UNIQUE | — | Template identifier slug (e.g. `specification-ticket`) |
+| display_name | TEXT | — | Human-readable name |
+| description | TEXT | NULL | What this workflow type is for |
+| states_json | TEXT | — | JSON array of state definitions: `[{"name":"idea","transitions":["proposed"],"requires":[]}]` |
+| initial_state | TEXT | — | State name for new instances |
+| source | TEXT | 'platform' | `platform` / `project:{name}` |
+| is_active | INTEGER | 1 | |
+| created_at | TEXT | datetime('now') | |
+| updated_at | TEXT | datetime('now') | |
+
+**Seed data (inserted if table is empty on startup):**
+
+| name | display_name | initial_state |
+|------|-------------|---------------|
+| specification-ticket | Specification Ticket | idea |
+| deployment | Deployment Pipeline | building |
+| review | Review Process | submitted |
+
+### workflow_instances
+
+Active workflow instances. One row per workflow in progress.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| id | INTEGER PK | auto | Auto-increment |
+| workflow_name | TEXT | — | Human-readable instance name (e.g. "deploy-myapp-v2.1") |
+| template_id | INTEGER FK | — | References workflow_templates.id |
+| project_id | INTEGER FK | — | References projects.id |
+| current_state | TEXT | — | Current state name |
+| payload | TEXT | '{}' | JSON blob of type-specific data |
+| created_at | TEXT | datetime('now') | |
+| updated_at | TEXT | datetime('now') | |
+
+### workflow_history
+
+Append-only transition log. One row per state change.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Auto-increment |
+| workflow_id | INTEGER FK | References workflow_instances.id |
+| from_state | TEXT | Previous state |
+| to_state | TEXT | New state |
+| comment | TEXT | Transition reason (optional) |
+| transition_payload | TEXT | JSON data attached to this transition |
+| timestamp | TEXT | When the transition occurred |
+
 ---
 
 ## Conventions

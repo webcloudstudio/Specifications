@@ -640,6 +640,240 @@ Return JSON:
 
 ---
 
+## 14. Service Discovery Scan [ROADMAP]
+
+**Trigger:** Runs after project scan completes (startup or rescan). Also triggered when service manifests change.
+
+```
+Project scan completes
+  |
+  v
+Scan platform services
+  |  Read GAME/services/*.service.yaml
+  |  For each manifest: parse name, description, version, transports, tools
+  |  Upsert into `services` + `service_tools` tables
+  |
+  v
+Scan project services
+  |  For each managed project:
+  |    Read {project}/services/*.service.yaml
+  |    Read {project}/mcp/*.service.yaml (MCP servers)
+  |    Upsert into `services`, `service_tools`, `mcp_servers` tables
+  |
+  v
+Mark removed services as is_active = 0
+  |
+  v
+Service Catalog screen reflects updated service list
+```
+
+**Reads:** Service manifest YAML files from GAME and project directories
+**Writes:** `services`, `service_tools`, `mcp_servers` tables
+**Events emitted:** `service_discovered`, `service_removed`
+
+---
+
+## 15. Service Tool Dispatch [ROADMAP]
+
+**Trigger:** Any transport calls a service tool — REST, CLI, MCP, or queue drain.
+
+```
+Caller invokes tool (any transport)
+  |
+  v
+POST /api/services/{service}/{tool}  (REST)
+game-cli {service} {tool} ...        (CLI → REST)
+MCP tool call                        (MCP → internal Python)
+Queue drain                          (async → internal Python)
+  |
+  v
+service_registry.dispatch_tool(service, tool, inputs)
+  |
+  v
+Validate inputs against tool schema
+  |  → 400 if validation fails
+  |
+  v
+Resolve handler:
+  |  Platform service (batch-runner, workflow, async-queue)
+  |    → direct Python function call
+  |  Project REST service
+  |    → proxy HTTP call to project's endpoint
+  |  MCP service
+  |    → delegate to MCP server process
+  |
+  v
+Execute handler, capture result
+  |
+  v
+Return result in transport-native format:
+  REST → JSON response
+  CLI  → printed output (or --json)
+  MCP  → MCP tool response
+  Queue → result written to message record
+```
+
+**Reads:** `services`, `service_tools` tables, tool input schema
+**Writes:** Depends on the tool being called
+**Events emitted:** Depends on the tool
+
+**Key behavior:** All transports converge on `dispatch_tool()`. The service registry is the single entry point. This means platform services are automatically available on all enabled transports without per-transport code.
+
+---
+
+## 16. MCP Server Lifecycle [ROADMAP]
+
+**Trigger:** Developer clicks Start/Expose on Service Catalog, or GAME auto-starts on startup.
+
+```
+Developer clicks Expose on Service Catalog
+  |
+  v
+POST /api/mcp/{id}/expose
+  |
+  v
+Load mcp_servers record
+  |  → 404 if not found
+  |
+  v
+Assign port from range (MCP_PORT_RANGE_START..END)
+  |  Find first unused port not in mcp_servers.assigned_port
+  |
+  v
+Start MCP server subprocess
+  |  {runtime} {entry_script} --transport sse --port {assigned_port}
+  |  Capture to log file (same pattern as ops.py)
+  |
+  v
+Update mcp_servers: status = running, pid, assigned_port, last_started
+  |
+  v
+Generate .mcp.json snippet with SSE URL
+  |  Service Catalog shows: connection URL, Copy Config button
+  |
+  v
+Coworkers add the snippet to their .mcp.json
+  |  Their Claude can now call the exposed tools
+
+UNEXPOSE:
+  Developer clicks Unexpose
+    |
+    v
+  POST /api/mcp/{id}/unexpose
+    |
+    v
+  SIGTERM to MCP server process
+  Update mcp_servers: status = stopped, exposed = 0, assigned_port = NULL
+```
+
+**Reads:** `mcp_servers`, `services` tables
+**Writes:** `mcp_servers` table, log file
+**Events emitted:** `mcp_started`, `mcp_stopped`, `mcp_exposed`, `mcp_unexposed`
+
+---
+
+## 17. Workflow Transition [ROADMAP]
+
+**Trigger:** Service call to `workflow/transition` from any transport, or drag on Kanban board.
+
+```
+Caller requests transition
+  |  workflow_id, to_state, comment (optional), payload (optional)
+  |
+  v
+Load workflow instance + template
+  |  → 404 if workflow not found
+  |
+  v
+Validate transition
+  |  Current state's transitions list must include to_state
+  |  Template may define `requires` fields for certain transitions
+  |  → 400 with error message if invalid
+  |
+  v
+Update workflow_instances.current_state = to_state
+  |
+  v
+Insert workflow_history row
+  |  from_state, to_state, comment, transition_payload, timestamp
+  |
+  v
+Emit event
+  |  event_type: workflow_transition
+  |  summary: "{workflow_name}: {from} → {to}"
+  |  detail: JSON with workflow_id, template, project, states, comment
+  |
+  v
+Return new state to caller
+  |
+  v
+If Kanban board is open: HTMX swap moves the card
+```
+
+**Reads:** `workflow_instances`, `workflow_templates` tables
+**Writes:** `workflow_instances` (state update), `workflow_history` (append), `events` (append)
+**Events emitted:** `workflow_transition`
+
+---
+
+## 18. AsyncQueue Drain [ROADMAP]
+
+**Trigger:** GAME startup (after scan + service discovery), manual `POST /api/services/async-queue/drain`, or scheduler cron job.
+
+```
+Drain triggered
+  |
+  v
+List queue files: data/queues/*.queue.jsonl
+  |  (or single queue if queue= parameter specified)
+  |
+  v
+For each queue file:
+  |
+  +---> Read all lines, parse JSON
+  |
+  +---> Filter: status = pending
+  |       Check TTL → mark expired messages as "expired"
+  |
+  +---> Sort: priority (critical > high > normal > low), then submitted_at (oldest first)
+  |
+  +---> For each pending message:
+  |       |
+  |       +---> Set status = processing
+  |       |
+  |       +---> Resolve service + tool from service registry
+  |       |       → mark as error if service/tool not found
+  |       |
+  |       +---> dispatch_tool(service, tool, payload)
+  |       |       |
+  |       |       +---> Success:
+  |       |       |       status = done
+  |       |       |       result = tool output
+  |       |       |       processed_at = now
+  |       |       |
+  |       |       +---> Failure:
+  |       |               status = error
+  |       |               error = message
+  |       |               Check retry count → requeue as pending if retries remain
+  |       |
+  |       +---> Rewrite message line in queue file
+  |
+  +---> If queue file > 1000 lines or 1MB:
+          Rotate completed messages to archive/
+          Rewrite active file with pending/processing only
+
+Summary:
+  Processed: N, Succeeded: N, Failed: N, Expired: N
+```
+
+**Reads:** Queue JSONL files, `queue_config.yaml`, `services` table
+**Writes:** Queue JSONL files (status updates), archive files (rotation), `events` table
+**Events emitted:** `queue_drained`
+
+**Key behavior:** Drain is idempotent — running it twice processes nothing if all messages are already done. Failed messages with retries remaining are reset to pending for the next drain cycle.
+
+---
+
 ## Flow Summary
 
 | # | Flow | Trigger | Implemented |
@@ -657,6 +891,11 @@ Return JSON:
 | 11 | Script Endpoint API | External POST to /api/{name}/run/{script} | ROADMAP |
 | 12 | Service Catalog API | External GET /api/catalog | ROADMAP |
 | 13 | Project Health API | External GET /api/{name}/health | ROADMAP |
+| 14 | Service Discovery Scan | After project scan | ROADMAP |
+| 15 | Service Tool Dispatch | REST / CLI / MCP / Queue drain | ROADMAP |
+| 16 | MCP Server Lifecycle | Expose / Unexpose / Start / Stop | ROADMAP |
+| 17 | Workflow Transition | Service call or Kanban drag | ROADMAP |
+| 18 | AsyncQueue Drain | Startup / Manual / Scheduler | ROADMAP |
 
 ---
 
@@ -693,6 +932,10 @@ The browser replaces the targeted DOM element. No full page reload unless naviga
 - Scanner runs async — dashboard is usable during scan
 - Heartbeat poller runs on its own timer, independent of user actions
 - Scheduler runs on its own timer, independent of heartbeat poller
+- Service discovery runs after project scan — sequential dependency
+- Queue drain is single-threaded per queue — messages processed in order
+- MCP servers run as independent subprocesses — one per exposed service
+- Workflow transitions are atomic per instance — no concurrent transitions on the same workflow
 
 ## Open Questions
 
