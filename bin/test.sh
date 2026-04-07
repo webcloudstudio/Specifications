@@ -123,11 +123,11 @@ echo ""
 
 # --- Bin scripts ---
 echo "Bin scripts:"
-for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/oneshot.sh bin/summarize_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/oneshot.sh bin/summarize_rules.sh bin/scorecard.sh; do
     assert_file "$script"
 done
 # Verify CommandCenter headers
-for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/oneshot.sh bin/summarize_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/oneshot.sh bin/summarize_rules.sh bin/scorecard.sh; do
     assert_contains "$script" "CommandCenter Operation"
     assert_contains "$script" "# Name:"
     assert_contains "$script" "# Category:"
@@ -136,7 +136,7 @@ echo ""
 
 # --- Script executability ---
 echo "Script executability:"
-for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/oneshot.sh bin/summarize_rules.sh; do
+for script in bin/setup.sh bin/validate.sh bin/convert.sh bin/oneshot.sh bin/summarize_rules.sh bin/scorecard.sh; do
     assert "$script is executable" test -x "$script"
 done
 echo ""

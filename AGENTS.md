@@ -75,7 +75,7 @@ Specifications/
     merge.sh                       Squash-merge Feature Branch → base branch (called by GAME)
     tran_logger.sh                 Extract bugs and ideas from AI session transaction logs
     spec_iterate.sh                AI-powered specification gap analysis and quality scoring
-    scorecard.sh                   Generate SCORECARD.md — specification-to-code alignment
+    scorecard.sh                   Generate SCORECARD.md — comprehensive project health dashboard
     update_reference_gaps.sh       Update REFERENCE_GAPS.md from specification vs prototype comparison
     decompose.sh                   Reverse-engineer an existing project into specification files
     summarize_rules.sh             Generate prompt to regenerate CLAUDE_RULES.md
@@ -197,8 +197,10 @@ bash bin/tran_logger.sh <ProjectName> --model=claude-haiku-4-5-20251001
 bash bin/spec_iterate.sh <ProjectName>
 bash bin/spec_iterate.sh <ProjectName> --model opus
 
-# Generate SCORECARD.md — specification-to-code alignment checklist
+# Generate SCORECARD.md — comprehensive project health dashboard
 bash bin/scorecard.sh <ProjectName>
+bash bin/scorecard.sh <ProjectName> --run-tests
+bash bin/scorecard.sh <ProjectName> --target=/path/to/prototype
 
 # Update REFERENCE_GAPS.md from specification vs prototype comparison
 bash bin/update_reference_gaps.sh <ProjectName>
@@ -319,7 +321,7 @@ Reads the Claude Code session transaction log (JSONL), analyzes git history plus
 AI-powered specification gap analysis using `claude -p` (subscription, not API tokens). Updates REFERENCE_GAPS.md, writes SPEC_SCORECARD.md (7-dimension quality rating), and SPEC_ITERATION.md (focused prompt targeting 1-2 highest-priority gaps). Accepts `--model opus|sonnet|haiku`.
 
 ### bin/scorecard.sh
-Generates SCORECARD.md in the prototype directory by checking code against specification files. Reads specification markdown, prototype routes.py, STUBS.md, and tests/. Outputs a checklist of KPIs measuring specification-to-code alignment.
+Comprehensive project health dashboard. Computes deterministic metrics across six dimensions: specification completeness, route coverage, test health, acceptance criteria, project structure, and deployment status. Reads specification files, prototype source, REFERENCE_GAPS.md, and SPEC_SCORECARD.md. Detects spec drift (files changed since last build tag), counts pending tickets, flags demerits for missing artifacts (no tests, no AC, etc.). Writes SCORECARD.md to the specification directory by default, or `--target` for the prototype. Supports `--run-tests` to execute tests and capture results. Multiple scripts can trigger regeneration — the output is structured markdown with parseable sections and summary table.
 
 ### bin/update_reference_gaps.sh
 Compares specification files against the prototype and optionally a reference implementation. Uses `claude -p` to identify gaps. Writes REFERENCE_GAPS.md in the specification directory.
