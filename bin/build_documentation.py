@@ -531,9 +531,7 @@ section h2 {{ font-size: 18px; font-weight: 700; color: var(--c-h1);
     <h1>Project<br>Prototyper</h1>
   </div>
 {step_nav}
-  <div class="nav-sep"></div>
-  <div class="nav-section">Current Projects</div>
-{proj_nav}
+
 </nav>
 
 <main>
