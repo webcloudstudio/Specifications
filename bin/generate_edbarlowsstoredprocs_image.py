@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate EdBarlowsStoredProcs Image
-# Category: maintenance
 #
 # Generate the EdBarlowsStoredProcs project card image (400x300 WebP).
 # Composites the real Sybase and SQL Server logos side by side on a dark background.

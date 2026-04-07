@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate HerpesHearts Image
-# Category: maintenance
 #
 # Generate the HerpesHearts project card image (400x300 WebP).
 #

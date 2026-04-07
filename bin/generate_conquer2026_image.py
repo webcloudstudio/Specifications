@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate conquer_2026 Image
-# Category: maintenance
 #
 # Generate the conquer_2026 project card image (400x300 WebP).
 #

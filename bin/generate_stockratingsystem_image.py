@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate StockRatingSystem Image
-# Category: maintenance
 #
 # Generate the StockRatingSystem project card image (400x300 WebP).
 #

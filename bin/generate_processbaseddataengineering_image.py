@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate ProcessBasedDataEngineering Image
-# Category: maintenance
 #
 # Generate the ProcessBasedDataEngineering project card image (400x300 WebP).
 #

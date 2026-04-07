@@ -11,17 +11,15 @@
     {
       id: 'oneshot', navLabel: 'One Shot',
       num: 'Workflow #1', title: 'Specification Driven Design — One Shot',
-      desc: 'oneshot.sh validates the specification directory, then concatenates specification files, technology rules, and stack patterns into a single prompt. The AI agent builds the entire application in one pass. Each build is git-tagged — every prototype is fully traceable to the exact specification state that produced it.',
+      desc: 'oneshot.sh validates the specification directory, then concatenates specification files, prompt rules, and stack patterns into a single prompt. The AI agent builds the entire application in one pass. Each build is git-tagged — every prototype is fully traceable to the exact specification state that produced it.',
       mermaid: `flowchart LR${D}
   S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
   SPEC --> S2["validate.sh"]:::script --> S3["oneshot.sh"]:::script
-  STACK(["Stack/"]):::dir --> S3
-  TR(["TechnologyRules/"]):::dir --> S3
+  RE(["RulesEngine/"]):::dir --> S3
+  PR(["prompts/"]):::dir --> S3
   S3 --> PT(["Prompt"]):::prompt
-  S3 --> SC{{"SCORECARD.md"}}:::md
-  S3 --> GAPS{{"REFERENCE_GAPS.md"}}:::md
-  PT --> PT2(["Prototype"]):::output
-  PT --> DL{{"deployments.jsonl"}}:::md`,
+  S3 --> DL{{"deployments.jsonl"}}:::md
+  PT --> PT2(["Prototype"]):::output`,
       learnings: [
         'A well-defined specification file architecture works.',
         'Opinionated stack — prescriptive patterns, not guidelines.',
@@ -44,15 +42,12 @@
       num: 'Workflow #2', title: 'Application Iteration',
       desc: 'Changes flow through specifications, not ad-hoc code edits. iterate.sh assembles pending change tickets (SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*) into a targeted prompt applied to the existing codebase. Once ready, merge.sh squash-merges the prototype branch into a promoted project.',
       mermaid: `flowchart LR${D}
-  DL{{"deployments.jsonl"}}:::md --> CH{{"Specification Diff"}}:::md
-  CH --> S1["iterate.sh"]:::script
-  PT1(["Stack/"]):::dir --> S1
-  TR1(["TechnologyRules/"]):::dir --> S1
+  DL{{"deployments.jsonl"}}:::md --> S1["iterate.sh"]:::script
+  CH{{"Specification Diff"}}:::md --> S1
   S1 --> PT(["Prompt"]):::prompt
+  S1 --> DL2{{"deployments.jsonl"}}:::md
   PT --> PT2(["Prototype"]):::output
-  S1 --> SC2{{"SCORECARD.md"}}:::md
   PT2 --> S2["merge.sh"]:::script
-  PT --> DL2{{"deployments.jsonl"}}:::md
   S2 --> PROJ(["Project"]):::output`,
       learnings: [
         'Updating specifications is far preferable to ad-hoc code edits. The scorecard tracks specification drift over time.'
@@ -61,15 +56,15 @@
     {
       id: 'techrules', navLabel: 'Technology Rules',
       num: 'Workflow #3', title: 'Technology Rules Propagation',
-      desc: 'BUSINESS_RULES.md is the source of truth for agent behavior. summarize_rules.sh generates a compact CLAUDE_RULES.md that is injected into every project via ProjectUpdate.sh. All projects share the same behavioral contract, making them interoperable and consistently structured. ProjectValidate.sh verifies compliance.',
+      desc: 'BUSINESS_RULES.md is the source of truth for agent behavior. summarize_rules.sh generates a compact CLAUDE_RULES.md that is injected into every project via ProjectUpdate.sh. All projects share the same behavioral contract, making them interoperable and consistently structured. ProjectValidate.sh verifies compliance by conformity level.',
       mermaid: `flowchart LR${D}
-  RULES(["Technology Rules"]):::dir
+  RULES(["RulesEngine/"]):::dir
   --> S1["summarize_rules.sh"]:::script
   --> CR{{"CLAUDE_RULES.md"}}:::md
   --> S2["ProjectUpdate.sh"]:::script
   --> PROJ(["Project"]):::output
   --> S3["ProjectValidate.sh"]:::script
-  --> KPI{{"SCORECARD.md"}}:::md`,
+  --> RPT(["Compliance Report"]):::output`,
       learnings: [
         'CLAUDE_RULES injection works well out of the box — key insight: use a crafted AI summary.',
         'An opinionated prescribed stack gave working software first time.'
@@ -82,10 +77,9 @@
       mermaid: `flowchart LR${D}
   GAPS{{"REFERENCE_GAPS.md"}}:::md --> SI["spec_iterate.sh"]:::script
   SPEC(["Specifications/"]):::dir  --> SI
-  SI --> SCORE{{"SCORECARD.md"}}:::md
-  SI --> PROMPT(["Prompt"]):::prompt
-  PROMPT --> DL{{"deployments.jsonl"}}:::md
-  PROMPT --> Proto(["Prototype"]):::output`,
+  SI --> GAPS2{{"REFERENCE_GAPS.md"}}:::md
+  SI --> SCORE{{"SPEC_SCORECARD.md"}}:::md
+  SI --> ITER{{"SPEC_ITERATION.md"}}:::prompt`,
       learnings: [
         'Works well — one gap at a time, best practices, low-touch review needed.'
       ]
@@ -126,7 +120,7 @@
       desc: 'decompose.sh reads an existing project\'s source code, detects the technology stack, and generates an AI prompt that produces structured specification files — METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, and more. The output feeds directly into Workflow #1, bringing unspecified applications under specification control.',
       mermaid: `flowchart LR${D}
   PROJ(["Existing Project"]):::dir --> D["decompose.sh"]:::script
-  TR(["TechnologyRules/"]):::dir --> D
+  RE(["RulesEngine/"]):::dir --> D
   D --> PT(["Prompt"]):::prompt
   PT --> SPEC(["Specifications/"]):::dir
   SPEC --> WF1(["Workflow #1 →"]):::output`,

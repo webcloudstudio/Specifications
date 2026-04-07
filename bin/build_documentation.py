@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Build Documentation
-# Category: maintenance
 """
 Build docs/index.html — single-page documentation for the Prototyper system.
 Also rebuilds root index.html (redirect) and per-project index.html viewers.

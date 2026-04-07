@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Build Project Docs
-# Category: maintenance
 """
 Assemble docs/index.html from DOC-*.md content files and bin/ script headers.
 Called by document.sh after AI content generation is complete.

@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate GEM Image
-# Category: maintenance
 #
 # Generate the gem project card image (400x300 WebP).
 #

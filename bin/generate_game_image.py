@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# CommandCenter Operation
-# Name: Generate GAME Image
-# Category: maintenance
 #
 # Generate the GAME project card image (400x300 WebP).
 #
