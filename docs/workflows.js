@@ -144,7 +144,7 @@
   /** Render full workflow block with all sections. */
   window.renderWorkflow = function (wf) {
     let h = `
-<div class="wp-wf">
+<div class="wp-wf" id="wf-${esc(wf.id)}">
   <div class="wp-num">${esc(wf.num)}</div>
   <h2 class="wp-title">${esc(wf.title)}</h2>
   <p class="wp-desc">${esc(wf.desc)}</p>
@@ -177,7 +177,7 @@
 
   function renderWorkflowIndex() {
     const rows = window.WORKFLOWS.map(wf =>
-      `<tr><td class="wp-idx-num">${esc(wf.num)}</td><td>${esc(wf.title)}</td></tr>`
+      `<tr><td class="wp-idx-num">${esc(wf.num)}</td><td><a class="wp-idx-link" href="#wf-${esc(wf.id)}">${esc(wf.title)}</a></td></tr>`
     ).join('');
     return `
 <div class="wp-header">
@@ -198,6 +198,13 @@
     ).join('');
     container.innerHTML = header + workflows;
     _runMermaid(container);
+    // Intercept index anchor clicks — <main> is a scroll container, not the document
+    container.querySelectorAll('.wp-idx-link').forEach(a => {
+      a.addEventListener('click', function (e) {
+        const target = container.querySelector(this.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      });
+    });
   };
 
   /** Render workflow block without I/O columns — for white-paper and summary views. */
@@ -276,12 +283,15 @@
 .wp-header { margin-bottom:4px; }
 .wp-h1 { font-size:28px; font-weight:900; color:#1E2328; margin:0 0 4px; letter-spacing:-.3px; }
 .wp-h2 { font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:#2cb67d; margin:0 0 16px; }
-.wp-index { border-collapse:collapse; width:100%; margin-bottom:4px; font-size:13px; }
-.wp-index th { background:#E4E6EA; color:#505A68; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:.8px; padding:5px 12px; text-align:left; border-bottom:2px solid #D5D8DE; }
-.wp-index td { padding:5px 12px; border-bottom:1px solid #EAECE8; color:#2E3640; }
+.wp-index { border-collapse:collapse; width:100%; margin-bottom:4px; }
+.wp-index th { background:#E4E6EA; color:#505A68; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:.8px; padding:6px 14px; text-align:left; border-bottom:2px solid #D5D8DE; }
+.wp-index td { padding:7px 14px; border-bottom:1px solid #EAECE8; }
 .wp-index tr:last-child td { border-bottom:none; }
 .wp-index tr:hover td { background:#F5F7FA; }
-.wp-idx-num { font-family:Consolas,monospace; font-size:11px; color:#2cb67d; font-weight:700; white-space:nowrap; width:110px; }
+.wp-idx-num { font-family:Consolas,monospace; font-size:12px; color:#2cb67d; font-weight:800; white-space:nowrap; width:120px; }
+.wp-idx-link { font-size:17px; font-weight:800; color:#1E2328; text-decoration:none; }
+.wp-idx-link:hover { color:#2cb67d; text-decoration:underline; }
+.wp-wf { scroll-margin-top:20px; }
 .wp-div { border:none; border-top:1px solid #D5D8DE; margin:20px 0; }
 .wf-tab-bar { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #D5D8DE; }
 .wf-tab { background:#E4E6EA; border:1px solid #D5D8DE; color:#505A68; padding:5px 13px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; transition:background .15s,color .15s,border-color .15s; white-space:nowrap; }
