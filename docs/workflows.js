@@ -175,10 +175,28 @@
     return h + `</div>`;
   };
 
+  function renderWorkflowIndex() {
+    const rows = window.WORKFLOWS.map(wf =>
+      `<tr><td class="wp-idx-num">${esc(wf.num)}</td><td>${esc(wf.title)}</td></tr>`
+    ).join('');
+    return `
+<div class="wp-header">
+  <h1 class="wp-h1">Project Prototyper</h1>
+  <h2 class="wp-h2">Specification Driven Design Workflows</h2>
+  <table class="wp-index">
+    <thead><tr><th>#</th><th>Workflow</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>
+<hr class="wp-div">`;
+  }
+
   window.renderAllWorkflows = function (container) {
-    container.innerHTML = window.WORKFLOWS.map((wf, i) =>
+    const header = renderWorkflowIndex();
+    const workflows = window.WORKFLOWS.map((wf, i) =>
       (i > 0 ? '<hr class="wp-div">' : '') + window.renderWorkflow(wf)
     ).join('');
+    container.innerHTML = header + workflows;
     _runMermaid(container);
   };
 
@@ -255,6 +273,15 @@
 .wp-io-col li { font-size:12px; font-family:Consolas,monospace; color:#505A68; padding:3px 0; border-bottom:1px solid #D5D8DE; }
 .wp-io-col li:last-child { border-bottom:none; }
 .wp-io-col li::before { content:"· "; color:#2cb67d; }
+.wp-header { margin-bottom:4px; }
+.wp-h1 { font-size:28px; font-weight:900; color:#1E2328; margin:0 0 4px; letter-spacing:-.3px; }
+.wp-h2 { font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:#2cb67d; margin:0 0 16px; }
+.wp-index { border-collapse:collapse; width:100%; margin-bottom:4px; font-size:13px; }
+.wp-index th { background:#E4E6EA; color:#505A68; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:.8px; padding:5px 12px; text-align:left; border-bottom:2px solid #D5D8DE; }
+.wp-index td { padding:5px 12px; border-bottom:1px solid #EAECE8; color:#2E3640; }
+.wp-index tr:last-child td { border-bottom:none; }
+.wp-index tr:hover td { background:#F5F7FA; }
+.wp-idx-num { font-family:Consolas,monospace; font-size:11px; color:#2cb67d; font-weight:700; white-space:nowrap; width:110px; }
 .wp-div { border:none; border-top:1px solid #D5D8DE; margin:20px 0; }
 .wf-tab-bar { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #D5D8DE; }
 .wf-tab { background:#E4E6EA; border:1px solid #D5D8DE; color:#505A68; padding:5px 13px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; transition:background .15s,color .15s,border-color .15s; white-space:nowrap; }
