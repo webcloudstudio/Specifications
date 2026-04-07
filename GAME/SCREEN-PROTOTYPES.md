@@ -5,12 +5,13 @@
 
 ## Menu Navigation
 
-`Prototypes`
+`Prototypes / Prototypes` — default sub-tab when Prototypes is first selected.
 
 ## Route
 
 ```
-GET /prototypes
+GET /prototypes              → redirects to /prototypes/list
+GET /prototypes/list
 ```
 
 ## Layout

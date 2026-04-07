@@ -1,8 +1,10 @@
 # Screen: Project Workflow
 
-**Version:** 20260326 V1
-**Extends:** SCREEN-DEFAULT
-**Description:** Specification for the Project Workflow screen — create specification ticket files for any project from a configurable set of workflow types
+**Status: REMOVED** — Ticket creation moved to `Workflow / Add Ticket` (SCREEN-DASHBOARDS-WORKFLOW.md). This screen and its route (`/project-workflow`) are no longer active.
+
+~~**Version:** 20260326 V1~~
+~~**Extends:** SCREEN-DEFAULT~~
+~~**Description:** Specification for the Project Workflow screen — create specification ticket files for any project from a configurable set of workflow types~~
 
 One-click entry point for raising specification tickets (PATCH-NNN, SCREEN-NNN, FEATURE-NNN, etc.) against any project that has a linked specification directory. Each active `workflow_types` row appears as a button per project row. Clicking opens a modal; submitting writes the file to disk and records it in `spec_tickets`.
 

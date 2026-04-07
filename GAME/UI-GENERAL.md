@@ -65,7 +65,7 @@ Each top-level tab navigates to a defined default route when first selected:
 | Tab | Default Route | Notes |
 |-----|--------------|-------|
 | Welcome (🏠) | `/welcome/summary` | Has sub-bar |
-| Prototypes (🚀) | `/prototypes` | Single screen, no sub-bar |
+| Prototypes (🚀) | `/prototypes/list` | Has sub-bar; Prototypes list is the default |
 | Projects (📁) | `/` (Dashboard) | Has sub-bar |
 | Processes (⚙️) | `/processes` | Single screen, no sub-bar |
 | Monitoring (📊) | `/monitoring` | Has sub-bar; Monitoring is the default |
@@ -87,16 +87,31 @@ Visible only when `Welcome` (🏠) is active in the top bar. Renders directly be
 
 Summary is the default sub-tab when Welcome is first selected.
 
+### Prototypes Sub-Bar
+
+Visible only when `Prototypes` (🚀) is active in the top bar. Renders directly below the top bar.
+
+| Element | Position | Behavior |
+|---------|----------|----------|
+| **Prototypes** tab | Left | Links to `/prototypes/list` — prototype list with search. Default. |
+| **Configuration** tab | Left | Links to `/prototypes/configuration` — batch METADATA.md editor |
+| **Validation** tab | Left | Links to `/prototypes/validation` — specification compliance checks |
+| **Maintenance** tab | Left | Links to `/prototypes/maintenance` — Specifications bin/ script runner |
+
+Prototypes (list) is the default sub-tab when Prototypes is first selected.
+
 ### Project Sub-Bar
 
 Visible only when `Projects` is active in the top bar. Renders directly below the top bar. Contains tabs only — no action buttons.
 
 | Element | Position | Behavior |
 |---------|----------|----------|
-| **Dashboard** tab | Left | Links to `/` — default project list |
+| **Dashboard** tab | Left | Links to `/` — default project list. Default. |
 | **Configuration** tab | Left | Links to `/project-config` — batch metadata editor |
+| **Validation** tab | Left | Links to `/project-validation` — compliance checks |
+| **Maintenance** tab | Left | Links to `/project-maintenance` — maintenance-category operations |
 
-Dashboard is the default sub-tab when Projects is first selected. The Dashboard screen carries its own action bar (filter + Rescan) within the page content — see SCREEN-PROJECTS-OVERVIEW.
+Dashboard is the default sub-tab when Projects is first selected. The Dashboard screen carries its own action bar (filter + Rescan) within the page content — see SCREEN-PROJECTS-OVERVIEW. Projects/Workflow has been removed — ticket creation is in the Workflow top-level tab.
 
 ### Monitoring Sub-Bar
 
