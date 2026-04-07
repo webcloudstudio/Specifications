@@ -9,8 +9,23 @@
 
   window.WORKFLOWS = [
     {
+      id: 'decompose', navLabel: 'Decompose',
+      num: 'Workflow #1', title: 'Reverse-Engineering Existing Applications',
+      desc: 'decompose.sh reads an existing project\'s source code, detects the technology stack, and generates an AI prompt that produces structured specification files — METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, and more. The output feeds directly into Workflow #2, bringing unspecified applications under specification control.',
+      mermaid: `flowchart LR${D}
+  PROJ(["Existing Project"]):::dir --> D["decompose.sh"]:::script
+  RE(["RulesEngine/"]):::dir --> D
+  D --> PT(["Prompt"]):::prompt
+  PT --> SPEC(["Specifications/"]):::dir
+  SPEC --> WF2(["Workflow #2 →"]):::output`,
+      learnings: [
+        'Effective for bringing existing applications under specification control without a full rewrite.',
+        'Stack detection (Flask, SQLite, Bootstrap) scopes the relevant technology rules automatically.'
+      ]
+    },
+    {
       id: 'oneshot', navLabel: 'One Shot',
-      num: 'Workflow #1', title: 'Specification Driven Design — One Shot',
+      num: 'Workflow #2', title: 'Specification Driven Design — One Shot',
       desc: 'oneshot.sh validates the specification directory, then concatenates specification files, prompt rules, and stack patterns into a single prompt. The AI agent builds the entire application in one pass. Each build is git-tagged — every prototype is fully traceable to the exact specification state that produced it.',
       mermaid: `flowchart LR${D}
   S1["setup.sh"]:::script --> SPEC(["Specifications/"]):::dir
@@ -39,7 +54,7 @@
     },
     {
       id: 'iterate', navLabel: 'Iterate',
-      num: 'Workflow #2', title: 'Application Iteration',
+      num: 'Workflow #3', title: 'Application Iteration',
       desc: 'Changes flow through specifications, not ad-hoc code edits. iterate.sh assembles pending change tickets (SCREEN-NNN-*, FEATURE-NNN-*, PATCH-NNN-*) into a targeted prompt applied to the existing codebase. Once ready, merge.sh squash-merges the prototype branch into a promoted project.',
       mermaid: `flowchart LR${D}
   DL{{"deployments.jsonl"}}:::md --> S1["iterate.sh"]:::script
@@ -54,8 +69,22 @@
       ]
     },
     {
+      id: 'tran', navLabel: 'Transaction Logs',
+      num: 'Workflow #4', title: 'Capturing Claude Edit Sessions',
+      desc: 'Claude edit sessions for diagnostics and feature changes are automatically captured for updates to your specifications. tran_logger.sh reads the Claude session JSONL and git history, then converts them into numbered specification tickets — PATCH-NNN-* for feature changes and AC-NNN-* for acceptance criteria. Numbered files apply in order, giving reproducible build patterns and the ability to work backwards from code to specification.',
+      mermaid: `flowchart LR${D}
+  DL{{"deployments.jsonl"}}:::md --> TL["tran_logger.sh"]:::script
+  PT([".claude JSONL"]):::dir --> TL
+  GI(["git logs"]):::dir --> TL
+  TL --> SPEC(["Specifications/"]):::dir`,
+      learnings: [
+        'Requires prompting the agent to produce acceptance criteria alongside feature changes.',
+        'Numbered PATCH-NNN-* and AC-NNN-* files give the best reproducible build patterns.'
+      ]
+    },
+    {
       id: 'techrules', navLabel: 'Technology Rules',
-      num: 'Workflow #3', title: 'Technology Rules Propagation',
+      num: 'Workflow #5', title: 'Technology Rules Propagation',
       desc: 'BUSINESS_RULES.md is the source of truth for agent behavior. summarize_rules.sh generates a compact CLAUDE_RULES.md that is injected into every project via ProjectUpdate.sh. All projects share the same behavioral contract, making them interoperable and consistently structured. ProjectValidate.sh verifies compliance by conformity level.',
       mermaid: `flowchart LR${D}
   RULES(["RulesEngine/"]):::dir
@@ -72,7 +101,7 @@
     },
     {
       id: 'speciterate', navLabel: 'Self Iteration',
-      num: 'Workflow #4', title: 'Automated Specification Iteration',
+      num: 'Workflow #6', title: 'Automated Specification Iteration',
       desc: 'spec_iterate.sh uses AI to score specification quality across seven dimensions, identify 1–2 highest-priority gaps, and generate a focused iteration prompt. REFERENCE_GAPS.md and SPEC_SCORECARD.md are updated automatically, closing the loop between specification quality and build quality without manual review.',
       mermaid: `flowchart LR${D}
   GAPS{{"REFERENCE_GAPS.md"}}:::md --> SI["spec_iterate.sh"]:::script
@@ -85,22 +114,8 @@
       ]
     },
     {
-      id: 'tran', navLabel: 'Transaction Logs',
-      num: 'Workflow #5', title: 'Capturing Claude Edit Sessions',
-      desc: 'Claude edit sessions for diagnostics and feature changes are automatically captured for updates to your specifications. tran_logger.sh reads the Claude session JSONL and git history, then converts them into numbered specification tickets — PATCH-NNN-* for feature changes and AC-NNN-* for acceptance criteria. Numbered files apply in order, giving reproducible build patterns and the ability to work backwards from code to specification.',
-      mermaid: `flowchart LR${D}
-  DL{{"deployments.jsonl"}}:::md --> TL["tran_logger.sh"]:::script
-  PT([".claude JSONL"]):::dir --> TL
-  GI(["git logs"]):::dir --> TL
-  TL --> SPEC(["Specifications/"]):::dir`,
-      learnings: [
-        'Requires prompting the agent to produce acceptance criteria alongside feature changes.',
-        'Numbered PATCH-NNN-* and AC-NNN-* files give the best reproducible build patterns.'
-      ]
-    },
-    {
       id: 'document', navLabel: 'Document',
-      num: 'Workflow #6', title: 'Specification-Driven Documentation',
+      num: 'Workflow #7', title: 'Specification-Driven Documentation',
       desc: 'document.sh reads specification files and calls an AI agent (claude -p, sonnet) to curate DOC-*.md summaries for each documentation section. build_project_docs.py then assembles those summaries, along with discovered bin/ scripts, into a Prototyper-style single-page documentation app. The result is a versioned docs/index.html that can be rebuilt on demand from the specification files.',
       mermaid: `flowchart LR${D}
   SPEC(["Specifications/"]):::dir --> D["document.sh"]:::script
@@ -112,21 +127,6 @@
         'Two-phase pipeline keeps AI content generation separate from HTML assembly.',
         'DOC-*.md files persist in the target — human-editable sources for rebuilds.',
         'Spec format warnings in validate.sh and document.sh guide authors toward documentation-ready specifications.'
-      ]
-    },
-    {
-      id: 'decompose', navLabel: 'Decompose',
-      num: 'Workflow #7', title: 'Reverse-Engineering Existing Applications',
-      desc: 'decompose.sh reads an existing project\'s source code, detects the technology stack, and generates an AI prompt that produces structured specification files — METADATA, ARCHITECTURE, DATABASE, SCREEN-*, FEATURE-*, and more. The output feeds directly into Workflow #1, bringing unspecified applications under specification control.',
-      mermaid: `flowchart LR${D}
-  PROJ(["Existing Project"]):::dir --> D["decompose.sh"]:::script
-  RE(["RulesEngine/"]):::dir --> D
-  D --> PT(["Prompt"]):::prompt
-  PT --> SPEC(["Specifications/"]):::dir
-  SPEC --> WF1(["Workflow #1 →"]):::output`,
-      learnings: [
-        'Effective for bringing existing applications under specification control without a full rewrite.',
-        'Stack detection (Flask, SQLite, Bootstrap) scopes the relevant technology rules automatically.'
       ]
     }
   ];
