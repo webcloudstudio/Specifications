@@ -11,6 +11,29 @@ Top bar: `Projects` (active — detail drill-down, not a direct nav item). No pr
 
 This page is navigated to when the gear icon is selected to see details of individual projects.
 
+## Project Navigation
+
+Previous / Next buttons allow the user to move through projects without returning to the Dashboard list.
+
+### Prev / Next Buttons
+
+Rendered in the page header, flanking the project name:
+
+```
+[← Prev Project]   MyApp   [Next Project →]
+```
+
+| Button | Behavior |
+|--------|----------|
+| `← Prev Project` | Navigate to `/project/{prev_id}` — the project with the nearest lower sort position by display name. Disabled if no previous project exists. |
+| `Next Project →` | Navigate to `/project/{next_id}` — the project with the nearest higher sort position by display name. Disabled if no next project exists. |
+
+**Ordering:** Same sort as the Dashboard list (alphabetical by `display_name`, respecting current filter state). Deleted projects are skipped automatically — navigation reads from the current live project list, so gaps are transparent to the user.
+
+**Filter inheritance:** The buttons navigate within the same filter context that brought the user here (passed as `?filter=` query param). If the user arrived from `?filter=all`, Prev/Next include IDEA and ARCHIVED projects. If from `?filter=normal`, they skip those statuses.
+
+**Keyboard:** Left arrow and Right arrow keys activate Prev / Next when no input field is focused.
+
 ## Route
 
 ```

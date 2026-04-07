@@ -1,65 +1,51 @@
 # Screen: Workflow
 
-**Version:** 20260320 V1  
-**Description:** Specification for the Workflow screen
-
-**Kanban board for prototype lifecycle management.** Tracks features and prototypes from idea through implementation to completion. Sources from `spec_tickets` — the same table used by the Projects / Workflow screen, so tickets created there appear here immediately.
+**Version:** 20260407 V2
+**Description:** Ticket-based workflow tracking for project and prototype work. Sub-tabbed screen.
 
 ## Menu Navigation
 
-`Dashboards / Workflow`
+`Workflow` — top-level tab. Sub-bar tabs: `Kanban` (default) | `Add Ticket` | `Manage`
 
-## Route
+## Routes
 
 ```
-GET /workflow
+GET /workflow              → redirects to /workflow/kanban
+GET /workflow/kanban       Kanban board. Default.
+GET /workflow/add          Add Ticket form.
+GET /workflow/manage       Workflow type and label management.
 ```
 
-## Layout
+---
 
-Kanban columns (one per state) spanning the viewport. Filter bar at top: filter by project, tag, priority. New Ticket button.
+## Sub-Tab: Kanban
 
-## States
+Default view. Full-width kanban board of all tickets grouped by state.
 
-Kanban columns map to `spec_tickets.kanban_state`:
+### Action Bar
 
-| State | Meaning |
-|-------|---------|
-| `idea` | First capture, not reviewed |
-| `proposed` | Has summary and plan |
-| `ready` | Has acceptance criteria, scheduled for work |
-| `in_development` | AI session running or recently finished |
-| `testing` | Work complete, human validating |
-| `done` | Accepted |
+Rendered above the board. Client-side filters.
 
-States are fixed. New tickets enter at `idea` regardless of how they were created.
+| Control | Type | Behavior |
+|---------|------|----------|
+| Project filter | Dropdown | Show tickets for one project or all. Default: all. |
+| Type filter | Pill buttons | Filter by workflow type: ALL / PATCH / SCREEN / FEATURE / AC |
+| Priority filter | Pill buttons | Filter by priority: ALL / Low / Medium / High / Critical |
 
-## Ticket Card
+### Board
 
-Each card shows:
+Kanban columns spanning the viewport width. One column per state, fixed order:
 
-| Field | Content | Source |
-|-------|---------|--------|
-| Title | Ticket title, clickable to open detail | `spec_tickets.title` |
-| Type badge | Workflow type pill (PATCH / SCREEN / FEATURE / AC) | `workflow_types.name` via `spec_tickets.workflow_type_id`; omitted if NULL |
-| Project | Project badge (colored by project) | `projects.display_name` |
-| Priority | Low / Medium / High / Critical indicator | `spec_tickets.priority` |
-| Tags | Ticket-level tag pills | `spec_tickets.tags` |
-| File | Filename pill when a specification file has been written | `spec_tickets.filename`; amber if `file_status = pending`, green if `applied` |
-| Age | Time since creation or last transition | `spec_tickets.created_at` |
+| Column | `kanban_state` value | Entry condition |
+|--------|---------------------|-----------------|
+| Idea | `idea` | All new tickets start here |
+| Proposed | `proposed` | Has summary |
+| Ready | `ready` | Has acceptance criteria |
+| In Development | `in_development` | AI session running or recently assigned |
+| Testing | `testing` | Work complete, human validating |
+| Done | `done` | Accepted |
 
-## Ticket Detail (modal or slide-out)
-
-| Section | Content |
-|---------|---------|
-| Title + description | Editable text |
-| State | Current state with transition buttons |
-| Acceptance criteria | Required at READY state |
-| AI Transaction Log | What was decided, what was built, why (populated during IN DEVELOPMENT) |
-| Test notes | Human validation notes (at TESTING) |
-| History | State transition timeline |
-
-## Transitions
+Drag a ticket card between columns to transition state. Validation is enforced on drop:
 
 ```
 IDEA → PROPOSED → READY → IN DEVELOPMENT → TESTING → DONE
@@ -68,46 +54,140 @@ IDEA → PROPOSED → READY → IN DEVELOPMENT → TESTING → DONE
                            PROPOSED ←──────────── (redesign)
 ```
 
-Drag ticket between columns or click state buttons. Validation enforced:
-- IDEA → PROPOSED requires summary
-- PROPOSED → READY requires acceptance criteria
-- IN DEVELOPMENT → TESTING requires work completed
+### Ticket Card
 
-## Prototype Lifecycle View
+| Field | Content | Source |
+|-------|---------|--------|
+| Title | Ticket title — click to open detail | `spec_tickets.title` |
+| Type badge | PATCH / SCREEN / FEATURE / AC pill | `workflow_types.name` |
+| Project | Project badge | `projects.display_name` |
+| Priority | Low / Medium / High / Critical indicator | `spec_tickets.priority` |
+| Age | Time since creation | `spec_tickets.created_at` |
+| File | Filename pill — amber if pending, green if applied | `spec_tickets.filename` |
 
-Filter to a single project to see its prototype lifecycle:
-- All tickets for that project across all states
-- Progress bar showing tickets by state
-- Links to specification files if `has_specs = true`
+### Ticket Detail (slide-out panel)
 
-## AI Integration
+Opens when a card is clicked. Editable in-place.
 
-Tickets in READY state can be submitted to an AI agent for automated implementation. The agent:
-1. Reads ticket description + acceptance criteria
-2. Implements changes
-3. Logs decisions to the AI Transaction Log
-4. Moves ticket to TESTING when done
+| Section | Content |
+|---------|---------|
+| Title | Editable text |
+| Description | Editable markdown body |
+| State | Current state; transition buttons for valid next states |
+| Acceptance criteria | Required before moving to READY |
+| Tags | Editable tag pills |
+| AI Transaction Log | Populated during IN DEVELOPMENT; read-only |
+| History | State transition timeline |
 
-## Interactions
-
-| Action | Trigger | Effect |
-|--------|---------|--------|
-| Create ticket | New Ticket button | Opens creation form |
-| Move ticket | Drag to column | Validates and transitions state |
-| Open detail | Click card | Shows ticket detail |
-| Filter | Project/tag/priority controls | Filters visible cards |
-| Submit to AI | Button on READY tickets | Queues for automated implementation |
-
-## Data Flow
+### Data Flow — Kanban
 
 | Reads | Writes |
 |-------|--------|
-| `spec_tickets` (kanban_state, all columns) | `spec_tickets.kanban_state` (drag / transition) |
-| `workflow_types` (type badge labels) | `spec_tickets.priority`, `tags`, `body` (detail edits) |
-| `projects` (display_name, has_specs) | `ai_decisions` table (during IN DEVELOPMENT) |
-| | `events` table (`ticket_transition`) |
+| `spec_tickets` | `spec_tickets.kanban_state` (drag / transition) |
+| `workflow_types` | `spec_tickets` body, priority, tags (detail edits) |
+| `projects` | `events` table (`ticket_transition`) |
+
+---
+
+## Sub-Tab: Add Ticket
+
+Simple form to create a new ticket. Navigates here from the sub-bar.
+
+### Layout
+
+```
+┌───────────────────────────────────────────────────────┐
+│  Add Ticket                                           │
+│  ─────────────────────────────────────────────────── │
+│                                                       │
+│  Title *                                              │
+│  [ Enter a short title for this ticket             ]  │
+│                                                       │
+│  Project *                                            │
+│  [ Select project ▼                                ]  │
+│                                                       │
+│  Type                                                 │
+│  [ FEATURE ▼  ]                                       │
+│                                                       │
+│  Priority                                             │
+│  ( ) Low  (●) Medium  ( ) High  ( ) Critical          │
+│                                                       │
+│  Description                                          │
+│  [ Multi-line text area                            ]  │
+│  [                                                 ]  │
+│                                                       │
+│  [Save Ticket]   [Clear]                              │
+│                                                       │
+└───────────────────────────────────────────────────────┘
+```
+
+### Fields
+
+| Field | Key | Type | Required | Default |
+|-------|-----|------|----------|---------|
+| Title | `title` | Text input | Yes | — |
+| Project | `project_id` | Dropdown (all projects) | Yes | — |
+| Type | `workflow_type_id` | Dropdown (from `workflow_types`) | No | FEATURE |
+| Priority | `priority` | Radio buttons | No | Medium |
+| Description | `body` | Textarea | No | — |
+
+### Buttons
+
+| Button | Behavior |
+|--------|----------|
+| `Save Ticket` (primary) | POST `/api/tickets`; on success: flash "Ticket created", clear form, redirect to Kanban with new card highlighted. |
+| `Clear` (outline) | Resets all fields to defaults. No writes. |
+
+### Validation
+
+| Rule | Error |
+|------|-------|
+| Title empty | "Title is required." — shown inline below the field. |
+| No project selected | "Select a project." |
+| Title > 120 chars | "Title must be 120 characters or fewer." |
+
+New tickets always enter the board at state `idea`.
+
+### Data Flow — Add Ticket
+
+| Reads | Writes |
+|-------|--------|
+| `projects` (dropdown population) | `spec_tickets` (INSERT) |
+| `workflow_types` (type dropdown) | `events` table (`ticket_created`) |
+
+---
+
+## Sub-Tab: Manage
+
+Metadata management for workflow configuration. Two sections: Workflow Types, Labels.
+
+### Workflow Types
+
+CRUD table for `workflow_types`. Each type maps to a ticket file prefix and a kanban label.
+
+| Column | Content | Editable |
+|--------|---------|----------|
+| Name | Type name (e.g., FEATURE, PATCH) | Yes (inline) |
+| File prefix | Specification file prefix (e.g., `FEATURE-NNN-`) | Yes (inline) |
+| Color | Pill color hex | Yes (color picker) |
+| Active | Toggle on/off | Yes |
+
+Add button: `+ Add Type` — appends a new blank row. Delete: trash icon per row (confirm before delete; blocked if tickets of that type exist).
+
+### Labels / Tags
+
+Manage tag values used on tickets. Simple list: tag name + color. Same inline-edit pattern as workflow types.
+
+### Data Flow — Manage
+
+| Reads | Writes |
+|-------|--------|
+| `workflow_types` | `workflow_types` (INSERT / UPDATE / DELETE) |
+| `ticket_tags` | `ticket_tags` (INSERT / UPDATE / DELETE) |
+
+---
 
 ## Open Questions
 
-- Should DONE tickets auto-archive after a configurable period?
-- How should the AI agent integration be triggered — queue, webhook, or manual?
+- Should the Add Ticket form stay on the Add Ticket sub-tab after saving, or auto-navigate to Kanban?
+- Should DONE tickets auto-archive after a configurable period? (configurable in Manage tab if yes)

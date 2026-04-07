@@ -8,7 +8,7 @@
 
 ## Menu Navigation
 
-`Dashboards / Processes`
+`Processes` — top-level tab, no sub-bar.
 
 ## Route
 

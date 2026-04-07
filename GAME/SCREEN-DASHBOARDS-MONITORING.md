@@ -1,13 +1,13 @@
 # Screen: Monitoring
 
-**Version:** 20260320 V1  
-**Description:** Specification for the Monitoring screen
-
-**Service health dashboard and event timeline.** Polls running services, shows status, alerts on failure.
+**Version:** 20260407 V2
+**Description:** Service health dashboard and interleaved event log for all running projects.
 
 ## Menu Navigation
 
-`Dashboards / Monitoring`
+`Monitoring` — top-level tab. Default sub-tab when Monitoring is selected.
+
+`Monitoring / Monitoring` — sub-bar.
 
 ## Route
 
@@ -17,57 +17,114 @@ GET /monitoring
 
 ## Layout
 
-Two sections: Health Table (top), Event Timeline (bottom).
+Two sections stacked vertically: Health Table (top), Event Log (bottom).
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Health Table                                            │
+│  ──────────────────────────────────────────────────────  │
+│  [project rows with up/down status]                      │
+├──────────────────────────────────────────────────────────┤
+│  Event Log                                               │
+│  [🔍 Filter events...]  [⚠ Warnings] [✖ Errors]         │
+│  ──────────────────────────────────────────────────────  │
+│  Timestamp ▼  | Project     | Severity | Message        │
+│  ────────────────────────────────────────────────────── │
+│  12:34:01     | MyApp       | ERROR    | exit code 1    │
+│  12:33:58     | CoreService | WARN     | slow response  │
+│  12:33:55     | Platform    | INFO     | scan completed │
+│  ...                                                     │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Health Table
 
+Only projects with both `port` and `health_endpoint` appear.
+
 | Column | Source | Content |
 |--------|--------|---------|
-| Project name | `projects.display_name` | Standard row header |
+| Project | `projects.display_name` | Standard row header |
 | Endpoint | `port` + `health_endpoint` | e.g., `localhost:5001/health` |
-| Status | Heartbeat poller | UP (green) / DOWN (red) / UNKNOWN (gray) badge |
+| Status | Heartbeat poller | `UP` (green) / `DOWN` (red) / `UNKNOWN` (gray) badge |
 | Last checked | `heartbeats.last_checked` | Timestamp |
 | Response time | `heartbeats.response_ms` | Milliseconds |
 | Uptime | `heartbeats.uptime_pct` | Rolling 24h percentage |
 
-Only projects with both `port` and `health_endpoint` appear.
+Column headers are clickable to sort. Current sort direction shown with ▲/▼ arrow.
 
-## Event Timeline
+### Alerts
 
-Chronological list of platform events from the `events` table. Each row:
+Banner notification when a service changes state (UP→DOWN or DOWN→UP). Links to the affected project. Snooze suppresses alerts for that service but continues polling.
 
-| Column | Content |
-|--------|---------|
-| Timestamp | When it happened |
-| Project | Which project (or "Platform") |
-| Event | Type + summary (e.g., "operation_completed: Start Server exited 0") |
+---
 
-Filter by project or event type. Most recent events first.
+## Event Log
 
-## Alerts
+Interleaved chronological log of events from all projects that have been started (i.e., have appeared in the process engine since last restart). Reads from the `events` table. Most recent first.
 
-Banner notification when a service changes state (UP→DOWN or DOWN→UP). Links to the affected project.
+### Filter Bar
 
-**States:** `UNKNOWN → UP → DOWN → UP` (cycle). SNOOZED suppresses alerts but continues polling.
+Rendered above the log table. All filters are client-side.
+
+| Control | Type | Behavior |
+|---------|------|----------|
+| Text search | Input (`🔍 Filter events…`) | Substring match on Project + Message fields. Case-insensitive. |
+| Warnings toggle | Checkbox `⚠ Warnings` | Show/hide rows where `severity = WARN`. Default: checked (shown). |
+| Errors toggle | Checkbox `✖ Errors` | Show/hide rows where `severity = ERROR`. Default: checked (shown). |
+
+INFO rows are always shown when no filters exclude them. The combination of checkboxes works as inclusive show/hide (unchecking hides that severity level).
+
+### Log Table
+
+| Column | Source | Content | Sortable |
+|--------|--------|---------|---------|
+| Timestamp | `events.created_at` | `HH:MM:SS` (date shown on date change rows) | Yes — default sort, descending |
+| Project | `events.project_id` → `projects.display_name` | Project name or "Platform" for system events | Yes |
+| Severity | `events.severity` | Colored pill: `INFO` (muted) / `WARN` (amber) / `ERROR` (red) | Yes |
+| Message | `events.summary` | Full event message; truncate at 120 chars with tooltip for rest | No |
+
+Clicking any column header sorts the table by that column. Click again to reverse direction. ▲/▼ arrow shown on active sort column.
+
+### Severity Color Standards
+
+| Severity | Color | Condition |
+|----------|-------|-----------|
+| INFO | Muted gray | Normal operation events |
+| WARN | Amber `#fdab3d` | Slow response, exit code warnings, non-fatal errors |
+| ERROR | Red `#e44258` | Process exits with error, service DOWN, unhandled exceptions |
+
+### Default State
+
+On page load: all severities shown, no text filter, sorted by Timestamp descending. Shows events from all projects that have been started. Limit: 500 rows; older rows require manual scroll or pagination (future).
+
+---
 
 ## Interactions
 
 | Action | Trigger | Effect |
 |--------|---------|--------|
-| Refresh | Button or auto-timer | Re-polls all health endpoints |
-| Snooze | Click on alert | Suppresses alerts for that service |
-| Filter events | Dropdown/text | Filters timeline |
-| Click project | Name link | Navigates to SCREEN-DRILLDOWN-PROJECT |
+| Sort column | Click header | Sorts table by that column; toggles direction |
+| Filter text | Type in search | Filters rows client-side in real time |
+| Toggle severity | Click checkbox | Shows/hides that severity level |
+| Refresh | Button or auto-timer | Reloads health endpoints and appends new events |
+| Snooze alert | Click on alert banner | Suppresses alerts for that service |
+| Click project name | Name link | Navigates to SCREEN-DRILLDOWN-PROJECT |
+
+---
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `projects` (port, health) | `heartbeats` table |
-| HTTP health endpoints | `events` table (state transitions) |
-| Process engine (running state) | Alert notifications |
+| `projects` (port, health_endpoint, display_name) | `heartbeats` table (poll results) |
+| HTTP health endpoints | `events` table (state-change entries) |
+| `events` table (all severity levels, all started projects) | Alert snooze state |
+
+---
 
 ## Open Questions
 
-- What should the polling interval be? Per-project via `health_check_interval` column (default 60s); see FEATURE-HEALTHCHECK.md. No global override needed.
-- Should alerts use browser notifications or just in-page banners? In-page banners only. Browser notification permissions are intrusive; the dashboard is intended for active monitoring sessions.
+- Should the event log auto-append new rows via polling (SSE or HTMX polling), or require a manual refresh?
+- Should the log limit of 500 rows be configurable in Settings?

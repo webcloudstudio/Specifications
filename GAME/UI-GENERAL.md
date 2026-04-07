@@ -34,10 +34,29 @@ Fixed. Present on all screens. Components left to right:
 | Element | Behavior |
 |---------|----------|
 | **Brand** (`cc-brand`) | App name (🎮 icon or command-line symbol). Click → Dashboard (`/`). |
-| **Top-level tabs** | Each tab has an icon before the label. Welcome (🏠), Projects (📁), Dashboards (📊), Publisher (📢), Catalog (📚), Prototypes (🚀). Active tab highlighted. Welcome is leftmost and is the default. |
-| **Documentation button** | Opens `docs/index.html` in new tab. |
-| **Settings** (gear icon) | ⚙️ Settings (far right). Click → activates Settings context and displays Settings sub-bar below. |
+| **Top-level tabs** | Icon + two-line label (see Tab Labels below). Left to right: Welcome, Prototypes, Projects, Processes, Monitoring, Workflow, Publisher, Catalog. Active tab highlighted. Welcome is leftmost and is the default. |
+| **Settings** | ⚙️ gear icon + label "Settings". Far right, before Help. Click → activates Settings context and displays Settings sub-bar. |
+| **Help** | 📖 book icon. Rightmost item. Click → navigates to `/help`. |
 | **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
+
+### Tab Labels
+
+Each top-level tab renders as a vertical stack: icon centered on top, text below in up to two lines. Long names split at a natural word boundary.
+
+| Tab | Icon | Line 1 | Line 2 |
+|-----|------|--------|--------|
+| Welcome | 🏠 | Welcome | |
+| Prototypes | 🚀 | Proto- | types |
+| Projects | 📁 | Projects | |
+| Processes | ⚙️ | Pro- | cesses |
+| Monitoring | 📊 | Monitor- | ing |
+| Workflow | 📋 | Simple | Workflow |
+| Publisher | 📢 | Portfolio | Publisher |
+| Catalog | 📚 | Service | Catalog |
+| Settings | ⚙️ | Settings | |
+| Help | 📖 | Help | |
+
+CSS class: `cc-nav-tab`. Icon in a `cc-nav-icon` span above text in a `cc-nav-label` span. Max tab width: ~80px. Font size for label: 11px.
 
 ### Tab Defaults
 
@@ -46,12 +65,15 @@ Each top-level tab navigates to a defined default route when first selected:
 | Tab | Default Route | Notes |
 |-----|--------------|-------|
 | Welcome (🏠) | `/welcome/summary` | Has sub-bar |
+| Prototypes (🚀) | `/prototypes` | Single screen, no sub-bar |
 | Projects (📁) | `/` (Dashboard) | Has sub-bar |
-| Dashboards (📊) | `/monitoring` | Has sub-bar; Monitoring is the default |
+| Processes (⚙️) | `/processes` | Single screen, no sub-bar |
+| Monitoring (📊) | `/monitoring` | Has sub-bar; Monitoring is the default |
+| Workflow (📋) | `/workflow/kanban` | Has sub-bar; Kanban is the default |
 | Publisher (📢) | `/publisher` | Single screen, no sub-bar |
 | Catalog (📚) | `/servicecatalog` | Single screen, no sub-bar |
-| Prototypes (🚀) | `/prototypes` | Single screen, no sub-bar |
 | Settings (⚙️) | `/settings/general` | Has sub-bar |
+| Help (📖) | `/help` | Single screen, no sub-bar |
 
 ### Welcome Sub-Bar
 
@@ -76,19 +98,28 @@ Visible only when `Projects` is active in the top bar. Renders directly below th
 
 Dashboard is the default sub-tab when Projects is first selected. The Dashboard screen carries its own action bar (filter + Rescan) within the page content — see SCREEN-PROJECTS-OVERVIEW.
 
-### Dashboards Sub-Bar
+### Monitoring Sub-Bar
 
-Visible only when `Dashboards` is active in the top bar. Renders directly below the top bar.
+Visible only when `Monitoring` is active in the top bar. Renders directly below the top bar.
 
 | Element | Position | Behavior |
 |---------|----------|----------|
-| **Monitoring** tab | Left | Links to `/monitoring` — service health and event timeline. Default. |
-| **Processes** tab | Left | Links to `/processes` — live log viewer and process control |
-| **Workflow** tab | Left | Links to `/workflow` — kanban board for prototype lifecycle |
+| **Monitoring** tab | Left | Links to `/monitoring` — service health and event log. Default. |
 | **Scheduler** tab | Left | Links to `/scheduler` — scheduled operations overview |
-| **Service Catalog** tab | Left | Links to `/servicecatalog` — service browser and MCP management |
 
-Monitoring is the default sub-tab when Dashboards is first selected.
+Monitoring is the default sub-tab when Monitoring is first selected.
+
+### Workflow Sub-Bar
+
+Visible only when `Workflow` is active in the top bar. Renders directly below the top bar.
+
+| Element | Position | Behavior |
+|---------|----------|----------|
+| **Kanban** tab | Left | Links to `/workflow/kanban` — kanban board. Default. |
+| **Add Ticket** tab | Left | Links to `/workflow/add` — ticket creation form |
+| **Manage** tab | Left | Links to `/workflow/manage` — workflow types and label configuration |
+
+Kanban is the default sub-tab when Workflow is first selected.
 
 ### Settings Sub-Bar
 
