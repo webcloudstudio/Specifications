@@ -1,10 +1,10 @@
 # Screen: Service Catalog
 
-**Version:** 20260323 V1
+**Version:** 2026-04-06 V2
 **Row structure from:** SCREEN-DEFAULT (status badge, icon, project name — row header only; does not use Baseline table or filter button)
-**Description:** Specification for the Service Catalog screen — browse exposed API endpoints, fire scripts, and stream logs
+**Description:** Specification for the Service Catalog screen — browse services, fire scripts, stream logs, manage MCP servers, and monitor queues
 
-API-oriented view of all projects and their registered scripts. Each project shows its endpoint surface; scripts can be run directly from the screen. Active and past runs are visible inline with live log output.
+Service-oriented view of the platform. Shows all registered services (platform and project-provided) across all transports: REST, CLI, MCP, async queue, and web UI. Each service shows its tools, available transports, and operational status. Scripts can be run directly. MCP servers can be started, stopped, and exposed. Queue depths are visible at a glance.
 
 ## Menu Navigation
 
@@ -18,76 +18,127 @@ GET /servicecatalog
 
 ## Layout
 
-Two-panel. Left: project list (accordion). Right: detail panel for the selected project.
+Three-panel. Left: service list (grouped). Top-right: service detail. Bottom-right: activity feed (recent runs, queue drains, MCP events).
 
 ```
-┌─────────────────────┬──────────────────────────────────────────┐
-│  Project List       │  Project: My App                         │
-│  ─────────────────  │  Port: 5001  Health: /health  ACTIVE     │
-│  ▶ My App           │  ─────────────────────────────────────── │
-│  ▶ Other Project    │  Scripts                                  │
-│  ...                │  start   service   POST /api/myapp/run/.. │
-│                     │  test    local     POST /api/myapp/run/.. │
-│                     │  ─────────────────────────────────────── │
-│                     │  Active Runs        Recent Runs           │
-│                     │  start  RUNNING     deploy  done 2m ago   │
-└─────────────────────┴──────────────────────────────────────────┘
+┌──────────────────────┬──────────────────────────────────────────┐
+│  Services            │  Service: Batch Runner                    │
+│  ──────────────────  │  Platform service  v1.0.0                 │
+│                      │  Transports: REST CLI MCP                 │
+│  PLATFORM SERVICES   │  ──────────────────────────────────────── │
+│  ● Batch Runner      │  Tools                                    │
+│  ● Workflow          │  run_script  POST /api/services/batch-r.. │
+│  ● AsyncQueue        │  run_status  GET  /api/services/batch-r.. │
+│                      │  run_log     GET  /api/services/batch-r.. │
+│  PROJECT SERVICES    │  ──────────────────────────────────────── │
+│  ▶ MyApp             │  Active Runs        Recent Runs           │
+│    ● pricing (MCP)   │  deploy  RUNNING    test  done 2m ago     │
+│  ▶ Other Project     │                                           │
+│    ● sync (REST)     ├──────────────────────────────────────────┤
+│                      │  Activity                                 │
+│  ℹ Button Key        │  14:02 batch-runner/run_script myapp/dep  │
+│                      │  14:01 async-queue/drain voice (3 msgs)   │
+│                      │  13:58 workflow/transition ticket-42 →test │
+└──────────────────────┴──────────────────────────────────────────┘
 ```
 
-On narrow viewports: project list collapses to a selector dropdown; detail panel takes full width.
+On narrow viewports: service list collapses to a selector dropdown; panels stack vertically.
 
-## Project List (left panel)
+## Help Icon and Button Key
 
-Sorted by name. Each row:
+A help icon (ℹ circle-info) is pinned at the bottom of the left panel. Clicking it opens a popover with a legend explaining the colored indicators used throughout the screen:
+
+| Indicator | Meaning |
+|-----------|---------|
+| Green dot (●) | Service healthy / MCP server running |
+| Yellow dot (●) | Service degraded / queue has pending items |
+| Red dot (●) | Service error / MCP server failed |
+| Gray dot (●) | Service stopped / not monitored |
+| Blue badge | REST transport available |
+| Green badge | CLI transport available |
+| Purple badge | MCP transport available |
+| Orange badge | Async transport available |
+| Pulsing ring | Operation currently running |
+
+The popover also shows a compact transport legend:
+- **REST** — call via HTTP from any language
+- **CLI** — call via `game-cli` from bash scripts
+- **MCP** — call from Claude or other AI agents
+- **Async** — submit to file queue, processed on drain
+
+The help icon badge shows "?" and is always visible. Dismiss popover by clicking outside or pressing Escape.
+
+## Service List (left panel)
+
+Grouped by source: **Platform Services** (from GAME), then **Project Services** (from managed projects, grouped by project name as collapsible sections).
+
+Each service row:
 
 | Element | Content |
 |---------|---------|
-| Status badge | `projects.status` |
-| Icon + name | `projects.display_name` |
-| Script count | Number of registered scripts (dim badge) |
-| Health indicator | Green dot if UP, red if DOWN, gray if unmonitored |
+| Health dot | Colored indicator (see Button Key) |
+| Service name | From manifest `display_name` or `name` |
+| Transport badges | Small colored pills showing enabled transports |
+| Type label | `(MCP)` / `(REST)` / `(Queue)` for project services — dim text |
 
-Clicking a row loads the detail panel for that project. Selected row highlighted. No filter bar — project count is manageable.
+Clicking a service loads the detail panel. Selected row highlighted.
 
-## Detail Panel (right panel)
+## Detail Panel (top-right)
 
-### Project Header
+### Service Header
 
 | Field | Source |
 |-------|--------|
-| Display name | `projects.display_name` |
-| Status badge | `projects.status` |
-| Port | `projects.port` |
-| Health path | `projects.health_endpoint` |
-| Base URL | `http://localhost:{port}` (link, opens new tab) |
-| Last scanned | `projects.last_scanned` |
+| Service name | `services.display_name` or `services.name` |
+| Source | "Platform service" or "Project: {name}" |
+| Version | From manifest |
+| Description | From manifest |
+| Transport badges | Colored badges for each enabled transport with labels |
 
-Rescan button (small, top-right): triggers `POST /api/scan` for this project only, then refreshes the panel.
+### Tools Table
 
-### Scripts Table
-
-One row per registered operation for this project.
+One row per tool defined in the service manifest.
 
 | Column | Content |
 |--------|---------|
-| Name | `operations.name` |
-| Category | Badge: service / local / maintenance |
-| Endpoint | `POST /api/{name}/run/{script}` — click to copy |
-| Timeout | `operations.timeout` (seconds; dim if not set) |
-| Last Run | Relative time + status badge of most recent `op_runs` row |
-| Actions | **Run** button; **Log** button (shown when last run exists) |
+| Name | Tool name |
+| Description | One-line description from manifest |
+| Endpoint | REST path (click to copy curl command) |
+| CLI | `game-cli {service} {tool}` (click to copy) |
+| Actions | **Try** button (opens inline form with input fields from schema) |
 
-**Curl copy:** Clicking the endpoint cell copies `curl -X POST http://localhost:{GAME_PORT}/api/{name}/run/{script}` to clipboard. Toast confirmation.
+**Try button behavior:**
+1. Opens an inline form below the tool row with input fields generated from the tool's input schema
+2. User fills in required fields
+3. Submit fires `POST /api/services/{service}/{tool}` with the form data as JSON
+4. Response shown inline below the form
+5. For batch-runner tools: response includes run_id and auto-opens the active run tracker
+
+### MCP Controls (shown only for MCP-enabled services)
+
+| Element | Content |
+|---------|---------|
+| MCP Status | Running / Stopped / Error badge |
+| Expose toggle | Switch: exposed (network port) vs. unexposed (stdio only) |
+| Port | Assigned port when exposed |
+| Config snippet | "Copy Config" button — copies `.mcp.json` snippet to clipboard |
+| Start / Stop | Buttons to manage the MCP server process |
+
+### Queue Status (shown only for async-enabled services or AsyncQueue itself)
+
+| Element | Content |
+|---------|---------|
+| Queue name(s) | List of queues this service reads from |
+| Pending | Count of pending messages |
+| Processing | Count of currently processing messages |
+| Last drained | Timestamp of last drain |
+| Drain button | Triggers `POST /api/services/async-queue/drain?queue={name}` |
 
 ### Run Controls
 
-**Run button behavior:**
-1. Fires `POST /api/{name}/run/{script}`
-2. Button changes to `Running…` with spinner
-3. Inline status row appears below the script row (see Active Run Row below)
-4. Button remains disabled until run completes or is stopped
+Same as V1: Run button fires scripts, inline status row shows active runs with polling, View Log opens the log drawer. No changes to existing behavior.
 
-**Active Run Row** (inline, below the triggering script row):
+### Active Run Row (inline, below the triggering tool row)
 
 | Element | Content |
 |---------|---------|
@@ -95,62 +146,75 @@ One row per registered operation for this project.
 | Status badge | Polls `GET /api/runs/{run_id}` every 2 seconds; badge cycles RUNNING → DONE / ERROR / STOPPED |
 | Duration | Elapsed seconds (live) |
 | Stop button | `POST /api/runs/{run_id}/stop` — shown only while RUNNING |
-| View Log button | Opens log drawer (see below) |
-
-Polling stops when status leaves `running`. Badge color: blue = running, green = done, red = error, gray = stopped.
+| View Log button | Opens log drawer |
 
 ### Log Drawer
 
-Slide-in panel from the right (or bottom on narrow screens). Opens when "View Log" is clicked.
+Slide-in panel from the right (or bottom on narrow screens). Same as V1:
 
 | Element | Content |
 |---------|---------|
-| Header | Project name + script name + run ID + status badge |
+| Header | Service name + tool name + run ID + status badge |
 | Log area | Monospace, scrollable, auto-scrolls while RUNNING |
-| Source | `GET /api/runs/{run_id}/log` — fetched on open; re-fetched every 3 seconds while RUNNING |
+| Source | `GET /api/runs/{run_id}/log` — re-fetched every 3 seconds while RUNNING |
 | Stop button | Shown while RUNNING |
 | Close | X button or Escape |
-| Download | Downloads log as `.log` file (full content) |
-
-Live update stops when status leaves `running`.
+| Download | Downloads log as `.log` file |
 
 ### Recent Runs
 
-Below the scripts table. Last 10 runs across all scripts for this project.
+Below the tools table. Last 10 runs for this service (across all tools).
 
 | Column | Content |
 |--------|---------|
-| Script | Script name |
+| Tool | Tool name |
 | Status | Badge |
 | Started | Relative time |
 | Duration | Seconds |
 | Exit | Exit code |
-| Log | Link to open log drawer for that run |
+| Log | Link to open log drawer |
+
+## Activity Feed (bottom-right panel)
+
+Chronological feed of recent service activity across all services. Sources:
+- Batch Runner: operation started/completed/failed
+- Workflow: state transitions
+- AsyncQueue: drain events, message submissions
+- MCP: server started/stopped/exposed
+
+Each entry: timestamp, service name, tool name, one-line summary. Clicking an entry navigates to the relevant service detail.
+
+Auto-refreshes every 10 seconds. Shows last 50 entries. Filter dropdown: All / Batch Runner / Workflow / Queue / MCP.
 
 ## Interactions
 
 | Action | Trigger | Effect |
 |--------|---------|--------|
-| Select project | Click row | Loads detail panel (HTMX swap) |
-| Run script | Click Run | POST fire → inline status row |
-| Stop run | Click Stop | POST stop → status updates to stopped |
+| Select service | Click row | Loads detail panel (HTMX swap) |
+| Try tool | Click Try | Opens inline form with schema-driven inputs |
+| Run script | Click Run on batch-runner tool | POST fire → inline status row |
+| Stop run | Click Stop | POST stop → status updates |
 | View log | Click View Log | Opens log drawer |
 | Copy endpoint | Click endpoint cell | Copies curl command to clipboard |
-| Rescan project | Rescan button | POST /api/scan → refreshes panel |
-| Download log | Download button | Browser download of log file |
+| Copy CLI | Click CLI cell | Copies game-cli command to clipboard |
+| Copy MCP config | Copy Config button | Copies .mcp.json snippet |
+| Expose MCP | Toggle expose switch | POST expose → starts MCP server on port |
+| Drain queue | Drain button | POST drain → processes pending messages |
+| View help | Click ℹ icon | Opens button key popover |
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `GET /api/catalog` (initial load) | `POST /api/{name}/run/{script}` (fire) |
-| `GET /api/runs/{run_id}` (polling) | `POST /api/runs/{run_id}/stop` (stop) |
-| `GET /api/runs/{run_id}/log` (log) | `POST /api/scan` (rescan) |
-
-Screen uses HTMX for project selection / panel swaps. Run controls and polling use plain JS fetch (JSON API, not HTMX fragments).
+| `services` table (all active) | `op_runs` (via batch-runner) |
+| `service_tools` table | `mcp_servers` (expose/unexpose/start/stop) |
+| `mcp_servers` table (status, port) | `events` (service activity) |
+| `op_runs` (recent runs) | Queue files (drain) |
+| Queue files (pending counts) | |
+| `events` (activity feed) | |
 
 ## Open Questions
 
-- Should the log drawer support text search within output? Yes — add a search input that highlights matching lines. Can reuse the same pattern as the Processes screen log viewer when that feature is added.
-- Should the screen auto-select the first project on load? Start with panel empty. The left panel is the navigation; forcing a selection is disorienting on first visit.
-- Should active runs from other sessions appear in Active Runs? Yes — the Active Runs section shows all `op_runs` rows with `status = running` for this project regardless of origin session. Curl-initiated runs appear here the same as UI-initiated ones.
+- Should the Try button support saving and replaying tool invocations (like Postman collections)? Useful for repeated testing. Could store saved invocations in a `service_invocations` table.
+- Should the Activity Feed support WebSocket or SSE for real-time updates instead of polling? Polling is simpler but misses events between refreshes.
+- Should project services be auto-collapsed in the left panel, or expanded by default? Auto-collapsed if there are more than 5 projects to avoid overwhelming the list.
