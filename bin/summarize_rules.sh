@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Summarize Rules
-# Category: maintenance
+# Category: Workflow
 # Rules: RulesEngine/BUSINESS_RULES.md, RulesEngine/CLAUDE_RULES.md
 
 # Generates a prompt for an AI agent to regenerate RulesEngine/CLAUDE_RULES.md

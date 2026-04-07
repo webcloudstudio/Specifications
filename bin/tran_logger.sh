@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Transaction Logger
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Prompt: prompts/oneshot_prototype_rules.md
 

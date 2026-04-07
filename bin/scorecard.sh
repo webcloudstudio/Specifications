@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Scorecard
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Rules: RulesEngine/BUSINESS_RULES.md
 

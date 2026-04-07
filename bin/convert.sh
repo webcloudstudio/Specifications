@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Convert Specs
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Prompt: prompts/oneshot_build_rules.md
 # Rules: RulesEngine/stack/*.md

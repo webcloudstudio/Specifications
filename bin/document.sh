@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Document
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Prompt: prompts/document.md
 

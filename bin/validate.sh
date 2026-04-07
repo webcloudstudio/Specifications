@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Validate Spec
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 
 # Validates a specification directory inside this repo for completeness and correctness.

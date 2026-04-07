@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: OneShot
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Prompt: prompts/oneshot_build_rules.md, prompts/oneshot_prototype_rules.md, prompts/oneshot_documentation.md
 # Rules: RulesEngine/CLAUDE_RULES.md, RulesEngine/stack/*.md

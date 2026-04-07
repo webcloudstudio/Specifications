@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Project Validate
-# Category: maintenance
+# Category: Global
 # Args: Project
 #
 # Verify a promoted code project against CLAUDE_RULES compliance criteria.

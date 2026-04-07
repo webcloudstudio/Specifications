@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Setup Spec
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 
 # Scaffolds a new specification directory inside this repo from templates,

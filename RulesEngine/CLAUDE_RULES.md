@@ -75,7 +75,7 @@ The `# Args:` line lists positional arguments in order, comma-separated. Include
 ```bash
 #!/bin/bash
 # CommandCenter Operation
-# Category: service
+# Category: Operations
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
 # your start command — use $PORT for the service port
@@ -89,7 +89,7 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 ```python
 #!/usr/bin/env python3
 # CommandCenter Operation
-# Category: maintenance
+# Category: Workflow
 import sys, os; sys.path.insert(0, os.path.dirname(__file__)); from common import op
 
 def main(ctx):

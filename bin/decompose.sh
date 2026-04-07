@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Decompose Project
-# Category: Operations
+# Category: Workflow
 # Prompt: prompts/oneshot_build_rules.md
 # Rules: RulesEngine/stack/*.md
 #

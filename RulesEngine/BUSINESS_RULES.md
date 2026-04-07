@@ -152,12 +152,20 @@ The following fields are recognized in the first 20 lines of any `bin/` file car
 |-------|----------|-------|
 | `# CommandCenter Operation` | Yes — marker | Registers the file in the service catalog. Must appear within the first 20 lines. |
 | `# Name:` | Yes | Display name used in GAME and the service catalog. Use the Name String from the Standard Script Names table if applicable. |
-| `# Category:` | Yes | Operational category: `Operations`, `maintenance`, or `service`. |
+| `# Category:` | Yes | Operational category: `Operations`, `Workflow`, or `Global` (see Category Definitions below). |
 | `# Description:` | Required for programmatically called scripts | One-line summary of what the script does. Mandatory for any script that may be invoked by a scheduler, orchestrator, or external platform. |
 | `# Args:` | Required if positional arguments exist | Positional arguments in order, comma-separated. Omit if none. |
 | `# Port:` | Required if script binds or exposes a port | The port number the script listens on or uses. |
 
 Scripts that may be called programmatically (schedulers, orchestrators, GAME) MUST include `# Description:` and `# Args:` (if applicable) so callers can discover the contract without reading the body.
+
+**Category Definitions**
+
+| Category | Rule | Examples |
+|----------|------|---------|
+| `Operations` | Standard lifecycle scripts: `start.sh`, `stop.sh`, `build.sh`, `test.sh`, `build_documentation.sh`. Use this exact category for these exact filenames regardless of project. | start.sh, stop.sh, build.sh, test.sh, build_documentation.sh |
+| `Global` | Scripts whose filename begins with a capital letter. These scripts modify files or state in repositories other than their own — the capital letter is a visual signal that the script reaches outside its project boundary. | GitCommit.sh, ProjectUpdate.sh, ProjectValidate.sh |
+| `Workflow` | All other `bin/` scripts that are not a Standard Script Name and do not start with a capital letter. Includes data processing, specification tools, one-off automation, and anything that operates only within the project's own directory. | iterate.sh, scorecard.sh, photo_analyze.sh, validate.sh |
 
 ### HAS_TEST_SCRIPT
 **Scope:** scripts
@@ -225,7 +233,7 @@ The canonical `common.sh` template follows this order: METADATA.md fields → ve
 ```bash
 #!/bin/bash
 # CommandCenter Operation
-# Category: service
+# Category: Operations
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
 # your start command — use $PORT for the service port
@@ -244,7 +252,7 @@ source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 ```python
 #!/usr/bin/env python3
 # CommandCenter Operation
-# Category: maintenance
+# Category: Workflow
 import sys, os; sys.path.insert(0, os.path.dirname(__file__)); from common import op
 
 def main(ctx):

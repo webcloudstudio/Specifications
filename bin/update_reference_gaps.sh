@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Gap Analysis
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Prompt: prompts/update_reference_gaps.md
 

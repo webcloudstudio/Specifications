@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Project Update
-# Category: maintenance
+# Category: Global
 # Args: Project
 #
 # Update a promoted code project with the latest CLAUDE_RULES and templates.

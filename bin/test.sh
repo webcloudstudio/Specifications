@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Test Specs
-# Category: maintenance
+# Category: Operations
 
 # Runs unit tests on the specification system itself.
 # Verifies that templates, scripts, and global rules are intact.

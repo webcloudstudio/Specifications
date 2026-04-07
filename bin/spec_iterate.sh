@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Spec Iterate
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 # Prompt: prompts/spec_iterate.md
 # Rules: RulesEngine/BUSINESS_RULES.md

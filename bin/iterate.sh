@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Iterate
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 
 # Generates a focused iteration prompt combining:

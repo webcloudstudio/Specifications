@@ -1,7 +1,7 @@
 #!/bin/bash
 # CommandCenter Operation
 # Name: Merge
-# Category: maintenance
+# Category: Workflow
 # Args: Spec
 #
 # Squash-merges a Feature Branch into the base branch and deletes the feature branch.
