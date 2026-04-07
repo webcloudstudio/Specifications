@@ -93,6 +93,7 @@ Specifications/
   GAME/                            Project specification (GAME dashboard)
   archive/                         Superseded documents — not current spec
   docs/                            Generated documentation (index.html, Features.html, white-paper.html)
+  prompts/                         Prompt templates for agent scripts — one prompts/abc.md per bin/abc.sh that calls claude -p
 ```
 
 **Reference standards in RulesEngine/ (not auto-distributed):**

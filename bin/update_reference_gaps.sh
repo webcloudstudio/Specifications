@@ -16,7 +16,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROMPT_FILE="$REPO_DIR/bin/update_reference_gaps.md"
+PROMPT_FILE="$REPO_DIR/prompts/update_reference_gaps.md"
 
 POSITIONAL=""
 for arg in "$@"; do
