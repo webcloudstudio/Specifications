@@ -1,7 +1,7 @@
 # Documentation Build Standard
 
-**Version:** 20260402 V2
-**Scope:** All projects — defines how documentation is built, structured, and published.
+**Version:** 20260407 V1
+**Description:** Build standards for project documentation — output patterns, source files, portability, and script conventions.
 
 ---
 
@@ -118,7 +118,7 @@ The sidebar (dynamic content, script discovery, project listing) lives only in `
 Sub-pages use the header bar for consistent chrome and inter-page navigation.
 
 **Readability rule:** dark text on light backgrounds, white text on dark backgrounds — always.
-Never use `--c-text`, `--c-h1`, or `--c-h3` on a dark surface. See `DOCUMENTATION_BRANDING.md`
+Never use `--c-text`, `--c-h1`, or `--c-h3` on a dark surface. See `BRANDING.md`
 for the full readability contract.
 
 ---
@@ -172,7 +172,7 @@ Everything needed is inside `docs/` — styles, images, projects/, index.html.
 
 ## Theming
 
-See `RulesEngine/DOCUMENTATION_BRANDING.md` for the full color/typography standard.
+See `RulesEngine/BRANDING.md` for the full color/typography standard.
 
 Default theme for new projects: **slate** (charcoal sidebar, teal accent, warm off-white content).
 

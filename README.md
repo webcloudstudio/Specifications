@@ -34,11 +34,11 @@ bash bin/summarize_rules.sh > rules-prompt.md
 
 ```
 Specifications/
-  RulesEngine/                     Agent rules, stack patterns, branding, spec templates
+  RulesEngine/                     Governance standards — rules, branding, process
     BUSINESS_RULES.md              Source for CLAUDE_RULES.md — edit here, then regenerate
     CLAUDE_RULES.md                Generated agent behavior contract (injected into projects)
-    CONVERT.md                     Spec expansion rules (concise → detailed)
-    DOCUMENTATION_BRANDING.md      Color variables, typography, theme standards
+    BRANDING.md                    Color variables, typography, theme standards
+    PROTOTYPE_PROCESS.md           Lifecycle state machine (build and iteration workflow)
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
     spec_template/                 Template files for setup.sh
     templates/                     Canonical common.sh and common.py for code projects

@@ -1,7 +1,7 @@
 # Business Rules
 
-**Version:** 20260330 V4
-**Description:** Source for CLAUDE_RULES.md — edit here, then regenerate via `bin/summarize_rules.sh`.
+**Version:** 20260407 V1
+**Description:** Master source for agent behavior rules — edit here, then regenerate CLAUDE_RULES.md via `bin/summarize_rules.sh`.
 
 ---
 

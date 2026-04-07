@@ -1,7 +1,7 @@
 # Prototype Iteration Rules
 
-**Version:** 20260323 V1
-**Purpose:** Agent behavior rules for iterating oneshot-built prototypes. Injected by oneshot.sh into prototype AGENTS.md.
+**Version:** 20260407 V1
+**Description:** Agent behavior rules for iterating oneshot-built prototypes. Injected by oneshot.sh into prototype AGENTS.md.
 
 > These rules are ONLY active when working in a prototype directory built by oneshot.sh. They enable the specification feedback loop.
 

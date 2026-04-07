@@ -3,6 +3,8 @@
 # Name: Convert Specs
 # Category: maintenance
 # Args: Spec
+# Prompt: prompts/oneshot_build_rules.md
+# Rules: RulesEngine/stack/*.md
 
 # Generates a conversion prompt: concise project specs + ONESHOT_BUILD_RULES.md expansion rules + stack files.
 # Feed the output to an AI agent to get detailed, implementation-ready specifications.
@@ -33,7 +35,7 @@ if [ ! -d "$PROJECT_DIR" ]; then
 fi
 
 METADATA_FILE="$PROJECT_DIR/METADATA.md"
-CONVERT_FILE="$REPO_DIR/RulesEngine/ONESHOT_BUILD_RULES.md"
+CONVERT_FILE="$REPO_DIR/prompts/oneshot_build_rules.md"
 
 if [ ! -f "$METADATA_FILE" ]; then
     echo "ERROR: METADATA.md not found at $METADATA_FILE" >&2
@@ -96,7 +98,7 @@ HEADER
 # --- Conversion Rules ---
 echo "# CONVERSION RULES"
 echo ""
-emit_file "$CONVERT_FILE" "ONESHOT_BUILD_RULES.md (RulesEngine/ONESHOT_BUILD_RULES.md)"
+emit_file "$CONVERT_FILE" "Specification Conversion Rules (prompts/oneshot_build_rules.md)"
 
 # --- Stack References ---
 echo "# STACK REFERENCES"

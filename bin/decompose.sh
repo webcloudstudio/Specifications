@@ -2,6 +2,8 @@
 # CommandCenter Operation
 # Name: Decompose Project
 # Category: Operations
+# Prompt: prompts/oneshot_build_rules.md
+# Rules: RulesEngine/stack/*.md
 #
 # Reverse-engineer an existing project into specification files.
 # Reads source code, detects the technology stack, and generates
@@ -184,14 +186,15 @@ README.md, and IDEAS.md) must end with \`## Open Questions\` (leave empty if non
 PROMPT_HEADER
 
 # ── Include specification expansion rules for format reference ────────────────
-if [ -f "$RULES_ENGINE/ONESHOT_BUILD_RULES.md" ]; then
+ONESHOT_RULES="$PROJECT_DIR/prompts/oneshot_build_rules.md"
+if [ -f "$ONESHOT_RULES" ]; then
   echo ""
   echo "---"
   echo ""
-  echo "## Specification Format Reference (ONESHOT_BUILD_RULES.md)"
+  echo "## Specification Format Reference (prompts/oneshot_build_rules.md)"
   echo ""
   echo '```markdown'
-  cat "$RULES_ENGINE/ONESHOT_BUILD_RULES.md"
+  cat "$ONESHOT_RULES"
   echo '```'
 fi
 

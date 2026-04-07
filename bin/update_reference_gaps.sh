@@ -3,6 +3,7 @@
 # Name: Gap Analysis
 # Category: maintenance
 # Args: Spec
+# Prompt: prompts/update_reference_gaps.md
 
 # Runs gap analysis comparing spec vs prototype vs reference implementation.
 # Uses claude -p (subscription, not API tokens).

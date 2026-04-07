@@ -3,6 +3,7 @@
 # Name: Transaction Logger
 # Category: maintenance
 # Args: Spec
+# Prompt: prompts/oneshot_prototype_rules.md
 
 # Reads the session transaction log and updates iteration feedback files.
 # Analyzes recent prototype activity (git history + Claude Code session logs)
@@ -152,7 +153,7 @@ if [ "$NEW_SESSIONS" -eq 0 ] && [ -z "$SESSION_CONTENT" ]; then
 fi
 
 # Build the prompt
-PROTOTYPE_RULES="$(cat "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" 2>/dev/null || true)"
+PROTOTYPE_RULES="$(cat "$REPO_DIR/prompts/oneshot_prototype_rules.md" 2>/dev/null || true)"
 
 PROMPT=$(cat <<END_PROMPT
 ${PROTOTYPE_RULES}

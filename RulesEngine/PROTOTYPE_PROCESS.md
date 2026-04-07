@@ -1,7 +1,7 @@
 # Prototype Process Specification
 
-**Version:** 20260324 V3
-**Authority:** Single definitive reference for the prototype build and iteration workflow.
+**Version:** 20260407 V1
+**Description:** Single definitive reference for the prototype build and iteration workflow.
 
 **Location convention used in this document:**
 - `Specifications/<PROJECT>/` — specification files (this repo)

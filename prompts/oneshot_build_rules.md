@@ -1,6 +1,6 @@
 # Specification Conversion Rules
 
-**Version:** 20260320 V1  
+**Version:** 20260407 V1
 **Description:** Rules for expanding concise specification files into implementation-ready detailed specifications
 
 **How to expand concise project specifications into detailed, implementation-ready specifications.**

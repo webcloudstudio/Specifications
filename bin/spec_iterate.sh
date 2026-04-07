@@ -3,6 +3,8 @@
 # Name: Spec Iterate
 # Category: maintenance
 # Args: Spec
+# Prompt: prompts/spec_iterate.md
+# Rules: RulesEngine/BUSINESS_RULES.md
 
 # AI-powered specification gap analysis and iteration planning.
 # Calls claude -p (subscription, not API tokens) to:

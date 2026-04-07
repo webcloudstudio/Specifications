@@ -8,9 +8,9 @@
 
 This repository has two roles:
 
-1. **Global standards** (`RulesEngine/`) — distributing CLAUDE_RULES.md, ONESHOT_BUILD_RULES.md,
-   templates (common.sh, common.py), stack reference patterns, and branding standards
-   to every project via `bin/create_project.py`.
+1. **Global standards** (`RulesEngine/` + `prompts/`) — distributing CLAUDE_RULES.md,
+   templates (common.sh, common.py), stack reference patterns, branding standards,
+   and prompt content to every project via `bin/create_project.py`.
 2. **Project specifications** (`GAME/`, etc.) — concise
    specs organized by screen, feature, and component that define what to build.
 
@@ -30,7 +30,7 @@ The platform (GAME) then discovers and integrates projects automatically by read
 the same standards (METADATA.md, bin/ headers, AGENTS.md).
 
 **Specification methodology:** You write concise specifications (tables, bullets, short descriptions).
-ONESHOT_BUILD_RULES.md defines expansion rules. Stack files define technology patterns. The build
+`prompts/oneshot_build_rules.md` defines expansion rules. Stack files define technology patterns. The build
 pipeline combines everything into a single prompt an AI agent can execute.
 
 **Word choice:** Use "specification" in preference to "spec" in documentation, comments, and prose. "spec" is only acceptable in program/script names (e.g. `spec_iterate.sh`) and directory suffix conventions where brevity matters.
@@ -39,7 +39,7 @@ pipeline combines everything into a single prompt an AI agent can execute.
 - BUSINESS_RULES.md is the source for agent behavioral rules — full rationale lives there
 - CLAUDE_RULES.md is generated from BUSINESS_RULES.md via `bin/summarize_rules.sh` — never edit it directly
 - Keep CLAUDE_RULES.md minimal — agents follow rules, they don't need rationale
-- ONESHOT_BUILD_RULES.md defines how concise specs expand — methodology lives here, not in project dirs
+- `prompts/oneshot_build_rules.md` defines how concise specs expand — methodology is shared, not per-project
 - Stack files are prescriptive — copy-paste patterns, not guidelines
 - When rules or templates change, run `bash bin/update_projects.sh` to propagate
 
@@ -56,14 +56,11 @@ You are acting as a QA gate, not an executor. The goal is to arrive at correct, 
 
 ```
 Specifications/
-  RulesEngine/                    Global standards distributed to all projects
+  RulesEngine/                    Governance standards distributed to all projects
     BUSINESS_RULES.md              Source for agent behavior rules — edit this, not CLAUDE_RULES.md
     CLAUDE_RULES.md                Generated agent behavior contract (injected into AGENTS.md)
-    CLAUDE_PROTOTYPE.md            Agent behavior contract for prototype-phase projects
-    ONESHOT_BUILD_RULES.md         Specification expansion rules (global methodology)
-    DOCUMENTATION.md               Documentation build standard (output structure, themes)
-    DOCUMENTATION_BRANDING.md      Documentation theming and color standards
-    PROTOTYPE_PROCESS.md           Prototype workflow process guide (sourced by docs)
+    BRANDING.md                    Color variables, typography, and layout standards
+    PROTOTYPE_PROCESS.md           Lifecycle state machine (build and iteration workflow)
     stack/                         Prescriptive tech patterns (flask.md, sqlite.md, ...)
     spec_template/                 Template files for setup.sh
     templates/                     Canonical common.sh and common.py (code projects)
@@ -93,15 +90,16 @@ Specifications/
   GAME/                            Project specification (GAME dashboard)
   archive/                         Superseded documents — not current spec
   docs/                            Generated documentation (index.html, Features.html, white-paper.html)
-  prompts/                         Prompt templates for agent scripts — one prompts/abc.md per bin/abc.sh that calls claude -p
+  prompts/                         All prompt content consumed by bin/ scripts (templates + rules embedded in AI prompts)
 ```
 
 **Reference standards in RulesEngine/ (not auto-distributed):**
-- `DOCUMENTATION_BRANDING.md` — color variables, typography, theme standards. Not auto-distributed; projects copy patterns from here manually. Authoritative for all documentation styling.
+- `BRANDING.md` — color variables, typography, theme standards. Not auto-distributed; projects copy patterns from here manually. Authoritative for all documentation styling.
 - `BUSINESS_RULES.md` — source of truth for agent behavioral rules. Edit here, then regenerate CLAUDE_RULES.md.
 
 **Separation of concerns:**
-- `RulesEngine/` = what standards projects must follow + how specs expand
+- `RulesEngine/` = governance standards projects must follow (rules, branding, process)
+- `prompts/` = all content embedded in AI prompts by bin/ scripts (expansion rules, templates)
 - `{ProjectName}/` = what a specific prototype specification should be and do
 - `bin/` specification scripts = work on prototype directories inside this repo only
 - `bin/` Project* scripts = push standards to promoted code projects (absolute path or project name)
@@ -276,12 +274,12 @@ Scaffolds a new specification directory from `RulesEngine/spec_template/`, or up
 Validates a specification directory inside this repo: required files, METADATA fields, conformity level, naming conventions, Open Questions sections, stack file existence, template cleanup. Accepts a specification name only. Exit 0 = valid, exit 1 = errors.
 
 ### bin/convert.sh
-Generates a conversion prompt: ONESHOT_BUILD_RULES.md expansion rules + stack reference files + all
+Generates a conversion prompt: `prompts/oneshot_build_rules.md` expansion rules + stack reference files + all
 concise specification files from the project directory. Output is fed to an AI agent for expansion.
 
 ### bin/oneshot.sh
 The canonical build command. Validates the spec, detects build mode, then generates a
-complete one-shot build prompt: ONESHOT_BUILD_RULES.md + CLAUDE_RULES.md + stack files + all specification files.
+complete one-shot build prompt: prompt files + CLAUDE_RULES.md + stack files + all specification files.
 
 **New project mode** (no `git_repo` or no `BUILD_FEATURE_BRANCH_NAME`): generates
 the prompt only. Create the target directory manually (`mkdir` + `git init`), then open
@@ -341,7 +339,7 @@ Thin wrapper calling `project_manager.py verify`. Operates on promoted code proj
 ### ProjectUpdate.sh
 Thin wrapper calling `project_manager.py update`. Operates on promoted code projects only — not specification directories in this repo.
 
-### RulesEngine/ONESHOT_BUILD_RULES.md
+### prompts/oneshot_build_rules.md
 Global specification expansion rules. Defines how each file type (DATABASE, SCREEN, FEATURE, UI, ARCHITECTURE) should be expanded from concise author input to detailed implementation-ready specs. Stack-specific expansion defers to `stack/*.md` files.
 
 ### RulesEngine/stack/
@@ -371,6 +369,26 @@ The pattern for adding any new contract/file that all projects should have:
 4. **Validate it** — add a rule name to `RULES_BY_LEVEL` in `bin/project_manager.py` and implement its `check()` case
 5. **Document it** — add a row to the table above in this file
 
+## Adding a New Service Endpoint
+
+The pattern for adding a new bin/ script that uses AI prompts or RulesEngine standards:
+
+1. Create `bin/<name>.sh` with CommandCenter header including `# Prompt:` and/or `# Rules:` fields
+2. If the script uses an AI prompt template, create `prompts/<name>.md` with standard header
+3. Run `bash bin/test.sh` — it auto-validates all declared dependencies exist
+
+Service endpoint headers declare dependencies — no manifest to maintain:
+
+```bash
+#!/bin/bash
+# CommandCenter Operation
+# Name: My Script
+# Category: maintenance
+# Args: Spec
+# Prompt: prompts/my_script.md
+# Rules: RulesEngine/BUSINESS_RULES.md, RulesEngine/stack/*.md
+```
+
 ## Key Conventions
 
 - CLAUDE.md in each target project is a bare `@AGENTS.md` pointer; AGENTS.md holds the real instructions + injected CLAUDE_RULES block
@@ -378,5 +396,5 @@ The pattern for adding any new contract/file that all projects should have:
 - `archive/` holds superseded documents — do not treat as current spec
 - `index.html` files are auto-generated — edit the templates, not the outputs
 - When changing `RulesEngine/` content: run `bash ProjectUpdate.sh <project>` per project, or `bash bin/update_projects.sh` from `../GAME/` for all
-- ONESHOT_BUILD_RULES.md is global (in RulesEngine/), not per-project — methodology is shared
+- oneshot_build_rules.md is global (in prompts/), not per-project — methodology is shared
 - BUSINESS_RULES.md is the source of truth for agent behavioral rules; CLAUDE_RULES.md is generated — never edit CLAUDE_RULES.md directly

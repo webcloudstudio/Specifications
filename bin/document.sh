@@ -3,6 +3,7 @@
 # Name: Document
 # Category: maintenance
 # Args: Spec
+# Prompt: prompts/document.md
 
 # Generate project documentation from specification files using AI summarization.
 # Two-phase pipeline:

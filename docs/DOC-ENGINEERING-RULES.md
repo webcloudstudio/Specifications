@@ -20,8 +20,8 @@ bash bin/summarize_rules.sh > rules-prompt.md
 |------|---------|
 | `BUSINESS_RULES.md` | Full rules with rationale — edit here |
 | `CLAUDE_RULES.md` | Generated agent contract — never edit directly |
-| `ONESHOT_BUILD_RULES.md` | How concise specifications expand to detailed ones |
-| `DOCUMENTATION_BRANDING.md` | Colour palette, typography, theme standards |
+| `BRANDING.md` | Colour palette, typography, theme standards |
+| `PROTOTYPE_PROCESS.md` | Lifecycle state machine (build and iteration workflow) |
 | `stack/*.md` | Prescriptive patterns per technology (Flask, SQLite, Bootstrap, etc.) |
 | `spec_template/` | Template files scaffolded by `setup.sh` |
 | `templates/` | Files propagated to every code project (common.sh, common.py) |

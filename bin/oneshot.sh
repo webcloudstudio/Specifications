@@ -3,6 +3,8 @@
 # Name: OneShot
 # Category: maintenance
 # Args: Spec
+# Prompt: prompts/oneshot_build_rules.md, prompts/oneshot_prototype_rules.md, prompts/oneshot_documentation.md
+# Rules: RulesEngine/CLAUDE_RULES.md, RulesEngine/stack/*.md
 
 # Validates the Specification, detects build mode, and generates a complete AI build prompt.
 # Tags the current commit as a permanent build reference (oneshot/{spec}/{YYYY-MM-DD.N}).
@@ -215,7 +217,7 @@ fi
 
 # --- Generate one-shot build prompt ---
 # Include ONESHOT_BUILD_RULES.md so the AI can expand concise specs inline during implementation
-CONVERT_FILE="$REPO_DIR/RulesEngine/ONESHOT_BUILD_RULES.md"
+CONVERT_FILE="$REPO_DIR/prompts/oneshot_build_rules.md"
 
 STACK=$(get_metadata "stack")
 PORT=$(get_metadata "port")
@@ -304,7 +306,7 @@ fi
 if [ -f "$CONVERT_FILE" ]; then
     echo "# CONVERSION RULES"
     echo ""
-    emit_file "$CONVERT_FILE" "ONESHOT_BUILD_RULES.md (RulesEngine/ONESHOT_BUILD_RULES.md)"
+    emit_file "$CONVERT_FILE" "Specification Conversion Rules (prompts/oneshot_build_rules.md)"
 fi
 
 # --- CLAUDE_RULES.md ---
@@ -314,24 +316,18 @@ if [ -f "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" ]; then
     emit_file "$REPO_DIR/RulesEngine/CLAUDE_RULES.md" "CLAUDE_RULES.md"
 fi
 
-# --- CLAUDE_PROTOTYPE.md (iteration rules for oneshot-built prototypes) ---
-if [ -f "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" ]; then
+# --- Prototype iteration rules ---
+if [ -f "$REPO_DIR/prompts/oneshot_prototype_rules.md" ]; then
     echo "# PROTOTYPE ITERATION RULES"
     echo ""
     echo "These rules MUST be injected into the prototype's AGENTS.md under an ## Iteration Rules section."
     echo "They are ONLY active when working in this prototype directory."
     echo ""
-    emit_file "$REPO_DIR/RulesEngine/CLAUDE_PROTOTYPE.md" "CLAUDE_PROTOTYPE.md"
+    emit_file "$REPO_DIR/prompts/oneshot_prototype_rules.md" "Prototype Iteration Rules (prompts/oneshot_prototype_rules.md)"
 fi
 
-# --- Additional RulesEngine .md files (drop-in) ---
-for rules_file in "$REPO_DIR"/RulesEngine/*.md; do
-    fname="$(basename "$rules_file")"
-    case "$fname" in
-        CLAUDE_RULES.md|CLAUDE_PROTOTYPE.md|ONESHOT_BUILD_RULES.md|BUSINESS_RULES.md|DOCUMENTATION_BRANDING.md) continue ;;
-    esac
-    emit_file "$rules_file" "Rules: $fname"
-done
+# --- Documentation build standard ---
+emit_file "$REPO_DIR/prompts/oneshot_documentation.md" "Documentation Build Standard (prompts/oneshot_documentation.md)"
 
 # --- Technology Files ---
 echo "# TECHNOLOGY REFERENCES"

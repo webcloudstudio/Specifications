@@ -1,8 +1,7 @@
-# Documentation Branding Standards
+# Branding Standards
 
-**Version:** 20260322 V3
+**Version:** 20260407 V1
 **Description:** Color variables, typography, and layout standards for project documentation
-**Reference implementation:** `Specifications/doc/` (Prototyper — process-based, slate theme)
 
 ---
 

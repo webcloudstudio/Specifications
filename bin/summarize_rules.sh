@@ -2,6 +2,7 @@
 # CommandCenter Operation
 # Name: Summarize Rules
 # Category: maintenance
+# Rules: RulesEngine/BUSINESS_RULES.md, RulesEngine/CLAUDE_RULES.md
 
 # Generates a prompt for an AI agent to regenerate RulesEngine/CLAUDE_RULES.md
 # from RulesEngine/BUSINESS_RULES.md and related source files.
@@ -108,14 +109,8 @@ echo ""
 
 emit_file "$BUSINESS_RULES" "BUSINESS_RULES.md (RulesEngine/BUSINESS_RULES.md)"
 
-# All other .md files in RulesEngine/ except README.md and CLAUDE_RULES.md
-for f in $(find "$RULES_ENGINE_DIR" -maxdepth 1 -name '*.md' | sort); do
-    fname="$(basename "$f")"
-    case "$fname" in
-        README.md|CLAUDE_RULES.md|BUSINESS_RULES.md) continue ;;
-        *) emit_file "$f" "$fname (RulesEngine/$fname)" ;;
-    esac
-done
+# Include PROTOTYPE_PROCESS.md for lifecycle context
+emit_file "$RULES_ENGINE_DIR/PROTOTYPE_PROCESS.md" "PROTOTYPE_PROCESS.md (RulesEngine/PROTOTYPE_PROCESS.md)"
 
 # --- Current CLAUDE_RULES.md for reference ---
 echo "---"
