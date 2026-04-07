@@ -1,52 +1,69 @@
 # Screen: Dashboard
 
-**Version:** 20260320 V1
+**Version:** 20260407 V2
 **Extends:** SCREEN-DEFAULT
-**Description:** Specification for the Dashboard screen
+**Description:** Default Projects view. Discovered projects with status, operations, links, and documentation.
 
-**The main view.** Shows every discovered project with status, operations, and quick links. This is the landing page.
+**The main view.** Shows every discovered project with status, operations, and quick links. Default screen for the Projects tab and the app root.
 
 ## Menu Navigation
 
-`Projects / Overview` 
+`Projects / Dashboard` — default sub-tab when Projects is first selected.
 
 ## Route
 
 ```
 GET /
+GET /projects/dashboard   (alias)
 ```
-
-Renders SCREEN-DEFAULT (Baseline) with `columns=Links,Actions,Help`.
 
 ## Layout
 
-Full-width project list. One row per project. Two-tier nav at top per UI-GENERAL; filter button in project sub-bar. Text/tag filter controls below sub-bar.
+Full-width project list. Action bar at top of page content (filter controls + Rescan). Project rows below.
 
-## Middle Columns
+```
+┌────────────────────────────────────────────────────┐
+│  [🔍 Filter projects...]  [status pills]  [Rescan] │
+│  ──────────────────────────────────────────────── │
+│  ● ACTIVE   MyApp      [Start] [Stop]  [↗] [📄] ⚙ │
+│  ● PROTO    NewThing   [Build]         [↗] [📄] ⚙ │
+│  ● IDEA     Draft      [Run]           [↗]      ⚙ │
+│  ...                                               │
+└────────────────────────────────────────────────────┘
+```
 
-Renders Baseline with `columns=Links,Actions,Help`. Inherits all fixed columns and filter button from SCREEN-DEFAULT.
+## Action Bar
 
-| Column | Source | Interaction |
-|--------|--------|-------------|
-| Links | `extra.links`, server link from `port` | Click → open URL in new tab |
-| Actions | `operations` (category != maintenance) | Operation buttons per UI-GENERAL |
-| Help | `has_docs`, `extra.doc_path` | Green Documentation button → `/project/{id}/doc/` in new tab |
+Rendered at the top of the page content, below the sub-bar. Not in the sub-bar.
 
-Running projects show a green dot indicator in the project name cell.
+| Control | Type | Behavior |
+|---------|------|----------|
+| Filter input | Text input | Client-side filter by project name. Placeholder: "Filter projects…" |
+| Status pills | Toggle buttons | Show/hide rows by status: `normal` (default, hides IDEA + ARCHIVED) / `all` / `idea` / `archive`. State encoded as `?filter=` URL param. |
+| Namespace filter | Dropdown | Filter by namespace. Hidden when only one namespace exists. |
+| **Rescan Your Projects** | Button (outline, right-aligned) | POST `/api/scan`; refreshes project list in place. |
 
-## Project Detail (click project name or cog)
+Filters are client-side (no server round-trip). Rescan triggers a server scan then reloads the list via HTMX.
+
+## Columns
+
+Explicit column set — does not vary by URL params. Fixed order:
+
+| # | Column | Source | Interaction |
+|---|--------|--------|-------------|
+| 1 | Status badge | `projects.status` | Display-only. Read-only colored pill. No click action. To change status use project detail (⚙) or Configuration screen. |
+| 2 | Namespace badge | `projects.namespace` | Hidden when value is `development`. |
+| 3 | Icon + Name | `projects.project_type`, `projects.display_name` | Running projects show a green dot (●) before the name. Name links to `/project/{id}`. |
+| 4 | Actions | `operations` (category ≠ maintenance) | Operation buttons per UI-GENERAL. Run/stop per process engine state. |
+| 5 | Links | `projects.extra.links`, `projects.port` | Link buttons. Falls back to server link when `port` is set. Opens in new tab. |
+| 6 | Help | `projects.has_docs`, `projects.extra.doc_path` | Green Documentation button → proxy route → new tab. Shown only when `has_docs` is true (any of `doc*/index.htm*` exists). |
+| 7 | Settings (cog) | — | Links to `/project/{id}` (project detail / inline editor). |
+
+No Tags column. No Stack column. No Configuration column. No Maintenance column on this view.
+
+## Project Detail (click name or cog)
 
 Navigates to SCREEN-DRILLDOWN-PROJECT for the selected project.
-
-## Actions
-
-| Action | Trigger | Effect |
-|--------|---------|--------|
-| Run operation | Click button | Launches script, button shows running state |
-| Stop operation | Click running button | Sends SIGTERM |
-| Filter | Text/tag/status/namespace controls | Client-side row filtering |
-| Rescan Your Projects | Nav bar button (Project Sub-Bar, right) | POST `/api/scan`, refreshes project list |
-| Push | Per-project (shown when `git_unpushed > 0`) | POST `/api/push/{id}` |
 
 ## Startup Behavior
 
@@ -56,10 +73,12 @@ Scanner reads METADATA.md, AGENTS.md, and bin/ headers. Missing files produce co
 
 | Reads | Writes |
 |-------|--------|
-| Project scanner results | Operation launch requests |
-| Process engine run states | Git push commands |
-| Tag color config | |
+| Project scanner results | Operation launch requests (POST `/api/run/{id}/{op}`) |
+| Process engine run states | Stop requests (POST `/api/stop/{id}/{op}`) |
+| `PROJECTS_DIR` (env) | Git push requests (POST `/api/push/{id}`, shown when `git_unpushed > 0`) |
+|  | Rescan trigger (POST `/api/scan`) |
 
 ## Open Questions
 
-- Should the dashboard auto-refresh running project status on a timer, or only on explicit action?
+- Should the Dashboard auto-refresh running project status on a timer, or only on explicit action?
+- Should the Push button (shown when `git_unpushed > 0`) remain per-row, or move to project detail only?

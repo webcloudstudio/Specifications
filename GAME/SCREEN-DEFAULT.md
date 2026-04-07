@@ -25,11 +25,11 @@ GET /default?title=DEFAULT&columns=Links,Actions,Help&filter=normal&sort=name
 
 Full viewport width — no max-width cap. Sortable table. Column header click sorts; current direction shown with arrows.
 
-## Filter Button
+## Filter Controls
 
-Lives in the **project sub-bar** (right side) — see Navigation Bar in UI-GENERAL. Present whenever a Projects sub-screen (Dashboard, Configuration) is active.
+Each screen that uses this baseline carries its own filter controls in the page action bar. The Dashboard defines its filter and Rescan placement — see SCREEN-PROJECTS-OVERVIEW. Other screens (Configuration, etc.) define their own action bars independently.
 
-State cycles on click, encoded as URL query param `?filter=`:
+Status filter state cycles on click, encoded as URL query param `?filter=`:
 
 | State | Shows |
 |-------|-------|
@@ -44,7 +44,7 @@ State cycles on click, encoded as URL query param `?filter=`:
 
 | Position | Content | Source | Interaction |
 |----------|---------|--------|-------------|
-| First | Status badge | `projects.status` | Click → cycle IDEA/PROTOTYPE/ACTIVE/PRODUCTION/ARCHIVED; writes DB + METADATA.md |
+| First | Status badge | `projects.status` | Display-only by default. Screens that enable status editing (e.g. Configuration) specify click-to-cycle behavior explicitly. |
 | Second | Namespace badge | `projects.namespace` | Hidden when value is `development` |
 | Third | Icon + project name | `projects.project_type`, `projects.display_name` | Name links to `/project/{id}`; nowrap |
 | Last | Settings cog | — | Links to `/project/{id}` |

@@ -34,10 +34,24 @@ Fixed. Present on all screens. Components left to right:
 | Element | Behavior |
 |---------|----------|
 | **Brand** (`cc-brand`) | App name (🎮 icon or command-line symbol). Click → Dashboard (`/`). |
-| **Top-level tabs** | Each tab has an icon before the label. Welcome (🏠), Projects (📁), Processes (⚙️), Monitoring (📊), Workflow (📋), Publisher (📢), Catalog (📚), Prototypes (🚀). Active tab highlighted. Welcome is leftmost and is the default. |
+| **Top-level tabs** | Each tab has an icon before the label. Welcome (🏠), Projects (📁), Dashboards (📊), Publisher (📢), Catalog (📚), Prototypes (🚀). Active tab highlighted. Welcome is leftmost and is the default. |
 | **Documentation button** | Opens `docs/index.html` in new tab. |
 | **Settings** (gear icon) | ⚙️ Settings (far right). Click → activates Settings context and displays Settings sub-bar below. |
 | **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
+
+### Tab Defaults
+
+Each top-level tab navigates to a defined default route when first selected:
+
+| Tab | Default Route | Notes |
+|-----|--------------|-------|
+| Welcome (🏠) | `/welcome/summary` | Has sub-bar |
+| Projects (📁) | `/` (Dashboard) | Has sub-bar |
+| Dashboards (📊) | `/monitoring` | Has sub-bar; Monitoring is the default |
+| Publisher (📢) | `/publisher` | Single screen, no sub-bar |
+| Catalog (📚) | `/servicecatalog` | Single screen, no sub-bar |
+| Prototypes (🚀) | `/prototypes` | Single screen, no sub-bar |
+| Settings (⚙️) | `/settings/general` | Has sub-bar |
 
 ### Welcome Sub-Bar
 
@@ -53,16 +67,28 @@ Summary is the default sub-tab when Welcome is first selected.
 
 ### Project Sub-Bar
 
-Visible only when `Projects` is active in the top bar. Renders directly below the top bar.
+Visible only when `Projects` is active in the top bar. Renders directly below the top bar. Contains tabs only — no action buttons.
 
 | Element | Position | Behavior |
 |---------|----------|----------|
 | **Dashboard** tab | Left | Links to `/` — default project list |
 | **Configuration** tab | Left | Links to `/project-config` — batch metadata editor |
-| **Rescan button** | Right | Text: "Rescan Your Projects". POST `/api/scan` on click, refreshes project list. |
-| **Filter button** | Right | Cycling view filter: `normal → all → idea → archive → normal`. State is a URL query param (`?filter=`). |
 
-Dashboard is the default sub-tab when Projects is first selected. All SCREEN-DEFAULT-based screens render in this Projects context.
+Dashboard is the default sub-tab when Projects is first selected. The Dashboard screen carries its own action bar (filter + Rescan) within the page content — see SCREEN-PROJECTS-OVERVIEW.
+
+### Dashboards Sub-Bar
+
+Visible only when `Dashboards` is active in the top bar. Renders directly below the top bar.
+
+| Element | Position | Behavior |
+|---------|----------|----------|
+| **Monitoring** tab | Left | Links to `/monitoring` — service health and event timeline. Default. |
+| **Processes** tab | Left | Links to `/processes` — live log viewer and process control |
+| **Workflow** tab | Left | Links to `/workflow` — kanban board for prototype lifecycle |
+| **Scheduler** tab | Left | Links to `/scheduler` — scheduled operations overview |
+| **Service Catalog** tab | Left | Links to `/servicecatalog` — service browser and MCP management |
+
+Monitoring is the default sub-tab when Dashboards is first selected.
 
 ### Settings Sub-Bar
 
@@ -192,16 +218,16 @@ Category determines button style:
 
 ## Filter Bar
 
-Dashboard and other list screens share a filter pattern:
+List screens carry their own filter controls in the page action bar (not the sub-bar). Filters are client-side (no server round-trip) for responsiveness.
 
-| Filter | Type | Behavior |
-|--------|------|----------|
-| Text search | Input field | Filters rows by name/description match |
+Dashboard filter controls (see SCREEN-PROJECTS-OVERVIEW):
+
+| Control | Type | Behavior |
+|---------|------|----------|
+| Text search | Input field | Filters rows by name match |
 | Status filter | Pill buttons | Toggle visibility by status |
-| Tag filter | Pill buttons | Filter by selected tags |
 | Namespace filter | Dropdown | Filter by namespace |
-
-Filters are client-side (no server round-trip) for responsiveness.
+| Rescan button | Button | POST `/api/scan`; refreshes project list |
 
 ---
 
