@@ -1,6 +1,6 @@
 # Feature: Data Pipeline
 
-**Trigger:** Daily scheduled task (cron) at market close; also available as manual CLI (`python scripts/backfill.py --full` or `--incremental`) and via Settings page button
+**Trigger:** Daily scheduled task (cron: `0 18 * * 1-5` — 6pm weekdays, after US market close); also available as manual CLI (`python scripts/backfill.py --full` or `--incremental`) and via Settings page button
 
 ## Sequence
 

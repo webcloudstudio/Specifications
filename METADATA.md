@@ -1,9 +1,9 @@
 # AUTHORITATIVE PROJECT METADATA - THE FIELDS IN THIS FILE SHOULD BE CURRENT
 
-name: Prototyper
-display_name: Specification Driven Design
+name: Project Prototyper
+display_name: Project Prototyper
 git_repo: https://github.com/webcloudstudio/GAME_Spec
-short_description: Full Practice Develoipment Framework With Opinionated Stack and Enterprise Technology Business Rules. 
+short_description: SDD Develoipment Framework With Opinionated Stack and Enterprise Technology Business Rules. 
 status: ACTIVE
 version: 2026-03-14.1
 updated: 20260316_000000

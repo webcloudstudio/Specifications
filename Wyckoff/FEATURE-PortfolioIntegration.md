@@ -31,6 +31,27 @@ Account Number, Account Name, Symbol, Description, Quantity, Last Price, Last Pr
 - No persistent write — rebalance output and proposed trades are display-only
 - Manual mapping resolutions saveable to portfolio_mapping.yaml via Settings
 
+## portfolio_mapping.yaml Structure
+
+```yaml
+mappings:
+  # Direct ticker → bucket
+  AAPL: Technology
+  MSFT: Technology
+  JPM: Financials
+  XOM: Energy
+
+  # Fallback for unmapped tickers
+  fallback: yfinance_sector   # use yfinance info.sector lookup
+
+  # Manual overrides (takes precedence over both above and fallback)
+  overrides:
+    BRK.B: Financials          # yfinance misclassifies
+    GOOG: Technology           # operator prefers Tech over Comm Services
+```
+
+Mapping lookup order: `overrides` → `mappings` → `fallback` → flag as unmapped.
+
 ## Open Questions
 
 -

@@ -3,8 +3,8 @@
 Generic AI-assisted projects and prototypes Management Environment.
 
 name: GAME
-display_name: GAME
-title: GAME — Generic AI Management Environment
+display_name: Project Assistant
+title: Generic AI Management Environment
 git_repo: GAME
 short_description: Dashboard for managing, monitoring, and operating AI-assisted projects
 port: 5001

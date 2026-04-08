@@ -84,34 +84,22 @@ footer {
 
 <div class="cover">
   <div class="cover-eyebrow">Ed Barlows Specification Driven Design Methodology</div>
+  <h1>Ed Barlows Specification Driven Design Methodology</h1>
   <div class="cover-sub">
     Best Practices for a full life cycle specification driven design methodology.  
     Describes various workflows and artifacts and integrates an opinionated structured stack 
     of business, design, and technology rules targeting reproducable supportable easy-to-develop and 
     easy-to-maintain.
   </div>
-  <div class="cover-meta"><span>Ed Barlow</span><span>Web Cloud Studio</span><span>2026</span></div>
 </div>
 
 <div class="wp-section">
-  <h2>The Problem</h2>
-  <ul>
-  <li>In 2026 Agentic code generation works very well for small, self-contained tasks. </li>
-  <li>Without specifications, these projects do not scale and because each project is different they ar hard to support.</li>
-  <li>Supportability and Interoperability is out-of-the-box manual and it can be automaticly consistently for all projects</li>
-  <li>Token usage...</li>
-  <li>The ai generates software tools but there IS no framework for non technical users to manage their code</li>
-</ul>
-</div>
-
-<div class="wp-section">
-  <h2>The Approach</h2>
+  <h2>Specification Files</h2>
   <p>Specification Driven Design separates <em>what to build</em> from <em>how to build it</em>.
   The developer writes concise, structured specification files. An opinionated technology stack
   and a set of techology/business rules provide the <em>how</em>. A build script assembles everything into
   a single prompt that an AI agent executes in one pass.</p>
 
-  <h2>Specification Files</h2>
   <p>Each project is defined by a small set of markdown files in a permissioned Specification repository:</p>
   <ul>
     <li><code>METADATA.md</code> &mdash; identity, stack, status, manual metadata for the project </li>
@@ -141,9 +129,7 @@ footer {
   <p>Quality tools keep things on track: <code>scorecard.sh</code> measures specification-to-code
   alignment, <code>spec_iterate.sh</code> identifies specification gaps, and
   <code>tran_logger.sh</code> extracts bugs and ideas from AI session logs.</p>
-</div>
 
-<div class="wp-section">
   <h2>Promotion</h2>
   <p>When a prototype is ready, <code>merge.sh</code> squash-merges the feature branch into the
   base branch. <code>ProjectValidate.sh</code> checks compliance against maturity-level rules
