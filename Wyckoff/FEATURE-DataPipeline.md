@@ -1,6 +1,6 @@
 # Feature: Data Pipeline
 
-**Trigger:** Manual CLI (`python scripts/backfill.py --full` or `--incremental`) or Settings page button
+**Trigger:** Daily scheduled task (cron) at market close; also available as manual CLI (`python scripts/backfill.py --full` or `--incremental`) and via Settings page button
 
 ## Sequence
 
@@ -9,14 +9,16 @@
 3. For incremental: query last stored date per ticker; download only delta since that date
 4. Drop rows with null `close` or `volume`
 5. Upsert into `market_data`
-6. Download FRED series (DGS10, DGS2, T10Y2Y, CPIAUCSL, ICSA, M2SL, FEDFUNDS) via fredapi; upsert into `macro_data`
-7. Write download result (row count, date range, any errors) to `download_log`
-8. Run post-download validation: flag gaps, stale tickers, NaN counts
-9. Print validation report to terminal
+6. Load FRED API key from `.api` file (key: `FRED_API_KEY`)
+7. Download FRED series (DGS10, DGS2, T10Y2Y, CPIAUCSL, ICSA, M2SL, FEDFUNDS) via fredapi; upsert into `macro_data`
+8. Write download result (row count, date range, any errors) to `download_log`
+9. Run post-download validation: flag gaps, stale tickers, NaN counts
+10. Print validation report to terminal
 
 ## Reads
 
 - config/universe.yaml
+- .api (FRED_API_KEY)
 - market_data (last date per ticker, incremental only)
 
 ## Writes
@@ -30,7 +32,8 @@
 - Ticker download failure: log and continue — do not abort batch
 - Zero rows on weekday: flag in download_log for manual review
 - FRED API failure: log; macro data is supplementary, do not abort
+- .api file missing or key absent: abort with clear error message
 
 ## Open Questions
 
-- OQ5: FRED API key — register at fred.stlouisfed.org during setup if not present
+-

@@ -74,6 +74,17 @@ UNIQUE(bucket, date, signal_id)
 | row_count | INTEGER | rows in market_data for this ticker |
 | status | TEXT | 'ok', 'warning', 'error' |
 
+## target_weights
+
+Managed via Portfolio web interface. Replaces static YAML for target allocations.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| bucket | TEXT PK | Asset class bucket name |
+| target_pct | REAL | Target allocation 0.0–100.0; all rows must sum to 100 |
+| notes | TEXT | Optional operator annotation |
+| updated_at | TEXT | timestamp of last edit |
+
 ## Open Questions
 
 - signals table storage: narrow (one row per signal_id) chosen for Phase 1 flexibility; may switch to wide table if query performance becomes an issue

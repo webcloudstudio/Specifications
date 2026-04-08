@@ -10,7 +10,7 @@ type: oneshot
 base_branch:
 version: 2026-04-08.1
 updated: 20260408
-image_description:
+image_description: A Giant Cartoon Dollar Sign
 
 ## Agent Instructions
 

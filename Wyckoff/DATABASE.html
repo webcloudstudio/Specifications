@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wyckoff Accumulator — Data Model</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f8f9fa;
+      color: #212529;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.25rem; }
+    p.subtitle { color: #6c757d; font-size: 0.9rem; margin-top: 0; margin-bottom: 2rem; }
+    .diagram-container {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 2rem;
+      overflow-x: auto;
+    }
+    .legend {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #495057;
+    }
+    .legend table { border-collapse: collapse; }
+    .legend td { padding: 0.25rem 0.75rem; border: 1px solid #dee2e6; }
+    .legend td:first-child { font-weight: 600; background: #f8f9fa; }
+  </style>
+</head>
+<body>
+  <h1>Wyckoff Accumulator — Data Model</h1>
+  <p class="subtitle">SQLite schema · Phase 1 tables · Generated 2026-04-08</p>
+
+  <div class="diagram-container">
+    <div class="mermaid">
+erDiagram
+    asset_config {
+        text ticker PK
+        text asset_class
+        text bucket
+        text display_name
+        text source
+        integer is_active
+        date added_date
+    }
+
+    market_data {
+        integer id PK
+        text ticker FK
+        text asset_class
+        text bucket
+        date date
+        real open
+        real high
+        real low
+        real close
+        real adj_close
+        integer volume
+        real dollar_volume
+        text source
+        text created_at
+    }
+
+    macro_data {
+        integer id PK
+        text series_id
+        text indicator_name
+        date date
+        real value
+        text source
+        text created_at
+    }
+
+    signals {
+        integer id PK
+        text bucket FK
+        date date
+        text signal_id
+        real value
+        text created_at
+    }
+
+    download_log {
+        integer id PK
+        text ticker FK
+        text last_success
+        text last_failure
+        integer row_count
+        text status
+    }
+
+    target_weights {
+        text bucket PK
+        real target_pct
+        text notes
+        text updated_at
+    }
+
+    asset_config ||--o{ market_data : "ticker"
+    asset_config ||--o{ download_log : "ticker"
+    asset_config ||--o{ signals : "bucket"
+    asset_config ||--o{ target_weights : "bucket"
+    market_data }o--|| signals : "bucket + date"
+    </div>
+  </div>
+
+  <div class="legend">
+    <p><strong>Key relationships</strong></p>
+    <table>
+      <tr><td>asset_config → market_data</td><td>Each configured ticker has many daily OHLCV rows</td></tr>
+      <tr><td>asset_config → signals</td><td>Each bucket has many computed signal rows per date</td></tr>
+      <tr><td>asset_config → download_log</td><td>Each ticker has one download status row</td></tr>
+      <tr><td>asset_config → target_weights</td><td>Each bucket has one operator-set target allocation</td></tr>
+      <tr><td>macro_data</td><td>Standalone — FRED series, not joined to asset_config</td></tr>
+    </table>
+    <p style="margin-top:1rem; color:#6c757d;">
+      Unique constraints: <code>market_data(ticker, date)</code> · <code>macro_data(series_id, date)</code> · <code>signals(bucket, date, signal_id)</code>
+    </p>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default', er: { diagramPadding: 40 } });
+  </script>
+</body>
+</html>
