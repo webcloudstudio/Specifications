@@ -1,0 +1,79 @@
+# Database
+
+**Version:** 20260408 V1
+**Description:** SQLite schema — market data, signals, configuration, and portfolio support
+
+## market_data
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | |
+| ticker | TEXT | NOT NULL |
+| asset_class | TEXT | e.g. 'equity_sector', 'fixed_income' |
+| bucket | TEXT | e.g. 'Technology', 'Long Treasury' |
+| date | DATE | NOT NULL |
+| open | REAL | |
+| high | REAL | |
+| low | REAL | |
+| close | REAL | NOT NULL |
+| adj_close | REAL | NOT NULL |
+| volume | INTEGER | NOT NULL |
+| dollar_volume | REAL | computed: adj_close × volume |
+| source | TEXT | 'yfinance' or 'fred' |
+| created_at | TEXT | timestamp |
+
+UNIQUE(ticker, date)
+
+## macro_data
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | |
+| series_id | TEXT | FRED series ID, NOT NULL |
+| indicator_name | TEXT | e.g. '10Y Treasury Yield' |
+| date | DATE | NOT NULL |
+| value | REAL | NOT NULL |
+| source | TEXT | default 'fred' |
+| created_at | TEXT | timestamp |
+
+UNIQUE(series_id, date)
+
+## asset_config
+
+| Column | Type | Notes |
+|--------|------|-------|
+| ticker | TEXT PK | |
+| asset_class | TEXT | NOT NULL |
+| bucket | TEXT | NOT NULL |
+| display_name | TEXT | NOT NULL |
+| source | TEXT | 'yfinance' or 'fred' |
+| is_active | INTEGER | boolean, default 1 |
+| added_date | DATE | |
+
+## signals
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | |
+| bucket | TEXT | NOT NULL |
+| date | DATE | NOT NULL |
+| signal_id | TEXT | e.g. 'V004', 'W001', 'R007' |
+| value | REAL | numeric; phase enum stored as text mapped to real |
+| created_at | TEXT | timestamp |
+
+UNIQUE(bucket, date, signal_id)
+
+## download_log
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | |
+| ticker | TEXT | NOT NULL |
+| last_success | TEXT | timestamp |
+| last_failure | TEXT | timestamp |
+| row_count | INTEGER | rows in market_data for this ticker |
+| status | TEXT | 'ok', 'warning', 'error' |
+
+## Open Questions
+
+- signals table storage: narrow (one row per signal_id) chosen for Phase 1 flexibility; may switch to wide table if query performance becomes an issue
