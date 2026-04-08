@@ -9,15 +9,10 @@
 Downloads and caches end-of-day price/volume data for asset class buckets plus FRED macro indicators. Phase 1 universe: 11 equity sector ETFs (SPDR XL*). Phase 2 expands to full ~40-bucket universe (bonds, commodities, forex, crypto, alternatives). Backfills 5 years on first run; incremental updates run daily on a schedule. All data stored in local SQLite. Validation report after each run. FRED API key read from `.api` file (`FRED_API_KEY`).
 
 ### Signal Engine
-Computes ~200–300 signals per bucket per day across five families:
-- **Volume analytics (V)** — relative volume, buying/selling pressure, volume divergence, climax, dry-up
-- **Price momentum (P)** — rate of change (5/20/60/120d), SMA crossovers (20/50/200), ATR, range position
-- **Wyckoff phase detection (W)** — state machine classifying each bucket: accumulation, markup, distribution, or markdown; plus event detection (spring, upthrust, test, SOS, SOW)
-- **Cross-asset relative strength (R)** — performance vs SPY, dollar flow share, percentile rankings across all buckets
-- **Macro/regime context (M)** — yield curve slope, VIX percentile, gold/TLT ratios, dollar trend, credit spread
+Generates a wide feature matrix — hundreds of candidate metrics per (bucket, date) row — by applying systematic transformations (rolling averages, rate-of-change, volume ratios, range position, boolean thresholds) over configurable window lengths (3, 5, 10, 20, 50, 100, 200 days) to raw OHLCV data. Cross-sectional features (percentile rankings across all buckets on each date) and FRED macro indicators are appended. The specific metrics that matter are determined empirically, not pre-specified.
 
-### Composite Scoring
-Weighted composite sell score and buy score derived from signal families. Sell signals weighted higher and thresholds tuned more sensitive — detecting distribution before it's obvious is the operator's stated priority.
+### Feature Selection & Regression
+Runs regression (LASSO, logistic, random forest) against forward-return targets (5, 10, 20, 60 days) to identify which features have genuine predictive signal. Walk-forward validation only — no look-ahead. Output is a feature importance ranking. Phase 1 goal is discovery: which transformations and windows actually predict asset class moves. Top-ranked features are promoted to the signals table and used for alerting and the dashboard.
 
 ### Portfolio Integration
 Parses Fidelity positions CSV (`Portfolio_Positions_Apr-08-2026.csv` format), maps holdings to asset class buckets (config file + yfinance fallback), and computes current weight per bucket as a percentage of total portfolio value.

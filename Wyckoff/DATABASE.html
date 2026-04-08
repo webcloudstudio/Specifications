@@ -80,9 +80,21 @@ erDiagram
         integer id PK
         text bucket FK
         date date
-        text signal_id
+        text feature_name
         real value
         text created_at
+    }
+
+    feature_importance {
+        integer id PK
+        text feature_name
+        text bucket
+        integer forward_horizon_days
+        real coefficient
+        real hit_rate
+        real information_coefficient
+        integer rank
+        text computed_at
     }
 
     download_log {
@@ -105,6 +117,7 @@ erDiagram
     asset_config ||--o{ download_log : "ticker"
     asset_config ||--o{ signals : "bucket"
     asset_config ||--o{ target_weights : "bucket"
+    asset_config ||--o{ feature_importance : "bucket"
     market_data }o--|| signals : "bucket + date"
     </div>
   </div>
@@ -113,10 +126,12 @@ erDiagram
     <p><strong>Key relationships</strong></p>
     <table>
       <tr><td>asset_config → market_data</td><td>Each configured ticker has many daily OHLCV rows</td></tr>
-      <tr><td>asset_config → signals</td><td>Each bucket has many computed signal rows per date</td></tr>
+      <tr><td>asset_config → signals</td><td>Top-ranked features per bucket per date (post-regression)</td></tr>
+      <tr><td>asset_config → feature_importance</td><td>Regression results per feature per bucket per forward horizon</td></tr>
       <tr><td>asset_config → download_log</td><td>Each ticker has one download status row</td></tr>
       <tr><td>asset_config → target_weights</td><td>Each bucket has one operator-set target allocation</td></tr>
       <tr><td>macro_data</td><td>Standalone — FRED series, not joined to asset_config</td></tr>
+      <tr><td>feature matrix</td><td>Parquet files per bucket (features/*.parquet) — not in SQLite; too wide for row-based storage</td></tr>
     </table>
     <p style="margin-top:1rem; color:#6c757d;">
       Unique constraints: <code>market_data(ticker, date)</code> · <code>macro_data(series_id, date)</code> · <code>signals(bucket, date, signal_id)</code>

@@ -52,16 +52,36 @@ UNIQUE(series_id, date)
 
 ## signals
 
+Stores only the top-ranked features after regression — not the full feature matrix. Used by the UI dashboard and alert engine.
+
 | Column | Type | Notes |
 |--------|------|-------|
 | id | INTEGER PK | |
 | bucket | TEXT | NOT NULL |
 | date | DATE | NOT NULL |
-| signal_id | TEXT | e.g. 'V004', 'W001', 'R007' |
-| value | REAL | numeric; phase enum stored as text mapped to real |
+| feature_name | TEXT | e.g. 'close_roc_20', 'volume_ratio_10' |
+| value | REAL | |
 | created_at | TEXT | timestamp |
 
-UNIQUE(bucket, date, signal_id)
+UNIQUE(bucket, date, feature_name)
+
+## feature_importance
+
+Results from the regression layer — updated after each regression run.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | |
+| feature_name | TEXT | transformation name |
+| bucket | TEXT | asset class bucket; 'ALL' for cross-sectional |
+| forward_horizon_days | INTEGER | 5, 10, 20, or 60 |
+| coefficient | REAL | regression coefficient or RF importance score |
+| hit_rate | REAL | fraction of times signal preceded correct direction |
+| information_coefficient | REAL | rank correlation of signal vs forward return |
+| rank | INTEGER | rank among all features for this bucket/horizon |
+| computed_at | TEXT | timestamp |
+
+UNIQUE(feature_name, bucket, forward_horizon_days)
 
 ## download_log
 
