@@ -4,7 +4,7 @@
 **Type:** abstract — base layout, not a routed screen
 **Description:** Reusable project list layout. Named views extend this by declaring `Extends: SCREEN-DEFAULT` and specifying their middle columns.
 
-**Inherited by:** SCREEN-PROJECTS-DASHBOARD, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION, SCREEN-PROJECTS-MAINTENANCE
+**Inherited by:** SCREEN-PROJECTS-DASHBOARD, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION, SCREEN-PROJECTS-MAINTENANCE, SCREEN-PROTOTYPES-LIST
 
 A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
 
@@ -27,9 +27,17 @@ Full viewport width — no max-width cap. Sortable table. Column header click so
 
 ## Filter Controls
 
-Each screen that uses this baseline carries its own filter controls in the page action bar. The Dashboard defines its filter and Rescan placement — see SCREEN-PROJECTS-DASHBOARD. Other screens (Configuration, etc.) define their own action bars independently.
+Each screen that uses this baseline carries its own filter controls in the page action bar. The controls below are the standard set — screens may add extra controls (e.g. Rescan).
 
-Status filter state cycles on click, encoded as URL query param `?filter=`:
+### Standard Filter Bar Controls
+
+| Control | Type | Behavior |
+|---------|------|----------|
+| Text search | Text input | Free-form substring match on project name and description. Real-time client-side filter. Placeholder: "Search name or description…" |
+| Status pills | Toggle buttons | Show/hide rows by status. State encoded as `?filter=` URL param. |
+| Namespace dropdown | Dropdown | Filter by namespace. Hidden when only one namespace exists. State encoded as `?namespace=` URL param. |
+
+Status filter states:
 
 | State | Shows |
 |-------|-------|

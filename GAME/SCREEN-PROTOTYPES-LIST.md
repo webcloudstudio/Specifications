@@ -1,12 +1,14 @@
 # Screen: Prototypes
 
 **Version:** 20260324 V2
+**Extends:** SCREEN-DEFAULT
 **Description:** Top-level screen listing all known prototypes (specification directories inside the Specifications repo) with their names and current status.
 
 ## Menu Navigation
 
 Main Menu: Prototypes
 Sub Menu: List (Default)
+Inherits From: SCREEN-DEFAULT
 
 ## Route
 
@@ -82,14 +84,13 @@ Buttons:
 
 ## Filter Bar
 
-Lives above the list. Client-side filtering (no round-trip).
+Inherits the standard filter bar from SCREEN-DEFAULT. Client-side filtering (no round-trip).
 
-| Filter | Behavior |
-|--------|----------|
-| Text search input | Filters rows by name + description match |
-| Status pill buttons | Toggle visibility by status (IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED) |
-
-Default state: all statuses shown.
+| Control | Type | Behavior |
+|---------|------|----------|
+| Text search | Text input | Free-form filter on prototype name and description. Placeholder: "Search name or description…" |
+| Status pills | Toggle buttons | Show/hide rows by status: IDEA / PROTOTYPE / ACTIVE / PRODUCTION / ARCHIVED. Default: all shown. |
+| Namespace dropdown | Dropdown | Filter by namespace. Hidden when only one namespace exists. |
 
 ## Empty State
 

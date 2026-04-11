@@ -38,6 +38,17 @@
 - bin/ shell scripts MUST NOT contain Windows line endings (CR+LF).
 - Test suite SHOULD verify no `\r` exists in any `.sh` or `.py` file under `bin/`.
 
+## Projects Dashboard and Prototypes List — Table and Navigation
+**Target:** SCREEN-PROJECTS-DASHBOARD.md, SCREEN-PROTOTYPES-LIST.md, SCREEN-DEFAULT.md
+
+- The screen MUST list projects (or prototypes) in the selected filters, one row per project/prototype, in a sortable table.
+- Clicking any column header MUST sort the table by that column; clicking again MUST reverse the sort direction. The active sort column MUST show a ▲ or ▼ direction indicator.
+- The action bar MUST include a free-form text input that filters rows in real time by project/prototype name and short description (substring match, case-insensitive).
+- The action bar MUST include a namespace dropdown that filters rows to the selected namespace; the dropdown MUST be hidden when only one namespace exists.
+- The action bar MUST include status pill filters that show/hide rows by status.
+- All filters MUST be client-side (no server round-trip) and MUST compose (applying multiple filters narrows the visible set).
+- The SCREEN-PROTOTYPES-LIST MUST inherit the standard filter bar defined in SCREEN-DEFAULT.
+
 ---
 
 ## Folded

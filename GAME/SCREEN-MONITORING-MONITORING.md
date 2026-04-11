@@ -44,14 +44,15 @@ Only projects with both `port` and `health_endpoint` appear.
 
 | Column | Source | Content |
 |--------|--------|---------|
-| Project | `projects.display_name` | Standard row header |
-| Endpoint | `port` + `health_endpoint` | e.g., `localhost:5001/health` |
-| Status | Heartbeat poller | `UP` (green) / `DOWN` (red) / `UNKNOWN` (gray) badge |
-| Last checked | `heartbeats.last_checked` | Timestamp |
-| Response time | `heartbeats.response_ms` | Milliseconds |
-| Uptime | `heartbeats.uptime_pct` | Rolling 24h percentage |
+| Project Name | `projects.display_name` | Links to project detail |
+| URL | `port` + `health_endpoint` | e.g., `localhost:5001/health` |
+| Status | Heartbeat poller | `UP` (green) / `DOWN` (red) badge; blank when never polled |
+| Code | `heartbeats.response_code` | HTTP status code (e.g. 200); blank when never polled |
+| Last Time | `heartbeats.last_checked` | Timestamp of last poll; `Never` when no poll has run |
 
 Column headers are clickable to sort. Current sort direction shown with ▲/▼ arrow.
+
+Empty State: Status and Code cells are blank (no badge, no text) until the first successful poll. Last Time shows `Never`.
 
 ### Alerts
 

@@ -102,20 +102,23 @@ Simple form to create a new ticket. Navigates here from the sub-bar.
 │  ─────────────────────────────────────────────────── │
 │                                                       │
 │  Title *                                              │
-│  [ Enter a short title for this ticket             ]  │
+│  [ Ticket 001                                      ]  │
 │                                                       │
 │  Project *                                            │
 │  [ Select project ▼                                ]  │
+│                                                       │
+│  Description                                          │
+│  [ Multi-line text area                            ]  │
+│  [                                                 ]  │
+│                                                       │
+│  Tags                                                 │
+│  [ tag pills / text input                          ]  │
 │                                                       │
 │  Type                                                 │
 │  [ FEATURE ▼  ]                                       │
 │                                                       │
 │  Priority                                             │
 │  ( ) Low  (●) Medium  ( ) High  ( ) Critical          │
-│                                                       │
-│  Description                                          │
-│  [ Multi-line text area                            ]  │
-│  [                                                 ]  │
 │                                                       │
 │  [Save Ticket]   [Clear]                              │
 │                                                       │
@@ -126,11 +129,12 @@ Simple form to create a new ticket. Navigates here from the sub-bar.
 
 | Field | Key | Type | Required | Default |
 |-------|-----|------|----------|---------|
-| Title | `title` | Text input | Yes | — |
+| Title | `title` | Text input | Yes | `Ticket NNN` — auto-incremented from the highest existing ticket number + 1, zero-padded to 3 digits (e.g. `Ticket 001`, `Ticket 002`). User may override. |
 | Project | `project_id` | Dropdown (all projects) | Yes | — |
+| Description | `body` | Textarea | No | — |
+| Tags | `tags` | Tag pill input | No | — |
 | Type | `workflow_type_id` | Dropdown (from `workflow_types`) | No | FEATURE |
 | Priority | `priority` | Radio buttons | No | Medium |
-| Description | `body` | Textarea | No | — |
 
 ### Buttons
 

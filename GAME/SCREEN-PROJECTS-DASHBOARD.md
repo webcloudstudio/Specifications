@@ -36,16 +36,16 @@ Full-width project list. Action bar at top of page content (filter controls + Re
 
 ## Action Bar
 
-Rendered at the top of the page content, below the sub-bar. Not in the sub-bar.
+Rendered at the top of the page content, below the sub-bar. Inherits the standard filter bar from SCREEN-DEFAULT plus the Rescan button.
 
 | Control | Type | Behavior |
 |---------|------|----------|
-| Filter input | Text input | Client-side filter by project name. Placeholder: "Filter projects…" |
+| Text search | Text input | Free-form filter on project name and description. Placeholder: "Search name or description…" |
 | Status pills | Toggle buttons | Show/hide rows by status: `normal` (default, hides IDEA + ARCHIVED) / `all` / `idea` / `archive`. State encoded as `?filter=` URL param. |
-| Namespace filter | Dropdown | Filter by namespace. Hidden when only one namespace exists. |
+| Namespace filter | Dropdown | Filter by namespace. Hidden when only one namespace exists. State encoded as `?namespace=` URL param. |
 | **Rescan Your Projects** | Button (outline, right-aligned) | POST `/api/scan`; refreshes project list in place. |
 
-Filters are client-side (no server round-trip). Rescan triggers a server scan then reloads the list via HTMX.
+Text search and status/namespace filters are client-side (no server round-trip). Rescan triggers a server scan then reloads the list via HTMX.
 
 ## Columns
 
