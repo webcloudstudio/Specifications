@@ -30,7 +30,7 @@
 1. **[P0] CLI/Bash Gateway** — write `FEATURE-CLI-GATEWAY.md` specifying `bin/game-cli.sh` commands (catalog, run, health, status, log) so the platform is usable headlessly from other project scripts.
 2. **[P1] has_tests / has_specs schema** — add `has_tests` and `has_specs` columns to the `projects` table in DATABASE.md and the Field Source Mapping table; they are referenced by SCREEN-PROJECTS-VALIDATION.md but have no schema definition.
 3. **[P2] Log filter rule editor** — write `SCREEN-SETTINGS-LOGFILTER.md` for the `log_filter` table UI; without it, operators must edit classification rules directly in SQLite, making production log tuning impractical.
-4. **[P2] Prototype detail view** — write `SCREEN-PROTOTYPES-DETAIL.md` for `GET /prototypes/{name}`; the route is referenced in SCREEN-PROTOTYPES.md and ARCHITECTURE.md but the screen itself is unspecified.
+4. **[P2] Prototype detail view** — write `SCREEN-PROTOTYPES-DETAIL.md` for `GET /prototypes/{name}`; the route is referenced in SCREEN-PROTOTYPES-LIST.md and ARCHITECTURE.md but the screen itself is unspecified.
 5. **[P2] AI agent submission mechanism** — resolve how READY tickets are handed off to an AI agent (queue, webhook, or direct Claude API call) and write either a concrete flow in FUNCTIONALITY.md or a new `FEATURE-AI-SUBMISSION.md`.
 
 ## What This Specification Does Well

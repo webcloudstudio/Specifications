@@ -65,7 +65,7 @@ No Tags column. No Stack column. No Configuration column. No Maintenance column 
 
 ## Project Detail (click name or cog)
 
-Navigates to SCREEN-DRILLDOWN-PROJECT for the selected project.
+Navigates to SCREEN-PROJECTS-DETAIL for the selected project.
 
 ## Startup Behavior
 

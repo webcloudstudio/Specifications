@@ -18,7 +18,7 @@
 - Scanner MUST detect `docs/index.html` for the `has_docs` flag.
 
 ## Default Landing Screen
-**Target:** SCREEN-PROJECTS-WELCOME.md, UI-GENERAL.md
+**Target:** SCREEN-WELCOME.md, UI-GENERAL.md
 
 - `GET /` MUST redirect to `/welcome` — Welcome is the default landing screen.
 - The Welcome tab MUST be active (highlighted) when the application first loads.

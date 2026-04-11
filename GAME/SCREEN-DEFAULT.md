@@ -4,7 +4,7 @@
 **Type:** abstract — base layout, not a routed screen
 **Description:** Reusable project list layout. Named views extend this by declaring `Extends: SCREEN-DEFAULT` and specifying their middle columns.
 
-**Inherited by:** SCREEN-PROJECTS-OVERVIEW, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION, SCREEN-PROJECTS-MAINTENANCE, SCREEN-PROJECTS-WORKFLOW
+**Inherited by:** SCREEN-PROJECTS-DASHBOARD, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION, SCREEN-PROJECTS-MAINTENANCE
 
 A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
 
@@ -27,7 +27,7 @@ Full viewport width — no max-width cap. Sortable table. Column header click so
 
 ## Filter Controls
 
-Each screen that uses this baseline carries its own filter controls in the page action bar. The Dashboard defines its filter and Rescan placement — see SCREEN-PROJECTS-OVERVIEW. Other screens (Configuration, etc.) define their own action bars independently.
+Each screen that uses this baseline carries its own filter controls in the page action bar. The Dashboard defines its filter and Rescan placement — see SCREEN-PROJECTS-DASHBOARD. Other screens (Configuration, etc.) define their own action bars independently.
 
 Status filter state cycles on click, encoded as URL query param `?filter=`:
 
@@ -62,7 +62,7 @@ Status filter state cycles on click, encoded as URL query param `?filter=`:
 | `Help` | Help | `projects.has_docs` + `extra.doc_path` | Green Documentation button → proxy route → new tab; `has_docs` is true when any of `doc/index.htm`, `doc/index.html`, `docs/index.htm`, `docs/index.html` exists (glob: `doc*/index.htm*`) |
 | `Maintenance` | Maintenance | `operations` (category = maintenance) | Operation buttons |
 | `LastUpdate` | Updated | `projects.version` | Date portion only; strips `.N` suffix |
-| `Configuration` | Configuration | `projects.port`, `card_show`, `tags` | Inline-editable fields per SCREEN-CONFIGURATION |
+| `Configuration` | Configuration | `projects.port`, `card_show`, `tags` | Inline-editable fields per SCREEN-PROJECTS-CONFIGURATION |
 | `Workflows` | Workflows | `workflow_types` (is_active = 1) + `projects.has_specs` | One button per active workflow type; disabled with "No specifications" tooltip when `has_specs = false` |
 
 ## Open Questions

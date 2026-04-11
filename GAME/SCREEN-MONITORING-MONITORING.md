@@ -109,7 +109,7 @@ On page load: all severities shown, no text filter, sorted by Timestamp descendi
 | Toggle severity | Click checkbox | Shows/hides that severity level |
 | Refresh | Button or auto-timer | Reloads health endpoints and appends new events |
 | Snooze alert | Click on alert banner | Suppresses alerts for that service |
-| Click project name | Name link | Navigates to SCREEN-DRILLDOWN-PROJECT |
+| Click project name | Name link | Navigates to SCREEN-PROJECTS-DETAIL |
 
 ---
 

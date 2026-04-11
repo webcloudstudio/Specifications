@@ -39,4 +39,4 @@ Clicking the cog icon navigates to SCREEN-PROJECT for full metadata editing orga
 
 ## Open Questions
 
-- Should the batch Configuration column include additional fields (namespace, desired_state)? The Configuration screen shows the most-commonly-edited fields. Full metadata editing (including namespace and desired_state) is available via SCREEN-DRILLDOWN-PROJECT when the cog is clicked. The batch column stays minimal.
+- Should the batch Configuration column include additional fields (namespace, desired_state)? The Configuration screen shows the most-commonly-edited fields. Full metadata editing (including namespace and desired_state) is available via SCREEN-PROJECTS-DETAIL when the cog is clicked. The batch column stays minimal.

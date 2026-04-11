@@ -50,7 +50,7 @@ Repos present on GitHub but absent from `projects` table (matched by comparing `
 ### Make A Project Button
 
 **What it does:**
-1. `git clone <ssh_url> ~/Projects/<repo.name>` (uses SSH; requires SSH key configured — see SCREEN-PROJECTS-WELCOME.md)
+1. `git clone <ssh_url> ~/Projects/<repo.name>` (uses SSH; requires SSH key configured — see SCREEN-WELCOME.md)
 2. Creates a minimal `METADATA.md` in the cloned directory:
    ```
    display_name: <repo.name title-cased>

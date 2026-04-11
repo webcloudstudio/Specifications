@@ -30,7 +30,7 @@
 - [x] **P0 — Project Health API (Flow 13):** `GET /api/{name}/health` proxies to each project's health endpoint. Specified in FEATURE-HEALTHCHECK.md.
 - [ ] **P0 — CLI/Bash Gateway:** `bin/game-cli.sh` wrapper for catalog, run, health commands from bash without curl. No specification yet.
 - [x] **P2 — Heartbeat Polling (Flow 6):** Background poller fully specified in FEATURE-HEALTHCHECK.md (concurrent threading, state transitions, uptime_pct).
-- [x] **P3 — Schedule Fire (Flow 7):** Cron loop specified in SCREEN-DASHBOARDS-SCHEDULER.md; startup catch-up in FUNCTIONALITY.md Flow 7.
+- [x] **P3 — Schedule Fire (Flow 7):** Cron loop specified in SCREEN-MONITORING-SCHEDULER.md; startup catch-up in FUNCTIONALITY.md Flow 7.
 - [x] **P3 — Missed-Run Recovery:** FUNCTIONALITY.md Flow 7 startup catch-up fires ONE immediate run for each missed schedule.
 - [ ] **P3 — Dynamic Port Management:** Track ports in use, detect conflicts at scan time. Not yet specified.
 
@@ -57,23 +57,23 @@
 
 ## SCREEN-PROTOTYPES-DETAIL.md (NEW)
 
-- [ ] **P2 — Prototype detail view:** `GET /prototypes/{name}` is referenced in SCREEN-PROTOTYPES.md but has no specification. Should show parsed specification files as a rendered HTML index with file list, Open Questions, and links to the oneshot flow.
+- [ ] **P2 — Prototype detail view:** `GET /prototypes/{name}` is referenced in SCREEN-PROTOTYPES-LIST.md but has no specification. Should show parsed specification files as a rendered HTML index with file list, Open Questions, and links to the oneshot flow.
 
 ## SCREEN-SETTINGS-WORKFLOWS.md (NEW)
 
 - [ ] **P3 — Workflow type management screen:** `workflow_types` table is seeded on startup; SCREEN-PROJECTS-WORKFLOW.md notes "until that screen exists, types are edited directly in the DB." Needs a proper settings screen for CRUD on workflow type definitions.
 
-## SCREEN-HOMEPAGE.md
+## SCREEN-PUBLISHER.md
 
-- [x] **P1 — Publish edit page:** Cover is provided by the SCREEN-HOMEPAGE.md Build/Publish/Preview/Homepage sections. Per-project card editing is handled via Configuration screen (`card_show`, `card_title`, etc.).
-- [ ] **P1 — Publish preview:** Local Astro preview server start/stop at port 4321. SCREEN-HOMEPAGE.md references this but `bin/LocalPreview.sh` is not specified.
+- [x] **P1 — Publish edit page:** Cover is provided by the SCREEN-PUBLISHER.md Build/Publish/Preview/Homepage sections. Per-project card editing is handled via Configuration screen (`card_show`, `card_title`, etc.).
+- [ ] **P1 — Publish preview:** Local Astro preview server start/stop at port 4321. SCREEN-PUBLISHER.md references this but `bin/LocalPreview.sh` is not specified.
 - [ ] **P7 — Card image generation:** `bin/generate_card_images.py` not yet specified.
 
 ## SCREEN-PROJECTS-VALIDATION.md
 
 - [ ] **P2 — Schedule nightly validation:** `Validate All` triggered automatically on schedule. Not yet wired to scheduler. When specified, add a `validation_schedule` key to settings table and reference FUNCTIONALITY.md Flow 7.
 
-## SCREEN-DASHBOARDS-WORKFLOW.md
+## SCREEN-WORKFLOW.md
 
 - [ ] **P2 — AI agent submission mechanism:** READY tickets can be "submitted to an AI agent" but the trigger mechanism (queue, webhook, API call to Claude) is unspecified. Needs a concrete flow or FEATURE-AI-SUBMISSION.md.
 
@@ -93,7 +93,7 @@
 - [ ] **P0 — Published API docs:** Auto-generate API reference at `/api/docs`. No specification yet.
 - [ ] **P3 — bin/test.sh:** Run test suite.
 - [ ] **P3 — bin/PushAndPublish.sh:** Full GitHub Pages publish pipeline (referenced in FUNCTIONALITY.md Flow 5, not yet a formal script specification).
-- [ ] **P3 — bin/LocalPreview.sh:** Astro preview server (referenced in SCREEN-HOMEPAGE.md).
+- [ ] **P3 — bin/LocalPreview.sh:** Astro preview server (referenced in SCREEN-PUBLISHER.md).
 - [ ] **P6 — bin/create_project.py:** Scaffold new projects from templates (lives in GAME project, referenced from Specifications AGENTS.md).
 
 ## Unspecified Features (backlog)
@@ -116,12 +116,12 @@
 | P0 Script Endpoint API | FEATURE-SERVICE-CATALOG.md | 2026-03-23 |
 | P0 Project Health API | FEATURE-HEALTHCHECK.md | 2026-03-23 |
 | P2 Heartbeat Polling | FEATURE-HEALTHCHECK.md | 2026-03-23 |
-| P3 Schedule Fire | SCREEN-DASHBOARDS-SCHEDULER.md | 2026-03-25 |
+| P3 Schedule Fire | SCREEN-MONITORING-SCHEDULER.md | 2026-03-25 |
 | P3 Missed-Run Recovery | FUNCTIONALITY.md Flow 7 | 2026-03-20 |
-| P1 Tag management screen | SCREEN-SETTINGS-TAG.md | 2026-03-25 |
+| P1 Tag management screen | SCREEN-SETTINGS-TAGS.md | 2026-03-25 |
 | P1 Settings screen | SCREEN-SETTINGS-GENERAL.md | 2026-03-26 |
 | P5 Project Maturity Scorecard | SCREEN-PROJECTS-VALIDATION.md (conformity levels) | 2026-03-25 |
-| P6 Specification management | SCREEN-PROTOTYPES.md + SCREEN-PROJECTS-WORKFLOW.md | 2026-03-24 |
+| P6 Specification management | SCREEN-PROTOTYPES-LIST.md + SCREEN-PROJECTS-WORKFLOW.md | 2026-03-24 |
 | P1 monitoring.py module | ARCHITECTURE.md (Health Monitor section) | 2026-03-26 |
 | P1 scheduler.py module | ARCHITECTURE.md (Scheduler section) | 2026-03-26 |
 | P1 Routes table update | ARCHITECTURE.md (routes table lines 115–125) | 2026-03-26 |

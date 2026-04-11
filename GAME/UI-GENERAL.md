@@ -312,7 +312,7 @@ Global scripts (`Category: Global`) show an amber warning banner in the modal he
 
 List screens carry their own filter controls in the page action bar (not the sub-bar). Filters are client-side (no server round-trip) for responsiveness.
 
-Dashboard filter controls (see SCREEN-PROJECTS-OVERVIEW):
+Dashboard filter controls (see SCREEN-PROJECTS-DASHBOARD):
 
 | Control | Type | Behavior |
 |---------|------|----------|

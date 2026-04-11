@@ -5,7 +5,7 @@
 
 ## Design Intent
 
-GAME already has a Kanban board (SCREEN-DASHBOARDS-WORKFLOW.md) for specification ticket lifecycle. That board uses a fixed set of states (idea → proposed → ready → in_development → testing → done) tied to `spec_tickets`. The Workflow Service generalizes this into a platform service that any project can use for any kind of state machine — not just specification tickets.
+GAME already has a Kanban board (SCREEN-WORKFLOW.md) for specification ticket lifecycle. That board uses a fixed set of states (idea → proposed → ready → in_development → testing → done) tied to `spec_tickets`. The Workflow Service generalizes this into a platform service that any project can use for any kind of state machine — not just specification tickets.
 
 **One interface, many workflows:** A deployment pipeline, a content review process, a bug triage queue, and the existing specification ticket lifecycle are all state machines. They differ in their states, transitions, and payloads — not in their fundamental operations (create, transition, query, list). The Workflow Service provides those operations as a generic interface. The specific workflow behavior comes from **workflow templates** that define states and allowed transitions.
 

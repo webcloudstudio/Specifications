@@ -95,7 +95,7 @@ GAME maintains a service registry in the `services` database table (see below). 
 2. **Project services** — manifests in `{project}/services/*.service.yaml` for each managed project
 3. **MCP servers** — registered MCP server configurations (see FEATURE-MCP-Hosting.md)
 
-The Service Catalog screen (SCREEN-DASHBOARDS-SERVICECATALOG.md) displays all registered services grouped by source (platform vs. project).
+The Service Catalog screen (SCREEN-CATALOG.md) displays all registered services grouped by source (platform vs. project).
 
 ---
 

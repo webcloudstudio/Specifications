@@ -1,6 +1,6 @@
 # Screen: Project Workflow
 
-**Status: REMOVED** — Ticket creation moved to `Workflow / Add Ticket` (SCREEN-DASHBOARDS-WORKFLOW.md). This screen and its route (`/project-workflow`) are no longer active.
+**Status: REMOVED** — Ticket creation moved to `Workflow / Add Ticket` (SCREEN-WORKFLOW.md). This screen and its route (`/project-workflow`) are no longer active.
 
 ~~**Version:** 20260326 V1~~
 ~~**Extends:** SCREEN-DEFAULT~~
