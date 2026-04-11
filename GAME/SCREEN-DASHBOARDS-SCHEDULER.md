@@ -7,7 +7,8 @@ Overview of all operations that have a `# Schedule:` header. Allows enabling/dis
 
 ## Menu Navigation
 
-`Monitoring / Scheduler` — sub-tab of Monitoring.
+Main Menu: Monitoring
+Sub Menu: Scheduler
 
 ## Route
 

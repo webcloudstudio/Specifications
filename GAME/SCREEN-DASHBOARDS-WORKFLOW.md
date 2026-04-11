@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Workflow` — top-level tab. Sub-bar tabs: `Kanban` (default) | `Add Ticket` | `Manage`
+Main Menu: Workflow
+Sub Menu: Kanban (Default)
 
 ## Routes
 

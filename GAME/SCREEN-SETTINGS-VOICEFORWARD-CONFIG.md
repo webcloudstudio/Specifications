@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Settings / Voice`
+Main Menu: Settings [right]
+Sub Menu: Voice
 
 ## Route
 

@@ -6,7 +6,9 @@
 
 ## Menu Navigation
 
-`Projects / Maintenance`
+Main Menu: Projects
+Sub Menu: Maintenance
+Inherits From: SCREEN-DEFAULT
 
 ## Route
 

@@ -8,7 +8,8 @@
 
 ## Menu Navigation
 
-`Processes` — top-level tab, no sub-bar.
+Main Menu: Monitoring
+Sub Menu: Processes
 
 ## Route
 

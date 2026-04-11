@@ -9,9 +9,8 @@ This screen does **not** extend SCREEN-DEFAULT. It has its own layout and column
 
 ## Menu Navigation
 
-`Projects / Setup`
-
-(Appears as a tab in the Project sub-bar alongside Dashboard and Configuration.)
+Main Menu: Projects
+Sub Menu: Setup
 
 ## Route
 

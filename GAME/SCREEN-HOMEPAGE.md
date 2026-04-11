@@ -4,7 +4,7 @@
 
 ## Menu Navigation
 
-`Publisher`
+Main Menu: Publisher
 
 ## Route
 

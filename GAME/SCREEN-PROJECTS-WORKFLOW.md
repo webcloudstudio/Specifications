@@ -10,7 +10,7 @@ One-click entry point for raising specification tickets (PATCH-NNN, SCREEN-NNN, 
 
 ## Menu Navigation
 
-`Projects / Workflow`
+(REMOVED — no navigation entry)
 
 ## Route
 

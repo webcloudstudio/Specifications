@@ -5,7 +5,7 @@
 
 ## Menu Navigation
 
-`Catalog` — top-level tab ("Service / Catalog" two-line label). Single screen, no sub-bar.
+Main Menu: Catalog
 
 ## Route
 

@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Prototypes / Configuration`
+Main Menu: Prototypes
+Sub Menu: Configuration
 
 ## Route
 

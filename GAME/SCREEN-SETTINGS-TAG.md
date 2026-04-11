@@ -7,7 +7,8 @@ Tags are discovered automatically from `projects.tags` across all projects. This
 
 ## Menu Navigation
 
-`Settings / Tags`
+Main Menu: Settings [right]
+Sub Menu: Tags
 
 ## Route
 

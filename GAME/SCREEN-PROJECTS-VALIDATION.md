@@ -8,9 +8,9 @@ A SCREEN-DEFAULT-based list view where each project row shows its current valida
 
 ## Menu Navigation
 
-`Projects / Validation`
-
-(Appears as a tab in the Project sub-bar alongside Dashboard, Configuration, and Setup.)
+Main Menu: Projects
+Sub Menu: Validation
+Inherits From: SCREEN-DEFAULT
 
 ## Route
 

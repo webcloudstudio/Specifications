@@ -7,9 +7,7 @@
 
 ## Menu Navigation
 
-Top bar: `Projects` (active — detail drill-down, not a direct nav item). No project sub-bar on this screen.
-
-This page is navigated to when the gear icon is selected to see details of individual projects.
+Main Menu: Projects (detail view — no sub-bar active)
 
 ## Project Navigation
 

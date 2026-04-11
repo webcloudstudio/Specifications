@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Prototypes / Prototypes` — default sub-tab when Prototypes is first selected.
+Main Menu: Prototypes
+Sub Menu: List (Default)
 
 ## Route
 

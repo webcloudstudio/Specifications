@@ -5,9 +5,8 @@
 
 ## Menu Navigation
 
-`Monitoring` — top-level tab. Default sub-tab when Monitoring is selected.
-
-`Monitoring / Monitoring` — sub-bar.
+Main Menu: Monitoring
+Sub Menu: Monitoring (Default)
 
 ## Route
 

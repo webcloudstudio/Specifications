@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Settings / General`
+Main Menu: Settings [right]
+Sub Menu: General (Default)
 
 ## Route
 

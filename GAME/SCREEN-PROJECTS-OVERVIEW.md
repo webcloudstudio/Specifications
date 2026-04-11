@@ -8,7 +8,9 @@
 
 ## Menu Navigation
 
-`Projects / Dashboard` — default sub-tab when Projects is first selected.
+Main Menu: Projects
+Sub Menu: Dashboard (Default)
+Inherits From: SCREEN-DEFAULT
 
 ## Route
 

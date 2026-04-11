@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Prototypes / Maintenance`
+Main Menu: Prototypes
+Sub Menu: Maintenance
 
 ## Route
 

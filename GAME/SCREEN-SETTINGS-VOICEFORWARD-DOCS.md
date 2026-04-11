@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Settings / Voice Docs`
+Main Menu: Settings [right]
+Sub Menu: Voice Docs
 
 ## Route
 

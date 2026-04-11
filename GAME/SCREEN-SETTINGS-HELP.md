@@ -4,7 +4,8 @@
 
 ## Menu Navigation
 
-`Settings / Help`
+Main Menu: Settings [right]
+Sub Menu: Help
 
 ## Route
 

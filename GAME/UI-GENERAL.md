@@ -1,9 +1,7 @@
 # UI General Standards
 
-**Version:** 20260320 V1  
+**Version:** 20260411 V2
 **Description:** Shared UI patterns and conventions across all screens
-
-**Shared UI patterns, components, and conventions used across all screens.**
 
 All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
 
@@ -11,144 +9,154 @@ All SCREEN-*.md files reference this document for shared elements. Screen specif
 
 ## Theme
 
-Dark theme using Bootstrap 5 `data-bs-theme="dark"`. Custom CSS in `static/style.css` extends Bootstrap with platform-specific variables:
+**Light-body, dark-nav professional scheme.** Bootstrap 5 default (no `data-bs-theme` attribute). Custom CSS in `static/style.css`.
 
-| Variable | Purpose | Value |
-|----------|---------|-------|
-| `--cc-surface` | Card/panel background | Dark surface |
-| `--cc-border` | Border color | Subtle dark border |
-| `--cc-muted` | Secondary text | Muted gray |
+Do not set `data-bs-theme="dark"`. Do not use grey text on dark backgrounds anywhere. Do not use grey icons on dark backgrounds.
 
-No JS build step. Bootstrap 5 via CDN. HTMX via CDN.
+| Element | Background | Text / Icon Color |
+|---------|-----------|-------------------|
+| Top navigation bar | `#1e293b` (dark navy) | `#f1f5f9` (near-white) |
+| Sub-navigation bar | `#f1f5f9` (light gray) | `#334155` (slate-700) |
+| Active top-tab | `#0073ea` (blue accent) | `#ffffff` |
+| Active sub-tab | `#ffffff` | `#0073ea` (blue accent) |
+| Page body | `#ffffff` | `#1e293b` |
+| Cards / panels | `#ffffff` | `#1e293b` |
+| Muted / secondary text | — | `#64748b` (slate-500) |
+| Borders | — | `#e2e8f0` |
+
+CSS variables in `static/style.css`:
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `--cc-nav-bg` | `#1e293b` | Top nav background |
+| `--cc-nav-text` | `#f1f5f9` | Top nav text and icons |
+| `--cc-nav-active-bg` | `#0073ea` | Active top-tab highlight |
+| `--cc-subnav-bg` | `#f1f5f9` | Sub-bar background |
+| `--cc-subnav-text` | `#334155` | Sub-bar text |
+| `--cc-subnav-active-bg` | `#ffffff` | Active sub-tab bg |
+| `--cc-subnav-active-text` | `#0073ea` | Active sub-tab text |
+| `--cc-body-bg` | `#ffffff` | Page body background |
+| `--cc-surface` | `#ffffff` | Card/panel background |
+| `--cc-border` | `#e2e8f0` | Border color |
+| `--cc-muted` | `#64748b` | Secondary / muted text |
+
+---
+
+## Screen Navigation Convention
+
+Every routed screen file declares its position in the navigation using this block immediately after the description header:
+
+```
+## Menu Navigation
+
+Main Menu: {tab name}
+Sub Menu: {sub-tab name} (Default)
+Inherits From: SCREEN-DEFAULT
+```
+
+Rules:
+- **Main Menu** — the top-bar tab label exactly as shown in the Tab Definitions table below.
+- **Sub Menu** — the sub-bar tab label. Add `(Default)` if this screen is the default sub-tab for its top-level tab. Omit the line entirely for single-screen top-level tabs with no sub-bar.
+- **Inherits From** — present only when the screen extends `SCREEN-DEFAULT`. Omit otherwise.
+- Settings and Help use `[right]` annotation: `Main Menu: Settings [right]`
+- Standalone pages with no GAME navigation bar (e.g. VoiceForward mobile recorder) use: `(standalone — no GAME navigation bar)`
 
 ---
 
 ## Navigation Bar
 
-Three-tier navigation. Top bar is always visible. Sub-bars appear when their respective top-level items are active.
+Two-tier navigation. Top bar is always visible. Sub-bar appears below the top bar when the active top-level tab has sub-tabs.
 
 ### Top Bar
 
-Fixed. Present on all screens. Components left to right:
-
-| Element | Behavior |
-|---------|----------|
-| **Brand** (`cc-brand`) | App name (🎮 icon or command-line symbol). Click → Dashboard (`/`). |
-| **Top-level tabs** | Icon + two-line label (see Tab Labels below). Left to right: Welcome, Prototypes, Projects, Processes, Monitoring, Workflow, Publisher, Catalog. Active tab highlighted. Welcome is leftmost and is the default. |
-| **Settings** | ⚙️ gear icon + label "Settings". Far right, before Help. Click → activates Settings context and displays Settings sub-bar. |
-| **Help** | 📖 book icon. Rightmost item. Click → navigates to `/help`. |
-| **Running badges** | Green pill badges for each currently-running project. Click → project detail. |
-
-### Tab Labels
-
-Each top-level tab renders as a vertical stack: icon centered on top, text below in up to two lines. Long names split at a natural word boundary.
-
-| Tab | Icon | Line 1 | Line 2 |
-|-----|------|--------|--------|
-| Welcome | 🏠 | Welcome | |
-| Prototypes | 🚀 | Proto- | types |
-| Projects | 📁 | Projects | |
-| Processes | ⚙️ | Pro- | cesses |
-| Monitoring | 📊 | Monitor- | ing |
-| Workflow | 📋 | Simple | Workflow |
-| Publisher | 📢 | Portfolio | Publisher |
-| Catalog | 📚 | Service | Catalog |
-| Settings | ⚙️ | Settings | |
-| Help | 📖 | Help | |
-
-CSS class: `cc-nav-tab`. Icon in a `cc-nav-icon` span above text in a `cc-nav-label` span. Max tab width: ~80px. Font size for label: 11px.
-
-### Tab Defaults
-
-Each top-level tab navigates to a defined default route when first selected:
-
-| Tab | Default Route | Notes |
-|-----|--------------|-------|
-| Welcome (🏠) | `/welcome/summary` | Has sub-bar |
-| Prototypes (🚀) | `/prototypes/list` | Has sub-bar; Prototypes list is the default |
-| Projects (📁) | `/` (Dashboard) | Has sub-bar |
-| Processes (⚙️) | `/processes` | Single screen, no sub-bar |
-| Monitoring (📊) | `/monitoring` | Has sub-bar; Monitoring is the default |
-| Workflow (📋) | `/workflow/kanban` | Has sub-bar; Kanban is the default |
-| Publisher (📢) | `/publisher` | Single screen, no sub-bar |
-| Catalog (📚) | `/servicecatalog` | Single screen, no sub-bar |
-| Settings (⚙️) | `/settings/general` | Has sub-bar |
-| Help (📖) | `/help` | Single screen, no sub-bar |
-
-### Welcome Sub-Bar
-
-Visible only when `Welcome` (🏠) is active in the top bar. Renders directly below the top bar.
+Fixed. Present on all screens. Background: `--cc-nav-bg` (`#1e293b`).
 
 | Element | Position | Behavior |
 |---------|----------|----------|
-| **Summary** tab | Left | Links to `/welcome/summary` — read-only configuration health view. Default. |
-| **Prototypes** tab | Left | Links to `/welcome/prototypes` — searchable prototype list |
-| **Projects** tab | Left | Links to `/welcome/projects` — searchable project list |
+| **Brand** | Far left | App name + command-line icon. Click → `/`. |
+| **Left tabs** | Left group | Welcome, Projects, Prototypes, Monitoring, Workflow, Catalog, Publisher — in that order. |
+| **Running badges** | Center/flex spacer | Green pill badges for each currently-running project. Click → project detail. |
+| **Settings** | Right group, first | `⚙️ Settings`. Click → activates Settings context, shows Settings sub-bar. |
+| **Help** | Right group, last | `📖 Help`. Click → `/help`. |
 
-Summary is the default sub-tab when Welcome is first selected.
+Settings and Help are right-aligned (pushed to the far right by a flex spacer before them).
 
-### Prototypes Sub-Bar
+### Tab Definitions
 
-Visible only when `Prototypes` (🚀) is active in the top bar. Renders directly below the top bar.
+Each tab renders as icon above label. Icon: 20px emoji rendered in native color (not filtered or recolored). Label: system sans-serif, 13px, white on the navy background. No word-splitting, no hyphenation.
 
-| Element | Position | Behavior |
-|---------|----------|----------|
-| **Prototypes** tab | Left | Links to `/prototypes/list` — prototype list with search. Default. |
-| **Configuration** tab | Left | Links to `/prototypes/configuration` — batch METADATA.md editor |
-| **Validation** tab | Left | Links to `/prototypes/validation` — specification compliance checks |
-| **Maintenance** tab | Left | Links to `/prototypes/maintenance` — Specifications bin/ script runner |
+| Tab | Icon | Label | Default Route | Sub-bar |
+|-----|------|-------|---------------|---------|
+| Welcome | 🏠 | Welcome | `/welcome/summary` | Yes |
+| Projects | 📁 | Projects | `/` | Yes |
+| Prototypes | 🚀 | Prototypes | `/prototypes/list` | Yes |
+| Monitoring | 📊 | Monitoring | `/monitoring` | Yes |
+| Workflow | 📋 | Workflow | `/workflow/kanban` | Yes |
+| Catalog | 📚 | Service Catalog | `/servicecatalog` | No |
+| Publisher | 📢 | Publisher | `/publisher` | No |
+| Settings | ⚙️ | Settings | `/settings/general` | Yes — right-aligned |
+| Help | 📖 | Help | `/help` | No — right-aligned |
 
-Prototypes (list) is the default sub-tab when Prototypes is first selected.
+"Service Catalog" renders as two lines: "Service" / "Catalog". All other labels are single-line. Max tab width: 90px.
 
-### Project Sub-Bar
+CSS class: `cc-nav-tab`. Icon in `cc-nav-icon` span, label in `cc-nav-label` span.
 
-Visible only when `Projects` is active in the top bar. Renders directly below the top bar. Contains tabs only — no action buttons.
+### Sub-Bars
 
-| Element | Position | Behavior |
-|---------|----------|----------|
-| **Dashboard** tab | Left | Links to `/` — default project list. Default. |
-| **Configuration** tab | Left | Links to `/project-config` — batch metadata editor |
-| **Validation** tab | Left | Links to `/project-validation` — compliance checks |
-| **Maintenance** tab | Left | Links to `/project-maintenance` — maintenance-category operations |
+Sub-bar background: `--cc-subnav-bg` (`#f1f5f9`). Active tab: white background, blue text. Font: 13px system sans-serif, dark text.
 
-Dashboard is the default sub-tab when Projects is first selected. The Dashboard screen carries its own action bar (filter + Rescan) within the page content — see SCREEN-PROJECTS-OVERVIEW. Projects/Workflow has been removed — ticket creation is in the Workflow top-level tab.
+#### Welcome Sub-Bar
 
-### Monitoring Sub-Bar
+| Tab | Route | Notes |
+|-----|-------|-------|
+| Summary | `/welcome/summary` | Default |
+| Prototypes | `/welcome/prototypes` | Searchable prototype list |
+| Projects | `/welcome/projects` | Searchable project list |
 
-Visible only when `Monitoring` is active in the top bar. Renders directly below the top bar.
+#### Projects Sub-Bar
 
-| Element | Position | Behavior |
-|---------|----------|----------|
-| **Monitoring** tab | Left | Links to `/monitoring` — service health and event log. Default. |
-| **Scheduler** tab | Left | Links to `/scheduler` — scheduled operations overview |
+| Tab | Route | Notes |
+|-----|-------|-------|
+| Dashboard | `/` | Default |
+| Configuration | `/project-config` | Batch metadata editor |
+| Validation | `/project-validation` | Compliance checks |
+| Maintenance | `/project-maintenance` | Maintenance-category operations |
+| Setup | `/project-setup` | Discover and register GitHub repos |
 
-Monitoring is the default sub-tab when Monitoring is first selected.
+#### Prototypes Sub-Bar
 
-### Workflow Sub-Bar
+| Tab | Route | Notes |
+|-----|-------|-------|
+| List | `/prototypes/list` | Default |
+| Configuration | `/prototypes/configuration` | Batch METADATA.md editor |
+| Validation | `/prototypes/validation` | Specification compliance checks |
+| Maintenance | `/prototypes/maintenance` | Specifications bin/ script runner |
 
-Visible only when `Workflow` is active in the top bar. Renders directly below the top bar.
+#### Monitoring Sub-Bar
 
-| Element | Position | Behavior |
-|---------|----------|----------|
-| **Kanban** tab | Left | Links to `/workflow/kanban` — kanban board. Default. |
-| **Add Ticket** tab | Left | Links to `/workflow/add` — ticket creation form |
-| **Manage** tab | Left | Links to `/workflow/manage` — workflow types and label configuration |
+| Tab | Route | Notes |
+|-----|-------|-------|
+| Monitoring | `/monitoring` | Default — service health and event log |
+| Scheduler | `/scheduler` | Scheduled operations overview |
+| Processes | `/processes` | Live log viewer and process control |
 
-Kanban is the default sub-tab when Workflow is first selected.
+#### Workflow Sub-Bar
 
-### Settings Sub-Bar
+| Tab | Route | Notes |
+|-----|-------|-------|
+| Kanban | `/workflow/kanban` | Default |
+| Add Ticket | `/workflow/add` | Ticket creation form |
+| Manage | `/workflow/manage` | Workflow types and label configuration |
 
-Visible only when `Settings` (gear icon in top bar) is active. Renders directly below the top bar, replacing the Project Sub-Bar.
+#### Settings Sub-Bar
 
-| Element | Position | Behavior |
-|---------|----------|----------|
-| **General** tab | Left | Links to `/settings/general` — application settings |
-| **Tags** tab | Left | Links to `/settings/tags` — tag color configuration |
-| **Help** tab | Left | Links to `/settings/help` — application help |
-| **Voice** tab | Left | Links to `/settings/voiceforward/config` — voice button management |
-| **Voice Docs** tab | Left | Links to `/settings/voiceforward/docs` — phone setup documentation |
-
-General is the default sub-tab when Settings is first selected.
+| Tab | Route | Notes |
+|-----|-------|-------|
+| General | `/settings/general` | Default — application settings |
+| Tags | `/settings/tags` | Tag color configuration |
+| Voice | `/settings/voiceforward/config` | Voice button management |
+| Voice Docs | `/settings/voiceforward/docs` | Phone setup documentation |
+| Help | `/settings/help` | Application help |
 
 ---
 
@@ -223,7 +231,7 @@ Three global modals defined in `base.html`:
 | Command Output | `opOutputModal` | Shows operation stdout/stderr output |
 | Script Viewer | `scriptViewerModal` | Shows script file content with gateway endpoint — opened from Service Catalog |
 
-Modals use dark surface background with themed borders. See Script Viewer Modal section for full specification.
+Modals use white surface background with standard light borders.
 
 ---
 
@@ -257,15 +265,13 @@ Rendered per-operation on Dashboard rows, project detail, and the Service Catalo
 
 ### Category Button Styles
 
-Three categories map to distinct visual styles. The style signals what kind of action the script performs and whether it reaches outside the project.
-
 | Category | Style class | Color | Icon prefix | Meaning |
 |----------|-------------|-------|-------------|---------|
 | `Operations` | `op-btn--operations` | Green `#00c875` | ▶ / ■ / ⚙ / 🧪 | Core lifecycle: start, stop, build, test. Primary actions. |
 | `Workflow` | `op-btn--workflow` | Blue `#0073ea` | → | Project tools: analysis, generation, maintenance scripts. Secondary. |
 | `Global` | `op-btn--global` | Amber `#fdab3d` | ⤴ | Crosses repo boundaries. Visually distinct to signal cross-project impact. |
 
-**Icon prefix rules** (Operations only — other categories use → or ⤴):
+**Icon prefix rules** (Operations only):
 
 | Script name | Icon |
 |-------------|------|
@@ -330,9 +336,11 @@ System font stack (no web fonts). Monospace for logs and code output.
 | Element | Font | Size |
 |---------|------|------|
 | Body | System sans-serif | 14px |
-| Headings | System sans-serif | 16-20px |
+| Headings | System sans-serif | 16–20px |
+| Nav tab labels | System sans-serif | 13px |
+| Sub-bar tab labels | System sans-serif | 13px |
 | Log output | System monospace | 13px |
-| Badges/pills | System sans-serif | 11px |
+| Badges/pills | System sans-serif | 12px |
 
 ---
 
@@ -342,5 +350,5 @@ Designed for desktop use (operations center). Minimum supported width: 1024px. N
 
 ## Open Questions
 
-- Should the nav bar's top-level tabs be configurable (show/hide per user preference)? Not in V1 — all tabs are always visible. A future settings option could hide infrequently-used tabs.
-- Should running badges in the nav bar auto-dismiss after a configurable timeout? Yes — badges clear when the process exits (already the design). No timeout behavior needed.
+- Should the nav bar's top-level tabs be configurable (show/hide per user preference)? Not in V1 — all tabs are always visible.
+- Should running badges in the nav bar auto-dismiss after a configurable timeout? Yes — badges clear when the process exits. No timeout behavior needed.

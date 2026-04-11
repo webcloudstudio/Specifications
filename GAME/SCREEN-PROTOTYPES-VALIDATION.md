@@ -5,7 +5,8 @@
 
 ## Menu Navigation
 
-`Prototypes / Validation`
+Main Menu: Prototypes
+Sub Menu: Validation
 
 ## Route
 

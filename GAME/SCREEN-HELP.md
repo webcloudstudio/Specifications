@@ -5,7 +5,7 @@
 
 ## Menu Navigation
 
-`Help` — top-level tab (📖), rightmost after Settings. No sub-bar.
+Main Menu: Help [right]
 
 ## Route
 

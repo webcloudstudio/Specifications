@@ -4,7 +4,8 @@
 
 ## Menu Navigation
 
-`Welcome` — top-level. Sub-bar tabs: `Summary` (default) | `Prototypes` | `Projects`
+Main Menu: Welcome
+Sub Menu: Summary (Default)
 
 ## Routes
 

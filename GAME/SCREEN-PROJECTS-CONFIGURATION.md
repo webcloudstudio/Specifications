@@ -8,7 +8,9 @@ A screen for editing project metadata across projects in a view
 
 ## Menu Navigation
 
-`Projects / Configuration`
+Main Menu: Projects
+Sub Menu: Configuration
+Inherits From: SCREEN-DEFAULT
 
 ## Route
 
