@@ -1,18 +1,15 @@
 # Screen: Prototypes Validation
 
-**Version:** 20260407 V1
-**Description:** Run and review specification validation checks across all prototype directories. Mirrors Projects / Validation.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V1 |
+| Route | `GET /prototypes/validation` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Prototypes |
+| Sub Menu | Validation |
+| Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 
-## Menu Navigation
-
-Main Menu: Prototypes
-Sub Menu: Validation
-
-## Route
-
-```
-GET /prototypes/validation
-```
+Run and review specification validation checks across all prototype directories. Mirrors Projects / Validation.
 
 ## Layout
 

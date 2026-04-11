@@ -1,22 +1,15 @@
 # Screen: Project Setup
 
-**Version:** 20260325 V1
-**Description:** Specification for the Project Setup screen — discover unregistered GitHub repos and bring them into GAME
+| Field | Value |
+|-------|-------|
+| Version | 20260325 V1 |
+| Route | `GET /project-setup` |
+| Parent | — |
+| Main Menu | Projects |
+| Sub Menu | Setup |
+| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 
-Fetches the user's GitHub repository list and compares against projects already registered in GAME. Shows un-registered repos with a `Make A Project` action and registered projects with a `Conform` action.
-
-This screen does **not** extend SCREEN-DEFAULT. It has its own layout and column set because the source of truth is the GitHub API, not the GAME database.
-
-## Menu Navigation
-
-Main Menu: Projects
-Sub Menu: Setup
-
-## Route
-
-```
-GET /project-setup
-```
+Discover unregistered GitHub repos and bring them into GAME. Own layout — does not extend SCREEN-DEFAULT (source of truth is the GitHub API, not the GAME database).
 
 ## Prerequisites
 

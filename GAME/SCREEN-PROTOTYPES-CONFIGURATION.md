@@ -1,18 +1,15 @@
 # Screen: Prototypes Configuration
 
-**Version:** 20260407 V1
-**Description:** Batch metadata editor for prototype specification directories. Mirrors Projects / Configuration.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V1 |
+| Route | `GET /prototypes/configuration` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Prototypes |
+| Sub Menu | Configuration |
+| Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 
-## Menu Navigation
-
-Main Menu: Prototypes
-Sub Menu: Configuration
-
-## Route
-
-```
-GET /prototypes/configuration
-```
+Batch metadata editor for prototype specification directories. Mirrors Projects / Configuration.
 
 ## Layout
 

@@ -1,22 +1,15 @@
 # Screen: Maintenance
 
-**Version:** 20260326 V1
-**Extends:** SCREEN-DEFAULT
-**Description:** Specification for the Maintenance screen — project list showing maintenance-category operations for each project
+| Field | Value |
+|-------|-------|
+| Version | 20260326 V1 |
+| Route | `GET /project-maintenance` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Projects |
+| Sub Menu | Maintenance |
+| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 
-## Menu Navigation
-
-Main Menu: Projects
-Sub Menu: Maintenance
-Inherits From: SCREEN-DEFAULT
-
-## Route
-
-```
-GET /project-maintenance
-```
-
-Renders SCREEN-DEFAULT (Baseline) with `columns=Maintenance`.
+Project list showing maintenance-category operations for each project. Renders SCREEN-DEFAULT with `columns=Maintenance`.
 
 ## Maintenance Column
 

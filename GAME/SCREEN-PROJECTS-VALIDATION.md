@@ -1,24 +1,15 @@
 # Screen: Validation
 
-**Version:** 20260325 V1
-**Extends:** SCREEN-DEFAULT
-**Description:** Specification for the Validation screen — run and review project compliance checks across all registered projects
+| Field | Value |
+|-------|-------|
+| Version | 20260325 V1 |
+| Route | `GET /project-validation` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Projects |
+| Sub Menu | Validation |
+| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 
-A SCREEN-DEFAULT-based list view where each project row shows its current validation state and exposes controls to run checks individually or as a batch. Two validation categories: **Repo/Project Quality** and **Workflow Conformity**.
-
-## Menu Navigation
-
-Main Menu: Projects
-Sub Menu: Validation
-Inherits From: SCREEN-DEFAULT
-
-## Route
-
-```
-GET /project-validation
-```
-
-Renders SCREEN-DEFAULT (Baseline) with `columns=Validation`.
+Run and review project compliance checks across all registered projects. Renders SCREEN-DEFAULT with `columns=Validation`. Two validation categories: Repo/Project Quality and Workflow Conformity.
 
 ## Validation Column
 

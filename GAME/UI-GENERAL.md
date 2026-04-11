@@ -55,24 +55,44 @@ CSS variables in `static/style.css`:
 
 ---
 
-## Screen Navigation Convention
+## Screen Header Template
 
-Every routed screen file declares its position in the navigation using this block immediately after the description header:
+Every SCREEN-*.md file MUST open with a `# Screen: {Name}` heading followed immediately by this metadata table. No prose, no other headings, and no `## Route` section appear before or inside this block.
 
+```markdown
+# Screen: {Display Name}
+
+| Field | Value |
+|-------|-------|
+| Version | YYYYMMDD Vn |
+| Route | `GET /path` |
+| Parent | SCREEN-DEFAULT  ← or — if none |
+| Main Menu | {tab label} |
+| Sub Menu | {sub-tab label} · default  ← omit "· default" if not the default |
+| Tab Order | 1: Label · 2: Label · 3: Label … |
+
+One-sentence description.
 ```
-## Menu Navigation
 
-Main Menu: {tab name}
-Sub Menu: {sub-tab name} (Default)
-Inherits From: SCREEN-DEFAULT
-```
+### Field Rules
 
-Rules:
-- **Main Menu** — the top-bar tab label exactly as shown in the Tab Definitions table below.
-- **Sub Menu** — the sub-bar tab label. Add `(Default)` if this screen is the default sub-tab for its top-level tab. Omit the line entirely for single-screen top-level tabs with no sub-bar.
-- **Inherits From** — present only when the screen extends `SCREEN-DEFAULT`. Omit otherwise.
-- Settings and Help use `[right]` annotation: `Main Menu: Settings [right]`
-- Standalone pages with no GAME navigation bar (e.g. VoiceForward mobile recorder) use: `(standalone — no GAME navigation bar)`
+| Field | Rule |
+|-------|------|
+| **Version** | `YYYYMMDD Vn` — date of last substantive change + revision number. |
+| **Route** | Primary HTTP route(s). Multiple routes: comma-separated. Detail/dynamic routes: `GET /path/{id}`. |
+| **Parent** | `SCREEN-DEFAULT` when the screen extends the baseline list layout. `—` otherwise. |
+| **Main Menu** | Top-bar tab label exactly as shown in Tab Definitions. Right-aligned tabs: append ` [right]` (e.g. `Settings [right]`). Detail views with no active tab: `{Tab} · detail view`. Standalone pages with no nav bar: `(standalone)`. |
+| **Sub Menu** | Sub-bar tab label. Append ` · default` on the tab that is the default landing for its top-level tab. Omit the row entirely for screens with no sub-bar. |
+| **Tab Order** | All sub-tabs for this screen's top-level tab, in left-to-right order, as `N: Label`. Abstract screens: `—`. |
+
+### Special Cases
+
+| Case | Parent | Sub Menu | Tab Order |
+|------|--------|----------|-----------|
+| Abstract (e.g. SCREEN-DEFAULT) | — | — | — |
+| Detail screen (no sub-bar active) | — | — | — |
+| Standalone (no GAME nav) | — | `(standalone)` | — |
+| Explicitly no parent | — | per nav | per nav |
 
 ---
 
@@ -339,16 +359,7 @@ Global scripts (`Category: Global`) show an amber warning banner in the modal he
 
 ## Filter Bar
 
-List screens carry their own filter controls in the page action bar (not the sub-bar). Filters are client-side (no server round-trip) for responsiveness.
-
-Dashboard filter controls (see SCREEN-PROJECTS-DASHBOARD):
-
-| Control | Type | Behavior |
-|---------|------|----------|
-| Text search | Input field | Filters rows by name match |
-| Status filter | Pill buttons | Toggle visibility by status |
-| Namespace filter | Dropdown | Filter by namespace |
-| Rescan button | Button | POST `/api/scan`; refreshes project list |
+List screens carry their own filter controls in the page action bar (not the sub-bar). Filters are client-side (no server round-trip) for responsiveness. The standard filter bar controls are defined in SCREEN-DEFAULT. Individual screens may add extra controls (e.g., the Rescan button on the Dashboard).
 
 ---
 

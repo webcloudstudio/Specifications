@@ -1,18 +1,17 @@
 # Screen: Baseline Layout
 
-**Version:** 20260320 V1
-**Type:** abstract — base layout, not a routed screen
-**Description:** Reusable project list layout. Named views extend this by declaring `Extends: SCREEN-DEFAULT` and specifying their middle columns.
+| Field | Value |
+|-------|-------|
+| Version | 20260320 V1 |
+| Route | `GET /default?title=...&columns=...&filter=...&sort=...` |
+| Parent | — |
+| Main Menu | — |
+| Sub Menu | — |
+| Tab Order | — |
 
-**Inherited by:** SCREEN-PROJECTS-DASHBOARD, SCREEN-PROJECTS-CONFIGURATION, SCREEN-PROJECTS-VALIDATION, SCREEN-PROJECTS-MAINTENANCE, SCREEN-PROTOTYPES-LIST
+Abstract — base layout, not a routed screen. Reusable sortable, filterable project/prototype list. Screens that extend this declare `Parent: SCREEN-DEFAULT` and specify their middle columns.
 
-A sortable, filterable, configurable project list. Middle columns are passed as arguments, making this a reusable base for named views.
-
-## Route
-
-```
-GET /default?title=DEFAULT&columns=Links,Actions,Help&filter=normal&sort=name
-```
+## Route Parameters
 
 | Param | Default | Purpose |
 |-------|---------|---------|

@@ -1,18 +1,15 @@
 # Screen: Prototypes Maintenance
 
-**Version:** 20260407 V1
-**Description:** Maintenance operations for prototype specification directories. Runs Specifications bin/ scripts per prototype. Mirrors Projects / Maintenance.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V1 |
+| Route | `GET /prototypes/maintenance` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Prototypes |
+| Sub Menu | Maintenance |
+| Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 
-## Menu Navigation
-
-Main Menu: Prototypes
-Sub Menu: Maintenance
-
-## Route
-
-```
-GET /prototypes/maintenance
-```
+Maintenance operations for prototype specification directories. Runs Specifications bin/ scripts per prototype. Mirrors Projects / Maintenance.
 
 ## Layout
 

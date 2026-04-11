@@ -1,21 +1,15 @@
 # Screen: Prototypes
 
-**Version:** 20260324 V2
-**Extends:** SCREEN-DEFAULT
-**Description:** Top-level screen listing all known prototypes (specification directories inside the Specifications repo) with their names and current status.
+| Field | Value |
+|-------|-------|
+| Version | 20260324 V2 |
+| Route | `GET /prototypes/list`, `GET /prototypes` (redirects) |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Prototypes |
+| Sub Menu | List · default |
+| Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 
-## Menu Navigation
-
-Main Menu: Prototypes
-Sub Menu: List (Default)
-Inherits From: SCREEN-DEFAULT
-
-## Route
-
-```
-GET /prototypes              → redirects to /prototypes/list
-GET /prototypes/list
-```
+Top-level screen listing all known prototypes (specification directories in the Specifications repo) with their names and current status.
 
 ## Layout
 

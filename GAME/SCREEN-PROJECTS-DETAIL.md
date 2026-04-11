@@ -1,13 +1,15 @@
 # Screen: Project Detail
 
-**Version:** 20260320 V1  
-**Description:** Specification for the Project Detail screen
+| Field | Value |
+|-------|-------|
+| Version | 20260320 V1 |
+| Route | `GET /project/{id}` |
+| Parent | — |
+| Main Menu | Projects · detail view |
+| Sub Menu | — |
+| Tab Order | — |
 
-**Single-project deep view.** Shows all configuration information for a project grouped by source.  Fields are correctly edittable.  Script headers and other items can be just described (ie. all bin scripts should have a listing for their relevant metadata) .env file variables etc.  ALl metadata for one project should be editable. Lets users edit file based  serves as the metadata editor for the project.
-
-## Menu Navigation
-
-Main Menu: Projects (detail view — no sub-bar active)
+Single-project deep view. All metadata, operations, and activity for one project. Fields are editable in place. Serves as the full metadata editor for the project.
 
 ## Project Navigation
 
@@ -31,14 +33,6 @@ Rendered in the page header, flanking the project name:
 **Filter inheritance:** The buttons navigate within the same filter context that brought the user here (passed as `?filter=` query param). If the user arrived from `?filter=all`, Prev/Next include IDEA and ARCHIVED projects. If from `?filter=normal`, they skip those statuses.
 
 **Keyboard:** Left arrow and Right arrow keys activate Prev / Next when no input field is focused.
-
-## Route
-
-```
-GET /project/{id}
-```
-
-Rest call should return service catalog data for the project enabling completed layouts. 
 
 ## Behavior
 

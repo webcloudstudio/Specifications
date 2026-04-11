@@ -1,23 +1,15 @@
 # Screen: Dashboard
 
-**Version:** 20260407 V2
-**Extends:** SCREEN-DEFAULT
-**Description:** Default Projects view. Discovered projects with status, operations, links, and documentation.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V2 |
+| Route | `GET /`, `GET /projects/dashboard` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Projects |
+| Sub Menu | Dashboard · default |
+| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 
-**The main view.** Shows every discovered project with status, operations, and quick links. Default screen for the Projects tab and the app root.
-
-## Menu Navigation
-
-Main Menu: Projects
-Sub Menu: Dashboard (Default)
-Inherits From: SCREEN-DEFAULT
-
-## Route
-
-```
-GET /
-GET /projects/dashboard   (alias)
-```
+Default Projects view. Every discovered project with status, operations, links, and documentation. Default screen for the Projects tab and the app root.
 
 ## Layout
 

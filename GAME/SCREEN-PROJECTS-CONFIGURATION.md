@@ -1,24 +1,15 @@
 # Screen: Configuration
 
-**Version:** 20260320 V1
-**Extends:** SCREEN-DEFAULT
-**Description:** Specification for the Configuration screen
+| Field | Value |
+|-------|-------|
+| Version | 20260320 V1 |
+| Route | `GET /project-config` |
+| Parent | SCREEN-DEFAULT |
+| Main Menu | Projects |
+| Sub Menu | Configuration |
+| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 
-A screen for editing project metadata across projects in a view
-
-## Menu Navigation
-
-Main Menu: Projects
-Sub Menu: Configuration
-Inherits From: SCREEN-DEFAULT
-
-## Route
-
-```
-GET /project-config
-```
-
-Renders SCREEN-DEFAULT (Baseline) with `columns=Configuration`.
+Batch metadata editor. Edit project fields (port, stack, tags, visibility) across all projects in a single view. Renders SCREEN-DEFAULT with `columns=Configuration`.
 
 ## Configuration Column
 
