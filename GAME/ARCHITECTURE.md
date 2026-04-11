@@ -233,10 +233,12 @@ GAME/
   db.py                  Database access helpers
   claude_convention.py   CLAUDE.md / AGENTS.md parsing
   templates/             Flask/Jinja2 templates
-    base.html            Layout with nav bar
+    base.html            Layout shell (includes nav partials; no inline nav HTML)
+    _nav_top.html        Top navigation bar partial
+    _nav_sub.html        Sub-navigation bar partial (section-conditional)
     partials/            HTMX response fragments
   static/
-    style.css            Custom styles (Bootstrap 5 dark theme)
+    style.css            Custom styles (light-body dark-nav; see UI-GENERAL.md)
   bin/
     common.sh            Shared script functions
     common.py            Shared Python functions

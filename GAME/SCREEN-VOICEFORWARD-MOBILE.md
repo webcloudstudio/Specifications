@@ -13,7 +13,7 @@ Not nested under `/settings/`. Standalone route with no top bar or sub-bar. Inte
 
 ## Layout
 
-Full viewport, single centered column, max-width 480px. Dark theme (matching GAME's `data-bs-theme="dark"`). Large touch targets throughout.
+Full viewport, single centered column, max-width 480px. Dark theme (this standalone page always uses dark regardless of `GAME_THEME` — it is a mobile recorder, not a GAME screen). Large touch targets throughout.
 
 ```
 ┌────────────────────────────────┐

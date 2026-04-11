@@ -16,7 +16,7 @@ Common built-in standards provide enterprise features out of the box. Projects c
 - **Language:** Python
 - **Framework:** Flask (app factory, blueprints, HTMX for partial updates)
 - **Database:** SQLite (WAL mode, single file at `data/prototyper.db`)
-- **Frontend:** Bootstrap 5 (dark theme, CDN)
+- **Frontend:** Bootstrap 5 (light-body dark-nav, CDN; theme configurable via `GAME_THEME` env var)
 - **Port:** 5001
 
 Each stack component maps to a prescriptive reference file in `../RulesEngine/stack/`.
@@ -30,7 +30,7 @@ All project integration standards are defined in `../RulesEngine/CLAUDE_RULES.md
 | **FUNCTIONALITY.md** | End-to-end flows: trigger → sequence → result |
 | **ARCHITECTURE.md** | How is code organized? Modules, routes, data flow |
 | **DATABASE.md** | Tables, columns, constraints, field sources |
-| **UI-GENERAL.md** | Shared UI patterns: nav bar, headers, dark theme, HTMX |
+| **UI-GENERAL.md** | Shared UI patterns: nav bar, headers, theme, HTMX |
 | **SCREEN-*.md** | Per-screen: route, layout, interactions |
 
 **Flow:** ARCHITECTURE describes modules → DATABASE defines storage → UI-GENERAL defines shared patterns → SCREEN-* defines per-screen layout.

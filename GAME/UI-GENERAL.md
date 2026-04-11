@@ -9,9 +9,22 @@ All SCREEN-*.md files reference this document for shared elements. Screen specif
 
 ## Theme
 
-**Light-body, dark-nav professional scheme.** Bootstrap 5 default (no `data-bs-theme` attribute). Custom CSS in `static/style.css`.
+**Default: light-body, dark-nav professional scheme.** Theme is configurable via the `GAME_THEME` environment variable (`light` | `dark`). Default is `light` when unset.
 
-Do not set `data-bs-theme="dark"`. Do not use grey text on dark backgrounds anywhere. Do not use grey icons on dark backgrounds.
+`base.html` reads `GAME_THEME` and conditionally sets `data-bs-theme`:
+```html
+<html lang="en" {% if theme == 'dark' %}data-bs-theme="dark"{% endif %}>
+```
+
+The route layer passes `theme = os.environ.get('GAME_THEME', 'light')` to every template render context.
+
+`.env.sample` entry: `GAME_THEME=light  # light|dark`
+
+> **[ROADMAP] Settings UI:** A theme selector in Settings → General will allow switching without editing `.env`.
+
+**Light mode (default).** Custom CSS in `static/style.css`. The colors below apply when `GAME_THEME=light`.
+
+> **PROHIBITED:** Do NOT hardcode `data-bs-theme="dark"` on `<html>`. Do NOT use grey text on dark backgrounds. Do NOT use grey icons on dark backgrounds.
 
 | Element | Background | Text / Icon Color |
 |---------|-----------|-------------------|
@@ -101,6 +114,8 @@ Each tab renders as icon above label. Icon: 20px emoji rendered in native color 
 
 CSS class: `cc-nav-tab`. Icon in `cc-nav-icon` span, label in `cc-nav-label` span.
 
+> **IMPORTANT:** Tab icons are bare emoji characters in HTML — e.g. `<span class="cc-nav-icon">🏠</span>`. Do NOT use Bootstrap Icons (`<i class="bi bi-*">`) for top-nav tab icons. Emoji render in native color; Bootstrap Icons render monochrome.
+
 ### Sub-Bars
 
 Sub-bar background: `--cc-subnav-bg` (`#f1f5f9`). Active tab: white background, blue text. Font: 13px system sans-serif, dark text.
@@ -157,6 +172,20 @@ Sub-bar background: `--cc-subnav-bg` (`#f1f5f9`). Active tab: white background, 
 | Voice | `/settings/voiceforward/config` | Voice button management |
 | Voice Docs | `/settings/voiceforward/docs` | Phone setup documentation |
 | Help | `/settings/help` | Application help |
+
+---
+
+### Template Structure
+
+Navigation is split into two partial templates. `base.html` must NOT contain inline nav HTML — it includes the partials:
+
+| File | Contains |
+|------|---------|
+| `templates/_nav_top.html` | Top navigation bar only (brand + all top-level tabs + running badges) |
+| `templates/_nav_sub.html` | Sub-navigation bar — section-conditional (`{% if active_section == 'welcome' %}` … `{% elif %}` chain) |
+| `templates/base.html` | Shell only: `{% include '_nav_top.html' %}` then `{% include '_nav_sub.html' %}` |
+
+All screen templates extend `base.html` and set `active_section` and `active_page` in their route handlers.
 
 ---
 

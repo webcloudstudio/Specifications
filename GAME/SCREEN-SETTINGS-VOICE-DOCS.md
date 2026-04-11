@@ -133,7 +133,7 @@ Buttons are configured in GAME settings — not in code. Each button needs:
 | Element | Description |
 |---------|-------------|
 | Section cards | Five `cc-card` blocks; each has a `cc-card-header` with section number and title |
-| Code blocks | `<pre class="bg-dark border rounded p-3">` with monospace text |
+| Code blocks | `<pre class="bg-light border rounded p-3">` with monospace text |
 | Copy buttons | `[Copy]` button in top-right of each code block; JS copies `innerText` to clipboard; label flashes "Copied!" for 1.5s |
 | Internal link | Section 5 button links to `/settings/voiceforward/config` using standard Bootstrap outline button |
 

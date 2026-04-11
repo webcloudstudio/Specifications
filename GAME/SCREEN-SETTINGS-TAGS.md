@@ -3,7 +3,7 @@
 **Version:** 20260325 V1
 **Description:** Specification for the Tag Settings screen — assign display colors to tags from a curated preset palette
 
-Tags are discovered automatically from `projects.tags` across all projects. This screen assigns a foreground/background color pair to each tag. Colors are drawn from a curated preset list chosen for legibility on the dark theme.
+Tags are discovered automatically from `projects.tags` across all projects. This screen assigns a foreground/background color pair to each tag. Colors are drawn from a curated preset list chosen for legibility on white backgrounds.
 
 ## Menu Navigation
 
@@ -63,7 +63,7 @@ Tags with no assigned color render with a default neutral color (`--cc-muted` ba
 
 ## Preset Palette
 
-A fixed list of foreground/background pairs designed for legibility on the dark theme. All combinations meet 4.5:1 contrast ratio.
+A fixed list of foreground/background pairs designed for legibility on white backgrounds. All combinations meet 4.5:1 contrast ratio.
 
 | Name | Background | Foreground | Use for |
 |------|------------|------------|---------|

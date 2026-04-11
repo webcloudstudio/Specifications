@@ -52,6 +52,7 @@ Single-column centered form, max-width 600px. Card (`cc-card`) per logical group
 |-------|-----|------|---------|-------------------------------|
 | Application Name | `app_name` | Text input | `Command Center` | The name displayed in the upper-left corner of the application |
 | Homepage URL | `homepage_url` | URL input | `` (empty) | Your GitHub Pages URL — must start with `https://`. Shown on the Homepage screen. |
+| [ROADMAP] Theme | `app_theme` | Select | `light` | `light` \| `dark`. Currently set via `GAME_THEME` in `.env`; this field will write it to the `settings` table and apply without restart. |
 
 Fields are populated from the `settings` table on page load. All values are optional — saving an empty field stores an empty string (not NULL).
 
