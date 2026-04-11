@@ -1,20 +1,15 @@
 # Screen: Scheduler
 
-**Version:** 20260325 V1
-**Description:** Specification for the Scheduler screen — view and manage all scheduled operations across projects
+| Field | Value |
+|-------|-------|
+| Version | 20260325 V1 |
+| Route | `GET /scheduler` |
+| Parent | — |
+| Main Menu | Monitoring |
+| Sub Menu | Scheduler |
+| Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
 
-Overview of all operations that have a `# Schedule:` header. Allows enabling/disabling schedules and editing cron expressions. The scheduler itself runs as a background loop in the platform (see FUNCTIONALITY.md Flow 7).
-
-## Menu Navigation
-
-Main Menu: Monitoring
-Sub Menu: Scheduler
-
-## Route
-
-```
-GET /scheduler
-```
+View and manage all scheduled operations. Enables/disables schedules and edits cron expressions. Scheduler runs as a background loop (see FUNCTIONALITY.md Flow 7).
 
 ## Layout
 

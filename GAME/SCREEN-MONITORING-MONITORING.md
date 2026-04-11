@@ -1,18 +1,15 @@
 # Screen: Monitoring
 
-**Version:** 20260407 V2
-**Description:** Service health dashboard and interleaved event log for all running projects.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V2 |
+| Route | `GET /monitoring` |
+| Parent | — |
+| Main Menu | Monitoring |
+| Sub Menu | Monitoring · default |
+| Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
 
-## Menu Navigation
-
-Main Menu: Monitoring
-Sub Menu: Monitoring (Default)
-
-## Route
-
-```
-GET /monitoring
-```
+Service health dashboard and interleaved event log for all running projects.
 
 ## Layout
 

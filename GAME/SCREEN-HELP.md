@@ -1,17 +1,15 @@
 # Screen: Help
 
-**Version:** 20260407 V1
-**Description:** Documentation viewer. Renders the project's built documentation (docs/index.html) in-page when available; shows a friendly fallback when not built.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V1 |
+| Route | `GET /help` |
+| Parent | — |
+| Main Menu | Help [right] |
+| Sub Menu | — |
+| Tab Order | — |
 
-## Menu Navigation
-
-Main Menu: Help [right]
-
-## Route
-
-```
-GET /help
-```
+Documentation viewer. Renders `docs/index.html` in-page when available; friendly fallback when not built.
 
 ## Layout
 

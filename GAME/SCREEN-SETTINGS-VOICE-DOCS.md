@@ -1,20 +1,15 @@
 # Screen: VoiceForward — Setup Documentation
 
-**Version:** 20260328 V1
-**Description:** Static documentation page explaining how to install dependencies, configure WSL2 network access, and connect an iPhone to the VoiceForward recorder.
+| Field | Value |
+|-------|-------|
+| Version | 20260328 V1 |
+| Route | `GET /settings/voiceforward/docs` |
+| Parent | — |
+| Main Menu | Settings [right] |
+| Sub Menu | Voice Docs |
+| Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 
-## Menu Navigation
-
-Main Menu: Settings [right]
-Sub Menu: Voice Docs
-
-## Route
-
-```
-GET /settings/voiceforward/docs
-```
-
-Settings sub-bar is active. Voice Docs tab is selected.
+Static documentation: install dependencies, configure WSL2 network access, and connect an iPhone to VoiceForward.
 
 ## Layout
 

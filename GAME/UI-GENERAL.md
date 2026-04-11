@@ -57,7 +57,7 @@ CSS variables in `static/style.css`:
 
 ## Screen Header Template
 
-Every SCREEN-*.md file MUST open with a `# Screen: {Name}` heading followed immediately by this metadata table. No prose, no other headings, and no `## Route` section appear before or inside this block.
+**MANDATORY.** Every SCREEN-*.md file MUST open with a `# Screen: {Name}` heading followed immediately by this metadata table and a one-line description. No prose, no other headings, and no `## Route` section appear before or inside this block. Any SCREEN file that omits or deviates from this template is non-conformant and MUST be corrected before build.
 
 ```markdown
 # Screen: {Display Name}
@@ -179,7 +179,7 @@ Sub-bar background: `--cc-subnav-bg` (`#f1f5f9`). Active tab: white background, 
 
 | Tab | Route | Notes |
 |-----|-------|-------|
-| Kanban | `/workflow/kanban` | Default |
+| Workflow | `/workflow/kanban` | Default — kanban board |
 | Add Ticket | `/workflow/add` | Ticket creation form |
 | Manage | `/workflow/manage` | Workflow types and label configuration |
 

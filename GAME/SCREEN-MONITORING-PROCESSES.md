@@ -1,21 +1,15 @@
 # Screen: Processes
 
-**Version:** 20260320 V1
-**Row structure from:** SCREEN-DEFAULT (status badge, icon, project name — fixed columns only; does not use Baseline table or filter button)
-**Description:** Specification for the Processes screen
+| Field | Value |
+|-------|-------|
+| Version | 20260320 V1 |
+| Route | `GET /processes` |
+| Parent | — |
+| Main Menu | Monitoring |
+| Sub Menu | Processes |
+| Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
 
-**Live log viewer and process control.** Shows what is running, what ran, and the output.
-
-## Menu Navigation
-
-Main Menu: Monitoring
-Sub Menu: Processes
-
-## Route
-
-```
-GET /processes
-```
+Live log viewer and process control. Shows what is running, what ran, and the output.
 
 ## Layout
 
@@ -23,7 +17,7 @@ Project list with expandable rows. If a project has running processes, they show
 
 ## Process List
 
-Standard header per SCREEN-DEFAULT (status badge, icon, name). Each row expands to show:
+One row per project. Row header: status badge, icon, project name. Each row expands to show:
 
 | Column | Source | Content |
 |--------|--------|---------|

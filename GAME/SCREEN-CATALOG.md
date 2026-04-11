@@ -1,17 +1,15 @@
 # Screen: Service Catalog
 
-**Version:** 20260407 V4
-**Description:** Surface area reference for every project and prototype. Shows all callable endpoints grouped by type — scripts, links, REST routes, and MCP tools. Read-only reference with script viewer.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V4 |
+| Route | `GET /servicecatalog` |
+| Parent | — |
+| Main Menu | Catalog |
+| Sub Menu | — |
+| Tab Order | — |
 
-## Menu Navigation
-
-Main Menu: Catalog
-
-## Route
-
-```
-GET /servicecatalog
-```
+Read-only reference of every project and prototype's callable surface area — scripts, links, REST routes, and MCP tools.
 
 ---
 

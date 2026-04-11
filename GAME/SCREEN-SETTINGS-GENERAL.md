@@ -1,21 +1,15 @@
 # Screen: General Settings
 
-**Version:** 20260326 V1
-**Description:** Specification for the General Settings screen — application-level configuration
+| Field | Value |
+|-------|-------|
+| Version | 20260326 V1 |
+| Route | `GET /settings/general`, `POST /settings/general` |
+| Parent | — |
+| Main Menu | Settings [right] |
+| Sub Menu | General · default |
+| Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 
-## Menu Navigation
-
-Main Menu: Settings [right]
-Sub Menu: General (Default)
-
-## Route
-
-```
-GET  /settings/general
-POST /settings/general
-```
-
-Sub-bar is active when any `/settings/*` route is loaded. General is the default sub-tab.
+Application-level configuration — app name, homepage URL, and theme.
 
 ## Layout
 

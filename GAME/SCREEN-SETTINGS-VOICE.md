@@ -1,21 +1,15 @@
 # Screen: VoiceForward — Button Configuration
 
-**Version:** 20260328 V1
-**Description:** Manage voice recorder buttons — set label, target file, color, and display order.
+| Field | Value |
+|-------|-------|
+| Version | 20260328 V1 |
+| Route | `GET /settings/voiceforward/config`, `GET /settings/voiceforward` (redirect) |
+| Parent | — |
+| Main Menu | Settings [right] |
+| Sub Menu | Voice |
+| Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 
-## Menu Navigation
-
-Main Menu: Settings [right]
-Sub Menu: Voice
-
-## Route
-
-```
-GET  /settings/voiceforward/config
-GET  /settings/voiceforward  (redirect → /settings/voiceforward/config)
-```
-
-Settings sub-bar is active. Voice tab is selected.
+Manage voice recorder buttons — set label, target file, color, and display order.
 
 ## Layout
 

@@ -1,20 +1,15 @@
 # Screen: Tag Settings
 
-**Version:** 20260325 V1
-**Description:** Specification for the Tag Settings screen — assign display colors to tags from a curated preset palette
+| Field | Value |
+|-------|-------|
+| Version | 20260325 V1 |
+| Route | `GET /settings/tags` |
+| Parent | — |
+| Main Menu | Settings [right] |
+| Sub Menu | Tags |
+| Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 
-Tags are discovered automatically from `projects.tags` across all projects. This screen assigns a foreground/background color pair to each tag. Colors are drawn from a curated preset list chosen for legibility on white backgrounds.
-
-## Menu Navigation
-
-Main Menu: Settings [right]
-Sub Menu: Tags
-
-## Route
-
-```
-GET /settings/tags
-```
+Assign display colors to tags from a curated preset palette. Tags are auto-discovered from `projects.tags` across all projects.
 
 ## Layout
 

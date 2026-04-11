@@ -1,17 +1,15 @@
-# Screen: Help
+# Screen: Help (Settings)
 
-**Description:** Help and documentation page for Prototyper application.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V1 |
+| Route | `GET /settings/help` |
+| Parent | — |
+| Main Menu | Settings [right] |
+| Sub Menu | Help |
+| Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 
-## Menu Navigation
-
-Main Menu: Settings [right]
-Sub Menu: Help
-
-## Route
-
-```
-GET /settings/help
-```
+Application help and documentation within the Settings sub-bar.
 
 ## Layout
 

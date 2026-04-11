@@ -1,15 +1,15 @@
 # Screen: VoiceForward — Mobile Recorder
 
-**Version:** 20260328 V1
-**Description:** Mobile-optimized voice recorder page served by the GAME server. No GAME navigation bar rendered — standalone full-viewport page designed for iPhone Safari.
+| Field | Value |
+|-------|-------|
+| Version | 20260328 V1 |
+| Route | `GET /voice` |
+| Parent | — |
+| Main Menu | (standalone) |
+| Sub Menu | — |
+| Tab Order | — |
 
-## Route
-
-```
-GET /voice
-```
-
-Not nested under `/settings/`. Standalone route with no top bar or sub-bar. Intended to be bookmarked on iPhone home screen.
+Mobile-optimized voice recorder. No GAME navigation bar — standalone full-viewport page for iPhone Safari. Intended to be bookmarked on home screen.
 
 ## Layout
 

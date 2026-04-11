@@ -1,19 +1,15 @@
 # Screen: Publisher
 
-**Description:** Portfolio site management. Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields. Shows editable project cards for homepage inclusion.
+| Field | Value |
+|-------|-------|
+| Version | 20260407 V1 |
+| Route | `GET /publisher`, `POST /publisher/build`, `POST /publisher/publish`, `POST /publisher/{project_id}/card` |
+| Parent | — |
+| Main Menu | Publisher |
+| Sub Menu | — |
+| Tab Order | — |
 
-## Menu Navigation
-
-Main Menu: Publisher
-
-## Route
-
-```
-GET /publisher
-POST /publisher/build
-POST /publisher/publish
-POST /publisher/{project_id}/card
-```
+Portfolio site management. Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields.
 
 ## Layout
 
