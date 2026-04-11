@@ -8,8 +8,7 @@
 | Main Menu | Monitoring |
 | Sub Menu | Scheduler |
 | Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
-
-View and manage all scheduled operations. Enables/disables schedules and edits cron expressions. Scheduler runs as a background loop (see FUNCTIONALITY.md Flow 7).
+| Description | View and manage all scheduled operations. Enables/disables schedules and edits cron expressions. Scheduler runs as a background loop (see FUNCTIONALITY.md Flow 7). |
 
 ## Layout
 
@@ -96,4 +95,6 @@ On platform startup, the scheduler loop starts automatically. Startup catch-up f
 ## Open Questions
 
 - Should the cron expression editor show a visual picker (minute/hour/day selectors) in addition to the raw expression?
+	* Eventually yes, for now editing job data is done manually
 - Should `schedule_missed` events trigger a visible alert banner on this screen?
+	* yes  - it should have an clear icon

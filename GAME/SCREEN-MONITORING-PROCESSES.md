@@ -8,8 +8,7 @@
 | Main Menu | Monitoring |
 | Sub Menu | Processes |
 | Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
-
-Live log viewer and process control. Shows what is running, what ran, and the output.
+| Description | Live log viewer and process control. Shows what is running, what ran, and the output. |
 
 ## Layout
 

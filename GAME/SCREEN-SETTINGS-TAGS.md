@@ -8,8 +8,7 @@
 | Main Menu | Settings [right] |
 | Sub Menu | Tags |
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
-
-Assign display colors to tags from a curated preset palette. Tags are auto-discovered from `projects.tags` across all projects.
+| Description | Assign display colors to tags from a curated preset palette. Tags are auto-discovered from `projects.tags` across all projects. |
 
 ## Layout
 

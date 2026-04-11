@@ -8,8 +8,7 @@
 | Main Menu | Settings [right] |
 | Sub Menu | General · default |
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
-
-Application-level configuration — app name, homepage URL, and theme.
+| Description | Application-level configuration — app name, homepage URL, and theme. |
 
 ## Layout
 

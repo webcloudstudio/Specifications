@@ -8,8 +8,7 @@
 | Main Menu | Workflow |
 | Sub Menu | Manage |
 | Tab Order | 1: Workflow · 2: Add Ticket · 3: Manage |
-
-CRUD management for workflow types and ticket tags/labels.
+| Description | CRUD management for workflow types and ticket tags/labels. |
 
 ## Workflow Types
 

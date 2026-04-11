@@ -8,8 +8,7 @@
 | Main Menu | Projects |
 | Sub Menu | Setup |
 | Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
-
-Discover unregistered GitHub repos and bring them into GAME. Own layout — does not extend SCREEN-DEFAULT (source of truth is the GitHub API, not the GAME database).
+| Description | Discover unregistered GitHub repos and bring them into GAME. Own layout — does not extend SCREEN-DEFAULT (source of truth is the GitHub API, not the GAME database). |
 
 ## Prerequisites
 

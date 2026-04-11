@@ -8,8 +8,7 @@
 | Main Menu | — |
 | Sub Menu | — |
 | Tab Order | — |
-
-Abstract — base layout, not a routed screen. Reusable sortable, filterable project/prototype list. Screens that extend this declare `Parent: SCREEN-DEFAULT` and specify their middle columns.
+| Description | Abstract — base layout, not a routed screen. Reusable sortable, filterable project/prototype list. Screens that extend this declare `Parent: SCREEN-DEFAULT` and specify their middle columns. |
 
 ## Route Parameters
 

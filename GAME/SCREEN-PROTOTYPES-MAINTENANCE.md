@@ -8,8 +8,7 @@
 | Main Menu | Prototypes |
 | Sub Menu | Maintenance |
 | Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
-
-Maintenance operations for prototype specification directories. Runs Specifications bin/ scripts per prototype. Mirrors Projects / Maintenance.
+| Description | Maintenance operations for prototype specification directories. Runs Specifications bin/ scripts per prototype. Mirrors Projects / Maintenance. |
 
 ## Layout
 

@@ -8,8 +8,7 @@
 | Main Menu | Welcome |
 | Sub Menu | Prototypes |
 | Tab Order | 1: Summary · 2: Prototypes · 3: Projects |
-
-Read-only searchable list of all known prototypes. No actions — navigation only.
+| Description | Read-only searchable list of all known prototypes. No actions — navigation only. |
 
 ## Layout
 

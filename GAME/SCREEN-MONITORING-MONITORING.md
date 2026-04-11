@@ -8,8 +8,7 @@
 | Main Menu | Monitoring |
 | Sub Menu | Monitoring · default |
 | Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
-
-Service health dashboard and interleaved event log for all running projects.
+| Description | Service health dashboard and interleaved event log for all running projects. |
 
 ## Layout
 

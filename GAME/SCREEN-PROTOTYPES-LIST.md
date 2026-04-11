@@ -8,8 +8,7 @@
 | Main Menu | Prototypes |
 | Sub Menu | List · default |
 | Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
-
-Top-level screen listing all known prototypes (specification directories in the Specifications repo) with their names and current status.
+| Description | Top-level screen listing all known prototypes (specification directories in the Specifications repo) with their names and current status. |
 
 ## Layout
 

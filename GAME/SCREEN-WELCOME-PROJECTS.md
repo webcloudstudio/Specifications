@@ -8,8 +8,7 @@
 | Main Menu | Welcome |
 | Sub Menu | Projects |
 | Tab Order | 1: Summary · 2: Prototypes · 3: Projects |
-
-Read-only searchable list of all discovered projects. No actions — navigation only. Mirrors Welcome — Prototypes layout applied to projects.
+| Description | Read-only searchable list of all discovered projects. No actions — navigation only. Mirrors Welcome — Prototypes layout applied to projects. |
 
 ## List
 

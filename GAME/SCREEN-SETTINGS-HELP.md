@@ -8,8 +8,7 @@
 | Main Menu | Settings [right] |
 | Sub Menu | Help |
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
-
-Application help and documentation within the Settings sub-bar.
+| Description | Application help and documentation within the Settings sub-bar. |
 
 ## Layout
 

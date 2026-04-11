@@ -8,8 +8,7 @@
 | Main Menu | Projects · detail view |
 | Sub Menu | — |
 | Tab Order | — |
-
-Single-project deep view. All metadata, operations, and activity for one project. Fields are editable in place. Serves as the full metadata editor for the project.
+| Description | Single-project deep view. All metadata, operations, and activity for one project. Fields are editable in place. Serves as the full metadata editor for the project. |
 
 ## Project Navigation
 

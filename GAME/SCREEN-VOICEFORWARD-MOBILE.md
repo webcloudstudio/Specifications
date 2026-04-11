@@ -8,8 +8,7 @@
 | Main Menu | (standalone) |
 | Sub Menu | — |
 | Tab Order | — |
-
-Mobile-optimized voice recorder. No GAME navigation bar — standalone full-viewport page for iPhone Safari. Intended to be bookmarked on home screen.
+| Description | Mobile-optimized voice recorder. No GAME navigation bar — standalone full-viewport page for iPhone Safari. Intended to be bookmarked on home screen. |
 
 ## Layout
 

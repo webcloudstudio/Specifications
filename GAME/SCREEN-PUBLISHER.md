@@ -8,8 +8,7 @@
 | Main Menu | Publisher |
 | Sub Menu | — |
 | Tab Order | — |
-
-Portfolio site management. Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields.
+| Description | Portfolio site management. Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields. |
 
 ## Layout
 

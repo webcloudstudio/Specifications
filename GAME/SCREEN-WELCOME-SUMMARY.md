@@ -8,8 +8,7 @@
 | Main Menu | Welcome |
 | Sub Menu | Summary · default |
 | Tab Order | 1: Summary · 2: Prototypes · 3: Projects |
-
-Read-only health and configuration overview. Default landing screen for the application.
+| Description | Read-only health and configuration overview. Default landing screen for the application. |
 
 ## Layout
 

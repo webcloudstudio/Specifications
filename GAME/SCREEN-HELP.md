@@ -8,8 +8,7 @@
 | Main Menu | Help [right] |
 | Sub Menu | — |
 | Tab Order | — |
-
-Documentation viewer. Renders `docs/index.html` in-page when available; friendly fallback when not built.
+| Description | Documentation viewer. Renders `docs/index.html` in-page when available; friendly fallback when not built. |
 
 ## Layout
 

@@ -8,10 +8,7 @@
 | Main Menu | Catalog |
 | Sub Menu | — |
 | Tab Order | — |
-
-Read-only reference of every project and prototype's callable surface area — scripts, links, REST routes, and MCP tools.
-
----
+| Description | Read-only reference of every project and prototype's callable surface area — scripts, links, REST routes, and MCP tools. |
 
 ## What the Catalog Tracks
 
@@ -224,3 +221,4 @@ Rescan (Rescan button on Dashboard, or server restart) refreshes all surface are
 - Should the Script Viewer modal support a "Run" button (fire the script via the gateway endpoint) for Operations and Workflow scripts?
 - Should REST endpoints be click-to-try (open a simple form with method + path + body) rather than click-to-copy?
 - Should Global scripts show a warning in the modal: "This script modifies other repositories"?
+	No need
