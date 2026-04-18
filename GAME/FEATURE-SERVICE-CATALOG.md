@@ -326,8 +326,102 @@ STARTING → RUNNING → DONE
 | GET | `/api/runs/{run_id}` | Run status JSON |
 | GET | `/api/runs/{run_id}/log` | Log content JSON |
 | POST | `/api/runs/{run_id}/stop` | Stop confirmation JSON |
+| GET | `/api/capabilities` | Aggregated capability index (see below) |
+| POST | `/api/capabilities/invoke` | Invoke a capability by name (see below) |
 
 Screen route: `GET /servicecatalog`.
+
+---
+
+## Capability Catalog Extension
+
+The catalog also aggregates the `## Capabilities` blocks from each project's `AGENTS.md`. This extends the existing script/endpoint surface with typed, transport-agnostic callable functions.
+
+Capabilities are discovered at startup alongside scripts and stored in a `capabilities` table.
+
+### Query
+
+```
+GET /api/capabilities
+```
+
+All query parameters optional.
+
+**Request (query string or JSON body):**
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `tags` | string[] | Filter by any matching tag |
+| `owner` | string | Filter by permission owner |
+| `namespace` | string | Filter by METADATA.md namespace |
+
+**Response:**
+
+```json
+{
+  "capabilities": [
+    {
+      "name": "download_prices",
+      "project": "market_downloader",
+      "description": "Download historical market prices",
+      "tags": ["finance", "data-source", "etl"],
+      "transports": ["cli", "rest", "mcp"],
+      "lifecycle": "on-demand"
+    }
+  ]
+}
+```
+
+### Invoke
+
+```
+POST /api/capabilities/invoke
+```
+
+**Request:**
+
+```json
+{
+  "capability": "download_prices",
+  "args": { "symbol": "AAPL", "start_date": "2024-01-01", "end_date": "2024-02-01" },
+  "identity": "ed",
+  "preferred_transport": "auto"
+}
+```
+
+`preferred_transport`: `auto` | `cli` | `rest` | `mcp`
+
+**Transport selection (auto):**
+
+| Caller | Transport |
+|--------|-----------|
+| Local Python | CLI |
+| Remote Python | REST |
+| AI Agent | MCP |
+
+Resolution order: `cli` → `rest` → `mcp`. First available transport wins.
+
+**Response (success):**
+
+```json
+{ "status": "success", "capability": "download_prices", "transport_used": "cli", "result": { ... } }
+```
+
+**Response (async):**
+
+```json
+{ "status": "accepted", "job_id": "job_9912", "message": "Capability running asynchronously" }
+```
+
+**Response (error):**
+
+```json
+{ "status": "error", "error": "permission_denied", "message": "User not authorized for capability" }
+```
+
+### Startup Scan
+
+At startup `scanner.py` reads each project's `AGENTS.md`. If a `## Capabilities` JSON block is present, each capability entry is stored in the `capabilities` table. Capability format is defined in `Prototyper/RulesEngine/SPECIFICATION_CONTRACT.md`.
 
 ---
 
