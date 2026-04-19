@@ -5,10 +5,11 @@
 | Version | 20260407 V4 |
 | Route | `GET /servicecatalog` |
 | Parent | — |
-| Main Menu | Catalog |
+| Main Menu | Service\nCatalog |
 | Sub Menu | — |
 | Tab Order | — |
 | Description | Read-only reference of every project and prototype's callable surface area — scripts, links, REST routes, and MCP tools. |
+| Depends On  | FEATURE-SERVICE-CATALOG.md, UI-GENERAL.md |
 
 ## What the Catalog Tracks
 

@@ -9,6 +9,7 @@
 | Sub Menu | Workflow · default |
 | Tab Order | 1: Workflow · 2: Add Ticket · 3: Manage |
 | Description | Full-width kanban board of all tickets grouped by state. |
+| Depends On  | UI-GENERAL.md |
 
 ## Action Bar
 

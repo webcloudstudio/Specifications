@@ -9,6 +9,7 @@
 | Sub Menu | — |
 | Tab Order | — |
 | Description | Mobile-optimized voice recorder. No GAME navigation bar — standalone full-viewport page for iPhone Safari. Intended to be bookmarked on home screen. |
+| Depends On  | FEATURE-VOICEFORWARD.md, UI-GENERAL.md |
 
 ## Layout
 

@@ -9,6 +9,7 @@
 | Sub Menu | List · default |
 | Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 | Description | Top-level screen listing all known prototypes (specification directories in the Specifications repo) with their names and current status. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

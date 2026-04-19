@@ -9,6 +9,7 @@
 | Sub Menu | Configuration |
 | Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 | Description | Batch metadata editor for prototype specification directories. Mirrors Projects / Configuration. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

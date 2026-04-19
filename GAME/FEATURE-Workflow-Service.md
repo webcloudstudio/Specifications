@@ -1,5 +1,10 @@
 # Feature: Workflow Service
 
+
+| Field       | Value |
+|-------------|-------|
+| Version     | (set version) |
+
 **Version:** 2026-04-06 V1
 **Description:** Generic state machine service — one interface for all workflow types, differentiated by workflow-name and workflow-type with payload-driven behavior
 

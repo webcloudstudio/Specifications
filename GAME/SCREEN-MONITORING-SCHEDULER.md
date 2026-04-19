@@ -9,6 +9,7 @@
 | Sub Menu | Scheduler |
 | Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
 | Description | View and manage all scheduled operations. Enables/disables schedules and edits cron expressions. Scheduler runs as a background loop (see FUNCTIONALITY.md Flow 7). |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

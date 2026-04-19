@@ -38,6 +38,10 @@ Each queue is a JSONL file at `data/queues/{queue-name}.queue.jsonl`. One line p
 | `submitted_at` | string | Yes | ISO 8601 timestamp |
 | `status` | string | Yes | `pending` / `processing` / `done` / `error` / `expired` |
 | `priority` | string | No | `low` / `normal` / `high` / `critical` (default: `normal`) |
+| Description |  |
+| Version     | (set version) |
+| Depends On  | FEATURE-VOICEFORWARD.md |
+| Provides    | POST /api/voice/upload, POST /api/services/async-queue/submit, POST /api/services/async-queue/drain |
 | `ttl_seconds` | integer | No | Message expires if not processed within this many seconds after submission |
 | `result` | object | No | Set by drain handler on completion |
 | `error` | string | No | Set by drain handler on failure |

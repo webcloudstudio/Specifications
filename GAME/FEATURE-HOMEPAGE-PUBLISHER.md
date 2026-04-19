@@ -38,6 +38,8 @@ Templates are installed to `TARGET/templates/` and render to `TARGET/publish/`:
 
 | Template | Output path |
 |----------|-------------|
+| Description |  |
+| Version     | (set version) |
 | `index.html.j2` | `publish/index.html` |
 | `projects.html.j2` | `publish/projects/index.html` |
 | `resume.html.j2` | `publish/resume/index.html` |

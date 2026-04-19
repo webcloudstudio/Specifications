@@ -18,6 +18,9 @@ Three capabilities unified under one feature:
 | Service Health Poller | Scheduler fires every `health_check_interval` seconds per project; also on `POST /api/health/poll` |
 | Heartbeat API | Called explicitly by project scripts via `common.py` or `common.sh` |
 | Log Ingestor | Scheduler fires every 60 seconds; also on `POST /api/logs/ingest` |
+| Provides    | POST /api/health/poll, POST /api/logs/ingest |
+| Version     | (set version) |
+| Description |  |
 
 ---
 

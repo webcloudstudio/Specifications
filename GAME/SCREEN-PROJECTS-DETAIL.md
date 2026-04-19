@@ -9,6 +9,7 @@
 | Sub Menu | — |
 | Tab Order | — |
 | Description | Single-project deep view. All metadata, operations, and activity for one project. Fields are editable in place. Serves as the full metadata editor for the project. |
+| Depends On  | UI-GENERAL.md |
 
 ## Project Navigation
 

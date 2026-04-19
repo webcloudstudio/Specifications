@@ -9,6 +9,7 @@
 | Sub Menu | Dashboard · default |
 | Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 | Description | Default Projects view. Every discovered project with status, operations, links, and documentation. Default screen for the Projects tab and the app root. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

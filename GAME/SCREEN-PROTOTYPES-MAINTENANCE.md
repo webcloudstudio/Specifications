@@ -9,6 +9,7 @@
 | Sub Menu | Maintenance |
 | Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 | Description | Maintenance operations for prototype specification directories. Runs Specifications bin/ scripts per prototype. Mirrors Projects / Maintenance. |
+| Depends On  | FEATURE-SERVICE-CATALOG.md, UI-GENERAL.md |
 
 ## Layout
 

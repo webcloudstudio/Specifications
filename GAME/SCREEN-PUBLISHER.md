@@ -9,6 +9,7 @@
 | Sub Menu | — |
 | Tab Order | — |
 | Description | Portfolio site management. Builds and publishes a static GitHub Pages portfolio from project METADATA.md fields. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

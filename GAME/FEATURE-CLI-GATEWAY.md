@@ -22,6 +22,10 @@
 | `game-cli health {name}` | `GET /api/health/{name}` | Print health state for one project |
 | `game-cli heartbeat {state} [{msg}]` | `POST /api/heartbeat` | Record a heartbeat from the calling script (state: OK/WARNING/ERROR/CRITICAL) |
 | `game-cli event {severity} {msg}` | `POST /api/events` | Record an event (severity: INFORMATION/WARNING/ERROR/CRITICAL) |
+| Provides    | GET /api/catalog, POST /api/{name}/run/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /api/health/{name}, POST /api/heartbeat, POST /api/events |
+| Depends On  | FEATURE-SERVICE-CATALOG.md |
+| Version     | (set version) |
+| Description |  |
 
 ---
 

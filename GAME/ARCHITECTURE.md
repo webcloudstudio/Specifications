@@ -1,3 +1,10 @@
+# ARCHITECTURE: Architecture
+
+| Field       | Value |
+|-------------|-------|
+| Version     | (set version) |
+| Description |  |
+
 # Architecture
 
 **Version:** 20260320 V1  

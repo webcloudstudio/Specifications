@@ -9,6 +9,7 @@
 | Sub Menu | Configuration |
 | Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 | Description | Batch metadata editor. Edit project fields (port, stack, tags, visibility) across all projects in a single view. Renders SCREEN-DEFAULT with `columns=Configuration`. |
+| Depends On  | UI-GENERAL.md |
 
 ## Configuration Column
 

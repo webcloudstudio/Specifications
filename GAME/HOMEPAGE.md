@@ -1,3 +1,10 @@
+# HOMEPAGE: Homepage
+
+| Field       | Value |
+|-------------|-------|
+| Version     | (set version) |
+| Description |  |
+
 # Homepage
 
 **Version:** 20260326.1

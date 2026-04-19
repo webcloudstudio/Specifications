@@ -9,6 +9,7 @@
 | Sub Menu | Validation |
 | Tab Order | 1: List · 2: Configuration · 3: Validation · 4: Maintenance |
 | Description | Run and review specification validation checks across all prototype directories. Mirrors Projects / Validation. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

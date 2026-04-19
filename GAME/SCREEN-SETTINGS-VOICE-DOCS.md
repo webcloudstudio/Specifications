@@ -9,6 +9,7 @@
 | Sub Menu | Voice Docs |
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 | Description | Static documentation: install dependencies, configure WSL2 network access, and connect an iPhone to VoiceForward. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

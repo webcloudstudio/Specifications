@@ -9,6 +9,7 @@
 | Sub Menu | Prototypes |
 | Tab Order | 1: Summary · 2: Prototypes · 3: Projects |
 | Description | Read-only searchable list of all known prototypes. No actions — navigation only. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

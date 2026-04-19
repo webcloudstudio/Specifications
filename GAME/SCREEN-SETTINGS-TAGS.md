@@ -9,6 +9,7 @@
 | Sub Menu | Tags |
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 | Description | Assign display colors to tags from a curated preset palette. Tags are auto-discovered from `projects.tags` across all projects. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

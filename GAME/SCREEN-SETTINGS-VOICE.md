@@ -9,6 +9,7 @@
 | Sub Menu | Voice |
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 | Description | Manage voice recorder buttons — set label, target file, color, and display order. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

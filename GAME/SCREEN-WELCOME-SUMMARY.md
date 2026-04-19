@@ -9,6 +9,7 @@
 | Sub Menu | Summary · default |
 | Tab Order | 1: Summary · 2: Prototypes · 3: Projects |
 | Description | Read-only health and configuration overview. Default landing screen for the application. |
+| Depends On  | UI-GENERAL.md |
 
 ## Layout
 

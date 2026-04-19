@@ -9,6 +9,7 @@
 | Sub Menu | Validation |
 | Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 | Description | Run and review project compliance checks across all registered projects. Renders SCREEN-DEFAULT with `columns=Validation`. Two validation categories: Repo/Project Quality and Workflow Conformity. |
+| Depends On  | UI-GENERAL.md |
 
 ## Validation Column
 

@@ -16,6 +16,8 @@ Each flow shows: what triggers it, what happens in sequence, what gets read, wha
 ```
 User clicks Rescan (or first page load)
   |
+| Version     | (set version) |
+| Description |  |
   v
 POST /api/scan
   |
