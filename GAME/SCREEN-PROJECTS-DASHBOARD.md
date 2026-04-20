@@ -34,7 +34,7 @@ Rendered at the top of the page content, below the sub-bar. Inherits the standar
 |---------|------|----------|
 | Text search | Text input | Free-form filter on project name and description. Placeholder: "Search name or description…" |
 | Status pills | Toggle buttons | Show/hide rows by status: `normal` (default, hides IDEA + ARCHIVED) / `all` / `idea` / `archive`. State encoded as `?filter=` URL param. |
-| Namespace filter | Dropdown | Filter by namespace. Hidden when only one namespace exists. State encoded as `?namespace=` URL param. |
+| Namespace pills | Toggle buttons | Show/hide rows by namespace.  Values: All (default) / List of Name Spaces.  State encoded as `?namespace=` URL param. |
 | **Rescan Your Projects** | Button (outline, right-aligned) | POST `/api/scan`; refreshes project list in place. |
 
 Text search and status/namespace filters are client-side (no server round-trip). Rescan triggers a server scan then reloads the list via HTMX.
@@ -47,32 +47,21 @@ Explicit column set — does not vary by URL params. Fixed order:
 |---|--------|--------|-------------|
 | 1 | Status badge | `projects.status` | Display-only. Read-only colored pill. No click action. To change status use project detail (⚙) or Configuration screen. |
 | 2 | Namespace badge | `projects.namespace` | Hidden when value is `development`. |
-| 3 | Icon + Name | `projects.project_type`, `projects.display_name` | Running projects show a green dot (●) before the name. Name links to `/project/{id}`. |
+| 3 | Icon + Name | `projects.project_type`, `projects.display_name` | Running projects show a green dot (●) before the name. Name links to `/project/{id}`.  |
 | 4 | Actions | `operations` (category ≠ maintenance) | Operation buttons per UI-GENERAL. Run/stop per process engine state. |
-| 5 | Links | `projects.extra.links`, `projects.port` | Link buttons. Falls back to server link when `port` is set. Opens in new tab. |
+| 5 | Links | `projects.extra.links` | Link buttons. Opens in new tab. |
 | 6 | Help | `projects.has_docs`, `projects.extra.doc_path` | Green Documentation button → proxy route → new tab. Shown only when `has_docs` is true (any of `doc*/index.htm*` exists). |
 | 7 | Settings (cog) | — | Links to `/project/{id}` (project detail / inline editor). |
 
-No Tags column. No Stack column. No Configuration column. No Maintenance column on this view.
+No Tags column. No Stack column. No Configuration column. No Maintenance column on this view. Anso no short_description.  
 
 ## Project Detail (click name or cog)
 
 Navigates to SCREEN-PROJECTS-DETAIL for the selected project.
 
-## Startup Behavior
-
-Scanner reads METADATA.md, AGENTS.md, and bin/ headers. Missing files produce compliance gaps, not errors. Projects removed from disk are marked inactive.
-
-## Data Flow
-
-| Reads | Writes |
-|-------|--------|
-| Project scanner results | Operation launch requests (POST `/api/run/{id}/{op}`) |
-| Process engine run states | Stop requests (POST `/api/stop/{id}/{op}`) |
-| `PROJECTS_DIR` (env) | Git push requests (POST `/api/push/{id}`, shown when `git_unpushed > 0`) |
-|  | Rescan trigger (POST `/api/scan`) |
+## Other Details
+- Should the Dashboard auto-refresh running project status on a timer, or only on explicit action?
+    The dashboard only refresheson a rescan
+- The project links 
 
 ## Open Questions
-
-- Should the Dashboard auto-refresh running project status on a timer, or only on explicit action?
-- Should the Push button (shown when `git_unpushed > 0`) remain per-row, or move to project detail only?

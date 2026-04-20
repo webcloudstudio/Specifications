@@ -2,8 +2,8 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | (set version) |
-| Description |  |
+| Version     | 20260419 V1 |
+| Description | Base Architecture Layout - Step 1 |
 
 # Architecture
 
@@ -36,6 +36,9 @@ Scans `$PROJECTS_DIR` for project directories. For each:
 2. Read AGENTS.md / CLAUDE.md → extract `## Bookmarks` (AI quick-links) and `## Endpoints` table (project REST routes → `extra.endpoints`)
 3. Read bin/ scripts → parse CommandCenter headers (any language: sh, py, js, pl)
 4. Upsert into `projects` and `operations` tables
+5. Log Message: "Completed <directory> - <num commands> commands <num endpoints> <n.n seconds>"
+
+Error if $PROJECTS_DIR is undefined
 
 Runs asynchronously on startup (not blocking first page load). Triggered manually by rescan button.
 

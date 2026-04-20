@@ -24,7 +24,7 @@
 | `game-cli event {severity} {msg}` | `POST /api/events` | Record an event (severity: INFORMATION/WARNING/ERROR/CRITICAL) |
 | Provides    | GET /api/catalog, POST /api/{name}/run/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /api/health/{name}, POST /api/heartbeat, POST /api/events |
 | Depends On  | FEATURE-SERVICE-CATALOG.md |
-| Version     | (set version) |
+| Version     | 20260419 V1 |
 | Description |  |
 
 ---

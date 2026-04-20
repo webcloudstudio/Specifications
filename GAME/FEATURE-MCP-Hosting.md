@@ -3,7 +3,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | (set version) |
+| Version     | 20260419 V1 |
 | Description |  |
 
 **Version:** 2026-04-06 V1

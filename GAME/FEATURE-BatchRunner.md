@@ -5,7 +5,7 @@
 |-------------|-------|
 | Provides    | POST /api/{project}/run/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /api/{project}/runs, POST /api/services/batch-runner/{tool} |
 | Depends On  | FEATURE-SERVICE-CATALOG.md |
-| Version     | (set version) |
+| Version     | 20260419 V1 |
 | Description |  |
 
 **Version:** 2026-04-06 V1

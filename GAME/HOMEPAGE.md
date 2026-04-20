@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | (set version) |
+| Version     | 20260419 V1 |
 | Description |  |
 
 # Homepage

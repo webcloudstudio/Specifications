@@ -19,7 +19,7 @@ Three capabilities unified under one feature:
 | Heartbeat API | Called explicitly by project scripts via `common.py` or `common.sh` |
 | Log Ingestor | Scheduler fires every 60 seconds; also on `POST /api/logs/ingest` |
 | Provides    | POST /api/health/poll, POST /api/logs/ingest |
-| Version     | (set version) |
+| Version     | 20260419 V1 |
 | Description |  |
 
 ---

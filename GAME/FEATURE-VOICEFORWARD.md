@@ -22,7 +22,7 @@ VoiceForward adds a mobile-accessible recorder page to the GAME server. The user
 | `POST /api/voice/upload` | Phone browser sends audio blob + label after recording stops |
 | `GET /voice` | Phone browser loads the mobile recorder page |
 | Provides    | POST /api/voice/upload, GET /voice |
-| Version     | (set version) |
+| Version     | 20260419 V1 |
 | Description |  |
 
 ---
