@@ -81,14 +81,12 @@ When SSH is ❌, a collapsible "Alternatives" block shows: HTTPS credential stor
 
 Separate `cc-card` below CHECKLIST. All rows are read-only (📌 informational). Data is populated at application startup and stored in the database.
 
-| # | Item | Description | Notes |
-|---|------|-------------|-------|
-| 1 | Projects in GitHub Repo | Total projects discovered in the configured GitHub account | New — requires scanner enhancement and DB column |
-| 2 | Projects Downloaded | Projects present in `PROJECTS_DIR` | Sum of all local projects |
-| 3 | Projects — `<State>` | One row per distinct project state (e.g. Active, Prototype, Archived) | Enumerated from the `status` field in each project's METADATA.md |
-| 4 | Projects NOT Downloaded | Projects found in GitHub but absent from `PROJECTS_DIR` | Derived: row 1 minus row 2 |
-
-> **Required work:** Row 1 (GitHub Repo count) requires the startup scanner to call the GitHub API, persist the count to the database, and expose it via the existing startup-scan data path. Add a `github_repo_count` column (or equivalent) to the relevant table.
+| # | Item | Source | Description |
+|---|------|--------|-------------|
+| 1 | Projects in GitHub Repo | `platform_stats.github_repo_count` | Total repos in the configured GitHub account; populated by startup scan via GitHub API |
+| 2 | Projects Downloaded | `platform_stats.scan_projects_total` | Projects present in `PROJECTS_DIR` |
+| 3 | Projects — `<State>` | `platform_stats.projects_by_state_*` | One row per distinct status value (Active, Prototype, Archived, etc.) |
+| 4 | Projects NOT Downloaded | Derived: row 1 − row 2 | Projects found in GitHub but absent from `PROJECTS_DIR`; computed at render time |
 
 ## API
 
@@ -105,7 +103,7 @@ Allowed keys: `app_name`, `homepage_url`. Any other key returns 400.
 | `settings` table (`app_name`, `homepage_url`) | `settings` table (`app_name`, `homepage_url`) via `/api/welcome/config` |
 | `PROJECTS_DIR`, `SPECIFICATIONS_PATH` (env) | None |
 | `version` from METADATA.md | None |
-| Startup scan counts (projects by state, GitHub repo count) | None |
+| `platform_stats` table (`github_repo_count`, `scan_projects_total`, `projects_by_state_*`, `scan_last_completed`) | None |
 | `ssh -T git@github.com` exit code | None |
 
 ## Open Questions

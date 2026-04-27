@@ -55,11 +55,19 @@ Scanner reads $PROJECTS_DIR
   +---> Mark projects not found on disk as is_active = false
   |
   v
+Write platform_stats (after per-project loop)
+  |  github_repo_count   ← GitHub API: GET /users/{GITHUB_USERNAME}/repos (paginated)
+  |  scan_projects_total ← count of directories processed
+  |  projects_by_state_* ← one key per distinct status value
+  |  scan_last_completed ← current timestamp
+  |  (GitHub API failure → retain previous values, log warning, continue)
+  |
+  v
 Dashboard refreshes with updated project list
 ```
 
-**Reads:** Filesystem ($PROJECTS_DIR), METADATA.md, AGENTS.md, bin/ scripts, .git/
-**Writes:** `projects` table, `operations` table
+**Reads:** Filesystem ($PROJECTS_DIR), METADATA.md, AGENTS.md, bin/ scripts, .git/, GitHub API
+**Writes:** `projects` table, `operations` table, `platform_stats` table
 **Event emitted:** `scan_completed`
 
 **Key behaviors:**

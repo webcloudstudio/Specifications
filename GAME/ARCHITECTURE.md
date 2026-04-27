@@ -32,13 +32,20 @@ Single blueprint `cc` registered on `/`. All routes live in `routes.py`.
 ### Scanner (`scanner.py`)
 
 Scans `$PROJECTS_DIR` for project directories. For each:
-1. Read METADATA.md → parse key:value fields
+1. Read METADATA.md → parse key:value fields (including `git_repo`, `updated`)
 2. Read AGENTS.md / CLAUDE.md → extract `## Bookmarks` (AI quick-links) and `## Endpoints` table (project REST routes → `extra.endpoints`)
 3. Read bin/ scripts → parse CommandCenter headers (any language: sh, py, js, pl)
 4. Upsert into `projects` and `operations` tables
 5. Log Message: "Completed <directory> - <num commands> commands <num endpoints> <n.n seconds>"
 
-Error if $PROJECTS_DIR is undefined
+After the per-project loop:
+6. Call GitHub API (`GET https://api.github.com/users/{GITHUB_USERNAME}/repos?per_page=100`, paginated) to count total repos in the account → write `github_repo_count` to `platform_stats`
+7. Write per-state project counts to `platform_stats` (`projects_by_state_{status}` keys)
+8. Write `scan_projects_total`, `scan_last_completed` to `platform_stats`
+
+GitHub API call uses `GITHUB_TOKEN` if set (required for private repos). On failure, logs warning and retains previous `platform_stats` values — scan continues normally.
+
+Error if `$PROJECTS_DIR` is undefined.
 
 Runs asynchronously on startup (not blocking first page load). Triggered manually by rescan button.
 

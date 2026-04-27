@@ -1,10 +1,63 @@
 # DATABASE: Database Schema
 # Database
 
-**Version:** 20260320 V1  
+**Version:** 20260426 V2  
 **Description:** Database schema: tables, columns, and types
 
 **SQLite with WAL mode.** Single file at `data/game.db`.
+
+---
+
+## Canonical Authority Rule
+
+**This file is the single source of truth for all persistent data in the application.** Any feature that stores new data — whether sourced from the scanner, a runtime check, a user action, or an external API — must update this file before implementation begins.
+
+When a feature adds new persistent data, the following files must all be updated together:
+
+| File | What to update |
+|------|---------------|
+| `DATABASE.md` | Add column/table to schema + Field Source Mapping |
+| `db.py` | Add `CREATE TABLE` / `ALTER TABLE` + accessor function(s) |
+| `ARCHITECTURE.md` (scanner section) | If scan-sourced: add to scanner module description |
+| `FUNCTIONALITY.md` (relevant flow) | Add the read/write step to the flow diagram |
+| `SCREEN-*.md` or `FEATURE-*.md` | The screen/feature that surfaces or writes the value |
+
+Updating only the screen specification (e.g., adding a display row without updating schema + scanner) is a gap — not a complete specification.
+
+---
+
+## Standalone DB Layer
+
+`db.py` is the **only** module that may call `sqlite3` directly. All routes, scanner, and background modules call `db.py` functions — never raw SQL outside that module.
+
+`db.py` must be runnable standalone:
+
+```bash
+python db.py          # creates schema + seeds all tables if missing
+python db.py --reset  # drops all tables and recreates (dev/test only)
+```
+
+Running `python db.py` is the canonical way to initialize a fresh database and must produce a fully seeded, ready-to-use `data/game.db` without requiring a Flask server start.
+
+---
+
+## DB Access Pattern
+
+All database access uses named helper functions in `db.py`. No module may bypass this.
+
+**Function naming conventions:**
+
+| Pattern | Purpose | Example |
+|---------|---------|---------|
+| `get_X(id)` | Fetch one row by primary key | `get_project(id)` |
+| `list_X(filters)` | Fetch multiple rows with optional filters | `list_projects(status='ACTIVE')` |
+| `upsert_X(data)` | Insert or update (scanner use) | `upsert_project(data)` |
+| `update_X(id, field, value)` | Single-field UI write | `update_project(id, 'status', 'DONE')` |
+| `delete_X(id)` | Hard delete (rare) | `delete_operation(id)` |
+| `get_setting(key)` / `set_setting(key, value)` | Settings table access | — |
+| `get_platform_stat(key)` / `set_platform_stat(key, value)` | Platform stats access | — |
+
+**Connection management:** Each request gets one connection via Flask's `g` object. `db.py` exposes `get_db()` which opens and caches the connection for the request lifetime. Background threads open their own connection and close it when done.
 
 ---
 
@@ -72,6 +125,8 @@ Every field stored in the `projects` table, its source, and when it is read.
 | `has_docs` | Any subdir starting with `doc` containing `index.html` or `index.htm` (glob: `*/doc*/index.htm*`) | Scan | Boolean flag; enables 📖 Help button |
 | `has_tests` | `tests/` directory or `bin/test.sh` present | Scan | Boolean flag; used by Validation screen |
 | `has_specs` | `{SPECIFICATIONS_PATH}/{project.name}/` exists | Scan | Boolean flag; requires SPECIFICATIONS_PATH env var; defaults to 0 if not configured |
+| `git_repo` | `METADATA.md` → `git_repo:` | Scan | GitHub repository slug (e.g. `MyProject`); used for GitHub URL construction |
+| `updated` | `METADATA.md` → `updated:` | Scan | Developer-maintained update date in `YYYYMMDD` format; distinct from `updated_at` (system clock) |
 | `card_title` | `METADATA.md` → `title:` (card section) | Scan | Portfolio card; overrides `display_name` if set |
 | `card_desc` | `METADATA.md` → `short_description:` or `description:` | Scan | Portfolio card description |
 | `card_tags` | `METADATA.md` → `tags:` | Scan | Portfolio card tags |
@@ -185,6 +240,8 @@ On startup, the scan runs in a **background thread** so the server is immediatel
 | card_image | TEXT | NULL | Portfolio card image filename |
 | card_show | INTEGER | 0 | Include in portfolio page |
 | version | TEXT | NULL | YYYY-MM-DD.N from METADATA.md |
+| git_repo | TEXT | NULL | GitHub repository slug from METADATA.md → `git_repo:` |
+| updated | TEXT | NULL | Developer-maintained date (YYYYMMDD) from METADATA.md → `updated:` |
 | extra | TEXT | '{}' | JSON blob (links, bookmarks, doc_path, etc.) |
 | is_active | INTEGER | 1 | 0 if removed from disk |
 | last_scanned | TEXT | NULL | Timestamp of last scan |
@@ -347,9 +404,35 @@ Supersedes the `tickets` table — see note below.
 
 > **`tickets` table is superseded.** New code reads and writes `spec_tickets`. The `tickets` table is retained for backwards compatibility until migrated.
 
+### platform_stats
+
+Key-value store for **read-only runtime metrics** written by the platform itself (scanner results, health counts, GitHub discovery totals). These are not user-configurable — they are written by background processes and read by the UI. Distinct from `settings` which holds user-editable values.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| key | TEXT PK | — | Metric identifier |
+| value | TEXT | NULL | Current value |
+| description | TEXT | NULL | Human-readable label |
+| updated_at | TEXT | datetime('now') | Last time this metric was written |
+
+**Seed data (inserted if table is empty on startup):**
+
+| key | description |
+|-----|-------------|
+| `github_repo_count` | Total repositories in the configured GitHub account (`GITHUB_USERNAME`), discovered during startup scan |
+| `scan_projects_total` | Total project directories found in `PROJECTS_DIR` on last scan |
+| `scan_projects_downloaded` | Projects present in `PROJECTS_DIR` (same as `scan_projects_total` — retained for UI symmetry with `github_repo_count`) |
+| `scan_last_completed` | Timestamp of the last successful full scan |
+
+**GitHub repo count:** Populated during startup scan by calling `GET /api/github/repos` (GitHub API, requires `GITHUB_USERNAME`). If `GITHUB_TOKEN` is absent, only public repos are counted. If the API call fails, the previous value is retained and the last-updated timestamp is not changed. Value is NULL until the first successful scan.
+
+**Project state breakdown:** Per-state counts (e.g., `projects_by_state_active`, `projects_by_state_prototype`) are stored as individual rows with key pattern `projects_by_state_{status_lowercase}`. The UI renders one row per distinct status value found.
+
+---
+
 ### settings
 
-Key-value store for application-level configuration. Seeded on first startup. Rows are never deleted — only updated.
+Key-value store for **user-configurable** application-level settings. Seeded on first startup. Rows are never deleted — only updated.
 
 | Column | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -518,3 +601,4 @@ Append-only transition log. One row per state change.
 - **WAL PRAGMA per connection**: Harmless (WAL is persistent). Move to `init_db()` only as a cleanup task — not a blocking issue.
 - **Tag colors**: Promoted to `tag_colors` table above. `data/tag_colors.json` is legacy; migrate on first Settings / Tag load.
 - **`git_last_commit_date`**: Not yet implemented. Would replace `version` date as the `LastUpdate` column source. Requires `git log --format=%ci -1` during scan and storing the ISO date. Add to `projects` table when scanner is updated.
+- **`platform_stats` vs `settings` separation**: The split between read-only runtime metrics (`platform_stats`) and user-configurable values (`settings`) is intentional. Do not write scanner outputs to `settings`.
