@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260426 V3 |
+| Version | 20260427 V4 |
 | Route | `GET /welcome/summary`, `GET /welcome` (redirect) |
 | Parent | — |
 | Main Menu | Welcome |
@@ -57,7 +57,9 @@ Highlighted `cc-card`. Table columns: **Icon**, **Key**, **Value**, **Descriptio
 
 **Editability rule:** The Value cell is inline-editable only for settings-backed fields (`app_name`, `homepage_url`). All other rows are read-only — the Value cell is plain text with no input affordance.
 
-Clicking or tabbing into an editable Value cell activates an `<input>` styled inline (no visible border until focused, cursor appears). Tabbing out or losing focus triggers a `POST /api/welcome/config` with `key` and `value`. The server validates and returns an updated icon fragment; the icon updates in-place without a page reload.
+Editable Value cells contain a standard `<input>` (1px solid `var(--cc-border)`, 4px radius, white background, 4px 8px padding) — always visibly styled as a text box, not hidden until clicked. On focus the border becomes `2px solid #0073ea`. Tabbing out or losing focus triggers a `POST /api/welcome/config` with `key` and `value`. The server validates and returns an updated icon fragment; the icon updates in-place without a page reload.
+
+**Save feedback:** After every save attempt, a toast notification appears fixed top-right (green background, white text, 8px radius, z-index 1000). On success: "✓ Saved". On error: "✗ Failed — try again". The toast fades out after 2 seconds. The fetch must handle non-2xx responses and network errors, both showing the error toast.
 
 | Icon | Meaning |
 |------|---------|
@@ -68,12 +70,12 @@ Clicking or tabbing into an editable Value cell activates an `<input>` styled in
 
 | # | Item | Key | Description column text | Status logic | Value Editable |
 |---|------|-----|------------------------|-------------|----------------|
-| 1 | Application Name | `app_name` (settings) | Custom display name for this installation | ✅ if custom; ⚠️ if still default `Command Center` | **Yes** |
+| 1 | Application Name | `app_name` (settings) | The name of this installation | ✅ if custom; ⚠️ if still default `Command Center` | **Yes** |
 | 2 | Application Version | `version` (METADATA.md) | Version of this installation | 📌 always shown | No — read from METADATA.md |
-| 3 | Projects Directory | `PROJECTS_DIR` (env) | Directory containing your GitHub projects | ✅ if path exists; ❌ if missing | No — set in `.env`, restart |
-| 4 | Specifications Path | `SPECIFICATIONS_PATH` (env) | Directory containing specification files | ✅ if path exists; ⚠️ if using default | No — set in `.env` if default is wrong |
-| 5 | Homepage URL | `homepage_url` (settings) | Portfolio URL — the public homepage for your projects (`HOME_PAGE_URL`) | ✅ if valid `https://` URL; ⚠️ if empty | **Yes** |
-| 6 | GitHub SSH | runtime check | GitHub SSH key status | ✅ if `ssh -T git@github.com` exits 1 (authed); ❌ if exits 255 | No — not configurable here |
+| 3 | Projects Directory | `PROJECTS_DIR` (env) | Folder containing your managed projects. Set `PROJECTS_DIR` in `.env` to override (.env) | ✅ if path exists; ❌ if missing | No — env var, restart required |
+| 4 | Specifications Path | `SPECIFICATIONS_PATH` (env) | Folder containing specification files. Set `SPECIFICATIONS_PATH` in `.env` to override (.env) | ✅ if path exists; ⚠️ if using default | No — env var, restart required |
+| 5 | Homepage URL | `homepage_url` (settings) | Your public portfolio URL | ✅ if valid `https://` URL; ⚠️ if empty | **Yes** |
+| 6 | GitHub SSH | runtime check | GitHub SSH connectivity status | ✅ if `ssh -T git@github.com` exits 1 (authed); ❌ if exits 255 | No — not configurable here |
 
 When SSH is ❌, a collapsible "Alternatives" block shows: HTTPS credential store, GitHub CLI (`gh auth login`). Collapsed when SSH is ✅.
 
