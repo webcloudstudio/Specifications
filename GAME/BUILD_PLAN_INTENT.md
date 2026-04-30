@@ -8,23 +8,30 @@
 # Sizes in KB. Run verify to refresh them after editing spec files.
 # Prefix a file line with # to skip it from the build.
 
-## Foundation
-DATABASE.md (26k)
+## Foundation - Database
+# instructions: Build the SQLite schema only from DATABASE.md with WAL mode and FK pragma. Do not create the Flask app or any routes yet.
+DATABASE.md (31k)
+
+## Foundation - Flask
+# instructions: Create the Flask app factory (app/__init__.py), initialise SQLite from the existing
+schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement
+screens or features yet.
+# stack: python, flask
 
 ## Service Catalog
-## Default Screens
-## Welcome Screens
+### Default Screens
+### Welcome Screens
 FEATURE-SERVICE-CATALOG.md (12k)
 SCREEN-CATALOG.md (9k)
 SCREEN-PROTOTYPES-MAINTENANCE.md (3k)
 SCREEN-DEFAULT.md (3k)
 SCREEN-WELCOME-PROJECTS.md (1k)
 SCREEN-WELCOME-PROTOTYPES.md (1k)
-SCREEN-WELCOME-SUMMARY.md (3k)
+SCREEN-WELCOME-SUMMARY.md (6k)
 
 ## Projects Screens
 SCREEN-PROJECTS-CONFIGURATION.md (1k)
-SCREEN-PROJECTS-DASHBOARD.md (4k)
+SCREEN-PROJECTS-DASHBOARD.md (3k)
 SCREEN-PROJECTS-DETAIL.md (4k)
 SCREEN-PROJECTS-MAINTENANCE.md (1k)
 SCREEN-PROJECTS-SETUP.md (5k)
@@ -71,12 +78,16 @@ FEATURE-BatchRunner.md (6k)
 ## Cli Gateway
 FEATURE-CLI-GATEWAY.md (4k)
 
-## Asyncqueue
-## Voiceforward
+## Asyncqueue Voiceforward
 FEATURE-AsyncQueue.md (11k)
 FEATURE-VOICEFORWARD.md (5k)
 SCREEN-VOICEFORWARD-MOBILE.md (4k)
 SCREEN-SETTINGS-VOICE-DOCS.md (6k)
 SCREEN-SETTINGS-VOICE.md (4k)
 
+## Database Github Repos 001
+DATABASE-github-repos-001.md (2k)
+
+## Scanner
+FEATURE-SCANNER.md (4k)
 
