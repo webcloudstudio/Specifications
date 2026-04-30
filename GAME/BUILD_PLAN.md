@@ -25,7 +25,7 @@ rules: CLAUDE_RULES.md, oneshot_build_rules.md
 context: ARCHITECTURE.md
 force_llm: true
 instructions: |
-  Create the Flask app factory (app/__init__.py), initialise SQLite from the existing schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement screens or features yet.
+  Create the Flask app factory (app/__init__.py), initialise SQLite from the existing schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement screens or features yet. Error handlers must not call render_template — return JSON only in this phase since the template layer does not exist yet. Do not create any HTML templates.
 # Estimated prompt: ~48KB
 
 ## 3: Service Catalog
