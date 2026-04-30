@@ -23,8 +23,9 @@ instructions: |
 stack: common.md (7k), python.md (9k), flask.md (15k)
 rules: CLAUDE_RULES.md, oneshot_build_rules.md
 context: ARCHITECTURE.md
+force_llm: true
 instructions: |
-  Create the Flask app factory (app/__init__.py), initialise SQLite from the existing
+  Create the Flask app factory (app/__init__.py), initialise SQLite from the existing schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement screens or features yet.
 # Estimated prompt: ~48KB
 
 ## 3: Service Catalog

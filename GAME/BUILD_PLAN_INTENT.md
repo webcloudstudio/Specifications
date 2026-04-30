@@ -13,9 +13,7 @@
 DATABASE.md (31k)
 
 ## Foundation - Flask
-# instructions: Create the Flask app factory (app/__init__.py), initialise SQLite from the existing
-schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement
-screens or features yet.
+# instructions: Create the Flask app factory (app/__init__.py), initialise SQLite from the existing schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement screens or features yet.
 # stack: python, flask
 
 ## Service Catalog
