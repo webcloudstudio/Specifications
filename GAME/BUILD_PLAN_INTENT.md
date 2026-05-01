@@ -17,9 +17,10 @@ DATABASE.md (31k)
 # stack: python, flask
 
 ## Service Catalog
-### Default Screens
-### Welcome Screens
 FEATURE-SERVICE-CATALOG.md (12k)
+FEATURE-SCANNER.md (4k)
+
+### Default Screens ### Welcome Screens
 SCREEN-CATALOG.md (9k)
 SCREEN-PROTOTYPES-MAINTENANCE.md (3k)
 SCREEN-DEFAULT.md (3k)
@@ -48,16 +49,18 @@ SCREEN-PROTOTYPES-VALIDATION.md (3k)
 
 ## Homepage Publisher
 FEATURE-HOMEPAGE-PUBLISHER.md (11k)
-SCREEN-PUBLISHER.md (4k)
 HOMEPAGE.md (1k)
+
+## Homepage UI
+SCREEN-PUBLISHER.md (4k)
 
 ## Workflow Service
 FEATURE-Workflow-Service.md (11k)
+
+## Workflow UI
 SCREEN-WORKFLOW-ADD-TICKET.md (1k)
 SCREEN-WORKFLOW-MANAGE.md (1k)
 SCREEN-WORKFLOW-WORKFLOW.md (2k)
-
-#####
 
 ## Mcp Hosting
 FEATURE-MCP-Hosting.md (7k)
@@ -71,21 +74,19 @@ SCREEN-MONITORING-PROCESSES.md (2k)
 SCREEN-MONITORING-SCHEDULER.md (4k)
 
 ## Batchrunner
-FEATURE-BatchRunner.md (6k)
-
 ## Cli Gateway
+FEATURE-BatchRunner.md (6k)
 FEATURE-CLI-GATEWAY.md (4k)
 
-## Asyncqueue Voiceforward
+## Asyncqueue 
 FEATURE-AsyncQueue.md (11k)
 FEATURE-VOICEFORWARD.md (5k)
+
+## Voiceforward
 SCREEN-VOICEFORWARD-MOBILE.md (4k)
 SCREEN-SETTINGS-VOICE-DOCS.md (6k)
 SCREEN-SETTINGS-VOICE.md (4k)
 
 ## Database Github Repos 001
 DATABASE-github-repos-001.md (2k)
-
-## Scanner
-FEATURE-SCANNER.md (4k)
 

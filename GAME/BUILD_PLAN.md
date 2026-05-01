@@ -16,7 +16,7 @@ specifications: DATABASE.md (31k)
 context: ARCHITECTURE.md, FUNCTIONALITY.md
 instructions: |
   Build the SQLite schema only from DATABASE.md with WAL mode and FK pragma. Do not create the Flask app or any routes yet.
-# Estimated prompt: ~69KB
+# Estimated prompt: ~113KB  (~28k tokens)
 
 ## 2: Foundation - Flask
 
@@ -26,13 +26,13 @@ context: ARCHITECTURE.md
 force_llm: true
 instructions: |
   Create the Flask app factory (app/__init__.py), initialise SQLite from the existing schema, create bin/common.sh and bin/start.sh. Ensure the /health endpoint returns 200. Do not implement screens or features yet. Error handlers must not call render_template — return JSON only in this phase since the template layer does not exist yet. Do not create any HTML templates.
-# Estimated prompt: ~48KB
+# Estimated prompt: ~64KB  (~16k tokens)
 
 ## 3: Service Catalog
 
 stack: python_compact.md (5k), ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-SERVICE-CATALOG.md (12k), SCREEN-CATALOG.md (9k), SCREEN-PROTOTYPES-MAINTENANCE.md (3k), SCREEN-DEFAULT.md (3k), SCREEN-WELCOME-PROJECTS.md (1k), SCREEN-WELCOME-PROTOTYPES.md (1k), SCREEN-WELCOME-SUMMARY.md (6k)
+specifications: FEATURE-SERVICE-CATALOG.md (12k), FEATURE-SCANNER.md (4k), SCREEN-CATALOG.md (9k), SCREEN-PROTOTYPES-MAINTENANCE.md (3k), SCREEN-DEFAULT.md (3k), SCREEN-WELCOME-PROJECTS.md (1k), SCREEN-WELCOME-PROTOTYPES.md (1k), SCREEN-WELCOME-SUMMARY.md (6k)
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement routes: GET /api/catalog, POST /api/{name}/run/{script}, POST /api/conquer_2026/run/start, GET /api/conquer_2026/script/start, POST /api/conquer_2026/run/scorecard, GET /api/conquer_2026/script/scorecard.
@@ -41,7 +41,7 @@ smoke:
   - curl -sf http://localhost:${PORT}/api/catalog -o /dev/null
   - curl -sf http://localhost:${PORT}/api/conquer_2026/script/start -o /dev/null
   - curl -sf http://localhost:${PORT}/api/conquer_2026/script/scorecard -o /dev/null
-# Estimated prompt: ~64KB
+# Estimated prompt: ~100KB  (~25k tokens)
 
 ## 4: Projects Screens
 
@@ -51,7 +51,7 @@ specifications: SCREEN-PROJECTS-CONFIGURATION.md (1k), SCREEN-PROJECTS-DASHBOARD
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
-# Estimated prompt: ~41KB
+# Estimated prompt: ~73KB  (~18k tokens)
 
 ## 5: Settings Screens
 
@@ -61,7 +61,7 @@ specifications: SCREEN-SETTINGS-GENERAL.md (4k), SCREEN-SETTINGS-HELP.md (2k), S
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
-# Estimated prompt: ~36KB
+# Estimated prompt: ~67KB  (~17k tokens)
 
 ## 6: Prototypes Screens
 
@@ -71,29 +71,49 @@ specifications: SCREEN-PROTOTYPES-CONFIGURATION.md (2k), SCREEN-PROTOTYPES-LIST.
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
-# Estimated prompt: ~32KB
+# Estimated prompt: ~63KB  (~16k tokens)
 
 ## 7: Homepage Publisher
 
-stack: python_compact.md (5k), ui-flask.bootstrap-client.md (7k)
+stack: python_compact.md (5k), flask_compact.md (10k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-HOMEPAGE-PUBLISHER.md (11k), SCREEN-PUBLISHER.md (4k), HOMEPAGE.md (1k)
+specifications: FEATURE-HOMEPAGE-PUBLISHER.md (11k), HOMEPAGE.md (1k)
+context: ARCHITECTURE.md
+instructions: |
+  Implement the specification files for: Homepage Publisher.
+# Estimated prompt: ~58KB  (~14k tokens)
+
+## 8: Homepage UI
+
+stack: ui-flask.bootstrap-client.md (7k)
+rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
+specifications: SCREEN-PUBLISHER.md (4k)
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
-# Estimated prompt: ~44KB
+# Estimated prompt: ~56KB  (~14k tokens)
 
-## 8: Workflow Service
+## 9: Workflow Service
 
-stack: python_compact.md (5k), ui-flask.bootstrap-client.md (7k)
+stack: python_compact.md (5k), flask_compact.md (10k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-Workflow-Service.md (11k), SCREEN-WORKFLOW-ADD-TICKET.md (1k), SCREEN-WORKFLOW-MANAGE.md (1k), SCREEN-WORKFLOW-WORKFLOW.md (2k)
+specifications: FEATURE-Workflow-Service.md (11k)
+context: ARCHITECTURE.md
+instructions: |
+  Implement the specification files for: Workflow Service.
+# Estimated prompt: ~56KB  (~14k tokens)
+
+## 10: Workflow UI
+
+stack: ui-flask.bootstrap-client.md (7k)
+rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
+specifications: SCREEN-WORKFLOW-ADD-TICKET.md (1k), SCREEN-WORKFLOW-MANAGE.md (1k), SCREEN-WORKFLOW-WORKFLOW.md (2k)
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
-# Estimated prompt: ~43KB
+# Estimated prompt: ~56KB  (~14k tokens)
 
-## 9: Mcp Hosting
+## 11: Mcp Hosting
 
 stack: python_compact.md (5k), flask_compact.md (10k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -101,9 +121,9 @@ specifications: FEATURE-MCP-Hosting.md (7k)
 context: ARCHITECTURE.md
 instructions: |
   Implement the specification files for: Mcp Hosting.
-# Estimated prompt: ~36KB
+# Estimated prompt: ~52KB  (~13k tokens)
 
-## 10: Healthcheck
+## 12: Healthcheck
 
 stack: python_compact.md (5k), flask_compact.md (10k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -111,9 +131,9 @@ specifications: FEATURE-HEALTHCHECK.md (8k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /api/health/poll, POST /api/logs/ingest.
-# Estimated prompt: ~37KB
+# Estimated prompt: ~53KB  (~13k tokens)
 
-## 11: Monitoring Screens
+## 13: Monitoring Screens
 
 stack: ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -121,58 +141,47 @@ specifications: SCREEN-MONITORING-MONITORING.md (6k), SCREEN-MONITORING-PROCESSE
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
-# Estimated prompt: ~32KB
+# Estimated prompt: ~64KB  (~16k tokens)
 
-## 12: Batchrunner
+## 14: Cli Gateway
 
 stack: python_compact.md (5k), flask_compact.md (10k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-BatchRunner.md (6k)
+specifications: FEATURE-BatchRunner.md (6k), FEATURE-CLI-GATEWAY.md (4k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /api/{project}/run/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /api/{project}/runs, POST /api/services/batch-runner/{tool}.
-# Estimated prompt: ~35KB
+smoke:
+  - curl -sf http://localhost:${PORT}/api/catalog -o /dev/null
+# Estimated prompt: ~56KB  (~14k tokens)
 
-## 13: Cli Gateway
+## 15: Asyncqueue
 
 stack: python_compact.md (5k), flask_compact.md (10k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-CLI-GATEWAY.md (4k)
+specifications: FEATURE-AsyncQueue.md (11k), FEATURE-VOICEFORWARD.md (5k)
 context: ARCHITECTURE.md
 instructions: |
-  Implement routes: GET /api/catalog, POST /api/{name}/run/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /api/health/{name}.
-smoke:
-  - curl -sf http://localhost:${PORT}/api/catalog -o /dev/null
-# Estimated prompt: ~33KB
-
-## 14: Asyncqueue Voiceforward
-
-stack: python_compact.md (5k), ui-flask.bootstrap-client.md (7k)
-rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-AsyncQueue.md (11k), FEATURE-VOICEFORWARD.md (5k), SCREEN-VOICEFORWARD-MOBILE.md (4k), SCREEN-SETTINGS-VOICE-DOCS.md (6k), SCREEN-SETTINGS-VOICE.md (4k)
-context: ARCHITECTURE.md, UI-GENERAL.md
-instructions: |
   Implement routes: POST /api/voice/upload, POST /api/services/async-queue/submit, POST /api/services/async-queue/drain, POST /api/voice/upload, GET /voice.
-  Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
 smoke:
   - curl -sf http://localhost:${PORT}/voice -o /dev/null
-# Estimated prompt: ~59KB
+# Estimated prompt: ~61KB  (~15k tokens)
 
-## 15: Database Github Repos 001
+## 16: Voiceforward
+
+stack: ui-flask.bootstrap-client.md (7k)
+rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
+specifications: SCREEN-VOICEFORWARD-MOBILE.md (4k), SCREEN-SETTINGS-VOICE-DOCS.md (6k), SCREEN-SETTINGS-VOICE.md (4k)
+context: ARCHITECTURE.md, UI-GENERAL.md
+instructions: |
+  Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
+# Estimated prompt: ~68KB  (~17k tokens)
+
+## 17: Database Github Repos 001
 
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
 specifications: DATABASE-github-repos-001.md (2k)
 context: ARCHITECTURE.md
 instructions: |
   Implement the specification files for: Database Github Repos 001.
-# Estimated prompt: ~15KB
-
-## 16: Scanner
-
-stack: python_compact.md (5k), flask_compact.md (10k)
-rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-SCANNER.md (4k)
-context: ARCHITECTURE.md
-instructions: |
-  Implement routes: —.
-# Estimated prompt: ~33KB
+# Estimated prompt: ~31KB  (~8k tokens)
