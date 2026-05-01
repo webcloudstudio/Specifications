@@ -20,7 +20,7 @@ DATABASE.md (31k)
 FEATURE-SERVICE-CATALOG.md (12k)
 FEATURE-SCANNER.md (4k)
 
-### Default Screens ### Welcome Screens
+## Default and Welcome Screens
 SCREEN-CATALOG.md (9k)
 SCREEN-PROTOTYPES-MAINTENANCE.md (3k)
 SCREEN-DEFAULT.md (3k)
