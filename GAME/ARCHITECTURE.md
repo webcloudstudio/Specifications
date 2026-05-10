@@ -298,6 +298,8 @@ Environment variables loaded from `.env` at startup (via `python-dotenv`). A `.e
 
 `.env.sample` ships in the repo as a reference template; `.env` is gitignored.
 
+`bin/start.sh` must read `GAME_PORT` from `.env` before starting Flask, defaulting to `5000` if unset.
+
 ## Open Questions
 
 - Should routes.py be split into per-screen blueprint modules as the app grows? Not at PROTOTYPE — single routes.py until the file exceeds ~800 lines or team size demands it. Per-screen blueprints add indirection without benefit at current scale.

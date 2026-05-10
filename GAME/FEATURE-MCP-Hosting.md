@@ -1,4 +1,4 @@
-# Feature: MCP Hosting
+# Feature: Capabilities MCP-Hybrid
 
 
 | Field       | Value |

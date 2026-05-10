@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260407 V1 |
+| Version | 20260510 V2 |
 | Route | `GET /welcome/prototypes` |
 | Parent | — |
 | Main Menu | Welcome |
 | Sub Menu | Prototypes |
-| Tab Order | 1: Summary · 2: Prototypes · 3: Projects |
+| Tab Order | Not in primary Welcome flow (Summary → GitHub → Projects). Accessible directly via route. |
 | Description | Read-only searchable list of all known prototypes. No actions — navigation only. |
 | Depends On  | UI-GENERAL.md |
 
