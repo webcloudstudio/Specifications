@@ -5,7 +5,7 @@
 |-------------|-------|
 | Provides    | GET /api/catalog, POST /api/{name}/run/{script}, POST /api/conquer_2026/run/start, GET /api/conquer_2026/script/start, POST /api/conquer_2026/run/scorecard, GET /api/conquer_2026/script/scorecard, GET /api/{name}/script/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /servicecatalog, GET /api/capabilities, POST /api/capabilities/invoke |
 | Version     | 20260419 V1 |
-| Description |  |
+| Description | REST API for service discovery and headless script execution with fire-and-poll lifecycle |
 
 **Version:** 20260323 V1
 **Description:** REST API for service discovery and headless script execution with fire-and-poll lifecycle

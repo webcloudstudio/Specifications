@@ -4,7 +4,7 @@
 | Field       | Value |
 |-------------|-------|
 | Version     | 20260419 V1 |
-| Description |  |
+| Description | GAME as an MCP server host — discover, register, start, stop, and expose developer-created MCP servers |
 
 **Version:** 2026-04-06 V1
 **Description:** GAME as an MCP server host — discover, register, start, stop, and expose developer-created MCP servers

@@ -6,7 +6,7 @@
 | Provides    | POST /api/{project}/run/{script}, GET /api/runs/{run_id}, GET /api/runs/{run_id}/log, POST /api/runs/{run_id}/stop, GET /api/{project}/runs, POST /api/services/batch-runner/{tool} |
 | Depends On  | FEATURE-SERVICE-CATALOG.md |
 | Version     | 20260419 V1 |
-| Description |  |
+| Description | Long-running script execution exposed as a platform service — wraps the process engine with a service interface |
 
 **Version:** 2026-04-06 V1
 **Description:** Long-running script execution exposed as a platform service — wraps the process engine with a service interface

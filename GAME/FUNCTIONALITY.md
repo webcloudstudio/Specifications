@@ -17,7 +17,7 @@ Each flow shows: what triggers it, what happens in sequence, what gets read, wha
 User clicks Rescan (or first page load)
   |
 | Version     | 20260419 V1 |
-| Description |  |
+| Description | Step-by-step end-to-end flows showing how the platform's major workflows execute from trigger to completion |
   v
 POST /api/scan
   |

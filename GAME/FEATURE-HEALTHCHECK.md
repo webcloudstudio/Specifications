@@ -20,7 +20,7 @@ Three capabilities unified under one feature:
 | Log Ingestor | Scheduler fires every 60 seconds; also on `POST /api/logs/ingest` |
 | Provides    | POST /api/health/poll, POST /api/logs/ingest |
 | Version     | 20260419 V1 |
-| Description |  |
+| Description | Service endpoint polling, per-project heartbeat API, and incremental log-event ingestion |
 
 ---
 

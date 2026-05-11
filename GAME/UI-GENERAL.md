@@ -37,7 +37,7 @@ The route layer passes `theme = os.environ.get('GAME_THEME', 'light')` to every 
 | Cards / panels | `#ffffff` | `#1e293b` |
 | Muted / secondary text | — | `#64748b` (slate-500) |
 | Borders | — | `#e2e8f0` |
-| Description |  |
+| Description | Shared UI patterns and conventions across all screens |
 
 CSS variables in `static/style.css`:
 

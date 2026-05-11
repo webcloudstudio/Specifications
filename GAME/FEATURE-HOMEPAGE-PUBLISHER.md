@@ -38,7 +38,7 @@ Templates are installed to `TARGET/templates/` and render to `TARGET/publish/`:
 
 | Template | Output path |
 |----------|-------------|
-| Description |  |
+| Description | Template-based static site builder that renders the portfolio homepage from Jinja2 templates to plain HTML and publishes via GitHub Pages |
 | Version     | 20260419 V1 |
 | `index.html.j2` | `publish/index.html` |
 | `projects.html.j2` | `publish/projects/index.html` |
