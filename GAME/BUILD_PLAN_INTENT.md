@@ -1,9 +1,9 @@
 # BUILD_PLAN_INTENT.md — GAME
-# Created by: bash bin/build_plan.sh GAME create
+# Created by: bash bin/build_plan.sh GAME init
 #
 # Commands:
 #   bash bin/build_plan.sh GAME verify   fix sizes, preview phases by priority
-#   bash bin/build_plan.sh GAME run       validate ordering, write BUILD_PLAN.md
+#   bash bin/build_plan.sh GAME create   validate ordering, write BUILD_PLAN.md
 #
 # Sizes in KB. Run verify to refresh them after editing spec files.
 # Prefix a file line with # to skip it from the build.
