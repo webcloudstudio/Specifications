@@ -2,7 +2,7 @@
 # Created by: bash bin/build_plan.sh GAME init
 #
 # Commands:
-#   bash bin/build_plan.sh GAME verify   fix sizes, preview phases by priority
+#   bash bin/build_plan.sh GAME summary  print formatted summary with prompt sizes
 #   bash bin/build_plan.sh GAME create   validate ordering, write BUILD_PLAN.md
 #
 # Sizes in KB. Run verify to refresh them after editing spec files.
@@ -25,10 +25,10 @@ FEATURE-SCANNER.md (4k)
 
 ## Default and Welcome Screens
 SCREEN-DEFAULT.md (3k)
-SCREEN-WELCOME-PROJECTS.md (1k)
+SCREEN-WELCOME-PROJECTS.md (8k)
 SCREEN-WELCOME-PROTOTYPES.md (1k)
-SCREEN-WELCOME-SUMMARY.md (6k)
-FEATURE-Project-Download.md
+SCREEN-WELCOME-SUMMARY.md (8k)
+FEATURE-Project-Download.md (4k)
 
 ## Catalog
 SCREEN-CATALOG.md (9k)
@@ -95,6 +95,6 @@ SCREEN-SETTINGS-VOICE.md (4k)
 
 
 
-## Welcome Github [NEW]
+## Welcome Github
 SCREEN-WELCOME-GITHUB.md (8k)
 
