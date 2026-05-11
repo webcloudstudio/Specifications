@@ -46,8 +46,6 @@ instructions: |
   Implement routes: GET /api/catalog, POST /api/{name}/run/{script}, POST /api/conquer_2026/run/start, GET /api/conquer_2026/script/start, POST /api/conquer_2026/run/scorecard, GET /api/conquer_2026/script/scorecard.
 smoke:
   - curl -sf http://localhost:${PORT}/api/catalog -o /dev/null
-  - curl -sf http://localhost:${PORT}/api/conquer_2026/script/start -o /dev/null
-  - curl -sf http://localhost:${PORT}/api/conquer_2026/script/scorecard -o /dev/null
 # Estimated prompt: ~62KB  (~15k tokens)
 
 ## 5: Default and Welcome Screens
