@@ -1,0 +1,685 @@
+We have two steps combined into one prompt
+
+Two intents
+	- Update bin/setup.sh --
+		Create an agent to change a non conformed specification to conformed ones
+files with confomred ones THE ABOVE will be synopsized into setup.sh --analyze which will call an agent that converts specifications files into conformed specifcation
+fieles - which i thought i specified but dont see above of 
+
+# CreditBubble: Private Credit Stress Intelligence System
+## Initial Specification — May 2026
+
+---
+
+## INTENT
+
+This system replicates the analytical process used by top fixed-income trading desks (e.g., Millennium, Citadel) to systematically read SEC filings across the private credit universe and identify stress signals before they are widely recognized. The goal is to generate actionable long/short trading signals by detecting deterioration in private credit fund books — specifically Business Development Companies (BDCs) and alternative asset managers — using publicly available data that most investors do not systematically process.
+
+The core thesis: private credit funds mark illiquid assets quarterly using internal models with every incentive to be optimistic. Stress signals appear in the filings many quarters before a fund cuts its distribution, caps redemptions, or faces a regulatory investigation. The BlackRock TCP Capital DOJ investigation (May 2026) is an example of the endpoint; this system is designed to find the beginning.
+
+You are to implement the program phases
+	As you design the plan, ask questions when you have significant choices 
+	Write success criteria, failure modes, scorecards, quality metrics for each step
+		Publish simply just so we can see
+	The phases should be independently tested and as such label the features clearly for the build planner
+ 		Filenames should have injected "STEP." in their filename - not a suffix or prefix but somewhere in the middle 
+
+PreReq 1) Are there any python analytics libraries for Edgar data - that would be a first stop - lets see what we can get for free - no need to invent if its legit free. This information must inform the plan so the first step would be to try out some apis and stuff to ensure we can get connectivity and not be rate limited and get some sample data.
+
+PreReq 2) You will iterate the plan - this plan is from a quick session with cowork - i expect you to fully research the project - do a search on comparables and understand the capabilities of this concept.  Is Edgar data like this a product?  In any case we make a plan here.  And i MUST DISCUSS IT WITH YOU IN A CLEAR CONVERSATION BACK AND FORTH - with you only coding on plan approval.
+
+1) Download From Needed Sources - Cli
+        Identify & Define Needed Sources
+        Metadata and File Standards
+        Test Api
+2) Validate Data
+	Metadata and File Standards
+	Historical Data? 
+3) Determine the algorithm - the specific signals we want to watch for and their importance and selectivity
+	Build a MVP database to populate and review
+4) Analyze The Data
+	What percentage of the MVP database can be extracted with best guess python 
+		Compare various documents of same type across companies and for the same company over time for consitent paterns 
+	How accurate is your best guess as to a python signals analyzer
+	I assume there will be sections that are hard to parse - its wording and english.  Therefore i want to have a system whereby that language is rated by the llm into our scores and then the parser/rules processor is updated to recognise that kind of signal (not exact wording but i want common synonyms etc - rules can get large and should be in a jsonl for now. 
+	The patern of collect enough data and then reprocess in a loop -> LLM figures out signal and updates python which rescores documents including new ones.  
+	We want to have a best path estimate on how to proceed from the llm based on data sampling before we proceed
+	Important: I want the system to learn over time such as to be more automatically accurate for buy and sell signals. It may be language though so we need some way to compare what he said in paragraph 2 to Our scoring system so - i need advice as to the best way to learn to do this in an on-machine way - and would love it if my laptop could actually process the language mismatches.  But thats premature - we need to see how we can score first.  I have not done initial discovery. 
+5) Build a Theoretical scoring system with automatic triggers for signals 
+		This will ideally need to be backtested if possible
+	
+6) User Interface with Kpis over time and interesting news from recent filings and perhaps an automated buy or sell signal (via a report)
+
+
+You will Iterate the specifications documents after discovery phases - we are building the plan
+
+
+## THE BELOW FILES DEFINE THE DETAILS OF HTE PROGRAM
+---
+
+## Target Universe
+
+### Tier 1 — Publicly Traded BDCs (Primary Focus)
+These file 10-Qs with EDGAR and are the richest data sources.
+
+| Ticker | Name | Manager | Notes |
+|--------|------|---------|-------|
+| ARCC | Ares Capital Corporation | Ares Management | Largest BDC by AUM |
+| MFIC | MidCap Financial Investment Corp | Apollo Global | Already showing NAV decline |
+| TCPC | BlackRock TCP Capital Corp | BlackRock | Under DOJ investigation, 19% NAV cut Jan 2026 |
+| FSCO | FS Credit Opportunities Corp | FS Investments | User's benchmark — closed-end, no redemption risk |
+| OBDC | Blue Owl Capital Corporation | Blue Owl | Large retail-distributed BDC |
+| BXSL | Blackstone Secured Lending Fund | Blackstone | Listed Blackstone BDC |
+| CGBD | TCG BDC (Carlyle) | Carlyle | Mid-size BDC |
+| TPVG | TriplePoint Venture Growth | TriplePoint | Tech-focused, higher risk |
+
+### Tier 2 — Management Company Stocks (Potential Shorts)
+These are the parent managers. Stress in Tier 1 funds eventually damages their fee income, fundraising ability, and reputation.
+
+| Ticker | Name | Key Exposure |
+|--------|------|-------------|
+| APO | Apollo Global Management | MidCap Financial, AAPL credit, $3B fund sale signal |
+| ARES | Ares Management | ARCC, direct lending, capped redemptions at 5% |
+| BX | Blackstone | BCRED, BXSL, BREIT — massive retail private credit |
+| BLK | BlackRock | TCPC under DOJ investigation |
+| OWL | Blue Owl Capital | OBDC, heavy BDC origination |
+| KKR | KKR & Co | Infrastructure credit, private lending |
+
+### Tier 3 — Non-Traded / Interval Funds (Limited Direct Data, Monitored via 8-Ks)
+| Fund | Manager | Red Flag Status |
+|------|---------|----------------|
+| BCRED | Blackstone | $3.2B in redemptions, non-accruals 0.6% to 2.4% in one quarter |
+| Ares Direct Lending | Ares | Capped redemptions at 5%, requests at 11.6% |
+| Apollo Direct Lending | Apollo | Weighing $3B fund sale |
+
+---
+
+## Data Sources and Download Process
+
+### Primary Source: SEC EDGAR
+
+All BDC filings are publicly available via EDGAR. The system must download and parse:
+
+1. 10-Q (quarterly reports) — filed within 45 days of quarter end. Primary data source.
+2. 10-K (annual reports) — filed within 60-75 days of fiscal year end. Includes audited financials and full portfolio schedule.
+3. 8-K (material events) — filed within 4 business days. Critical for catching distribution cuts, NAV announcements, and redemption cap announcements in real time.
+4. N-2 / N-CEN (for registered investment companies) — supplemental data for some funds.
+
+### EDGAR API Endpoints
+
+# Get all filings for a company by CIK number
+https://data.sec.gov/submissions/CIK{10-digit-CIK}.json
+
+# Search for recent filings by ticker
+https://efts.sec.gov/LATEST/search-index?q=%22{TICKER}%22&dateRange=custom&startdt={DATE}&enddt={DATE}&forms=10-Q
+
+# Full text search across all filings
+https://efts.sec.gov/LATEST/search-index?q=%22payment+in+kind%22&forms=10-Q&dateRange=custom&startdt=2025-01-01
+
+# Get specific filing index
+https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&type=10-Q&dateb=&owner=include&count=10
+
+# Direct filing content (HTML)
+https://www.sec.gov/Archives/edgar/data/{CIK}/{accession-number}/{primary-document}.htm
+
+### CIK Numbers for Target Universe
+
+| Ticker | CIK |
+|--------|-----|
+| ARCC | 0001278752 |
+| MFIC | 0001655888 |
+| TCPC | 0001452936 |
+| FSCO | 0001552198 |
+| OBDC | 0001655888 |
+| BXSL | 0001822928 |
+| APO | 0001858681 |
+| ARES | 0001555280 |
+| BX | 0001393818 |
+| BLK | 0001364742 |
+| OWL | 0001823584 |
+
+Note: Verify all CIKs against EDGAR before first run. CIKs are permanent and do not change.
+
+### Download Protocol
+
+For each ticker in target universe:
+  1. GET submissions JSON from EDGAR API
+  2. Extract accession numbers for all 10-Q filings from past 8 quarters
+  3. For each accession number:
+     a. GET filing index page
+     b. Identify primary document (usually the .htm file)
+     c. Download and store raw HTML
+     d. Parse using extraction logic (see below)
+  4. Also monitor 8-K feed daily for material events
+  5. Store all raw files locally with timestamp and filing date
+
+---
+
+## Metrics to Extract — The Critical 12
+
+### Metric 1: PIK Income as % of Total Investment Income
+
+What it is: Payment-in-kind interest — borrowers paying interest with additional debt, not cash. Rising PIK means borrowers are cash-strapped.
+
+Where to find it: Income Statement / Statement of Operations. Look for line items labeled "Payment-in-kind interest income," "PIK interest," or "accretion of discount."
+
+Extraction target: PIK_income / total_investment_income * 100
+
+Red flag thresholds:
+- Watch: PIK > 10%
+- Elevated: PIK > 15%
+- Critical: PIK > 20% or PIK rising more than 3 percentage points in one quarter
+
+Search terms in filing text: "payment-in-kind," "PIK," "accreted," "deferred interest"
+
+---
+
+### Metric 2: Non-Accrual Rate (Cost Basis)
+
+What it is: Percentage of the portfolio that has stopped paying interest or principal. Always use cost basis — fair value artificially deflates the percentage.
+
+Where to find it: MD&A section, usually a table labeled "Non-Accrual Investments."
+
+Extraction target: non_accrual_cost / total_portfolio_cost * 100
+
+Red flag thresholds:
+- Watch: Non-accrual at cost > 2%
+- Elevated: > 3%
+- Critical: > 5%, or any single quarter increase > 1.5 percentage points
+
+Note: Always capture both cost basis and fair value non-accruals. A widening gap means impaired assets are being written down substantially.
+
+---
+
+### Metric 3: Weighted Average Portfolio Mark
+
+What it is: The aggregate fair value of the portfolio expressed as a percentage of cost.
+
+Where to find it: MD&A section, often stated explicitly. Also calculable from Schedule of Investments totals: total_fair_value / total_cost * 100.
+
+Extraction target: portfolio_fair_value / portfolio_cost * 100
+
+Red flag thresholds:
+- Watch: Mark < 95%
+- Elevated: Mark < 90%
+- Critical: Mark < 85%, or decline of more than 2% in one quarter
+
+Key analytical check: Compare the aggregate mark to the marks on the largest individual positions. If the aggregate looks healthy but 3-5 large positions are marked at 60-70 cents, the aggregate is being propped up by performing loans.
+
+---
+
+### Metric 4: NAV Per Share Trend
+
+What it is: Net Asset Value per share — the fund's equity value divided by shares outstanding.
+
+Where to find it: Balance sheet (Statement of Assets and Liabilities for BDCs).
+
+Extraction target: NAV per share for each quarter, quarter-over-quarter change, and cumulative change from 4 quarters prior.
+
+Red flag thresholds:
+- Watch: NAV decline > 2% in one quarter
+- Elevated: NAV decline > 4% in one quarter, or > 6% over trailing four quarters
+- Critical: NAV decline > 8% over trailing four quarters
+
+---
+
+### Metric 5: Asset Coverage Ratio
+
+What it is: The regulatory minimum for BDCs under the Investment Company Act of 1940. Must stay above 150%.
+
+Where to find it: Liquidity section and debt covenant tables. Phrased as "asset coverage ratio" or "senior securities coverage."
+
+Extraction target: total_assets / total_borrowings * 100
+
+Red flag thresholds:
+- Watch: Coverage < 185%
+- Elevated: Coverage < 170%
+- Critical: Coverage < 160% (approaching regulatory floor, forced deleveraging risk)
+
+Why this matters: When a BDC's asset coverage approaches 150%, it MUST begin selling assets to reduce leverage. Selling into a bad market forces further mark-downs — a death spiral.
+
+---
+
+### Metric 6: NII Distribution Coverage Ratio
+
+What it is: Is the fund actually earning enough income to pay its stated distribution?
+
+Where to find it: Statement of Operations. NII per share vs. declared dividend/distribution per share.
+
+Extraction target: NII_per_share / distributions_declared_per_share
+
+Red flag thresholds:
+- Watch: Coverage < 1.05x
+- Elevated: Coverage < 1.0x (paying from capital)
+- Critical: Coverage < 0.90x, or distribution cut announced
+
+---
+
+### Metric 7: Net Change in Unrealized Depreciation
+
+What it is: Consistent negative movement means the marks are being slowly walked down.
+
+Where to find it: Statement of Operations, line item "Net change in unrealized appreciation (depreciation) on investments."
+
+Extraction target: unrealized_change_this_quarter and rolling 4-quarter sum.
+
+Red flag thresholds:
+- Watch: Two consecutive quarters of unrealized depreciation
+- Elevated: Three consecutive quarters of unrealized depreciation
+- Critical: Single quarter unrealized depreciation > 3% of total portfolio fair value
+
+---
+
+### Metric 8: Realized vs. Unrealized Loss Ratio
+
+What it is: If a fund has large unrealized losses but almost no realized losses, positions are not being exited — the fund is frozen.
+
+Where to find it: Statement of Operations. Compare "Net realized gain (loss)" to "Net change in unrealized appreciation (depreciation)."
+
+Extraction target: abs(realized_losses) / abs(unrealized_losses)
+
+Red flag thresholds:
+- Watch: Ratio < 0.15 with meaningful unrealized losses
+- Critical: Large cumulative unrealized losses with near-zero realized losses over 4+ quarters
+
+---
+
+### Metric 9: Maturity Concentration in Near Term
+
+What it is: What percentage of the loan portfolio matures within the next 12 or 24 months?
+
+Where to find it: Notes to Financial Statements, maturity schedule tables.
+
+Extraction target: loans_maturing_within_12_months / total_portfolio_cost * 100
+
+Red flag thresholds:
+- Watch: > 20% maturing within 12 months
+- Elevated: > 30% within 12 months
+- Critical: > 40% within 12 months
+
+---
+
+### Metric 10: Largest Position Individual Marks
+
+What it is: The Schedule of Investments lists every holding with cost basis and fair value.
+
+Where to find it: Schedule of Investments (usually Exhibit 1 in the 10-Q).
+
+Extraction target: Top 15 positions by fair value, with cost basis, fair value, and implied mark for each.
+
+Red flag thresholds:
+- Watch: Any top-15 position marked below 85%
+- Elevated: Any top-15 position marked below 70%
+- Critical: Multiple top-15 positions below 70%
+
+---
+
+### Metric 11: Fee Waivers by the Manager
+
+What it is: Manager voluntarily waives fees to prevent the distribution from being cut. Direct signal of NII pressure.
+
+Where to find it: MD&A section, Related Party Transactions note.
+
+Extraction target: Binary flag (fee waiver yes/no) and dollar amount.
+
+Red flag: Any fee waiver is a critical signal.
+
+---
+
+### Metric 12: PIK Loan Percentage of New Originations
+
+What it is: What percentage of newly originated loans include a PIK component. Rising PIK in new deals means deal quality is declining.
+
+Where to find it: MD&A section on portfolio activity, Investment Activity tables.
+
+Extraction target: new_PIK_originations_cost / total_new_originations_cost * 100
+
+Red flag thresholds:
+- Watch: > 15% of new originations include PIK
+- Critical: > 25% of new originations include PIK
+
+---
+
+## Supplementary Signals (8-K Monitoring)
+
+For each ticker, poll EDGAR for 8-K filings daily.
+Flag any 8-K with keywords: "distribution," "redemption," "waiver," "investigation,"
+"non-accrual," "asset coverage," "maturity extension," "amendment."
+
+| Event | 8-K Item | Significance |
+|-------|---------|-------------|
+| Distribution cut or suspension | Item 8.01 | Critical |
+| Redemption cap imposed | Item 8.01 | Critical |
+| NAV decline announcement | Item 8.01 | Marks being acknowledged |
+| Amendment to credit facility | Item 1.01 | Covenant stress |
+| Management change | Item 5.02 | Often precedes credit events |
+| Material definitive agreement | Item 1.01 | Fund sales |
+| Government investigation | Item 8.01 | BlackRock TCP is the template |
+
+---
+
+## Scoring System — Red Flag Index
+
+| Metric | Threshold | Points |
+|--------|-----------|--------|
+| PIK income | > 10% | +1 |
+| PIK income | > 15% | +2 cumulative |
+| PIK income QoQ increase | > 3pp | +2 |
+| Non-accrual at cost | > 2% | +1 |
+| Non-accrual at cost | > 3% | +2 cumulative |
+| Non-accrual QoQ increase | > 1.5pp | +2 |
+| Weighted avg mark | < 95% | +1 |
+| Weighted avg mark | < 90% | +2 cumulative |
+| NAV decline quarter | > 2% | +1 |
+| NAV decline quarter | > 4% | +2 cumulative |
+| Asset coverage | < 185% | +1 |
+| Asset coverage | < 170% | +2 cumulative |
+| NII coverage | < 1.05x | +1 |
+| NII coverage | < 1.0x | +2 cumulative |
+| Unrealized depreciation | 2 consecutive quarters | +2 |
+| Unrealized depreciation | 3+ consecutive quarters | +3 cumulative |
+| Any top-15 position | < 70% mark | +2 |
+| Fee waiver detected | Any | +3 |
+| Distribution cut | Any | +4 |
+| Redemption cap imposed | Any | +4 |
+| 8-K investigation notice | Any | +5 |
+
+### Score Interpretation
+
+| Score | Signal | Action |
+|-------|--------|--------|
+| 0-3 | Watch | Monitor quarterly |
+| 4-6 | Elevated Risk | Underweight |
+| 7-9 | High Stress | Short management company stock |
+| 10+ | Distress | Strong short; consider puts |
+
+---
+
+## Trading Signal Generation
+
+### Long Signal — Closed-End Fund Deep Discount Play (FSCO Model)
+- Score 0-3 (clean book)
+- Trading at discount to NAV > 15%
+- Portfolio > 75% senior secured
+- No redemption risk (closed-end, exchange-listed)
+
+FSCO specifically: Score 0-3 with discount > 20% is a strong long.
+The -19% YTD market price decline vs +1.1% NAV return = panic selling unrelated to book quality.
+
+### Short Signal — Management Company (Primary)
+Target: APO, ARES, BX, OWL, BLK
+
+Trigger:
+- Underlying BDC score > 7
+- AND management company stock has not declined proportionally
+- AND one or more of: distribution cut, redemption cap, investigation notice
+
+### Short Signal — BDC (Secondary)
+Target: Any BDC trading at premium to NAV with score > 6
+
+### Pairs Trade
+Long FSCO / Short ARCC or OBDC
+
+---
+
+## Divergence Detection: Public vs. Private Marks
+
+1. BSL comparisons: When a portfolio company has both a BDC loan AND a publicly traded bond, compare marks. If public bond trades at 75 cents and BDC carries its loan at 92 cents, the BDC mark is suspect.
+
+2. Index comparison: Compare weighted average BDC portfolio mark to Morningstar/LSTA US Leveraged Loan Index. If BDC marks are consistently 5+ points above index, the marks are aggressive.
+
+3. CDS spreads: Widening CDS on named portfolio companies against stable BDC marks = divergence signal.
+
+4. Public equity: Severe equity distress in a portfolio company while the BDC loan is marked near par = stress precursor.
+
+---
+
+## Database Schema
+
+CREATE TABLE filings (
+    id INTEGER PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    cik TEXT NOT NULL,
+    filing_type TEXT NOT NULL,
+    period_end DATE NOT NULL,
+    filed_date DATE NOT NULL,
+    accession_number TEXT NOT NULL,
+    raw_html_path TEXT,
+    processed BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE metrics (
+    id INTEGER PRIMARY KEY,
+    filing_id INTEGER REFERENCES filings(id),
+    ticker TEXT NOT NULL,
+    period_end DATE NOT NULL,
+    pik_income DECIMAL,
+    total_investment_income DECIMAL,
+    pik_pct DECIMAL,
+    non_accrual_cost DECIMAL,
+    non_accrual_fair_value DECIMAL,
+    total_portfolio_cost DECIMAL,
+    total_portfolio_fair_value DECIMAL,
+    non_accrual_cost_pct DECIMAL,
+    weighted_avg_mark DECIMAL,
+    nav_per_share DECIMAL,
+    shares_outstanding DECIMAL,
+    asset_coverage_ratio DECIMAL,
+    nii_per_share DECIMAL,
+    distributions_per_share DECIMAL,
+    nii_coverage DECIMAL,
+    unrealized_change DECIMAL,
+    realized_gain_loss DECIMAL,
+    fee_waiver_amount DECIMAL,
+    fee_waiver_flag BOOLEAN DEFAULT FALSE,
+    red_flag_score INTEGER,
+    score_components TEXT,
+    extraction_confidence TEXT,
+    extraction_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE positions (
+    id INTEGER PRIMARY KEY,
+    filing_id INTEGER REFERENCES filings(id),
+    ticker TEXT NOT NULL,
+    period_end DATE NOT NULL,
+    company_name TEXT,
+    investment_type TEXT,
+    cost_basis DECIMAL,
+    fair_value DECIMAL,
+    mark_pct DECIMAL,
+    is_non_accrual BOOLEAN DEFAULT FALSE,
+    is_pik BOOLEAN DEFAULT FALSE,
+    maturity_date DATE,
+    position_rank INTEGER
+);
+
+CREATE TABLE alerts (
+    id INTEGER PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    alert_type TEXT NOT NULL,
+    alert_date DATE NOT NULL,
+    description TEXT,
+    severity TEXT,
+    metric_value DECIMAL,
+    threshold_value DECIMAL,
+    acknowledged BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE eightk_events (
+    id INTEGER PRIMARY KEY,
+    ticker TEXT NOT NULL,
+    filed_date DATE NOT NULL,
+    item_number TEXT,
+    event_type TEXT,
+    description TEXT,
+    raw_text TEXT,
+    flagged BOOLEAN DEFAULT FALSE
+);
+
+---
+
+## Parsing Logic
+
+### Step 1: Document Structure
+- Part I, Item 1: Financial Statements
+- Part I, Item 2: MD&A
+- Part II, Item 1A: Risk Factors
+- Notes to Financial Statements
+
+### Step 2: Text Extraction
+1. Download HTML filing from EDGAR
+2. Parse with BeautifulSoup or lxml
+3. Identify section boundaries using heading text
+4. For tabular data: extract using pandas read_html()
+5. For narrative text: use regex and keyword extraction
+
+### Step 3: Regex Patterns
+
+pik_patterns = [
+    r'payment.{0,5}in.{0,5}kind',
+    r'\bPIK\b',
+    r'PIK interest income',
+    r'accretion of discount',
+    r'deferred interest'
+]
+
+non_accrual_patterns = [
+    r'non.accrual',
+    r'nonaccrual',
+    r'placed on non-accrual',
+    r'non-accruing'
+]
+
+fee_waiver_patterns = [
+    r'waiv(ed|er|ing).{0,30}fee',
+    r'fee.{0,20}waiv',
+    r'voluntarily waived',
+    r'management fee waiver'
+]
+
+coverage_patterns = [
+    r'asset coverage ratio.{0,30}\d+\.?\d*\s*%',
+    r'senior securities coverage.{0,30}\d+\.?\d*\s*%',
+    r'coverage ratio.{0,30}\d+\.?\d*\s*%'
+]
+
+extension_patterns = [
+    r'extend(ed|ing).{0,30}maturit',
+    r'maturit.{0,30}extend',
+    r'amend and extend',
+    r'forbearance'
+]
+
+redemption_patterns = [
+    r'redemption.{0,30}limit(ed|ing|ation)',
+    r'cap(ped|ping).{0,30}redemption',
+    r'repurchase.{0,30}limit',
+    r'withdrawal.{0,30}limit'
+]
+
+### Step 4: Schedule of Investments Parsing
+1. Extract all positions with cost and fair value
+2. Calculate individual marks
+3. Flag positions < 85% mark
+4. Flag positions on non-accrual
+5. Flag positions with PIK notation
+6. Extract maturity dates where available
+7. Rank positions by fair value
+8. Calculate concentration metrics
+
+### Step 5: Validation
+- Does total_fair_value from Schedule match balance sheet?
+- Does calculated nav_per_share match stated NAV?
+- Does pik_income appear in both income statement and schedule footnotes?
+Confidence: high (all pass), medium (2 of 3), low (1 or 0)
+
+---
+
+## Sample Scoreboard Output
+
+PRIVATE CREDIT STRESS SCOREBOARD
+Ticker  Score  PIK%  Non-Acc%  Avg Mark  Coverage  NII Cov  Signal
+TCPC      14   18.2%   4.8%     88.1%    164%      0.87x    CRITICAL SHORT
+MFIC       9   14.1%   3.2%     92.4%    172%      0.94x    HIGH STRESS
+OBDC       6    9.8%   2.1%     94.7%    181%      1.01x    ELEVATED
+ARCC       4    8.2%   1.8%     95.2%    189%      1.08x    WATCH
+FSCO       2    5.1%   0.9%     96.8%    N/A       1.12x    LONG (25% disc)
+BXSL       3    7.4%   1.4%     95.9%    183%      1.03x    WATCH
+
+---
+
+## Implementation Stack
+
+Language:     Python 3.11+
+Storage:      SQLite (dev) / PostgreSQL (production)
+HTTP:         httpx or requests
+HTML parsing: BeautifulSoup4 + lxml
+Table parsing: pandas read_html()
+Scheduling:   APScheduler or cron
+Reporting:    Rich (terminal) + Jinja2 (HTML reports)
+
+Directory structure:
+creditbubble/
+  src/
+    edgar/
+      downloader.py
+      parser.py
+      schedule_parser.py
+    metrics/
+      extractor.py
+      scorer.py
+      divergence.py
+    db/
+      schema.sql
+      models.py
+    reports/
+      scoreboard.py
+      deep_dive.py
+      alerts.py
+    main.py
+  data/
+    raw/
+    db/
+  reports/
+  config.yaml
+  requirements.txt
+
+---
+
+## Phase 1 MVP
+1. EDGAR downloader — last 8 quarters of 10-Qs for all Tier 1 tickers
+2. Parser for 5 metrics: PIK%, non-accrual at cost, weighted avg mark, NAV per share, asset coverage
+3. SQLite storage
+4. Terminal scoreboard report
+5. 8-K daily monitor with keyword flagging
+
+## Phase 2
+6. Full 12-metric extraction
+7. Schedule of Investments position-level parsing
+8. Red Flag Index scoring with history
+9. HTML report generation
+
+## Phase 3
+10. Public vs. private mark divergence detection
+11. Automated alert dispatch
+12. Pairs trade signal generation
+13. Historical backtesting against known stress events
+
+---
+
+## Validation Test Cases
+
+| Event | Ticker | Quarter | Expected Signal |
+|-------|--------|---------|----------------|
+| TCPC 19% NAV cut | TCPC | Q4 2025/Q1 2026 | Score spikes to 10+ |
+| BCRED non-accrual 0.6% to 2.4% | BCRED | Q1 2026 | Non-accrual flag |
+| Ares redemption cap 5% | ARES funds | Q1 2026 | Redemption cap critical alert |
+| Apollo $3B fund sale | APO | Q1 2026 | Material event flag |
+| BlackRock DOJ investigation | BLK/TCPC | May 2026 | Investigation alert +5 points |
+
+---
+
+Document version 1.0 — May 2026. Prepared for Claude Code implementation.
+This system is for informational and research purposes. Not investment advice.
