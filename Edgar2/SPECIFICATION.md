@@ -40,14 +40,19 @@ have, and approve or redirect; the decision is then written back into this file.
   pipeline proves out on a few.
 - Output: a terminal/markdown scoreboard of per-ticker stress scores over time.
 - **EDGAR access: direct REST API via `edgar_client.py`.** No third-party library beyond `requests`.
-  `edgartools` was rejected — it fails to import on Python 3.11.0rc1 (invalid version string in
-  `core.py`) and on Python 3.10 with pandas 2.x (`AttributeError: module 'pandas' has no attribute
-  'DataFrame'`). The direct REST API is equally capable, has no fragile dependencies, and gives
-  explicit rate-limit control (0.12 s gap ≈ 8 req/s). Use `EdgarClient.get_cik(ticker)` for
+  `edgartools` was rejected on **dependency hygiene grounds**: v5.31.5 pulls in ~15 transitive
+  dependencies (httpx, httpxthrottlecache, pyarrow, orjson, stamina, tenacity, …) with opaque
+  rate-limiting behaviour and internal APIs that change between minor versions. The library wraps
+  the same REST endpoints with no data advantage. Note: `edgartools` 5.31.5 *does* import and run
+  on Python 3.10.12 + pandas 2.3.3 — the `AttributeError` failure recorded in earlier notes was
+  not reproduced in Step 1 testing; the rejection stands on dependency grounds, not import failure.
+  The direct REST API is equally capable, has no fragile dependencies, and gives explicit
+  rate-limit control (0.12 s gap ≈ 8 req/s). Use `EdgarClient.get_cik(ticker)` for
   CIK resolution — do not hardcode CIK numbers.
-- **FSCO excluded from Phase 1 pending PO decision.** FSCO does not file 10-Q or 10-K. It is a
-  registered closed-end fund filing N-CEN and N-2 only. It cannot be handled by the standard
-  pipeline without a separate handler.
+- **FSCO excluded from Phase 1.** FSCO does not file 10-Q or 10-K. It is a registered closed-end
+  fund; confirmed filing types: NPORT-P (monthly portfolio, 27 filings), N-CSR (semi-annual
+  shareholder report, 13), N-CSRS (12), N-CEN (8). Zero 10-Q or 10-K on record. Cannot be handled
+  by the standard pipeline without a separate N-CSR parser. Scope deferred to PO decision.
 - **BDC-specific XBRL concepts are not standardized.** Non-accrual and PIK concepts use company-
   specific namespaces (e.g. `arcc:`, `tcpc:`, `bxsl:`). Step 4 (data quality) will resolve
   whether per-ticker concept maps or HTML fallback is the right approach.
@@ -84,7 +89,7 @@ These are the milestones. Each bullet becomes one spike step
 (`bash bin/build_plan.sh Edgar2 spikes`). Resolved answers get written back into the
 Scope / Intent sections above and the bullet annotated `RESOLVED:`.
 
-- **Library discovery** — RESOLVED: Use direct EDGAR REST API via `edgar_client.py` (no edgartools). `edgartools` v5.31.5 fails on Python 3.11.0rc1 (invalid version string) and Python 3.10 + pandas 2.x (AttributeError). Direct REST to `data.sec.gov` is equivalent and stable. Rate limit: 0.12 s gap. All 4 Phase 1 CIKs confirmed. FSCO files N-CSR only — excluded.
+- **Library discovery** — RESOLVED: Use direct EDGAR REST API via `edgar_client.py` (no edgartools). `edgartools` 5.31.5 rejected on dependency hygiene grounds (~15 transitive deps, opaque rate-limiting, no data advantage over direct REST). Note: the previously recorded import failure (`AttributeError` on Python 3.10 + pandas 2.x) did *not* reproduce in Step 1 testing (Python 3.10.12 + pandas 2.3.3) — the rejection reason is dependency hygiene, not import breakage. Direct REST to `data.sec.gov` is equivalent and stable. Rate limit: 0.12 s gap confirmed safe. All 4 Phase 1 CIKs confirmed live. FSCO: zero 10-Q/10-K filings (NPORT-P + N-CSR only) — excluded from standard pipeline.
 - **Connectivity and processing validity** — RESOLVED: Yes. Direct REST fetches 10-Q, 10-K, 8-K for ARCC, MFIC, TCPC. XBRL via `companyfacts` endpoint: 185 us-gaap concepts for ARCC. `NetAssetValuePerShare`, `InvestmentCompanySeniorSecurityIndebtednessAssetCoverageRatio`, `CommonStockDividendsPerShareDeclared` all confirmed with 4+ quarters. Documents: ~24MB iXBRL HTML per 10-Q. FSCO: 0 × 10-Q.
 - **EDGAR client class** — RESOLVED: `edgar_client.py` in build workspace. `get_cik()`, `get_filings()`, `get_document()`, `get_xbrl_facts()`. Rate limit baked in. Only `requests` needed. See `evidence/STEP_3_EDGAR_CLIENT_CLASS.md`.
 - **Data quality and coverage** — RESOLVED: XBRL is the primary extraction path; HTML regex is the fallback for non-accrual only. Coverage across 3 BDCs × 4 quarters: NAV per share 4/4 (standard `us-gaap:NetAssetValuePerShare`); PIK interest income 4/4 (`us-gaap:InterestIncomeOperatingPaidInKind`); unrealized gain/loss 4/4 (various); non-accrual 4/4 for ARCC and MFIC via company-specific XBRL concepts, HTML regex fallback for TCPC (no XBRL concept present). Non-accrual and PIK balance concept names are company-specific — discover per-ticker at first-fetch time, do not hardcode. MFIC also exposes `mfic:PaidInKindBalance` (cumulative PIK capitalized balance) — treat as a first-class signal. FSCO files NPORT-P XML + N-CSR only, no 10-Q — quarterly NAV per share and non-accrual unavailable — FSCO scope deferred to PO. All four original spec CIKs were wrong; corrected table is above.
