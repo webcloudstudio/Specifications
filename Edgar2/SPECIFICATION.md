@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260521 V1 |
+| Version     | 20260525 V2 |
 | Description | A SEC-filing stress-signal pipeline for private-credit BDCs, built under uncertainty via the oneshot2 spike process. |
 | Build Mode  | oneshot2 (decompose by unknown, demo each milestone, reconcile decisions back here) |
 
@@ -36,12 +36,44 @@ have, and approve or redirect; the decision is then written back into this file.
 ## Scope (Phase 1)
 
 - Python, local, SQLite. No web server for the *pipeline itself*.
-- A small target universe to start (e.g. ARCC, MFIC, TCPC, FSCO) — expand only once the
+- A small target universe to start (ARCC, MFIC, TCPC — see FSCO note below) — expand only once the
   pipeline proves out on a few.
 - Output: a terminal/markdown scoreboard of per-ticker stress scores over time.
+- **EDGAR access library: edgartools (v5.31.5+).** MIT license. Built-in rate limiting at 8 req/s
+  (SEC allows 10). Handles 10-Q, 10-K, 8-K retrieval and XBRL parsing. Use `Company(ticker)` —
+  do not hardcode CIK numbers.
+- **FSCO excluded from Phase 1 pending PO decision.** FSCO does not file 10-Q or 10-K. It is a
+  registered closed-end fund filing N-CEN and N-2 only. It cannot be handled by the standard
+  pipeline without a separate handler.
+- **BDC-specific XBRL concepts are not standardized.** Non-accrual and PIK concepts use company-
+  specific namespaces (e.g. `arcc:`, `tcpc:`, `bxsl:`). Step 4 (data quality) will resolve
+  whether per-ticker concept maps or HTML fallback is the right approach.
 
 Out of scope for Phase 1: live trading, real-time 8-K alerting, a hosted UI, the full
 14-ticker universe.
+
+## Confirmed CIK Numbers (all verified against EDGAR 2026-05-25)
+
+| Ticker | Name | CIK |
+|--------|------|-----|
+| ARCC | Ares Capital Corporation | 0001287750 |
+| MFIC | MidCap Financial Investment Corp | 0001278752 |
+| TCPC | BlackRock TCP Capital Corp | 0001370755 |
+| FSCO | FS Credit Opportunities Corp | 0001568194 |
+| OBDC | Blue Owl Capital Corporation | 0001655888 |
+| BXSL | Blackstone Secured Lending Fund | 0001736035 |
+| CGBD | Carlyle Secured Lending | 0001544206 |
+| TPVG | TriplePoint Venture Growth | 0001580345 |
+| APO | Apollo Global Management | 0001858681 |
+| ARES | Ares Management Corp | 0001176948 |
+| BX | Blackstone Inc | 0001393818 |
+| BLK | BlackRock Inc | 0002012383 |
+| OWL | Blue Owl Capital Inc | 0001823945 |
+| KKR | KKR & Co | 0001404912 |
+
+Note: The CIK table in `../Initial_Spec.md` had 8 of 11 entries wrong (cross-assigned between
+tickers). The above are authoritative. The pipeline uses `Company(ticker)` for resolution so
+hardcoded CIKs are reference only.
 
 ## Open Questions
 
@@ -49,7 +81,7 @@ These are the milestones. Each bullet becomes one spike step
 (`bash bin/build_plan.sh Edgar2 spikes`). Resolved answers get written back into the
 Scope / Intent sections above and the bullet annotated `RESOLVED:`.
 
-- **Library discovery** — Which Python EDGAR libraries exist (edgartools, sec-edgar, direct HTTP), what are their capabilities and the SEC rate limits, and which should Edgar2 standardize on? Verify the target tickers' CIK numbers against EDGAR (the v1 spec had 10 of 14 wrong).
+- **Library discovery** — RESOLVED: Use edgartools v5.31.5+. It handles rate limiting (8 req/s), XBRL parsing, and all required form types. `Company(ticker)` resolves CIK automatically — no manual CIK management. All 14 target-ticker CIKs verified and recorded above (8 of 11 spec CIKs were wrong). FSCO does not file 10-Q/10-K; excluded from Phase 1 pending PO decision on whether to build a separate N-CEN handler.
 - **Connectivity and processing validity** — Can we actually fetch real 10-Q/10-K/8-K filings for the starter tickers, respecting rate limits, and store them? Prove it on a few real filings end to end.
 - **EDGAR client class** — Build a small, reusable client wrapper (fetch filings by ticker/form/date, return raw documents) with a worked usage demo, so later steps share one access path.
 - **Data quality and coverage** — For the fetched filings, what is actually parseable? Which target fields (NAV, non-accruals, PIK income, portfolio marks) can be reliably extracted, from XBRL vs HTML, and what is the coverage across tickers and quarters?
