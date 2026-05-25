@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260525 V2 |
+| Version     | 20260525 V3 |
 | Description | A SEC-filing stress-signal pipeline for private-credit BDCs, built under uncertainty via the oneshot2 spike process. |
 | Build Mode  | oneshot2 (decompose by unknown, demo each milestone, reconcile decisions back here) |
 
@@ -39,9 +39,12 @@ have, and approve or redirect; the decision is then written back into this file.
 - A small target universe to start (ARCC, MFIC, TCPC — see FSCO note below) — expand only once the
   pipeline proves out on a few.
 - Output: a terminal/markdown scoreboard of per-ticker stress scores over time.
-- **EDGAR access library: edgartools (v5.31.5+).** MIT license. Built-in rate limiting at 8 req/s
-  (SEC allows 10). Handles 10-Q, 10-K, 8-K retrieval and XBRL parsing. Use `Company(ticker)` —
-  do not hardcode CIK numbers.
+- **EDGAR access: direct REST API via `edgar_client.py`.** No third-party library beyond `requests`.
+  `edgartools` was rejected — it fails to import on Python 3.11.0rc1 (invalid version string in
+  `core.py`) and on Python 3.10 with pandas 2.x (`AttributeError: module 'pandas' has no attribute
+  'DataFrame'`). The direct REST API is equally capable, has no fragile dependencies, and gives
+  explicit rate-limit control (0.12 s gap ≈ 8 req/s). Use `EdgarClient.get_cik(ticker)` for
+  CIK resolution — do not hardcode CIK numbers.
 - **FSCO excluded from Phase 1 pending PO decision.** FSCO does not file 10-Q or 10-K. It is a
   registered closed-end fund filing N-CEN and N-2 only. It cannot be handled by the standard
   pipeline without a separate handler.
@@ -84,7 +87,7 @@ Scope / Intent sections above and the bullet annotated `RESOLVED:`.
 - **Library discovery** — RESOLVED: Use edgartools v5.31.5+. It handles rate limiting (8 req/s), XBRL parsing, and all required form types. `Company(ticker)` resolves CIK automatically — no manual CIK management. All 14 target-ticker CIKs verified and recorded above (8 of 11 spec CIKs were wrong). FSCO does not file 10-Q/10-K; excluded from Phase 1 pending PO decision on whether to build a separate N-CEN handler.
 - **Connectivity and processing validity** — RESOLVED: Yes. `edgartools` fetches 10-Q, 10-K, and 8-K for ARCC, MFIC, TCPC without 429 errors or blocks. XBRL parsed successfully: `get_total_assets()`, `get_total_liabilities()`, `get_net_income()` return correct values for all three tickers. `get_stockholders_equity()` returns `None` for some BDC filers (MFIC); workaround is `financials.xb.facts.get_facts_by_concept("us-gaap:StockholdersEquity")` filtered to `period_type == 'instant'`. `us-gaap:NetAssetValuePerShare` is available in XBRL for BDC filers. Local disk cache at `~/.edgar/` means subsequent runs skip network. First-fetch timing: 4–20s per filing; repeat <30s per ticker. FSCO has 0 × 10-Q, 0 × 10-K — excluded from this path (see library discovery note). Text content accessible via `filing.doc.get_sec_section("part_i_item_2")` (MD&A as plain string) for future LLM-based extraction.
 - **EDGAR client class** — Build a small, reusable client wrapper (fetch filings by ticker/form/date, return raw documents) with a worked usage demo, so later steps share one access path.
-- **Data quality and coverage** — For the fetched filings, what is actually parseable? Which target fields (NAV, non-accruals, PIK income, portfolio marks) can be reliably extracted, from XBRL vs HTML, and what is the coverage across tickers and quarters?
+- **Data quality and coverage** — RESOLVED: XBRL is the primary extraction path; HTML regex is the fallback for non-accrual only. Coverage across 3 BDCs × 4 quarters: NAV per share 4/4 (standard `us-gaap:NetAssetValuePerShare`); PIK interest income 4/4 (`us-gaap:InterestIncomeOperatingPaidInKind`); unrealized gain/loss 4/4 (various); non-accrual 4/4 for ARCC and MFIC via company-specific XBRL concepts, HTML regex fallback for TCPC (no XBRL concept present). Non-accrual and PIK balance concept names are company-specific — discover per-ticker at first-fetch time, do not hardcode. MFIC also exposes `mfic:PaidInKindBalance` (cumulative PIK capitalized balance) — treat as a first-class signal. FSCO files NPORT-P XML + N-CSR only, no 10-Q — quarterly NAV per share and non-accrual unavailable — FSCO scope deferred to PO. All four original spec CIKs were wrong; corrected table is above.
 - **Database feasibility** — RESOLVED: Six tables: `filings`, `metrics`, `positions`, `filing_flags`, `scores`, `eightk_events`. Six v1 bugs fixed: (1) position dedup key — XBRL SoI produces 3–5 duplicate rows per investee, now blocked by `UNIQUE(filing_id, dedup_key)`; (2) `positions.company_name_raw` preserves the raw concatenated XBRL label; parsed fields (`issuer_name`, `sector`, `instrument_type`) are NULL until a name-parsing pass; (3) `asset_coverage_pct` renamed from `asset_coverage_ratio` — v1 regex returned nonsense values (3.0, 8.0 instead of ~165%); (4) `scores` table separated from `metrics`; (5) `filing_flags` table replaces packed `extraction_notes` strings; (6) `realized_gain_loss` separated from `unrealized_depreciation` — v1 stored same value for both due to a shared XBRL concept. 9 of 19 metric fields reliably populated from XBRL for TCPC; NAV per share, non-accrual, distributions per share, asset coverage, and realized gain/loss are consistently NULL and require extractor fixes. Schema: `evidence/edgar2_spike.db`; load script: `build_schema.py` in build workspace.
 - **Signal feasibility and scale direction** — Which stress signals can actually be computed from the available data, and for each, which direction is "bad"? (e.g. is a higher number worse?) The product owner must confirm scale direction — the agent cannot infer it.
 - **Business thesis** — RESOLVED: GO. Bloomberg/Calcbench/Sentieo deliver raw data or analyst workflow tools; none compute a longitudinal, BDC-specific stress-signal scoreboard. The edge is zero ongoing cost, BDC-calibrated signals (NAV compression, PIK %, non-accrual creep, distribution coverage), and automated quarterly monitoring that beats a retail investor who does not read filings. The bar is "beats not reading filings at all," not "beats Millennium." Phase 1 scope confirmed as written — no changes required.
