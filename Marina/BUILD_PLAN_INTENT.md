@@ -9,7 +9,7 @@
 # Prefix a file line with # to skip it from the build.
 
 ## Foundation
-DATABASE.md (5k)
+DATABASE.md (8k)
 
 ## Marina Lib
 FEATURE-MARINA-LIB.md (3k)
@@ -35,5 +35,13 @@ FEATURE-CATALOG-READ.md (2k)
 ## Project Ops
 FEATURE-PROJECT-OPS.md (5k)
 
+## UI
+SCREEN-SETUP-AWS.md (7k)
+SCREEN-SETUP-GITHUB.md (6k)
+SCREEN-SETUP-PROJECTS.md (9k)
+SCREEN-SETUP-REPOSITORIES.md (7k)
+SCREEN-SETUP-SETTINGS.md (5k)
+SCREEN-SETUP-SUMMARY.md (8k)
+
 ## Voice Capture
-FEATURE-VOICE-CAPTURE.md (3k)
+#FEATURE-VOICE-CAPTURE.md (3k)

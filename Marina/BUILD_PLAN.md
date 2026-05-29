@@ -11,13 +11,13 @@
 
 stack: common.md (7k), python.md (9k)
 rules: CLAUDE_RULES.md, oneshot_build_rules.md
-specifications: DATABASE.md (5k)
+specifications: DATABASE.md (8k)
 context: ARCHITECTURE.md, FUNCTIONALITY.md
 instructions: |
   Build the foundation only — do not implement screens or features yet.
   Create the Flask app factory, SQLite schema (from DATABASE.md), bin/start.sh, bin/common.sh.
   Ensure the /health endpoint returns 200.
-# Estimated prompt: ~49KB  (~12k tokens)
+# Estimated prompt: ~52KB  (~13k tokens)
 
 ## 2: Marina Lib
 
@@ -104,12 +104,17 @@ instructions: |
   Implement routes: —.
 # Estimated prompt: ~31KB  (~8k tokens)
 
-## 10: Voice Capture
+## 10: UI
 
-stack: python_compact.md (5k)
+stack: ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: FEATURE-VOICE-CAPTURE.md (3k)
-context: ARCHITECTURE.md
+specifications: SCREEN-SETUP-AWS.md (7k), SCREEN-SETUP-GITHUB.md (6k), SCREEN-SETUP-PROJECTS.md (9k), SCREEN-SETUP-REPOSITORIES.md (7k), SCREEN-SETUP-SETTINGS.md (5k), SCREEN-SETUP-SUMMARY.md (8k)
+context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
-  Implement routes: —.
-# Estimated prompt: ~29KB  (~7k tokens)
+  Create routes: GET /setup/aws, GET /setup/github, GET /setup/projects, GET /setup/repositories, GET /setup/settings, POST /setup/settings, GET /setup/summary, GET /setup, GET /.
+  Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
+smoke:
+  - curl -sf http://localhost:${PORT}/setup/aws -o /dev/null
+  - curl -sf http://localhost:${PORT}/setup/github -o /dev/null
+  - curl -sf http://localhost:${PORT}/setup/projects -o /dev/null
+# Estimated prompt: ~79KB  (~20k tokens)
