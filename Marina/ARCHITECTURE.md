@@ -55,6 +55,12 @@ SigV4. It is the swap layer that keeps Marina from being welded to AWS.
 Each Lambda is thin (validate → one storage op → respond) per `stack/aws-lambda.md`. Authorisation
 (repo→capability gate) is enforced in a shared module described in `FEATURE-ACCESS-CONTROL.md`.
 
+**Local-plane queue handlers (Plane A).** Some capabilities run only on the box (they touch the
+filesystem) and are dispatched by draining the SQS queue, not by a cloud Lambda. The first is
+`prototyper` — exposing Prototyper's conformance scripts (`ProjectValidate/Update/Initialize/Document`)
+through the AsyncQueue, allow-listed and reported as events (see `FEATURE-PROJECT-OPS.md`). The cloud
+carries only the job request and the result report; no project code runs in the cloud.
+
 ## Directory Layout
 
 The build produces two artifacts: the Lambda/source tree and the Terraform tree. (The `marina` library
