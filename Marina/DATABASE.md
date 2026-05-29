@@ -2,8 +2,8 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260528 V1 |
-| Description | One DynamoDB table per environment holding the whole organization tree — projects, capabilities, heartbeats, events, and access grants — read as subtrees, never joined on the server. |
+| Version     | 20260529 V2 |
+| Description | DynamoDB single-table catalog (cloud) and SQLite local database (UI state, settings, user profile, GitHub cache). |
 
 **Description:** The DynamoDB single-table hierarchical schema and the exact access patterns it serves.
 See `stack/aws-dynamodb.md` for the rules this design follows.
@@ -98,8 +98,99 @@ enabled on the table against the `ttl` attribute, so events self-expire and neve
 30-day window keeps recent debugging history without unbounded growth. Project/capability/heartbeat/ACL
 items carry no `ttl` and persist until overwritten or explicitly removed.
 
+---
+
+## Local Database (SQLite)
+
+The Marina local web UI requires a small SQLite database for configuration, UI state, and GitHub API
+cache. This is separate from DynamoDB — it lives at `data/marina.db` and is gitignored.
+
+### Tables
+
+#### `settings`
+
+Key-value store for application-level configuration.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `key` | TEXT PRIMARY KEY | Setting name |
+| `value` | TEXT | Setting value (empty string for unset) |
+| `updated_at` | TEXT | ISO-8601 timestamp |
+
+Standard keys:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `app_name` | `Marina` | Nav brand label |
+| `app_theme` | `light` | UI theme: `light` \| `dark` |
+| `aws_profile` | `default` | AWS credentials profile name |
+| `marina_org` | `` | DynamoDB partition key (org slug) |
+| `github_username` | `` | GitHub account name for repo browsing |
+
+#### `user_profile`
+
+One row per local installation (single-user). Stores contact information for alert notifications.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | Always 1 — single-row table |
+| `email` | TEXT | Alert notification email address |
+| `cell_phone` | TEXT | SMS alert phone number (E.164 format, optional) |
+| `updated_at` | TEXT | ISO-8601 timestamp |
+
+#### `github_repos`
+
+Cache of GitHub API repo list. Refreshed by `POST /api/repositories/sync`.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `name` | TEXT NOT NULL | Repository slug |
+| `description` | TEXT | One-line description |
+| `html_url` | TEXT | GitHub web URL |
+| `clone_url` | TEXT | HTTPS clone URL |
+| `ssh_url` | TEXT | SSH clone URL |
+| `private` | INTEGER | 0 = public, 1 = private |
+| `pushed_at` | TEXT | ISO-8601 last-push time |
+| `is_downloaded` | INTEGER | 0 = cloud only, 1 = present in `PROJECTS_DIR` |
+| `synced_at` | TEXT | When this row was last fetched from GitHub |
+
+#### `projects`
+
+Local project registry. Populated by the startup scan of `PROJECTS_DIR`.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `name` | TEXT NOT NULL | Directory name (matches `METADATA.md → name`) |
+| `display_name` | TEXT | From `METADATA.md` |
+| `short_description` | TEXT | From `METADATA.md` |
+| `status` | TEXT | From `METADATA.md` (PROTOTYPE, ACTIVE, etc.) |
+| `namespace` | TEXT | From `METADATA.md` |
+| `path` | TEXT | Absolute filesystem path |
+| `git_repo` | TEXT | From `METADATA.md → git_repo` |
+| `is_conformed` | INTEGER | 0/1 — CLAUDE_RULES conformance status |
+| `is_published` | INTEGER | 0/1 — published to Marina DynamoDB catalog |
+| `published_at` | TEXT | ISO-8601 time of last publish |
+| `scan_at` | TEXT | ISO-8601 time of last scan |
+
+#### `platform_stats`
+
+Aggregate counters updated at startup and after scans.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `key` | TEXT PRIMARY KEY | Stat name |
+| `value` | TEXT | Stat value |
+| `updated_at` | TEXT | ISO-8601 |
+
+Standard keys: `github_repo_count`, `scan_projects_total`, `projects_by_state_{status}`, `sync_last_completed`.
+
+---
+
 ## Open Questions
 
 - Heartbeat history is latest-only (`HB#{program}` overwrite) for Phase 1/2. A short ring of
   `HB#{program}#{ulid}` entries would aid post-incident debugging — add only if a real incident shows
   the latest-only view is insufficient.
+- Should `user_profile` support multiple users (team installs) in a future phase? V1: single-row, single-user only.
