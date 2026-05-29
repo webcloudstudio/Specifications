@@ -184,7 +184,7 @@ Aggregate counters updated at startup and after scans.
 | `value` | TEXT | Stat value |
 | `updated_at` | TEXT | ISO-8601 |
 
-Standard keys: `github_repo_count`, `scan_projects_total`, `projects_by_state_{status}`, `sync_last_completed`.
+Standard keys: `github_repo_count`, `scan_projects_total`, `projects_by_state_{status}`, `catalog_last_published`.
 
 ---
 

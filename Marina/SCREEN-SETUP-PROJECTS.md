@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260529 V1 |
+| Version | 20260529 V2 |
 | Route | `GET /setup/projects` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -79,35 +79,29 @@ One row per project in `PROJECTS_DIR`. Sorted by name within namespace.
 
 ### Status Column
 
-**Top badge — CLAUDE_RULES Conformance:**
+**Top badge — Marina Standards:**
 
 | Badge | Meaning |
 |-------|---------|
-| `✅ Conformed` (teal) | CLAUDE_RULES injected; template files up to date. |
-| `⚠ Needs Update` (amber) | Has `METADATA.md` but missing template files or outdated `AGENTS.md`. |
+| `✅ Conformed` (teal) | Project meets Marina standards — Prototyper scripts report clean. |
+| `⚠ Needs Update` (amber) | Has `METADATA.md` but Prototyper reports standards gaps. |
 | `❓ Unknown` (muted) | No `METADATA.md` — cannot assess conformance. |
 
 **Bottom badge — Lifecycle status:**
 
 Standard status pill from `projects.status` (ACTIVE, PROTOTYPE, ARCHIVED, UNKNOWN). Styled per UI-GENERAL status badge colors.
 
-**Cloud Sync indicator** (inline, right of bottom badge):
+**Catalog status indicator** (inline, right of bottom badge):
 
 | State | Display |
 |-------|---------|
-| Published | `☁ Synced` (teal, small) |
+| Published | `☁ Published` (teal, small) |
 | Never published | `☁ —` (muted) |
-| Stale (local newer than last publish) | `☁ Stale` (amber) |
+| Stale (local `METADATA.md` newer than last publish) | `☁ Stale` (amber) |
 
 ### Conform Button
 
-Applies CLAUDE_RULES conformance to a single project.
-
-**What it does:**
-1. Injects latest `CLAUDE_RULES.md` into `AGENTS.md`
-2. Copies missing template files (`common.sh`, `common.py`, `index.html`)
-3. Adds missing `METADATA.md` default fields
-4. Triggers `POST /api/scan` to refresh the project record
+Brings a project up to Marina standards by invoking the Prototyper as an external process. Marina calls `bin/ProjectUpdate.sh {project_path}` (or `bin/ProjectInitialize.sh {project_path}` for UNKNOWN projects) and reports the exit status. The internal logic — what the Prototyper does to the project — is owned by the Prototyper, not by Marina.
 
 | State | Appearance |
 |-------|-----------|
@@ -125,7 +119,7 @@ Publishes the project's `METADATA.md` and capabilities to the Marina DynamoDB ca
 |-------|-----------|
 | Never published | `Publish` (outline primary) |
 | Published and current | `☁ Published` (teal, disabled) |
-| Stale | `Re-publish` (outline amber) |
+| Stale (`METADATA.md` changed since last publish) | `Re-publish` (outline amber) |
 | marina_org not set | Disabled, tooltip: `Set Marina Org on the Summary tab` |
 | MARINA_API_URL not set | Disabled, tooltip: `Deploy Marina API first — see AWS tab` |
 | In progress | Spinner + `Publishing…` (disabled) |
@@ -141,9 +135,9 @@ Above the table: aggregate counts across all visible projects.
 | Metric | Content |
 |--------|---------|
 | Total | Count of projects in `PROJECTS_DIR` |
-| Conformed | Projects with `✅ Conformed` status |
+| Conformed | Projects meeting Marina standards |
 | Needs Update | Projects with `⚠ Needs Update` |
-| Published | Projects with `☁ Synced` status |
+| Published | Projects with `☁ Published` catalog status |
 
 ## Empty State
 

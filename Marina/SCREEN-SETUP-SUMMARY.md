@@ -44,7 +44,7 @@ Single-column, max-width 900px, centered. Two `mn-card` sections: CHECKLIST and 
 │       ⚠️   Prototype              6                         │
 │       📌  Archived               3                         │
 │  📌  Projects NOT Downloaded    24                         │
-│  📌  Cloud Sync Last Completed  2026-05-29 06:05           │
+│  📌  Catalog Last Published      2026-05-29 06:05           │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -105,7 +105,7 @@ Read-only informational card. All rows 📌. Data populated at startup and after
 | 2 | Projects Downloaded | Count of directories in `PROJECTS_DIR` with `METADATA.md` |
 | 3–N | Projects by status | One row per distinct `status` value |
 | N+1 | Projects NOT Downloaded | `github_repo_count` − downloaded count |
-| N+2 | Cloud Sync Last Completed | `platform_stats.sync_last_completed` — `—` if never run |
+| N+2 | Catalog Last Published | `platform_stats.catalog_last_published` — `—` if never published |
 
 ## API
 
