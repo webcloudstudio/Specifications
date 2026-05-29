@@ -26,23 +26,31 @@ onboarding and checked at request time by a shared gate module.
 1. API Gateway has already authenticated the caller (IAM/SigV4); the Lambda reads the principal ARN from
    the request context (`$context.identity.userArn`).
 2. The gate resolves the target `project` from the route/body.
-3. It reads the ACL item `PK=ORG#{org}, SK=PROJECT#{project}#ACL#{principal}` (DATABASE.md pattern 11).
+3. It reads the ACL item `PK=ORG#{org}, SK=PROJECT#{project}#ACL#{principal}` (DATABASE.md pattern 11),
+   served from an **in-process cache keyed by `(org, project, principal)` with a 5-minute TTL**; a miss
+   falls back to `GetItem`. The cache is a latency optimisation only (see ARCHITECTURE.md); a revoked
+   grant stops working within five minutes.
 4. If the grant exists and its `access` covers the requested action (`read` ⊆ `readwrite`), allow;
    otherwise return `403 forbidden`. Org-wide read of the catalog index (project list) is allowed to any
    Org principal; per-project detail and any invoke require a grant.
 
-**Onboarding (`POST /onboard`):**
+**Onboarding (`POST /onboard` — Org-admin only):**
 
-1. A member is added to the AWS Organization (their account/role becomes a valid SigV4 principal).
-2. Onboarding verifies the member's git-repo access (Spike 2: GitHub token check at onboarding time) and,
-   for each repo they can use, writes an ACL grant
+1. `POST /onboard` is restricted to a specific Org-admin principal (its invoke role trusts only the admin
+   ARN). Members cannot grant themselves access; only an admin writes grants.
+2. A member is added to the AWS Organization (their account/role becomes a valid SigV4 principal).
+3. Onboarding verifies the member's git-repo access at onboard time by calling the GitHub REST API with a
+   supplied token (`GET /user/repos?affiliation=owner,collaborator,organization_member`). The token is
+   **used once and never persisted**. For each repo that maps to a Marina project, it writes an ACL grant
    (`PUT PK=ORG#{org}, SK=PROJECT#{project}#ACL#{principal}`, DATABASE.md pattern 12) with `access`
-   derived from repo permission (`read` vs `readwrite`).
-3. The grant records the `repo` it came from so it can be re-derived if repo access changes.
+   derived from the collaborator permission: `admin`/`maintain`/`write` → `readwrite`; `triage`/`read` →
+   `readonly`.
+4. The grant records the `repo` it came from so it can be re-derived if repo access changes.
 
-**Re-derivation:** onboarding (or a periodic re-sync) is the source of truth for grants. The gate itself
-does not call GitHub — it reads the ACL table, keeping per-request latency low and removing a runtime
-GitHub dependency.
+**Re-derivation:** a **nightly scheduled re-sync Lambda** re-derives all grants so they track repo-access
+changes without manual re-onboarding (cheap; keeps grants current). The gate itself never calls GitHub —
+it reads the ACL table (cached), keeping per-request latency low and removing a runtime GitHub
+dependency.
 
 ## Reads
 
@@ -66,9 +74,5 @@ GitHub dependency.
 
 ## Open Questions
 
-- Spike 2: confirm the repo→grant derivation (GitHub token check at onboarding) and whether the gate
-  caches the ACL per warm Lambda for a short TTL to cut DynamoDB reads. Default: direct read, no cache.
-- Should grant re-sync be a scheduled job or only re-run on explicit re-onboard? A nightly re-sync keeps
-  grants current as repo access changes; explicit-only is simpler. Leaning nightly re-sync (cheap).
-- Should `POST /onboard` itself be Org-admin-only (a specific principal), rather than self-serve? Yes —
-  only an Org admin principal may write grants; members cannot grant themselves access.
+- None open. The repo→grant derivation (GitHub token at onboard, never stored), the 5-minute in-process
+  gate cache, the nightly re-sync, and admin-only `POST /onboard` are all settled above.

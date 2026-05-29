@@ -30,7 +30,7 @@ joins and no `Scan`s**.
 | Project | `ORG#{org}` | `PROJECT#{project}` | Identity + metadata |
 | Capability | `ORG#{org}` | `PROJECT#{project}#CAP#{name}` | One per declared capability |
 | Heartbeat | `ORG#{org}` | `PROJECT#{project}#HB#{program}` | Latest state per program (overwritten) |
-| Event | `ORG#{org}` | `PROJECT#{project}#EVT#{ulid}` | Append-only; ULID sorts by time |
+| Event | `ORG#{org}` | `PROJECT#{project}#EVT#{ulid}` | Append-only; ULID sorts by time; carries a `ttl` epoch (30-day expiry) |
 | Access grant | `ORG#{org}` | `PROJECT#{project}#ACL#{principal}` | Repo→capability authorisation (see FEATURE-ACCESS-CONTROL) |
 
 Every item carries `type`, `project`, and `updated_at` (ISO-8601).
@@ -55,7 +55,8 @@ Every item carries `type`, `project`, and `updated_at` (ISO-8601).
 
 { "PK": "ORG#acme", "SK": "PROJECT#market#EVT#01J...ULID",
   "type": "event", "project": "market", "severity": "ERROR",
-  "message": "rate limited by upstream", "updated_at": "2026-05-28T06:04:11Z" }
+  "message": "rate limited by upstream", "updated_at": "2026-05-28T06:04:11Z",
+  "ttl": 1751004251 }
 
 { "PK": "ORG#acme", "SK": "PROJECT#market#ACL#arn:aws:iam::111:user/jane",
   "type": "acl", "project": "market", "principal": "arn:aws:iam::111:user/jane",
@@ -85,12 +86,20 @@ cross-project query (e.g. "all capabilities tagged finance across all projects")
 ## Writes Are Idempotent
 
 Publish overwrites the current projection with `PutItem` guarded by a condition
-(`attribute_not_exists(PK) OR updated_at <= :now`) so concurrent or out-of-order publishers cannot
-regress a newer record. All writes go through `marina.catalog` / `marina.report`.
+(`attribute_not_exists(SK) OR updated_at <= :now`) so concurrent or out-of-order publishers cannot
+regress a newer record. The existence check uses `SK` (the unique key within the partition), not `PK`:
+`attribute_not_exists(PK)` is never true for an item that already exists, so it would silently disable
+the guard. All writes go through `marina.catalog` / `marina.report`.
+
+## Event Retention (TTL)
+
+Event items carry a `ttl` attribute — Unix epoch seconds set to `updated_at + 30 days`. DynamoDB TTL is
+enabled on the table against the `ttl` attribute, so events self-expire and never accumulate cost. The
+30-day window keeps recent debugging history without unbounded growth. Project/capability/heartbeat/ACL
+items carry no `ttl` and persist until overwritten or explicitly removed.
 
 ## Open Questions
 
-- Event retention: cap events per project (e.g. keep last N or TTL-expire after 30 days) to bound item
-  count and read cost? A DynamoDB TTL attribute on event items is the cheap option — decide the window.
-- Should heartbeats keep short history (HB#{program}#{ulid}) or only latest (HB#{program})? Latest-only
-  is cheapest; short history aids debugging. Currently latest-only.
+- Heartbeat history is latest-only (`HB#{program}` overwrite) for Phase 1/2. A short ring of
+  `HB#{program}#{ulid}` entries would aid post-incident debugging — add only if a real incident shows
+  the latest-only view is insufficient.

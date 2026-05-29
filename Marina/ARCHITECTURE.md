@@ -124,9 +124,15 @@ Local clients read `MARINA_ORG`, `MARINA_ENDPOINT`, `MARINA_PROJECT`, and the AW
 environment (see `stack/marina-library.md`). Lambdas read `TABLE_NAME`, `QUEUE_URL`, `SHARE_BUCKET`, and
 `LOG_LEVEL` from Terraform-set environment variables (no `.env` in Lambda).
 
+## Authorisation Gate Caching
+
+The shared gate caches each ACL grant **in-process per warm Lambda with a 5-minute TTL** (keyed by
+`org, project, principal`), falling back to a DynamoDB `GetItem` on miss. At PAY_PER_REQUEST a grant
+read costs a fraction of a cent, so the cache is purely a latency optimisation (a cold `GetItem` adds
+2–8 ms). The 5-minute window bounds staleness: a revoked grant stops working within five minutes, which
+is acceptable because onboarding is admin-controlled and revocations are deliberate and infrequent.
+
 ## Open Questions
 
-- Should the shared authorisation module call DynamoDB on every request, or cache the repo→capability
-  ACL in-process per warm Lambda for a short TTL? (Performance vs. freshness — see Spike 2 in IDEAS.md.)
 - Should `health_read` compute aggregate health in the Lambda, or store a precomputed aggregate item on
   each heartbeat write? Precomputing simplifies the read but adds a write step.

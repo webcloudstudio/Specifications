@@ -61,7 +61,7 @@ mar.share.put(local_path, key=None) / get(key, dest) / list(prefix=None)        
 
 ## Open Questions
 
-- Should the library expose a thin `mar.raw` escape hatch for one-off operations not yet wrapped, or is
-  any un-wrapped need a signal to add a proper method? Leaning: no escape hatch — keep the boundary pure.
-- Spike 6: confirm `uv add git+https://.../marina-lib.git@vX.Y.Z` pins cleanly and flows into consumer
-  `uv.lock`; settle the library repo name and release tagging flow.
+- None open. **No `mar.raw` escape hatch** — any un-wrapped need is a signal to add a proper method, so
+  the boundary stays pure. Distribution is settled: the library repo is **`marina-lib`** (installed
+  package name `marina`); `uv add git+https://github.com/{org}/marina-lib.git@vMAJOR.MINOR.PATCH` pins to
+  the exact commit SHA in `uv.lock`, so every `uv sync` is reproducible even if the tag later moves.

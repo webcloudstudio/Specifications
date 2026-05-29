@@ -40,23 +40,17 @@ reads never masquerade as live.
 
 ---
 
-## Spikes (runnable investigations to resolve before/at build)
+## Spikes (resolved)
 
-Each spike is a concrete question the owner can ask to have run, with a decision to follow. They are
-also seeded into the relevant `## Open Questions` sections so the build tooling can surface them.
+Each spike named the file its findings belong to and has been **run and reconciled** into that file
+(per the spike standard in `SPECIFICATION_CONTRACT.md`). Full investigation write-ups are kept in
+`SPIKE_RESULTS.md` as a decision log.
 
-1. **API Gateway IAM/SigV4 across heterogeneous home networks.** Confirm that cross-account AWS
-   Organization principals can invoke an IAM-authorised HTTP API from arbitrary home networks with no
-   public anonymous path. Deliverable: the resource policy + invoke-role trust pattern to encode.
-2. **Repo-access → capability-access binding.** Decide how the "you hold the repo key" signal is
-   captured. Default: an Org-side ACL table in DynamoDB written at onboarding (no per-call GitHub
-   dependency). Spike validates how onboarding verifies repo access (GitHub token check at onboard time)
-   and whether the gate caches the ACL per warm Lambda.
-3. **Terraform remote backend bootstrap.** Validate the local-state `backend/` bootstrap then
-   backend-migrate flow for `foundation/`/`services/`, resolving the chicken-and-egg cleanly.
-4. **DynamoDB single-table schema validation.** Replay every access pattern in `DATABASE.md` against a
-   local DynamoDB (or `moto`) to confirm zero scans and correct `begins_with` subtree reads.
-5. **GitHub Actions OIDC → Org member accounts.** Stand up the OIDC provider + least-privilege deploy
-   role with a repo-scoped trust policy; confirm no static keys are needed.
-6. **`marina` library distribution via `uv`.** Confirm `uv add git+...@tag` pins cleanly and that a
-   version bump flows into consumers via `uv.lock`; settle the library repo name and tagging flow.
+| # | Spike | Target file(s) | Outcome |
+|---|-------|----------------|---------|
+| 1 | API Gateway IAM/SigV4 across home networks | `stack/aws-api-gateway.md`, `stack/marina-library.md` | HTTP API v2 + per-member invoke role; no IP allow-list, no resource policy, REST v1 rejected |
+| 2 | Repo-access → capability-access binding | `FEATURE-ACCESS-CONTROL.md`, `ARCHITECTURE.md` | GitHub token at onboard (never stored); 5-min in-process gate cache; nightly re-sync; admin-only onboard |
+| 3 | Terraform remote backend bootstrap | `stack/terraform.md` | `backend/` stays local; `foundation/`/`services/` init directly to S3 — no migrate step |
+| 4 | DynamoDB single-table schema validation | `DATABASE.md`, `stack/aws-dynamodb.md` | All 12 patterns valid, zero scans; condition uses `attribute_not_exists(SK)`; 30-day event TTL |
+| 5 | GitHub Actions OIDC → Org member accounts | `stack/github-actions.md` | OIDC provider + repo-scoped trust; no static keys |
+| 6 | `marina` library distribution via `uv` | `stack/marina-library.md`, `FEATURE-MARINA-LIB.md` | repo `marina-lib`; `uv add git+...@tag` pins to SHA in lock; no escape hatch |
