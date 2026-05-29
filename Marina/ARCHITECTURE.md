@@ -132,7 +132,13 @@ read costs a fraction of a cent, so the cache is purely a latency optimisation (
 2–8 ms). The 5-minute window bounds staleness: a revoked grant stops working within five minutes, which
 is acceptable because onboarding is admin-controlled and revocations are deliberate and infrequent.
 
+## Health Aggregation
+
+`health_read` computes aggregate health **in the Lambda at read time** from the latest heartbeat and
+recent event items — it does **not** store a precomputed aggregate. Read-time compute keeps the write
+path (heartbeat/event ingest) a single point write, and lets the aggregation rule change without a data
+migration. The read cost is trivial (a small `Query` per project), so the flexibility is free.
+
 ## Open Questions
 
-- Should `health_read` compute aggregate health in the Lambda, or store a precomputed aggregate item on
-  each heartbeat write? Precomputing simplifies the read but adds a write step.
+- None open.

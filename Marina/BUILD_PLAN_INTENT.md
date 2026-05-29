@@ -32,5 +32,8 @@ FEATURE-S3-SHARE.md (2k)
 ## Catalog Read
 FEATURE-CATALOG-READ.md (2k)
 
+## Project Ops
+FEATURE-PROJECT-OPS.md (3k)
+
 ## Voice Capture
 FEATURE-VOICE-CAPTURE.md (3k)
