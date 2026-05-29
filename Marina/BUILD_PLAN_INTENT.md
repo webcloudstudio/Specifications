@@ -15,7 +15,7 @@ DATABASE.md (5k)
 FEATURE-MARINA-LIB.md (3k)
 
 ## Access Control
-FEATURE-ACCESS-CONTROL.md (3k)
+FEATURE-ACCESS-CONTROL.md (4k)
 
 ## Asyncqueue
 FEATURE-ASYNCQUEUE.md (3k)
@@ -33,7 +33,7 @@ FEATURE-S3-SHARE.md (2k)
 FEATURE-CATALOG-READ.md (2k)
 
 ## Project Ops
-FEATURE-PROJECT-OPS.md (3k)
+FEATURE-PROJECT-OPS.md (5k)
 
 ## Voice Capture
 FEATURE-VOICE-CAPTURE.md (3k)
