@@ -7,6 +7,10 @@
 
 ## Features
 
+### Agile Plan Gate (`FEATURE-AgilePlan.md`)
+
+Reads `AGILE_PLAN.md` as the live state database. Parses spikes, stories, and ACs with their inline state. Derives a Kanban board from object states. Shows per-object evidence from the `evidence/` directory. Writes approve/revise/reject decisions back into `AGILE_PLAN.md` atomically — this is the gate that `oneshot2.sh` polls. Supports PO defect entry (adds AC to a ticket and sends it back to `revise`).
+
 ### Configuration Loading (`FEATURE-Config.md`)
 
 Loads `Console/console.json` at startup. Exposes the full configuration at `GET /api/config` and the tab list at `GET /api/tabs`. Validates that the config is well-formed JSON; raises a startup error if not.
