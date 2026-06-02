@@ -2,19 +2,19 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260601 V1 |
+| Version | 20260602 V2 |
 | Route | `GET /setup/aws` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | AWS |
-| Tab Order | 1: Summary · 2: AWS · 3: GitHub · 4: Repositories · 5: Projects · 6: Settings |
-| Description | Step-by-step AWS credential configuration and IAM connectivity check. Configure the AWS profile, region, org slug, and Marina API endpoint. |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
+| Description | Step-by-step AWS credential configuration, IAM connectivity check, and Python connectivity test. Configure the AWS profile, region, and org slug. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/aws |
 
 ## Layout
 
-Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertically: Identity, Organisation, API Endpoint, IAM Check.
+Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertically: Identity, Organisation, Python Connectivity, IAM Check.
 
 ## Collapsible Card Behaviour
 
@@ -32,7 +32,7 @@ Status criteria per card:
 |------|---------|
 | AWS IDENTITY | `aws sts get-caller-identity` returns a valid ARN |
 | ORGANISATION | `marina_org` setting is non-empty |
-| MARINA API ENDPOINT | `MARINA_API_URL` env var is set |
+| PYTHON CONNECTIVITY | boto3 `sts.get_caller_identity()` returns a valid ARN |
 | IAM REACHABILITY CHECK | Same result as AWS IDENTITY (shares the same check) |
 
 ```
@@ -56,19 +56,14 @@ Status criteria per card:
 │     projects are stored under this key. Use a short         │
 │     lowercase slug (e.g. acme, myname, dev-team).           │
 ├──────────────────────────────────────────────────────────────┤
-│  🌐  MARINA API ENDPOINT                                     │
+│  🐍  PYTHON CONNECTIVITY                                     │
 │  ───────────────────────────────────────────────────────── │
-│  Set MARINA_API_URL in .env after deploying Terraform:      │
-│  MARINA_API_URL=https://abc123.execute-api.us-east-1...     │
+│  Tests that Marina's Python process can reach AWS via        │
+│  boto3 using the configured profile and region.             │
+│  This check must pass before Terraform can run.             │
 │                                                              │
-│  Current value:  ⚠️  (not set)                              │
-│                                                              │
-│  Steps to deploy:                                            │
-│  1. cd terraform && terraform init                           │
-│  2. terraform plan -var="org=acme"                          │
-│  3. terraform apply                                          │
-│  4. Copy the api_url output to .env                         │
-│  5. Restart Marina                                           │
+│  Status:  ✅  boto3 connected — arn:aws:iam::111:user/ed    │
+│                              [Test Connection]              │
 ├──────────────────────────────────────────────────────────────┤
 │  ✅  IAM REACHABILITY CHECK                                  │
 │  ───────────────────────────────────────────────────────── │
@@ -107,13 +102,17 @@ Validation: lowercase alphanumeric plus hyphens only (`^[a-z0-9-]+$`). Server re
 
 Static guidance block: explains the org slug is the DynamoDB partition key and that changing it after data exists requires a migration.
 
-## MARINA API ENDPOINT Card
+## PYTHON CONNECTIVITY Card
 
-Read-only display of `MARINA_API_URL` env var status (✅ / ⚠️). No editable field — the URL is set in `.env` because it requires a restart.
+Tests that the Marina Flask process itself can make AWS API calls via boto3. This is separate from the AWS CLI identity check — it confirms that the Python environment, boto3 library, and IAM credentials are all functional together.
 
-Step-by-step Terraform deployment guide rendered as a numbered instruction list. Steps reference the Marina `terraform/` directory.
+`[Test Connection]` triggers `POST /api/setup/aws/check-python`. Result shown inline:
+- ✅ — `boto3 connected — {ARN}` (teal)
+- ❌ — error message with hint (e.g., `NoCredentialsError: Unable to locate credentials`)
 
-A `[Copy MARINA_API_URL env line]` button copies the template string `MARINA_API_URL=<url>` to clipboard once a URL is configured, to ease `.env` editing.
+Static guidance block: explains this check is required for Terraform to run, and that it validates the same profile/region configured above.
+
+The result is persisted in `platform_stats` as `python_aws_ok` (1/0) so the Terraform page can gate on it without re-running the check.
 
 ## IAM REACHABILITY CHECK Card
 
@@ -128,6 +127,7 @@ On failure, shows the exact AWS error message and a link to the AWS tab help gui
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | POST | `/api/setup/aws/check-identity` | — | HTML fragment: identity card content (✅ or ❌) |
+| POST | `/api/setup/aws/check-python` | — | HTML fragment: Python connectivity result (✅ or ❌) |
 | POST | `/api/setup/config` | `key`, `value` | Icon fragment (shared with Summary) |
 
 ## Data Flow
@@ -135,8 +135,9 @@ On failure, shows the exact AWS error message and a link to the AWS tab help gui
 | Reads | Writes |
 |-------|--------|
 | `settings` table (`aws_profile`, `marina_org`) | `settings` table via `/api/setup/config` |
-| `AWS_REGION`, `MARINA_API_URL` (env) | None |
+| `AWS_REGION` (env) | `platform_stats.python_aws_ok` (on check-python) |
 | `aws sts get-caller-identity` (subprocess) | None |
+| boto3 `sts.get_caller_identity()` | None |
 
 ## Open Questions
 

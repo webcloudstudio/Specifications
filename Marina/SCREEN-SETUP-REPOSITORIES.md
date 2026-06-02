@@ -2,13 +2,13 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260529 V1 |
+| Version | 20260602 V2 |
 | Route | `GET /setup/repositories` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Repositories |
-| Tab Order | 1: Summary · 2: AWS · 3: GitHub · 4: Repositories · 5: Projects · 6: Settings |
-| Description | Unified view of GitHub repositories and local projects. Shows which repos have been downloaded and provides one-click cloning. Supports browsing another GitHub user's public repos. |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
+| Description | Unified view of GitHub repositories and local projects across all source accounts. Shows which repos have been downloaded and provides one-click cloning. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/repositories |
 
@@ -37,17 +37,15 @@ Full-width. Action bar at top, repo table below.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  [↻ Refresh]   [🔍 Search repos...]  [👤 Other user: _______ ]│
+│  [↻ Refresh]   [🔍 Search repos...]                            │
 │  ──────────────────────────────────────────────────────────── │
-│  ┌──────────┬────────────────────────┬──────────┬────────────┐ │
-│  │ Status   │ Repository             │ Vis      │ Action     │ │
-│  ├──────────┼────────────────────────┼──────────┼────────────┤ │
-│  │ ✅ Local │ my-app                 │ Private  │ [Open ↗]   │ │
-│  │          │ My web application     │          │            │ │
-│  ├──────────┼────────────────────────┼──────────┼────────────┤ │
-│  │ ☁ Cloud  │ old-experiments        │ Private  │ [Download] │ │
-│  │          │ Various experiments    │          │            │ │
-│  └──────────┴────────────────────────┴──────────┴────────────┘ │
+│  ┌──────────┬──────────────────────┬──────────┬────────┬──────┐ │
+│  │ Status   │ Repository           │ Source   │ Vis    │Action│ │
+│  ├──────────┼──────────────────────┼──────────┼────────┼──────┤ │
+│  │ ✅ Local │ my-app               │ wcs      │Private │[Open]│ │
+│  ├──────────┼──────────────────────┼──────────┼────────┼──────┤ │
+│  │ ☁ Cloud  │ old-experiments      │ wcs      │Private │[↓]   │ │
+│  └──────────┴──────────────────────┴──────────┴────────┴──────┘ │
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,18 +53,18 @@ Full-width. Action bar at top, repo table below.
 
 | Control | Behavior |
 |---------|----------|
-| `↻ Refresh` (left) | Re-fetches repo list from GitHub API: `POST /api/repositories/sync`. Updates table via HTMX. Spinner while in progress. |
-| Search input (center) | Client-side filter on repo name and description. Case-insensitive substring. |
-| Other user input (right) | Text input, placeholder `GitHub username…`. Enter or `Fetch` loads that user's public repos (labelled clearly). `✕ Clear` resets to authenticated user's repos. Calls `GET /api/repositories?user={username}`. |
+| `↻ Refresh` (left) | Re-fetches repo list from GitHub API for all source accounts: `POST /api/repositories/sync`. Updates table via HTMX. Spinner while in progress. |
+| Search input (center) | Client-side filter on repo name. Case-insensitive substring. |
 
 ## Repo Table
 
-One row per GitHub repository. Sorted: downloaded repos first (alphabetically), then not-downloaded (alphabetically).
+One row per GitHub repository across all source accounts. Sorted: downloaded repos first (alphabetically), then not-downloaded (alphabetically).
 
 | Column | Source | Notes |
 |--------|--------|-------|
 | Status | `github_repos.is_downloaded` | `✅ Local` (teal) if downloaded; `☁ Cloud` (muted) if not |
-| Repository | `github_repos.name` + `github_repos.description` | Name bold, description muted below (truncated 80 chars). Name links to `github_repos.html_url` (new tab). |
+| Repository | `github_repos.name` | Repo name only — bold, links to `github_repos.html_url` (new tab). No description sub-text. |
+| Source | `github_repos.source_account` | GitHub account/org the repo belongs to. Column omitted entirely if all visible rows share the same source account (single-source installs). |
 | Visibility | `github_repos.private` | `Private` (amber pill) or `Public` (muted pill) |
 | Last pushed | `github_repos.pushed_at` | Relative time (e.g. `3 days ago`) |
 | Action | Derived from `is_downloaded` | See Action Column |
@@ -89,15 +87,6 @@ One row per GitHub repository. Sorted: downloaded repos first (alphabetically), 
 
 Download clones to `{PROJECTS_DIR}/{repo.name}` via SSH, falling back to HTTPS when SSH is unavailable.
 
-## Other User Mode
-
-When the Other User input is populated:
-
-- Banner above table: `Showing public repos for @{username}` (amber background, `✕ Back to my repos` on the right)
-- Only public repos for that user are shown
-- Status column still reflects whether the repo name matches a directory in `PROJECTS_DIR`
-- Download button works (clones to `PROJECTS_DIR`)
-
 ## Empty State
 
 If the authenticated user has no GitHub repos:
@@ -108,8 +97,7 @@ If the authenticated user has no GitHub repos:
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | POST | `/api/repositories/sync` | — | Updated table HTML fragment |
-| GET | `/api/repositories` | — | Table HTML fragment (authenticated user) |
-| GET | `/api/repositories?user={username}` | — | Table HTML fragment (other user, public only) |
+| GET | `/api/repositories` | — | Table HTML fragment (all source accounts) |
 | POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url` | Row status fragment (button states) |
 
 ## Data Flow

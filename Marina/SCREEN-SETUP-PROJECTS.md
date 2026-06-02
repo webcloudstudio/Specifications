@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260529 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/projects` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Projects |
-| Tab Order | 1: Summary · 2: AWS · 3: GitHub · 4: Repositories · 5: Projects · 6: Settings |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
 | Description | Lists all projects discovered in PROJECTS_DIR. Shows CLAUDE_RULES conformance status and cloud catalog sync state. Supports conforming individual projects and publishing them to the Marina DynamoDB catalog. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/projects |

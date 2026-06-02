@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260529 V1 |
+| Version     | 20260602 V2 |
 | Description | Shared UI patterns and conventions across all Marina screens. |
 
 All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
@@ -69,7 +69,7 @@ CSS variables in `static/style.css`:
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | {sub-tab label} · default  ← omit "· default" if not the default |
-| Tab Order | 1: Summary · 2: AWS · 3: GitHub · 4: Repositories · 5: Projects · 6: Settings |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
 | Description | One-sentence description. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /path |
@@ -99,16 +99,20 @@ Fixed. Present on all screens. Background: `--mn-nav-bg`.
 
 ### Sub-Navigation Bar
 
-Shown for the SETUP tab. Background: `--mn-subnav-bg`.
+Shown for the SETUP tab. Background: `--mn-subnav-bg`. Eight tabs always rendered; some may be **disabled** (not hidden) when their prerequisites are unmet.
 
-| Sub-tab | Route | Notes |
-|---------|-------|-------|
-| Summary | `/setup/summary` | Default landing |
-| AWS | `/setup/aws` | |
-| GitHub | `/setup/github` | |
-| Repositories | `/setup/repositories` | |
-| Projects | `/setup/projects` | |
-| Settings | `/setup/settings` | |
+| # | Sub-tab | Route | Disabled when |
+|---|---------|-------|---------------|
+| 1 | Summary | `/setup/summary` | Never — default landing |
+| 2 | AWS | `/setup/aws` | Never |
+| 3 | Terraform | `/setup/terraform` | Never |
+| 4 | GitHub | `/setup/github` | Never |
+| 5 | Git Scan | `/setup/scan` | GitHub not configured (auth ❌ or SSH ❌), or no PROJECTS_DIR |
+| 6 | Repositories | `/setup/repositories` | GitHub not configured, or PROJECTS_DIR not set |
+| 7 | Projects | `/setup/projects` | PROJECTS_DIR not set |
+| 8 | Settings | `/setup/settings` | Never |
+
+**Disabled tab appearance:** muted text (`--mn-muted`), no pointer cursor, `aria-disabled="true"`. Clicking a disabled tab shows a tooltip: `Complete {prerequisite} first.` Do not navigate.
 
 ### Template Structure
 
@@ -119,6 +123,28 @@ Shown for the SETUP tab. Background: `--mn-subnav-bg`.
 | `templates/base.html` | Shell only: includes both partials |
 
 All screen templates extend `base.html` and set `active_section` and `active_page` in route handlers.
+
+---
+
+## Page Header
+
+**MANDATORY on every SETUP screen.** A full-width dark header block rendered below the sub-navigation bar and above the page content.
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│  Marina — {Page Name}               {One-line page description}    │
+│  (32px bold teal)                   (14px muted, right block)      │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+| Element | Spec |
+|---------|------|
+| Background | `--mn-nav-bg` (deep navy `#0f172a`) |
+| Left: page title | `Marina — {Page Name}`. `Marina —` in teal accent (`--mn-accent`), `{Page Name}` in near-white (`--mn-nav-text`). Font: 24px bold. |
+| Right: description | One-line description of what this screen does. 14px, `--mn-muted`. Text block floated/flexed to the far right; not right-justified text alignment — it is a block anchored to the right edge. |
+| Padding | `1rem 1.5rem` |
+
+The **Summary** screen uses this header with title "Marina" (no sub-page suffix) and description "Configure Marina before proceeding." All other screens use "Marina — {Page Name}" where `{Page Name}` matches the sub-tab label.
 
 ---
 

@@ -1,92 +1,99 @@
-# Screen: Setup — Scan
+# Screen: Setup — Git Scan
 
 | Field | Value |
 |-------|-------|
-| Version | 20260601 V1 |
+| Version | 20260602 V2 |
 | Route | `GET /setup/scan` |
 | Parent | — |
 | Main Menu | SETUP |
-| Sub Menu | Scan |
-| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Scans GitHub and the local projects directory to reconcile what is available in the cloud vs what is on disk. Displays project counts by status and triggers a fresh sync. Unlocked after GitHub setup is complete. |
+| Sub Menu | Git Scan |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
+| Description | Scans all configured GitHub source accounts for repositories and reconciles them with local projects. Displays project counts grouped by source account. Unlocked after GitHub is configured and at least one source account has readable repositories. |
 | Depends On | UI-GENERAL.md, SCREEN-SETUP-GITHUB.md |
 | Provides | GET /setup/scan |
 
 ## Purpose
 
-Consolidates the SCAN STATUS block (moved from `/setup/summary`) and the Fetch action (moved from `/setup/repositories`) into a dedicated screen. After a scan, `/setup/repositories` reflects the updated data. This screen is the single entry point for refreshing the GitHub repo list.
+Fetches the repository list from every source account in `github_sources` and reconciles it against projects on disk in `PROJECTS_DIR`. After a scan, the Repositories and Projects tabs reflect the updated data. This screen is the single entry point for refreshing the GitHub repo list.
 
 ## Prerequisites
 
-- GitHub must be configured (GitHub Auth ✅ and GitHub SSH ✅) — enforced by the setup gate.
-- If unconfigured, a notice panel is shown with a link to `/setup/github`.
+- GitHub must be configured (GitHub Auth ✅ and GitHub SSH ✅).
+- At least one source account must have at least one readable repository (enforced by the tab disable gate in UI-GENERAL).
+- PROJECTS_DIR must be set.
+
+If unconfigured, the tab is disabled (not hidden) — see UI-GENERAL tab gates.
 
 ## Layout
 
-Single-column, max-width 900px, centered. Two `mn-card` sections: Scan Control, Scan Status.
+Single-column, max-width 900px, centered. One primary action button, then a results table grouped by source account.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  🔍  SCAN CONTROL                                            │
-│  ─────────────────────────────────────────────────────────  │
-│  Fetches your GitHub repository list and reconciles it       │
-│  with projects on disk in PROJECTS_DIR.                      │
+│  Last scan: 2026-06-01 09:12  (server startup)               │
+│                          [🔄 SCAN GITHUB NOW]                │
 │                                                              │
-│  Last scan:  2026-05-29 06:05  (3 days ago)                 │
-│                                  [🔄 Scan Now]              │
-│                                                              │
-│  ✅  Scan complete — 42 repositories found                   │
-├──────────────────────────────────────────────────────────────┤
-│  📡  SCAN STATUS                                             │
-│  ─────────────────────────────────────────────────────────  │
-│  📌  Projects in GitHub Repo        42                       │
-│  📌  Projects Downloaded            18                       │
-│       ✅  Active                     9                       │
-│       ⚠️   Prototype                  6                       │
-│       📌  Archived                   3                       │
-│  📌  Projects NOT Downloaded        24                       │
-│  📌  Catalog Last Published          2026-05-29 06:05        │
+│  ┌────────────────┬─────────────────┬──────────┬───────────┐ │
+│  │                │ webcloudstudio  │ acme-org │ Other     │ │
+│  ├────────────────┼─────────────────┼──────────┼───────────┤ │
+│  │ Project Count  │       42        │    8     │     5     │ │
+│  │ Git Projects   │       38        │    8     │     0     │ │
+│  │ Conformed      │       21        │    3     │     1     │ │
+│  │ Not Downloaded │       24        │    5     │    n/a    │ │
+│  └────────────────┴─────────────────┴──────────┴───────────┘ │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-## SCAN CONTROL Card
+## Scan Action
 
 | Element | Behaviour |
 |---------|-----------|
-| Last scan timestamp | Read from `platform_stats.last_scan`. Shows relative time alongside absolute. `—` if never scanned. |
-| `[🔄 Scan Now]` | Calls `POST /api/repositories/sync`. Spinner while running. On completion: updates Last scan and refreshes the SCAN STATUS card inline via HTMX. |
+| Last scan timestamp | The time of the most recent scan. Initialised at Marina startup (startup performs a scan if `github_repos` is empty, or always — see Open Questions). Persisted in `platform_stats.last_scan`. Shown as absolute datetime. |
+| `[🔄 SCAN GITHUB NOW]` | `POST /api/repositories/sync`. Spinner while running. On completion refreshes the timestamp and the results table inline via HTMX. |
 
-The button is enabled at all times when GitHub is configured. Re-scanning is always safe.
+The button is always enabled when the tab is accessible.
 
-## SCAN STATUS Card
+## Results Table
 
-Read-only informational card. Data sourced from `platform_stats` and `github_repos` tables, populated at startup and after a Scan. Identical content to the SCAN STATUS card that was on `/setup/summary` (moved here; removed from Summary).
+Displayed after a scan has been run (table is absent before first scan; replaced with "No scan yet — click SCAN GITHUB NOW.").
 
-| # | Item | Source |
-|---|------|--------|
-| 1 | Projects in GitHub Repo | `platform_stats.github_repo_count` |
-| 2 | Projects Downloaded | Count of directories in `PROJECTS_DIR` with `METADATA.md` |
-| 3–N | Projects by status | One row per distinct `status` value in `METADATA.md` files |
-| N+1 | Projects NOT Downloaded | `github_repo_count` − downloaded count |
-| N+2 | Catalog Last Published | `platform_stats.catalog_last_published` — `—` if never published |
+Columns — one per entry in `github_sources`, plus an **Other** column (always last):
+
+| Column | Content |
+|--------|---------|
+| `{source_account}` | Repos fetched from that GitHub account |
+| Other | Projects in `PROJECTS_DIR` whose `git_repo` field is blank, unrecognised, or missing |
+
+Rows — four fixed rows, one per metric:
+
+| Row | Description | Source |
+|-----|-------------|--------|
+| Project Count | Total repositories known for this source | `github_repos` count WHERE `source_account = {col}` |
+| Git Projects | Count of local projects (in `PROJECTS_DIR`) whose `git_repo` matches a repo from this source | `projects.git_repo` JOIN `github_repos` |
+| Conformed | Count of local projects with a valid `METADATA.md` (conformed to Marina standards) | `projects.is_conformed = 1` |
+| Not Downloaded | Repos in `github_repos` for this source that have no matching directory in `PROJECTS_DIR` | `github_repos.is_downloaded = 0` |
+
+**Other column:** For the "Other" column, "Project Count" = count of `projects` with no `git_repo` or a `git_repo` not matching any known source. "Git Projects" and "Not Downloaded" are not applicable (show `—`). "Conformed" = count of those projects with `is_conformed = 1`.
+
+No "Catalog Last Published" row.
 
 ## API
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
-| POST | `/api/repositories/sync` | — | Updated SCAN STATUS card HTML fragment |
-| GET | `/api/setup/scan/status` | — | JSON: `{ last_scan, repo_count, downloaded_count, by_status, not_downloaded, last_published }` |
+| POST | `/api/repositories/sync` | — | Updated scan timestamp + results table HTML fragment |
+| GET | `/api/setup/scan/status` | — | JSON: `{ last_scan, sources: [{ account, repo_count, git_project_count, conformed_count, not_downloaded }], other: { project_count, conformed_count } }` |
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `platform_stats` table | `platform_stats.last_scan` (on sync) |
+| `github_sources` table (column headings) | `platform_stats.last_scan` (on sync) |
 | `github_repos` table | `github_repos` table (upsert on sync) |
+| `projects` table (`git_repo`, `is_conformed`) | None |
 | `PROJECTS_DIR` (env) | None |
-| `settings.github_username` | None |
 
 ## Open Questions
 
-- Should a scheduled auto-scan run at Marina startup? V1: startup populates data if `github_repos` is empty; manual scan otherwise.
-- Should scan results show a diff (new/removed repos since last scan)? V2.
+- Should Marina always run a scan at startup (even if `github_repos` is populated), or only when the table is empty? V1: scan at startup always, persist the startup time as `last_scan`.
+- Should the table show a diff (new/removed repos since last scan)? V2.

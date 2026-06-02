@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260529 V2 |
+| Version     | 20260602 V3 |
 | Description | DynamoDB single-table catalog (cloud) and SQLite local database (UI state, settings, user profile, GitHub cache). |
 
 **Description:** The DynamoDB single-table hierarchical schema and the exact access patterns it serves.
@@ -146,6 +146,7 @@ Cache of GitHub API repo list. Refreshed by `POST /api/repositories/sync`.
 |--------|------|-------|
 | `id` | INTEGER PRIMARY KEY | |
 | `name` | TEXT NOT NULL | Repository slug |
+| `source_account` | TEXT NOT NULL | GitHub account/org this repo belongs to (FK to `github_sources.account`) |
 | `description` | TEXT | One-line description |
 | `html_url` | TEXT | GitHub web URL |
 | `clone_url` | TEXT | HTTPS clone URL |
@@ -154,6 +155,21 @@ Cache of GitHub API repo list. Refreshed by `POST /api/repositories/sync`.
 | `pushed_at` | TEXT | ISO-8601 last-push time |
 | `is_downloaded` | INTEGER | 0 = cloud only, 1 = present in `PROJECTS_DIR` |
 | `synced_at` | TEXT | When this row was last fetched from GitHub |
+
+Unique constraint: `(name, source_account)` — the same repo name can exist under different source accounts.
+
+#### `github_sources`
+
+GitHub accounts and organisations to scan for repositories. Managed from the GitHub tab → Source Accounts card.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `account` | TEXT NOT NULL UNIQUE | GitHub username or org slug |
+| `account_type` | TEXT | `User` or `Org` (detected on add via GitHub API) |
+| `added_at` | TEXT | ISO-8601 timestamp when the source was added |
+
+Seed row: `webcloudstudio` (User) — inserted on first run if no rows exist.
 
 #### `projects`
 
@@ -184,7 +200,7 @@ Aggregate counters updated at startup and after scans.
 | `value` | TEXT | Stat value |
 | `updated_at` | TEXT | ISO-8601 |
 
-Standard keys: `github_repo_count`, `scan_projects_total`, `projects_by_state_{status}`, `catalog_last_published`.
+Standard keys: `github_repo_count`, `scan_projects_total`, `projects_by_state_{status}`, `catalog_last_published`, `last_scan` (ISO-8601 timestamp of most recent Git Scan — set at startup and after manual scan), `python_aws_ok` (1/0 — result of last boto3 connectivity check from the AWS tab).
 
 ---
 

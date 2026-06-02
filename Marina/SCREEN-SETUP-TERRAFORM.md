@@ -2,40 +2,49 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260601 V1 |
+| Version | 20260602 V2 |
 | Route | `GET /setup/terraform` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Terraform |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Guided Terraform deployment for the Marina AWS plane. Runs init, plan, and apply steps sequentially via the infra/foundation scripts, then captures the api_url output into .env. |
+| Description | Guided Terraform deployment for the Marina AWS plane. Terraform is used to configure AWS services dynamically. Runs init, plan, and apply steps sequentially, then captures the api_url output into .env. Includes log viewer and Marina API endpoint status. |
 | Depends On | UI-GENERAL.md, SCREEN-SETUP-AWS.md |
 | Provides | GET /setup/terraform |
 
 ## Purpose
 
-The `/setup/aws` page documents the Terraform deployment steps as static instructions. This screen **executes** them: init → plan → apply. It surfaces real command output, tracks per-step status, and copies `MARINA_API_URL` into `.env` on completion. It also links back to `/setup/aws` for profile and org configuration.
+> **Terraform is used to configure AWS services dynamically.** This screen provisions the Marina AWS plane — API Gateway, Lambda, DynamoDB — in your account without requiring any manual AWS console steps.
+
+The `/setup/aws` page handles identity and Python connectivity. This screen **executes** the Terraform workflow: init → plan → apply. It surfaces real command output, tracks per-step status, and copies `MARINA_API_URL` into `.env` on completion. It also links back to `/setup/aws` for profile and org configuration.
 
 ## Prerequisites
 
 Before this screen is actionable:
-- AWS profile must be valid (`aws sts get-caller-identity` exits 0)
-- `marina_org` must be set
+- Python AWS connectivity must pass (`platform_stats.python_aws_ok = 1`) — from the AWS tab
+- `marina_org` must be set — from the AWS tab
 
 The page renders with a warning panel if either prerequisite is unmet, with links to `/setup/aws`.
 
 ## Layout
 
-Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertically: Prerequisites, Init, Plan, Apply.
+Single-column, max-width 900px, centered. Six `mn-card` sections stacked vertically: Prerequisites, Terraform Install, Init, Plan, Apply, Marina API Endpoint.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  🏗  PREREQUISITES                                           │
 │  ─────────────────────────────────────────────────────────  │
-│  ✅  AWS Identity    arn:aws:iam::111:user/ed                │
-│  ✅  Marina Org      marina                                  │
-│  ✅  Terraform CLI   v1.7.5                                  │
-│  ✅  Infra path      infra/foundation                        │
+│  ✅  Python AWS Connectivity   arn:aws:iam::111:user/ed      │
+│  ✅  Marina Org                marina                        │
+│  ✅  Terraform CLI             v1.7.5                        │
+│  ✅  Infra path                infra/foundation              │
+├──────────────────────────────────────────────────────────────┤
+│  🔧  TERRAFORM INSTALL                                       │
+│  ─────────────────────────────────────────────────────────  │
+│  Installs the Terraform CLI if not already present.         │
+│  Current: ⚠️  Not installed                                 │
+│                              [⬇ Install Terraform]          │
+│  Output:  (streamed install log)                             │
 ├──────────────────────────────────────────────────────────────┤
 │  1️⃣  TERRAFORM INIT                                          │
 │  ─────────────────────────────────────────────────────────  │
@@ -63,6 +72,17 @@ Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertic
 │  ✅  Apply complete.                                         │
 │  api_url = https://abc123.execute-api.us-east-1.amazonaws.com│
 │                 [📋 Copy export line]  [💾 Save to .env]     │
+├──────────────────────────────────────────────────────────────┤
+│  🌐  MARINA API ENDPOINT                                     │
+│  ─────────────────────────────────────────────────────────  │
+│  Current value:  ✅  https://abc123.execute-api.us-east-1…  │
+│  (Set MARINA_API_URL in .env — requires Marina restart)     │
+│  [📋 Copy env line]                                          │
+│                                                              │
+│  📋  TERRAFORM LOGS  [▼ Show last 100 lines]                │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  (collapsible log output from last terraform run)    │   │
+│  └──────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -72,12 +92,29 @@ Checks and displays readiness before any Terraform action is allowed.
 
 | # | Check | Source | Required |
 |---|-------|--------|----------|
-| 1 | AWS Identity | `aws sts get-caller-identity` exit code | Yes — blocks all steps |
+| 1 | Python AWS Connectivity | `platform_stats.python_aws_ok` (set by AWS tab check-python) | Yes — blocks all steps |
 | 2 | Marina Org | `settings.marina_org` | Yes — blocks Apply |
-| 3 | Terraform CLI | `terraform version` subprocess | Yes — blocks all steps |
+| 3 | Terraform CLI | `terraform version` subprocess | Yes — blocks Init/Plan/Apply (Install button available) |
 | 4 | Infra path | Path `infra/foundation/` exists in Marina project root | Yes — blocks all steps |
 
 If any required check is ❌, the affected step cards render as disabled with an inline hint linking to the corrective action.
+
+## TERRAFORM INSTALL Card
+
+Shown when `terraform version` exits non-zero (Terraform CLI not installed). Provides a one-click install path so the user does not need to open a terminal.
+
+`[⬇ Install Terraform]` triggers `POST /api/setup/terraform/install`, which runs the HashiCorp APT install sequence for Ubuntu/WSL2:
+
+```
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update && sudo apt-get install -y terraform
+```
+
+- Output streams in a scrollable `<pre>` block.
+- On exit 0: card shows `✅ Terraform {version} installed`; Install button replaced with `[↻ Re-check]`.
+- On exit non-0: red banner with last 20 lines of output.
+- After successful install, the PREREQUISITES card auto-refreshes to show `✅ Terraform CLI`.
 
 ## TERRAFORM INIT Card
 
@@ -113,15 +150,39 @@ Executes `infra/foundation/tf-apply.sh` via `POST /api/setup/terraform/apply`.
   - After Save: the `/setup/aws` API Endpoint card will show ✅ on next visit (env reloaded on restart).
 - On exit non-0: red banner, last 40 lines of output.
 
+## MARINA API ENDPOINT Card
+
+Read-only display of the current `MARINA_API_URL` env var value. This is the output produced by Terraform Apply and must be saved to `.env` for Marina to reach the cloud plane.
+
+| Element | Behaviour |
+|---------|-----------|
+| Status line | ✅ `{url}` if set; ⚠️ `(not set — run Apply first)` if empty |
+| `[📋 Copy env line]` | Copies `MARINA_API_URL={url}` to clipboard |
+| Reminder | Static note: "Marina requires a restart after `.env` is updated." |
+
+This card is always visible (not collapsed), so the endpoint status is always apparent.
+
+## TERRAFORM LOGS Section
+
+A collapsible block within the MARINA API ENDPOINT card (or directly below Apply). Shows the last N lines of the combined Terraform output (init + plan + apply) from the most recent run.
+
+| Element | Behaviour |
+|---------|-----------|
+| `[▼ Show last 100 lines]` toggle | Expands/collapses the log block. State preserved via Bootstrap collapse. |
+| Log content | Scrollable `<pre>` (max-height 300px), monospace 13px. Read from `data/terraform.log` written by the subprocess runners. |
+| Timestamp | Header line: `Last run: {timestamp}`. `—` if no run in this session. |
+
 ## API
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
-| GET | `/api/setup/terraform/status` | — | JSON: `{ init_ok, plan_ok, apply_ok, api_url }` |
+| GET | `/api/setup/terraform/status` | — | JSON: `{ init_ok, plan_ok, apply_ok, api_url, terraform_version }` |
+| POST | `/api/setup/terraform/install` | — | Streamed text/plain output, then install result fragment |
 | POST | `/api/setup/terraform/init` | — | Streamed text/plain output, then status fragment |
 | POST | `/api/setup/terraform/plan` | — | Streamed text/plain output, then plan summary fragment |
 | POST | `/api/setup/terraform/apply` | — | Streamed text/plain output, then apply result fragment |
 | POST | `/api/setup/terraform/save-env` | `key`, `value` | ✅ confirmation fragment |
+| GET | `/api/setup/terraform/logs` | — | HTML fragment: last 100 lines from `data/terraform.log` |
 
 All POST endpoints run as background subprocesses. Output is streamed via chunked response. Marina must restart after `.env` is written for `MARINA_API_URL` to take effect.
 

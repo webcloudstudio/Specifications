@@ -2,13 +2,13 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260529 V1 |
+| Version | 20260602 V2 |
 | Route | `GET /setup/github` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | GitHub |
-| Tab Order | 1: Summary · 2: AWS · 3: GitHub · 4: Repositories · 5: Projects · 6: Settings |
-| Description | GitHub credential configuration. Set GitHub username, verify CLI authentication, and check SSH key connectivity. Step-by-step guidance for each. |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
+| Description | GitHub credential configuration and scan source management. Set GitHub username, verify CLI authentication, check SSH connectivity, and configure which GitHub accounts to scan repositories from. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/github |
 
@@ -26,7 +26,7 @@ If `github_username` is not set and `gh auth status` fails, the page opens with 
 
 ## Layout
 
-Single-column, max-width 900px, centered. Three `mn-card` sections stacked vertically: Username, Authentication, SSH.
+Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertically: Username, Authentication, SSH, Source Accounts.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -61,6 +61,19 @@ Single-column, max-width 900px, centered. Three `mn-card` sections stacked verti
 │                                                              │
 │  Alternative: use HTTPS with gh auth login (no SSH needed).  │
 │                              [Re-check SSH]                  │
+├──────────────────────────────────────────────────────────────┤
+│  📦  SOURCE ACCOUNTS                                         │
+│  ───────────────────────────────────────────────────────── │
+│  GitHub accounts and organisations to scan for repositories. │
+│  The Git Scan tab fetches repos from all sources listed here.│
+│                                                              │
+│  ┌─────────────────┬────────┬──────────────────────────────┐ │
+│  │ Account         │ Type   │ Actions                      │ │
+│  ├─────────────────┼────────┼──────────────────────────────┤ │
+│  │ webcloudstudio  │ User   │ [Remove]                     │ │
+│  ├─────────────────┼────────┼──────────────────────────────┤ │
+│  │ [ Add account ] │        │ [Add]                        │ │
+│  └─────────────────┴────────┴──────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -99,12 +112,27 @@ HTTPS alternative block (shown when SSH is ❌):
 > **Using HTTPS instead of SSH**
 > If you prefer not to set up SSH keys, `gh auth login` with HTTPS stores credentials for `git clone`. Downloads on the Repositories tab will use HTTPS clones automatically when SSH is unavailable.
 
+## SOURCE ACCOUNTS Card
+
+Lists the GitHub accounts and organisations that the Git Scan will fetch repositories from. The authenticated user's account is always available; additional accounts are managed here.
+
+| Element | Behaviour |
+|---------|-----------|
+| Account list | Rows from `github_sources` table. Each row: account name, type (User/Org), Remove button. |
+| Add input | Text field + `[Add]` button. Calls `POST /api/setup/github/sources`. Validates the account exists on GitHub before saving. |
+| Remove | `DELETE /api/setup/github/sources/{account}`. Confirmation prompt if source has repos in `github_repos`. |
+| Default | `webcloudstudio` is seeded as the default source on first run if the authenticated user is `webcloudstudio`. Otherwise the authenticated GitHub username is used as the initial source. |
+
+Source accounts determine the columns on the Git Scan tab — one column per source, plus an "Other" column for projects without a GitHub repo.
+
 ## API
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | POST | `/api/setup/github/check-auth` | — | Auth card HTML fragment (✅ or ❌) |
 | POST | `/api/setup/github/check-ssh` | — | SSH card HTML fragment (✅ or ❌) |
+| POST | `/api/setup/github/sources` | `account` | Updated source list fragment |
+| DELETE | `/api/setup/github/sources/{account}` | — | Updated source list fragment |
 | POST | `/api/setup/config` | `key`, `value` | Icon fragment (shared with Summary) |
 
 ## Data Flow
@@ -112,6 +140,7 @@ HTTPS alternative block (shown when SSH is ❌):
 | Reads | Writes |
 |-------|--------|
 | `settings` table (`github_username`) | `settings` table via `/api/setup/config` |
+| `github_sources` table | `github_sources` table (add/remove) |
 | `gh auth status` exit code (subprocess) | None |
 | `ssh -T git@github.com` exit code (subprocess) | None |
 

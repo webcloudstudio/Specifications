@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260529 V1 |
+| Version | 20260602 V2 |
 | Route | `GET /setup/settings`, `POST /setup/settings` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Settings |
-| Tab Order | 1: Summary · 2: AWS · 3: GitHub · 4: Repositories · 5: Projects · 6: Settings |
+| Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
 | Description | Application-level configuration and user alert profile. Application name, theme, and user contact information for alert notifications. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/settings, POST /setup/settings |
