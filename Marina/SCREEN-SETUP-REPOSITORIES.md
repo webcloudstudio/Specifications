@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/repositories` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,21 @@
 | Description | Unified view of GitHub repositories and local projects across all source accounts. Shows which repos have been downloaded and provides one-click cloning. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/repositories |
+
+## Header KPIs
+
+Left column of the page header. Component type: **Count Block** (`mn-hdr-count`).
+
+Single count block:
+
+```html
+<div class="mn-hdr-count">
+  <span class="mn-hdr-count__number">{N}</span>
+  <span class="mn-hdr-count__label">Repos</span>
+</div>
+```
+
+N = total row count in `github_repos` across all source accounts. If `github_repos` is empty (never scanned), shows `0` with amber colour override on the number: `color: var(--mn-hdr-warn-bg)`.
 
 ## Unconfigured State
 

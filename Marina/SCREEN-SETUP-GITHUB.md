@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/github` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,16 @@
 | Description | GitHub credential configuration and scan source management. Set GitHub username, verify CLI authentication, check SSH connectivity, and configure which GitHub accounts to scan repositories from. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/github |
+
+## Header KPIs
+
+Left column of the page header. Component type: **Status Chip** (`mn-hdr-chip`).
+
+| State | Chip | Condition |
+|-------|------|-----------|
+| ✅ | `mn-hdr-chip--ok` · "Connected" | `github_username` set AND `gh auth status` ✅ AND SSH ✅ |
+| ⚠️ | `mn-hdr-chip--warn` · "Partial" | `github_username` set BUT auth ❌ or SSH ❌ |
+| ❌ | `mn-hdr-chip--error` · "Not Set Up" | `github_username` not set |
 
 ## Unconfigured State
 

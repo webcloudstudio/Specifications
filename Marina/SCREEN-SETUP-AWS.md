@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/aws` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,16 @@
 | Description | Step-by-step AWS credential configuration, IAM connectivity check, and Python connectivity test. Configure the AWS profile, region, and org slug. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/aws |
+
+## Header KPIs
+
+Left column of the page header. Component type: **Status Chip** (`mn-hdr-chip`).
+
+| State | Chip | Condition |
+|-------|------|-----------|
+| ✅ | `mn-hdr-chip--ok` · "Setup" | `aws_profile` set AND `python_aws_ok = 1` |
+| ⚠️ | `mn-hdr-chip--warn` · "Partial" | `aws_profile` set BUT `python_aws_ok = 0` or untested |
+| ❌ | `mn-hdr-chip--error` · "Not Set Up" | `aws_profile` empty or IAM unreachable |
 
 ## Layout
 

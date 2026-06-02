@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V3 |
+| Version | 20260602 V4 |
 | Route | `GET /setup/projects` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,36 @@
 | Description | Lists all projects discovered in PROJECTS_DIR. Shows CLAUDE_RULES conformance status and cloud catalog sync state. Supports conforming individual projects and publishing them to the Marina DynamoDB catalog. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/projects |
+
+## Header KPIs
+
+Left column of the page header. Component type: two **Count Blocks** (`mn-hdr-count`) separated by a vertical divider.
+
+```html
+<div class="mn-hdr-count">
+  <span class="mn-hdr-count__number">{conformed}</span>
+  <span class="mn-hdr-count__label">Conformed</span>
+</div>
+<div class="mn-hdr-kpi-divider"></div>
+<div class="mn-hdr-count">
+  <span class="mn-hdr-count__number">{total}</span>
+  <span class="mn-hdr-count__label">Total</span>
+</div>
+```
+
+```css
+.mn-hdr-kpi-divider {
+  width: 1px; height: 2rem;
+  background: var(--mn-hdr-muted); opacity: 0.4;
+}
+```
+
+| Value | Source |
+|-------|--------|
+| Conformed | `SELECT COUNT(*) FROM projects WHERE is_conformed = 1` |
+| Total | `SELECT COUNT(*) FROM projects` |
+
+Both counts reflect the currently active namespace filter. Respond to `POST /api/scan` via HTMX fragment update targeting `#header-kpi`.
 
 ## Unconfigured State
 

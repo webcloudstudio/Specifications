@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260602 V3 |
+| Version     | 20260602 V4 |
 | Description | Shared UI patterns and conventions across all Marina screens. |
 
 All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
@@ -138,24 +138,171 @@ All screen templates extend `base.html` and set `active_section` and `active_pag
 
 ## Page Header
 
-**MANDATORY on every SETUP screen.** A full-width dark header block rendered below the sub-navigation bar and above the page content.
+**MANDATORY on every SETUP screen.** A full-width dark header block rendered below the sub-navigation bar and above the page content. The header is always rendered on `--mn-nav-bg` (deep navy `#0f172a`) regardless of the body light/dark theme.
+
+### Three-Column Layout
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│  [icon]  Marina — {Page Name}       {One-line page description}    │
-│          (24px bold)                (14px muted, right block)      │
-└────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│  [KPI BLOCK — left]              [icon] Marina — {Page Name}             │
+│  e.g. ✅ Setup  42 Repos                {One-line description — right}   │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
+
+The header is a flex row: `justify-content: space-between; align-items: center`.
+
+| Column | Width | Content |
+|--------|-------|---------|
+| Left | `auto` | KPI block. Empty `<div>` when the page has no KPIs — the right column still anchors to the right. |
+| Right | `auto` | Icon + title + description block. Always present. |
+
+The **left** column is the KPI area. The **right** column contains `[icon] Marina — {Page Name}` with the description below/right — same visual as before, just moved to the right column.
+
+### Right Column Detail
 
 | Element | Spec |
 |---------|------|
-| Background | `--mn-nav-bg` (deep navy `#0f172a`) |
-| Left: icon | Optional page icon (see Page Icons). 24px, rendered in teal (`--mn-accent`) for Bootstrap Icons / SVG. Inline before the title, 0.5rem gap. |
-| Left: page title | `Marina — {Page Name}`. `Marina —` in teal accent (`--mn-accent`), `{Page Name}` in near-white (`--mn-nav-text`). Font: 24px bold. |
-| Right: description | One-line description of what this screen does. 14px, `--mn-muted`. Text block flexed to the far right; not right-justified text alignment — it is a block anchored to the right edge. |
-| Padding | `1rem 1.5rem` |
+| Icon | Optional. See Page Icons. 24px; Bootstrap Icons via `<i class="bi {class}">`, Simple Icons via `<img>` (white tint `f1f5f9`). 0.5rem gap before title. |
+| Title | `Marina — {Page Name}`. `Marina —` in teal (`--mn-accent`), `{Page Name}` in near-white (`--mn-nav-text`). 24px bold. |
+| Description | One-line description. 14px, `--mn-hdr-muted` (see KPI CSS). Positioned below/right of the title. |
+| Padding | `1rem 1.5rem` on the outer header. |
 
 The **Summary** screen uses title "Marina" (no sub-page suffix) and description "Marina setup overview." All other screens use "Marina — {Page Name}" where `{Page Name}` matches the sub-tab label.
+
+---
+
+## Header KPI CSS
+
+KPI elements live on the always-dark header surface. They use their own CSS variable set, separate from the body theme variables, so they remain legible on `--mn-nav-bg` whether the body is light or dark.
+
+```css
+/* Always dark-surface — do NOT reference --mn-body-bg or Bootstrap body vars here */
+--mn-hdr-text:       #f1f5f9;   /* primary text on dark header */
+--mn-hdr-muted:      #94a3b8;   /* secondary / label text on dark header */
+--mn-hdr-ok-bg:      #0d9488;   /* teal — "setup / all good" chip */
+--mn-hdr-warn-bg:    #d97706;   /* amber — "partial / attention" chip */
+--mn-hdr-error-bg:   #dc2626;   /* red — "not set up / failing" chip */
+--mn-hdr-count-text: #ffffff;   /* count number colour */
+--mn-hdr-count-label:#94a3b8;   /* count label colour */
+--mn-hdr-btn-border: #f1f5f9;   /* ghost action button border on dark */
+```
+
+### KPI Component Types
+
+Four reusable KPI components. Each is a compact inline block. Multiple components sit side-by-side in the left column with `gap: 1.5rem`.
+
+---
+
+#### 1. Status Chip — `mn-hdr-chip`
+
+A rounded-pill badge. Used for "Setup" / "Not Set Up" / "Partial" on pages with a single readiness state.
+
+```html
+<span class="mn-hdr-chip mn-hdr-chip--ok">Setup</span>
+<span class="mn-hdr-chip mn-hdr-chip--warn">Partial</span>
+<span class="mn-hdr-chip mn-hdr-chip--error">Not Set Up</span>
+```
+
+```css
+.mn-hdr-chip {
+  display: inline-block; padding: 0.2rem 0.75rem;
+  border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  color: #fff; letter-spacing: 0.02em;
+}
+.mn-hdr-chip--ok    { background: var(--mn-hdr-ok-bg); }
+.mn-hdr-chip--warn  { background: var(--mn-hdr-warn-bg); }
+.mn-hdr-chip--error { background: var(--mn-hdr-error-bg); }
+```
+
+---
+
+#### 2. Count Block — `mn-hdr-count`
+
+A stacked number + label. Used for repo counts, project counts, etc.
+
+```html
+<div class="mn-hdr-count">
+  <span class="mn-hdr-count__number">42</span>
+  <span class="mn-hdr-count__label">Repos</span>
+</div>
+```
+
+```css
+.mn-hdr-count { display: flex; flex-direction: column; align-items: center; }
+.mn-hdr-count__number { font-size: 1.4rem; font-weight: 700;
+                        color: var(--mn-hdr-count-text); line-height: 1; }
+.mn-hdr-count__label  { font-size: 0.75rem; color: var(--mn-hdr-count-label);
+                        margin-top: 0.1rem; }
+```
+
+Multiple count blocks side-by-side are separated by a 1px `var(--mn-hdr-muted)` vertical divider.
+
+---
+
+#### 3. All-Good Indicator — `mn-hdr-allgood`
+
+Used on Summary and Terraform. Shows overall system health at a glance.
+
+```html
+<!-- All clear -->
+<div class="mn-hdr-allgood mn-hdr-allgood--ok">
+  <i class="bi bi-check-circle-fill"></i>
+  <span>All systems ready</span>
+</div>
+<!-- Attention needed -->
+<div class="mn-hdr-allgood mn-hdr-allgood--warn">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <span>3 items need attention</span>
+</div>
+```
+
+```css
+.mn-hdr-allgood { display: flex; align-items: center; gap: 0.5rem;
+                  font-size: 0.9rem; font-weight: 600; }
+.mn-hdr-allgood i { font-size: 1.2rem; }
+.mn-hdr-allgood--ok   { color: var(--mn-hdr-ok-bg); }
+.mn-hdr-allgood--warn { color: var(--mn-hdr-warn-bg); }
+.mn-hdr-allgood--error { color: var(--mn-hdr-error-bg); }
+```
+
+---
+
+#### 4. Header Action Button — `mn-hdr-btn`
+
+A ghost (outline) button rendered on the dark header surface. Used when the page's primary trigger belongs in the header (e.g. Scan Now). Different from body `btn-mn-*` classes — do not use those inside the header.
+
+```html
+<button class="mn-hdr-btn" hx-post="/api/repositories/sync" ...>
+  <i class="bi bi-arrow-clockwise"></i> Scan GitHub Now
+</button>
+```
+
+```css
+.mn-hdr-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 1rem; border-radius: 6px;
+  border: 1.5px solid var(--mn-hdr-btn-border);
+  background: transparent; color: var(--mn-hdr-text);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+}
+.mn-hdr-btn:hover { background: rgba(255,255,255,0.1); }
+.mn-hdr-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+```
+
+---
+
+### KPI Assignments per Page
+
+| Page | KPI Type | Content | Source |
+|------|----------|---------|--------|
+| Summary | All-Good | ✅ "All systems ready" / ⚠️ "N items need attention" | Count of ❌/⚠️ rows in SETUP STATUS card |
+| AWS | Status Chip | `Setup` / `Partial` / `Not Set Up` | `python_aws_ok` + `aws_profile` |
+| Terraform | All-Good | ✅ "Deployed" / ❌ "Not deployed" | `MARINA_API_URL` set + `endpoint_reachable` |
+| GitHub | Status Chip | `Connected` / `Partial` / `Not Set Up` | `github_username` + auth + SSH |
+| Git Scan | Action Button | `[↻ Scan GitHub Now]` | Button triggers `POST /api/repositories/sync` |
+| Repositories | Count Block | `{N}` · `Repos` | `github_repos` count |
+| Projects | Count Blocks (×2) | `{N}` · `Conformed` + `{N}` · `Total` | `projects.is_conformed` aggregates |
+| Settings | _(none)_ | — | — |
 
 ---
 

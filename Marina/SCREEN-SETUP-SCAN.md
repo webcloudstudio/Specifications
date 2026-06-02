@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/scan` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,18 @@
 | Description | Scans all configured GitHub source accounts for repositories and reconciles them with local projects. Displays project counts grouped by source account. Unlocked after GitHub is configured and at least one source account has readable repositories. |
 | Depends On | UI-GENERAL.md, SCREEN-SETUP-GITHUB.md |
 | Provides | GET /setup/scan |
+
+## Header KPIs
+
+Left column of the page header. Component type: **Header Action Button** (`mn-hdr-btn`).
+
+```html
+<button class="mn-hdr-btn" hx-post="/api/repositories/sync" hx-target="#scan-results" hx-swap="innerHTML">
+  <i class="bi bi-arrow-clockwise"></i> Scan GitHub Now
+</button>
+```
+
+The button is disabled and shows a spinner while a scan is in progress. No timestamp or text label in the header KPI area — only the action button. The last scan time is displayed in the page body below.
 
 ## Purpose
 
@@ -26,12 +38,11 @@ If unconfigured, the tab is disabled (not hidden) — see UI-GENERAL tab gates.
 
 ## Layout
 
-Single-column, max-width 900px, centered. One primary action button, then a results table grouped by source account.
+Single-column, max-width 900px, centered. Last scan timestamp, then the results table. The Scan action button lives in the page header KPI (not repeated here).
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  Last scan: 2026-06-01 09:12  (server startup)               │
-│                          [🔄 SCAN GITHUB NOW]                │
 │                                                              │
 │  ┌────────────────┬─────────────────┬──────────┬───────────┐ │
 │  │                │ webcloudstudio  │ acme-org │ Other     │ │
@@ -46,10 +57,13 @@ Single-column, max-width 900px, centered. One primary action button, then a resu
 
 ## Scan Action
 
+The `[Scan GitHub Now]` button lives in the page header KPI (see Header KPIs). The page body shows the last scan timestamp and results only.
+
 | Element | Behaviour |
 |---------|-----------|
-| Last scan timestamp | The time of the most recent scan. Initialised at Marina startup (startup performs a scan if `github_repos` is empty, or always — see Open Questions). Persisted in `platform_stats.last_scan`. Shown as absolute datetime. |
-| `[🔄 SCAN GITHUB NOW]` | `POST /api/repositories/sync`. Spinner while running. On completion refreshes the timestamp and the results table inline via HTMX. |
+| Last scan timestamp | The time of the most recent scan. Initialised at Marina startup. Persisted in `platform_stats.last_scan`. Shown as absolute datetime with relative label (e.g. `2026-06-01 09:12 · server startup`). Element ID `scan-timestamp`. |
+
+When the header button triggers a scan it targets both `#scan-timestamp` and `#scan-results` via HTMX for independent inline updates.
 
 The button is always enabled when the tab is accessible.
 

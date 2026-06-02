@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/terraform` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,16 @@
 | Description | Guided Terraform deployment for the Marina AWS plane. Terraform is used to configure AWS services dynamically. Runs init, plan, and apply steps sequentially, then captures the api_url output into .env. Includes log viewer and Marina API endpoint status. |
 | Depends On | UI-GENERAL.md, SCREEN-SETUP-AWS.md |
 | Provides | GET /setup/terraform |
+
+## Header KPIs
+
+Left column of the page header. Component type: **All-Good Indicator** (`mn-hdr-allgood`), scoped to AWS plane readiness.
+
+| State | Display | Condition |
+|-------|---------|-----------|
+| ✅ | `bi-check-circle-fill` + "Deployed" (teal) | `MARINA_API_URL` set AND `endpoint_reachable = 1` |
+| ⚠️ | `bi-exclamation-triangle-fill` + "Endpoint unreachable" (amber) | `MARINA_API_URL` set BUT `endpoint_reachable = 0` |
+| ❌ | `bi-exclamation-triangle-fill` + "Not deployed" (red) | `MARINA_API_URL` not set |
 
 ## Purpose
 

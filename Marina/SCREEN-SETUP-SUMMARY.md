@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V3 |
+| Version | 20260602 V4 |
 | Route | `GET /setup/summary`, `GET /setup` (redirect), `GET /` (redirect) |
 | Parent | — |
 | Main Menu | SETUP |
@@ -43,6 +43,18 @@ Single-column, max-width 900px, centered. Page header followed by an optional am
 │              → Go to Settings                              │
 └────────────────────────────────────────────────────────────┘
 ```
+
+## Header KPIs
+
+Left column of the page header. Component type: **All-Good Indicator** (`mn-hdr-allgood`).
+
+| State | Display | Condition |
+|-------|---------|-----------|
+| ✅ | `bi-check-circle-fill` + "All systems ready" (teal) | All 7 tab rows are ✅ |
+| ⚠️ | `bi-exclamation-triangle-fill` + "N items need attention" (amber) | Any row is ⚠️ but none are ❌ |
+| ❌ | `bi-exclamation-triangle-fill` + "N items need attention" (red) | Any row is ❌ |
+
+N = count of rows that are ❌ or ⚠️. Updated via HTMX on page load and on `[↻ Refresh All]`.
 
 ## Page Header
 

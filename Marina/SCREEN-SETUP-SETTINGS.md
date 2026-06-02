@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/settings`, `POST /setup/settings` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -11,6 +11,10 @@
 | Description | Application-level configuration and user alert profile. Application name, theme, and user contact information for alert notifications. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/settings, POST /setup/settings |
+
+## Header KPIs
+
+None. The left KPI column is an empty `<div>` — the right column (icon + title + description) anchors to the right edge as usual.
 
 ## Layout
 
