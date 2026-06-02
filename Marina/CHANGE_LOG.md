@@ -1,3 +1,10 @@
+# SPEC: Change_Log
+
+| Field       | Value |
+|-------------|-------|
+| Version     | (set version) |
+| Description |  |
+
 # CHANGE_LOG.md — Marina
 
 Append-only change log. Format: DATE | TYPE | SCOPE | DESCRIPTION

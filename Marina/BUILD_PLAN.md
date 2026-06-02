@@ -27,7 +27,7 @@ specifications: FEATURE-MARINA-LIB.md (3k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: —.
-# Estimated prompt: ~29KB  (~7k tokens)
+# Estimated prompt: ~30KB  (~7k tokens)
 
 ## 3: Access Control
 
@@ -37,7 +37,7 @@ specifications: FEATURE-ACCESS-CONTROL.md (4k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /onboard.
-# Estimated prompt: ~30KB  (~7k tokens)
+# Estimated prompt: ~31KB  (~7k tokens)
 
 ## 4: Asyncqueue
 
@@ -47,7 +47,7 @@ specifications: FEATURE-ASYNCQUEUE.md (3k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /queue/{queue}.
-# Estimated prompt: ~29KB  (~7k tokens)
+# Estimated prompt: ~30KB  (~7k tokens)
 
 ## 5: Catalog Publish
 
@@ -102,19 +102,28 @@ specifications: FEATURE-PROJECT-OPS.md (5k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: —.
-# Estimated prompt: ~31KB  (~8k tokens)
+# Estimated prompt: ~32KB  (~8k tokens)
 
-## 10: UI
+## 10: SETUP UI
 
 stack: ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: SCREEN-SETUP-AWS.md (7k), SCREEN-SETUP-GITHUB.md (6k), SCREEN-SETUP-PROJECTS.md (9k), SCREEN-SETUP-REPOSITORIES.md (7k), SCREEN-SETUP-SETTINGS.md (5k), SCREEN-SETUP-SUMMARY.md (8k)
+specifications: SCREEN-SETUP-AWS.md (8k), SCREEN-SETUP-GITHUB.md (7k), SCREEN-SETUP-PROJECTS.md (9k), SCREEN-SETUP-REPOSITORIES.md (7k), SCREEN-SETUP-SETTINGS.md (5k), SCREEN-SETUP-SUMMARY.md (8k), SCREEN-SETUP-SCAN.md (5k), SCREEN-SETUP-TERRAFORM.md (8k)
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
-  Create routes: GET /setup/aws, GET /setup/github, GET /setup/projects, GET /setup/repositories, GET /setup/settings, POST /setup/settings, GET /setup/summary, GET /setup, GET /.
+  Create routes: GET /setup/aws, GET /setup/github, GET /setup/projects, GET /setup/repositories, GET /setup/settings, POST /setup/settings, GET /setup/summary, GET /setup, GET /, GET /setup/scan.
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
 smoke:
   - curl -sf http://localhost:${PORT}/setup/aws -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/github -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/projects -o /dev/null
-# Estimated prompt: ~79KB  (~20k tokens)
+# Estimated prompt: ~94KB  (~24k tokens)
+
+## 11: New Specs — place in build order
+
+rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
+specifications: CHANGE_LOG.md (3k)
+context: ARCHITECTURE.md
+instructions: |
+  Implement the specification files for: New Specs — place in build order.
+# Estimated prompt: ~24KB  (~6k tokens)
