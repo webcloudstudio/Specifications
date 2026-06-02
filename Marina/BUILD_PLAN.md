@@ -108,18 +108,33 @@ instructions: |
 
 stack: ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: SCREEN-SETUP-AWS.md (9k), SCREEN-SETUP-GITHUB.md (10k), SCREEN-SETUP-PROJECTS.md (10k), SCREEN-SETUP-REPOSITORIES.md (7k), SCREEN-SETUP-SETTINGS.md (5k), SCREEN-SETUP-SUMMARY.md (8k), SCREEN-SETUP-SCAN.md (6k), SCREEN-SETUP-TERRAFORM.md (13k)
+specifications: SCREEN-SETUP-AWS.md (9k), SCREEN-SETUP-GITHUB.md (10k), SCREEN-SETUP-PROJECTS.md (10k), SCREEN-SETUP-REPOSITORIES.md (7k)
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
-  Create routes: GET /setup/aws, GET /setup/github, GET /setup/projects, GET /setup/repositories, GET /setup/settings, POST /setup/settings, GET /setup/summary, GET /setup, GET /, GET /setup/scan.
+  Create routes: GET /setup/aws, GET /setup/github, GET /setup/projects, GET /setup/repositories.
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
 smoke:
   - curl -sf http://localhost:${PORT}/setup/aws -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/github -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/projects -o /dev/null
-# Estimated prompt: ~118KB  (~30k tokens)
+# Estimated prompt: ~84KB  (~21k tokens)
 
-## 11: New Specs — place in build order
+## 11: SETUP UI2
+
+stack: ui-flask.bootstrap-client.md (7k)
+rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
+specifications: SCREEN-SETUP-SETTINGS.md (5k), SCREEN-SETUP-SUMMARY.md (8k), SCREEN-SETUP-SCAN.md (6k), SCREEN-SETUP-TERRAFORM.md (13k)
+context: ARCHITECTURE.md, UI-GENERAL.md
+instructions: |
+  Create routes: GET /setup/settings, POST /setup/settings, GET /setup/summary, GET /setup, GET /, GET /setup/scan, GET /setup/terraform.
+  Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
+smoke:
+  - curl -sf http://localhost:${PORT}/setup/settings -o /dev/null
+  - curl -sf http://localhost:${PORT}/setup/summary -o /dev/null
+  - curl -sf http://localhost:${PORT}/setup -o /dev/null
+# Estimated prompt: ~81KB  (~20k tokens)
+
+## 12: New Specs — place in build order
 
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
 specifications: CHANGE_LOG.md (3k)
