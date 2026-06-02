@@ -71,6 +71,8 @@ Single inline-editable field. Tab-out triggers save via `POST /api/setup/config`
 - ✅ after save if non-empty.
 - ❌ if empty.
 
+**Auto-derive:** On page load, if `github_username` is not set, Marina reads the upstream remote URL from the local git repository (`git remote get-url origin`) and extracts the username. Parsed value is pre-filled into the field (not saved until user tabs out or edits).
+
 ## AUTHENTICATION Card
 
 Shows the result of `gh auth status` (run server-side). Displays:
@@ -80,6 +82,8 @@ Shows the result of `gh auth status` (run server-side). Displays:
 `[Re-check Auth]` button triggers `POST /api/setup/github/check-auth` and updates the card in place.
 
 When ❌: the step-by-step guide is shown expanded. When ✅: guide is collapsed (hidden by default, expandable via `Show steps again` link).
+
+**Install instruction (Ubuntu / WSL2):** The guide must show `sudo apt install gh` as the first step before `gh auth login`. Do not show brew or other package managers.
 
 ## SSH Card
 

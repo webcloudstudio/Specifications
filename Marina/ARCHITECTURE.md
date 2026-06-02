@@ -132,6 +132,15 @@ read costs a fraction of a cent, so the cache is purely a latency optimisation (
 2–8 ms). The 5-minute window bounds staleness: a revoked grant stops working within five minutes, which
 is acceptable because onboarding is admin-controlled and revocations are deliberate and infrequent.
 
+## Startup Gate
+
+Marina (local Flask app) refuses to start if the working directory is not a git repository with an upstream remote configured. On startup:
+1. Verify `git rev-parse --git-dir` exits 0 — abort with a clear error if not.
+2. Read `git remote get-url origin` — abort if no remote is set.
+3. Extract GitHub username from the remote URL and store in `settings.github_username` if not already set.
+
+This ensures the local control plane is always associated with a real repository, and the GitHub username seed is always available without user intervention.
+
 ## Health Aggregation
 
 `health_read` computes aggregate health **in the Lambda at read time** from the latest heartbeat and
