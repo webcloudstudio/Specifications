@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | (set version) |
+| Version     | 20260602 V1 |
 | Description |  |
 
 # CHANGE_LOG.md — Marina
