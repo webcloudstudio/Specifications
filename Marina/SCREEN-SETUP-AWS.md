@@ -2,7 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V3 |
+| Version | 20260602 V4 |
+| Header Background | `mn-hdr-bg--cloud` |
 | Route | `GET /setup/aws` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -14,13 +15,13 @@
 
 ## Header KPIs
 
-Left column of the page header. Component type: **Status Chip** (`mn-hdr-chip`).
+Left column of the page header. Component type: **Status Light** (`mn-hdr-light`).
 
-| State | Chip | Condition |
-|-------|------|-----------|
-| ✅ | `mn-hdr-chip--ok` · "Setup" | `aws_profile` set AND `python_aws_ok = 1` |
-| ⚠️ | `mn-hdr-chip--warn` · "Partial" | `aws_profile` set BUT `python_aws_ok = 0` or untested |
-| ❌ | `mn-hdr-chip--error` · "Not Set Up" | `aws_profile` empty or IAM unreachable |
+| State | Light | Condition |
+|-------|-------|-----------|
+| ✅ | `mn-hdr-light--ok` (green) | `aws_profile` set AND `python_aws_ok = 1` |
+| ⚠️ | `mn-hdr-light--warn` (amber) | `aws_profile` set BUT `python_aws_ok = 0` or untested |
+| ❌ | `mn-hdr-light--error` (red) | `aws_profile` empty or IAM unreachable |
 
 ## Layout
 

@@ -2,7 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V4 |
+| Version | 20260602 V5 |
+| Header Background | `mn-hdr-bg--summary` |
 | Route | `GET /setup/summary`, `GET /setup` (redirect), `GET /` (redirect) |
 | Parent | — |
 | Main Menu | SETUP |
@@ -18,7 +19,7 @@ Single-column, max-width 900px, centered. Page header followed by an optional am
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  🏠 Marina                    Marina setup overview.        │
+│  [KPI left]          ⚓  Marina          [spacer right]    │
 │  (dark header — see UI-GENERAL Page Header)                │
 ├────────────────────────────────────────────────────────────┤
 │  ⚠ Setup incomplete — configure all items before          │  ← amber, conditional
@@ -27,20 +28,14 @@ Single-column, max-width 900px, centered. Page header followed by an optional am
 │  SETUP STATUS                                              │
 │  ──────────────────────────────────────────────────────── │
 │  [AWS icon]  ✅  AWS               Identity confirmed      │
-│              → Go to AWS                                   │
 │  [TF icon]   ❌  Terraform         Not deployed            │
-│              AWS environment not yet configured.           │
-│              → Go to Terraform                             │
+│              Not deployed — run Terraform to provision.    │
 │  [GH icon]   ✅  GitHub            Connected               │
-│              → Go to GitHub                                │
 │  [scan icon] ⚠️  Git Scan          Never scanned           │
-│              → Go to Git Scan                              │
 │  [dir icon]  ❌  Projects Dir      Not set                 │
-│              [ /home/ed/projects           ] [Save to .env]│
+│              [ /home/ed/projects                        ]  │
 │  [KB icon]   ✅  Repositories      12 available            │
-│              → Go to Repositories                          │
 │  [⚙ icon]   ✅  Settings          Configured              │
-│              → Go to Settings                              │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -89,48 +84,43 @@ Each row shows the aggregate acceptance criteria for that tab. A row is ✅ only
 ### Row Layout
 
 Each row is two lines:
-- **Line 1:** `{icon}  {status-icon}  {Tab Name}    {Status Text}` — right edge: `→ Go to {Tab}` link (navigates to that tab's route)
+- **Line 1:** `{icon}  {status-icon}  {Tab Name}    {Status Text}`
 - **Line 2:** Detail text (muted, indented). Shown only when ❌ or ⚠️. For Projects Dir: replaces line 2 with the editable field (see below).
 
-The `→ Go to {Tab}` link is always shown (even ✅ rows) to allow easy navigation.
+No "→ Go to {Tab}" link — navigation is handled by the sub-tab bar. Do not add per-row navigation links.
 
-### Terraform Row — "AWS Environment Configured"
+### Terraform Row
 
-The Terraform row label on the Summary screen is displayed as **"AWS Environment Configured"** to communicate its meaning to a non-technical user. The link still reads `→ Go to Terraform`.
+The Terraform row label is **"Terraform"**, matching the sub-tab name exactly.
 
 Status text examples:
 - ✅ `Endpoint reachable — https://abc123.execute-api.us-east-1.amazonaws.com`
 - ⚠️ `MARINA_API_URL set but endpoint not responding`
 - ❌ `Not deployed — run Terraform to provision the AWS plane`
 
-### Projects Dir Row — Editable .env Field
+### Projects Dir Row — Inline Editable Field
 
-The Projects Dir row is the only row with an inline editable field. When PROJECTS_DIR is ❌ or ⚠️:
+The Projects Dir row shows an always-visible inline-editable text input (no separate save button). It follows the standard Inline-Editable Fields pattern from UI-GENERAL: tab-out or blur triggers `POST /api/setup/config`.
 
 ```
 [icon]  ❌  Projects Dir     Not set
-            [ /home/ed/projects                        ]  [Save to .env]
-            ⚠ Saving writes PROJECTS_DIR to .env — Marina restart required.
+            [ /home/ed/projects                        ]
 ```
 
-`[Save to .env]` button class: `btn-mn-caution` (amber — writes to .env, requires restart).
-
-On save: `POST /api/setup/env` with `key=PROJECTS_DIR&value={path}`. Server writes the value to `.env` and returns a ⚠️ inline notice: `Saved to .env — restart Marina for the change to take effect.`
-
-The field is always shown on this row (not just when ❌) so the user can update PROJECTS_DIR without navigating to another tab.
+On blur: `POST /api/setup/config` with `key=PROJECTS_DIR&value={path}`. Server writes the value and returns a toast notification. The field is always shown on this row so the user can update PROJECTS_DIR without navigating to another tab.
 
 ## API
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | GET | `/api/setup/summary/status` | — | JSON: `{ rows: [{ tab, status, text, detail }] }` |
-| POST | `/api/setup/env` | `key`, `value` | Confirmation fragment with restart notice |
+| POST | `/api/setup/config` | `key`, `value` | Toast fragment (Projects Dir inline save) |
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `settings` table (`aws_profile`, `github_username`, `app_name`, `marina_org`) | `.env` file via `/api/setup/env` (Projects Dir save only) |
+| `settings` table (`aws_profile`, `github_username`, `app_name`, `marina_org`) | `settings` table via `/api/setup/config` (Projects Dir inline save) |
 | `platform_stats` (`python_aws_ok`, `last_scan`, `github_repo_count`) | None |
 | `PROJECTS_DIR`, `MARINA_API_URL` (env) | None |
 | `github_repos` table (`is_downloaded` count) | None |

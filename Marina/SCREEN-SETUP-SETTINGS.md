@@ -2,7 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V3 |
+| Version | 20260602 V4 |
+| Header Background | `mn-hdr-bg--settings` |
 | Route | `GET /setup/settings`, `POST /setup/settings` |
 | Parent | — |
 | Main Menu | SETUP |

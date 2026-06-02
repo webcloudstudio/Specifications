@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260602 V4 |
+| Version     | 20260602 V5 |
 | Description | Shared UI patterns and conventions across all Marina screens. |
 
 All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
@@ -80,6 +80,7 @@ CSS variables in `static/style.css`:
 | Main Menu | SETUP |
 | Sub Menu | {sub-tab label} · default  ← omit "· default" if not the default |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
+| Header Background | `mn-hdr-bg--default`  ← see Header Background Types |
 | Description | One-sentence description. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /path |
@@ -107,9 +108,20 @@ Fixed. Present on all screens. Background: `--mn-nav-bg`.
 |-----------|--------|----------------|
 | `SETUP` | `/setup/*` | `/setup/summary` |
 
-### Sub-Navigation Bar
+### Sub-Navigation Bar — Tab Groups
 
-Shown for the SETUP tab. Background: `--mn-subnav-bg`. Eight tabs always rendered; some may be **disabled** (not hidden) when their prerequisites are unmet.
+Shown for the SETUP tab. Background: `--mn-subnav-bg`. Eight tabs always rendered, organised into three visual groups separated by a 1px `var(--mn-border)` vertical divider.
+
+| Group | Tabs | Purpose |
+|-------|------|---------|
+| 1 | Summary | Overview — standalone landing |
+| 2 | AWS · Terraform | Cloud infrastructure setup |
+| 3 | GitHub · Git Scan · Repositories · Projects | Source control and projects |
+| 4 | Settings | Application settings |
+
+A 1px `var(--mn-muted)` vertical divider is rendered between each group (not before the first, not after the last). Group separators are purely visual — they do not affect tab behaviour, routing, or ARIA roles.
+
+Some tabs may be **disabled** (not hidden) when their prerequisites are unmet.
 
 | # | Sub-tab | Route | Disabled when |
 |---|---------|-------|---------------|
@@ -144,30 +156,54 @@ All screen templates extend `base.html` and set `active_section` and `active_pag
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  [KPI BLOCK — left]              [icon] Marina — {Page Name}             │
-│  e.g. ✅ Setup  42 Repos                {One-line description — right}   │
+│  [KPI BLOCK — left]           ⚓  Marina                  [spacer]       │
+│                               (large, centered)                           │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-The header is a flex row: `justify-content: space-between; align-items: center`.
+The header is a CSS grid: `grid-template-columns: 1fr auto 1fr; align-items: center`. This guarantees the center column is mathematically centered regardless of KPI width.
 
-| Column | Width | Content |
-|--------|-------|---------|
-| Left | `auto` | KPI block. Empty `<div>` when the page has no KPIs — the right column still anchors to the right. |
-| Right | `auto` | Icon + title + description block. Always present. |
+| Column | Grid | Content |
+|--------|------|---------|
+| Left | `1fr` | KPI block. Empty `<div>` when the page has no KPIs — preserves centering of the title. |
+| Center | `auto` | ⚓ icon + `Marina` title. Always present. See Center Column Detail. |
+| Right | `1fr` | Empty spacer — reserved for future use. |
 
-The **left** column is the KPI area. The **right** column contains `[icon] Marina — {Page Name}` with the description below/right — same visual as before, just moved to the right column.
-
-### Right Column Detail
+### Center Column Detail
 
 | Element | Spec |
 |---------|------|
-| Icon | Optional. See Page Icons. 24px; Bootstrap Icons via `<i class="bi {class}">`, Simple Icons via `<img>` (white tint `f1f5f9`). 0.5rem gap before title. |
-| Title | `Marina — {Page Name}`. `Marina —` in teal (`--mn-accent`), `{Page Name}` in near-white (`--mn-nav-text`). 24px bold. |
-| Description | One-line description. 14px, `--mn-hdr-muted` (see KPI CSS). Positioned below/right of the title. |
+| Icon | Always `bi-anchor` (⚓). 28px. Near-white (`--mn-nav-text`). 0.5rem gap before title. |
+| Title | `Marina`. Near-white (`--mn-nav-text`). 28px bold. No sub-page suffix on any screen — page identity comes from the active sub-tab. |
 | Padding | `1rem 1.5rem` on the outer header. |
 
-The **Summary** screen uses title "Marina" (no sub-page suffix) and description "Marina setup overview." All other screens use "Marina — {Page Name}" where `{Page Name}` matches the sub-tab label.
+> **PROHIBITED:** Do NOT render `Marina — {Page Name}` in the header. Do NOT place the page title in the right column. The title is always just `Marina`, always centered.
+
+---
+
+## Header Background Types
+
+Each screen declares a `Header Background` in its metadata table. The value is a CSS class applied to the outer header `<div>`. This lets each screen type have a distinct visual treatment without changing the layout.
+
+| Class | Background | Use |
+|-------|-----------|-----|
+| `mn-hdr-bg--default` | `--mn-nav-bg` (#0f172a deep navy) | All setup screens — default |
+| `mn-hdr-bg--cloud` | `#0c1a2e` (darker blue-black) | AWS and Terraform screens |
+| `mn-hdr-bg--git` | `#0f1e17` (dark green-black) | GitHub, Git Scan, Repositories, Projects |
+| `mn-hdr-bg--settings` | `#1a1a2e` (dark indigo) | Settings screen |
+| `mn-hdr-bg--summary` | `--mn-nav-bg` (#0f172a deep navy) | Summary screen |
+
+CSS definition in `static/style.css`:
+
+```css
+.mn-hdr-bg--default  { background: var(--mn-nav-bg); }
+.mn-hdr-bg--cloud    { background: #0c1a2e; }
+.mn-hdr-bg--git      { background: #0f1e17; }
+.mn-hdr-bg--settings { background: #1a1a2e; }
+.mn-hdr-bg--summary  { background: var(--mn-nav-bg); }
+```
+
+All backgrounds are dark enough that `--mn-hdr-*` text variables remain legible without adjustment.
 
 ---
 
@@ -267,7 +303,29 @@ Used on Summary and Terraform. Shows overall system health at a glance.
 
 ---
 
-#### 4. Header Action Button — `mn-hdr-btn`
+#### 4. Status Light — `mn-hdr-light`
+
+A solid coloured dot (circle). Used in place of the Status Chip on screens where the KPI is purely a readiness indicator and the label text is not needed. Preferred over Status Chip for Setup screens.
+
+```html
+<div class="mn-hdr-light mn-hdr-light--ok"></div>
+<div class="mn-hdr-light mn-hdr-light--warn"></div>
+<div class="mn-hdr-light mn-hdr-light--error"></div>
+```
+
+```css
+.mn-hdr-light {
+  width: 20px; height: 20px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.mn-hdr-light--ok    { background: var(--mn-hdr-ok-bg);    box-shadow: 0 0 8px var(--mn-hdr-ok-bg); }
+.mn-hdr-light--warn  { background: var(--mn-hdr-warn-bg);  box-shadow: 0 0 8px var(--mn-hdr-warn-bg); }
+.mn-hdr-light--error { background: var(--mn-hdr-error-bg); box-shadow: 0 0 8px var(--mn-hdr-error-bg); }
+```
+
+---
+
+#### 5. Header Action Button — `mn-hdr-btn`
 
 A ghost (outline) button rendered on the dark header surface. Used when the page's primary trigger belongs in the header (e.g. Scan Now). Different from body `btn-mn-*` classes — do not use those inside the header.
 
@@ -296,9 +354,9 @@ A ghost (outline) button rendered on the dark header surface. Used when the page
 | Page | KPI Type | Content | Source |
 |------|----------|---------|--------|
 | Summary | All-Good | ✅ "All systems ready" / ⚠️ "N items need attention" | Count of ❌/⚠️ rows in SETUP STATUS card |
-| AWS | Status Chip | `Setup` / `Partial` / `Not Set Up` | `python_aws_ok` + `aws_profile` |
+| AWS | Status Light | Green / Amber / Red dot | `python_aws_ok` + `aws_profile` |
 | Terraform | All-Good | ✅ "Deployed" / ❌ "Not deployed" | `MARINA_API_URL` set + `endpoint_reachable` |
-| GitHub | Status Chip | `Connected` / `Partial` / `Not Set Up` | `github_username` + auth + SSH |
+| GitHub | Status Light | Green / Amber / Red dot | `github_username` + auth + SSH |
 | Git Scan | Action Button | `[↻ Scan GitHub Now]` | Button triggers `POST /api/repositories/sync` |
 | Repositories | Count Block | `{N}` · `Repos` | `github_repos` count |
 | Projects | Count Blocks (×2) | `{N}` · `Conformed` + `{N}` · `Total` | `projects.is_conformed` aggregates |

@@ -2,7 +2,8 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V3 |
+| Version | 20260602 V4 |
+| Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/github` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -14,13 +15,13 @@
 
 ## Header KPIs
 
-Left column of the page header. Component type: **Status Chip** (`mn-hdr-chip`).
+Left column of the page header. Component type: **Status Light** (`mn-hdr-light`).
 
-| State | Chip | Condition |
-|-------|------|-----------|
-| ✅ | `mn-hdr-chip--ok` · "Connected" | `github_username` set AND `gh auth status` ✅ AND SSH ✅ |
-| ⚠️ | `mn-hdr-chip--warn` · "Partial" | `github_username` set BUT auth ❌ or SSH ❌ |
-| ❌ | `mn-hdr-chip--error` · "Not Set Up" | `github_username` not set |
+| State | Light | Condition |
+|-------|-------|-----------|
+| ✅ | `mn-hdr-light--ok` (green) | `github_username` set AND `gh auth status` ✅ AND SSH ✅ |
+| ⚠️ | `mn-hdr-light--warn` (amber) | `github_username` set BUT auth ❌ or SSH ❌ |
+| ❌ | `mn-hdr-light--error` (red) | `github_username` not set |
 
 ## Unconfigured State
 
