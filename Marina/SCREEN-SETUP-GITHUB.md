@@ -2,14 +2,14 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V4 |
+| Version | 20260602 V5 |
 | Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/github` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | GitHub |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | GitHub credential configuration and scan source management. Set GitHub username, verify CLI authentication, check SSH connectivity, and configure which GitHub accounts to scan repositories from. |
+| Description | GitHub credential configuration and scan source management. Verify CLI authentication, check SSH connectivity, and configure which GitHub accounts and git URLs to scan repositories from. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/github |
 
@@ -25,28 +25,22 @@ Left column of the page header. Component type: **Status Light** (`mn-hdr-light`
 
 ## Unconfigured State
 
-If `github_username` is not set and `gh auth status` fails, the page opens with all three cards in ❌ state and a prominent banner:
+If `gh auth status` fails and no sources are configured, the page opens with all cards in ❌ state and a banner:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  ❌  GitHub is not configured.                               │
-│     Complete the three steps below to enable repository      │
-│     access and project downloads.                            │
+│     Complete the steps below to enable repository access     │
+│     and project downloads.                                   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 ## Layout
 
-Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertically: Username, Authentication, SSH, Source Accounts.
+Single-column, max-width 900px, centered. Three `mn-card` sections: Authentication, SSH, Source Accounts.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  👤  GITHUB USERNAME                                         │
-│  ───────────────────────────────────────────────────────── │
-│  GitHub Username   [ edbarlow                           ▏ ] │
-│  ─────────────────────────────────────────────────────────  │
-│  ✅  Username saved.                                         │
-├──────────────────────────────────────────────────────────────┤
 │  🔐  AUTHENTICATION (GitHub CLI)                             │
 │  ───────────────────────────────────────────────────────── │
 │  Status:  ❌  Not authenticated                             │
@@ -73,29 +67,22 @@ Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertic
 │  Alternative: use HTTPS with gh auth login (no SSH needed).  │
 │                              [Re-check SSH]                  │
 ├──────────────────────────────────────────────────────────────┤
-│  📦  SOURCE ACCOUNTS                                         │
+│  📦  SCAN SOURCES                                            │
 │  ───────────────────────────────────────────────────────── │
-│  GitHub accounts and organisations to scan for repositories. │
+│  GitHub accounts, organisations, or git URLs to scan.        │
 │  The Git Scan tab fetches repos from all sources listed here.│
 │                                                              │
-│  ┌─────────────────┬────────┬──────────────────────────────┐ │
-│  │ Account         │ Type   │ Actions                      │ │
-│  ├─────────────────┼────────┼──────────────────────────────┤ │
-│  │ webcloudstudio  │ User   │ [Remove]                     │ │
-│  ├─────────────────┼────────┼──────────────────────────────┤ │
-│  │ [ Add account ] │        │ [Add]                        │ │
-│  └─────────────────┴────────┴──────────────────────────────┘ │
+│  ┌──────────────────────────────────┬────────┬────────────┐  │
+│  │ Source                           │ Type   │ Actions    │  │
+│  ├──────────────────────────────────┼────────┼────────────┤  │
+│  │ webcloudstudio                   │ User   │ [Remove]   │  │
+│  │ my-org                           │ Org    │ [Remove]   │  │
+│  │ https://github.com/other/repo    │ URL    │ [Remove]   │  │
+│  ├──────────────────────────────────┼────────┼────────────┤  │
+│  │ [ github username, org, or URL ] │        │ [Add]      │  │
+│  └──────────────────────────────────┴────────┴────────────┘  │
 └──────────────────────────────────────────────────────────────┘
 ```
-
-## GITHUB USERNAME Card
-
-Single inline-editable field. Tab-out triggers save via `POST /api/setup/config` with `key=github_username`.
-
-- ✅ after save if non-empty.
-- ❌ if empty.
-
-**Auto-derive:** On page load, if `github_username` is not set, Marina reads the upstream remote URL from the local git repository (`git remote get-url origin`) and extracts the username. Parsed value is pre-filled into the field (not saved until user tabs out or edits).
 
 ## AUTHENTICATION Card
 
@@ -105,7 +92,7 @@ Shows the result of `gh auth status` (run server-side). Displays:
 
 `[Re-check Auth]` button triggers `POST /api/setup/github/check-auth` and updates the card in place.
 
-When ❌: the step-by-step guide is shown expanded. When ✅: guide is collapsed (hidden by default, expandable via `Show steps again` link).
+When ❌: the step-by-step guide is shown expanded. When ✅: guide is collapsed (hidden by default, expandable via `Show steps again` link). The authenticated identity is shown when ✅: `Authenticated as: {user}` (parsed from `gh auth status` output).
 
 **Install instruction (Ubuntu / WSL2):** The guide must show `sudo apt install gh` as the first step before `gh auth login`. Do not show brew or other package managers.
 
@@ -123,18 +110,31 @@ HTTPS alternative block (shown when SSH is ❌):
 > **Using HTTPS instead of SSH**
 > If you prefer not to set up SSH keys, `gh auth login` with HTTPS stores credentials for `git clone`. Downloads on the Repositories tab will use HTTPS clones automatically when SSH is unavailable.
 
-## SOURCE ACCOUNTS Card
+## SCAN SOURCES Card
 
-Lists the GitHub accounts and organisations that the Git Scan will fetch repositories from. The authenticated user's account is always available; additional accounts are managed here.
+Lists the scan sources the Git Scan tab will pull repositories from. A source can be a GitHub username, a GitHub organisation, or any HTTPS git URL (e.g. `https://github.com/other/repo`).
 
 | Element | Behaviour |
 |---------|-----------|
-| Account list | Rows from `github_sources` table. Each row: account name, type (User/Org), Remove button. |
-| Add input | Text field + `[Add]` button. Calls `POST /api/setup/github/sources`. Validates the account exists on GitHub before saving. |
-| Remove | `DELETE /api/setup/github/sources/{account}`. Confirmation prompt if source has repos in `github_repos`. |
-| Default | `webcloudstudio` is seeded as the default source on first run if the authenticated user is `webcloudstudio`. Otherwise the authenticated GitHub username is used as the initial source. |
+| Source list | Rows from `github_sources` table. Each row: source value, type (User / Org / URL), Remove button. |
+| Add input | Text field accepting a GitHub username, org name, or HTTPS git URL. `[Add]` calls `POST /api/setup/github/sources`. Type is auto-detected: URL if the value contains `://`; otherwise Marina attempts to resolve it via the GitHub API to distinguish User from Org. Unresolvable values are saved as type `Unknown`. |
+| Remove | `DELETE /api/setup/github/sources/{id}`. Confirmation prompt if source has repos in `github_repos`. |
+| Default | On first run, Marina reads the upstream remote URL from the local git repository (`git remote get-url origin`), extracts the owner, and seeds it as the initial source. |
 
-Source accounts determine the columns on the Git Scan tab — one column per source, plus an "Other" column for projects without a GitHub repo.
+Type detection rules:
+
+| Input | Detected Type |
+|-------|--------------|
+| Contains `://` (e.g. `https://github.com/org/repo`) | URL |
+| GitHub API `/users/{name}` returns `type: User` | User |
+| GitHub API `/users/{name}` returns `type: Organization` | Org |
+| API unreachable or 404 | Unknown |
+
+Source type determines how the Git Scan fetches repos:
+- **User / Org** — calls the GitHub API: `GET /users/{name}/repos` or `GET /orgs/{name}/repos`
+- **URL** — treats the URL as a single repository to clone/track directly; no API listing
+
+Source rows determine the columns on the Git Scan tab — one column per source, plus an "Other" column.
 
 ## API
 
@@ -142,18 +142,19 @@ Source accounts determine the columns on the Git Scan tab — one column per sou
 |--------|------|------|---------|
 | POST | `/api/setup/github/check-auth` | — | Auth card HTML fragment (✅ or ❌) |
 | POST | `/api/setup/github/check-ssh` | — | SSH card HTML fragment (✅ or ❌) |
-| POST | `/api/setup/github/sources` | `account` | Updated source list fragment |
-| DELETE | `/api/setup/github/sources/{account}` | — | Updated source list fragment |
-| POST | `/api/setup/config` | `key`, `value` | Icon fragment (shared with Summary) |
+| POST | `/api/setup/github/sources` | `source` | Updated source list fragment |
+| DELETE | `/api/setup/github/sources/{id}` | — | Updated source list fragment |
+
+The `github_username` field and `/api/setup/config` endpoint are not used by this screen.
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `settings` table (`github_username`) | `settings` table via `/api/setup/config` |
 | `github_sources` table | `github_sources` table (add/remove) |
-| `gh auth status` exit code (subprocess) | None |
-| `ssh -T git@github.com` exit code (subprocess) | None |
+| `gh auth status` (subprocess) | None |
+| `ssh -T git@github.com` (subprocess) | None |
+| GitHub API `/users/{name}` (type detection on add) | None |
 
 ## Open Questions
 

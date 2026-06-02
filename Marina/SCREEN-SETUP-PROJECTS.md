@@ -2,14 +2,14 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V5 |
+| Version | 20260602 V6 |
 | Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/projects` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Projects |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Lists all projects discovered in PROJECTS_DIR. Shows CLAUDE_RULES conformance status and cloud catalog sync state. Supports conforming individual projects and publishing them to the Marina DynamoDB catalog. |
+| Description | Sortable dashboard of GitHub-enabled project directories. One row per project showing name, conform status from METADATA.md, lifecycle status, and actions. Namespace filter at top. Rescan reads METADATA.md and git status from disk. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/projects |
 
@@ -29,19 +29,15 @@ Left column of the page header. Component type: two **Count Blocks** (`mn-hdr-co
 </div>
 ```
 
-```css
-.mn-hdr-kpi-divider {
-  width: 1px; height: 2rem;
-  background: var(--mn-hdr-muted); opacity: 0.4;
-}
-```
+Both counts reflect the active namespace filter and update on Rescan.
 
-| Value | Source |
-|-------|--------|
-| Conformed | `SELECT COUNT(*) FROM projects WHERE is_conformed = 1` |
-| Total | `SELECT COUNT(*) FROM projects` |
+## What Qualifies as a Project
 
-Both counts reflect the currently active namespace filter. Respond to `POST /api/scan` via HTMX fragment update targeting `#header-kpi`.
+Only directories that are GitHub-enabled are shown. A directory qualifies if:
+1. It contains a `.git/` folder, AND
+2. `git remote get-url origin` returns a URL containing `github.com`
+
+Directories without a `.git` folder, or with a non-GitHub remote, are silently excluded. The Rescan result always reflects the current disk state.
 
 ## Unconfigured State
 
@@ -51,129 +47,113 @@ If `PROJECTS_DIR` is not set or path does not exist:
 ┌──────────────────────────────────────────────────────────────┐
 │  ⚠  Projects directory not configured                        │
 │                                                              │
-│  Set PROJECTS_DIR in .env to point to your projects folder,  │
-│  then restart Marina.                                        │
-│                                                              │
-│  [→ Go to Summary]                                           │
+│  Set PROJECTS_DIR on the Summary tab, then rescan.           │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-If `marina_org` is not set, the project list renders normally but the `Publish` button on each row is disabled with tooltip: `Set Marina Org on the Summary tab to enable cloud publish.`
-
 ## Layout
 
-Full-width. Namespace selector at top, then action bar, then project table.
+Full-width. Namespace filter pills at top, then action bar, then sortable project table. One row per project — no wrapping, no sub-rows.
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│  Namespace:  [All ●]  [development]  [tools]  [experiments]    │
-│  ──────────────────────────────────────────────────────────── │
-│  [🔍 Search projects...]                      [↻ Rescan]       │
-│  ──────────────────────────────────────────────────────────── │
-│  ┌──────────┬───────────┬───────────────────────┬────────────┐ │
-│  │ Status   │ Name      │ Description            │ Actions    │ │
-│  ├──────────┼───────────┼───────────────────────┼────────────┤ │
-│  │ ✅ Conf  │ my-app    │ My web application     │ [✓][Pub ✅]│ │
-│  │ ACTIVE   │           │                        │            │ │
-│  ├──────────┼───────────┼───────────────────────┼────────────┤ │
-│  │ ⚠ Needs  │ old-tool  │ A legacy script runner │ [Conform]  │ │
-│  │ PROTOTYPE│           │                        │ [Publish]  │ │
-│  ├──────────┼───────────┼───────────────────────┼────────────┤ │
-│  │ ❓ Unkn  │ scratch   │ (no METADATA.md)       │ [Conform]  │ │
-│  │ UNKNOWN  │           │                        │            │ │
-│  └──────────┴───────────┴───────────────────────┴────────────┘ │
-└────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  Namespace:  [All ●]  [development]  [production]  [tools]           │
+│  ─────────────────────────────────────────────────────────────────  │
+│  [🔍 Search...]                                        [↻ Rescan]    │
+│  ─────────────────────────────────────────────────────────────────  │
+│  ▲ Name          Conform Status  Status      Namespace   Actions     │
+│  ─────────────────────────────────────────────────────────────────  │
+│    my-app        ✅ Conformed    ACTIVE       dev        [Publish ✅] │
+│    old-tool      ⚠ Needs Update PROTOTYPE    tools      [Conform]   │
+│    scratch       ❓ Unknown      —            —          [Conform]   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Namespace Selector
+## Namespace Filter
 
-Toggle pills above the action bar. Derived from distinct `namespace` values in `PROJECTS_DIR`. `All` is the default. State encoded in `?namespace=` URL param (bookmarkable). Hidden when only one namespace exists.
+Toggle pills immediately above the action bar. Derived from distinct `namespace` values in `PROJECTS_DIR` METADATA.md files. `All` is the default and always present. State encoded in `?namespace=` URL param. Hidden when only one namespace exists.
 
 ## Action Bar
 
-| Control | Behavior |
-|---------|----------|
-| Search input (left) | Client-side filter on project name and description. |
-| `↻ Rescan` (right) | `POST /api/scan`; refreshes project list via HTMX. |
+| Control | Behaviour |
+|---------|-----------|
+| Search input (left) | Client-side filter on project name. Instant — no server call. |
+| `↻ Rescan` (right) | `POST /api/scan` — re-reads METADATA.md and git status for every qualifying directory. Returns updated table fragment via HTMX. |
 
 ## Project Table
 
-One row per project in `PROJECTS_DIR`. Sorted by name within namespace.
+One row per qualifying project. Default sort: Name ascending. Each column header is clickable to sort; active sort column shows ▲ / ▼.
 
-| Column | Source | Notes |
-|--------|--------|-------|
-| Status | Two-line cell: conformance badge (top) + lifecycle status badge (bottom) | See Status Column |
-| Name | `projects.display_name` | Links to the project directory path. Plain text if UNKNOWN. |
-| Namespace | `projects.namespace` | Shown only when `All` namespace is selected. |
-| Description | `projects.short_description` | Truncated at 80 chars. Empty for UNKNOWN. |
-| Actions | Conform button + Publish button | See buttons below |
+| Column | Content | Sortable |
+|--------|---------|---------|
+| Name | `display_name` from METADATA.md; falls back to directory name | Yes |
+| Conform Status | Single badge — see Conform Status below | Yes |
+| Status | Lifecycle status pill from `status:` in METADATA.md | Yes |
+| Namespace | `namespace:` from METADATA.md; `—` if absent | Yes |
+| Actions | Conform button + Publish button | No |
 
-### Status Column
+**One row = one line.** No secondary lines, no expanded detail rows. All information fits inline. Row height matches standard Bootstrap table rows.
 
-**Top badge — Marina Standards:**
+## Conform Status
 
-| Badge | Meaning |
-|-------|---------|
-| `✅ Conformed` (teal) | Project meets Marina standards — Prototyper scripts report clean. |
-| `⚠ Needs Update` (amber) | Has `METADATA.md` but Prototyper reports standards gaps. |
-| `❓ Unknown` (muted) | No `METADATA.md` — cannot assess conformance. |
+Single badge derived from Prototyper validation output. Stored in `projects.conform_status` after each Rescan.
 
-**Bottom badge — Lifecycle status:**
+| Badge | CSS | Meaning |
+|-------|-----|---------|
+| `✅ Conformed` | `mn-badge--ok` (teal) | `bin/ProjectValidate.sh` exits 0 |
+| `⚠ Needs Update` | `mn-badge--warn` (amber) | `bin/ProjectValidate.sh` exits non-0 |
+| `❓ Unknown` | `mn-badge--muted` | No `METADATA.md` in directory |
 
-Standard status pill from `projects.status` (ACTIVE, PROTOTYPE, ARCHIVED, UNKNOWN). Styled per UI-GENERAL status badge colors.
+Rescan re-runs `bin/ProjectValidate.sh` for each project and updates this badge. The badge does not persist between Marina restarts — Rescan is always required on first load.
 
-**Catalog status indicator** (inline, right of bottom badge):
+## Lifecycle Status
 
-| State | Display |
-|-------|---------|
-| Published | `☁ Published` (teal, small) |
-| Never published | `☁ —` (muted) |
-| Stale (local `METADATA.md` newer than last publish) | `☁ Stale` (amber) |
+Status pill from `status:` in METADATA.md. Valid values and colours per UI-GENERAL status badge specification: `ACTIVE`, `PROTOTYPE`, `ARCHIVED`, `IDEA`, `PRODUCTION`. `—` if no METADATA.md.
+
+## Actions Column
+
+Two buttons per row, rendered compactly inline.
 
 ### Conform Button
 
-Brings a project up to Marina standards by invoking the Prototyper as an external process. Marina calls `bin/ProjectUpdate.sh {project_path}` (or `bin/ProjectInitialize.sh {project_path}` for UNKNOWN projects) and reports the exit status. The internal logic — what the Prototyper does to the project — is owned by the Prototyper, not by Marina.
-
 | State | Appearance |
 |-------|-----------|
-| Needs conforming | `Conform` (outline secondary) |
-| Already conformed | `✓ Conformed` (muted, disabled) |
-| In progress | Spinner + `Updating…` (disabled) |
-| Success | `✓ Done` (teal, 2 s) → status updates to `✅ Conformed` without reload |
-| Error | `Failed` (red), inline error below the row |
+| Needs conforming / Unknown | `[Conform]` (outline secondary, small) |
+| Already conformed | `[✓]` (muted icon-only, disabled) |
+| In progress | spinner only (disabled) |
+| Error | `[!]` (red, tooltip shows error) |
+
+On click: `POST /api/projects/{id}/conform`. Marina invokes `bin/ProjectInitialize.sh {project_path}` (Unknown) or `bin/ProjectUpdate.sh {project_path}` (Needs Update). Returns updated row fragment. No page reload.
 
 ### Publish Button
 
-Publishes the project's `METADATA.md` and capabilities to the Marina DynamoDB catalog. Calls `POST /api/projects/{id}/publish` which invokes `marina.catalog.publish()`.
-
 | State | Appearance |
 |-------|-----------|
-| Never published | `Publish` (outline primary) |
-| Published and current | `☁ Published` (teal, disabled) |
-| Stale (`METADATA.md` changed since last publish) | `Re-publish` (outline amber) |
-| marina_org not set | Disabled, tooltip: `Set Marina Org on the Summary tab` |
-| MARINA_API_URL not set | Disabled, tooltip: `Deploy Marina API first — see AWS tab` |
-| In progress | Spinner + `Publishing…` (disabled) |
-| Success | `☁ Published` (teal, 2 s) → cloud sync indicator updates |
-| Error | `Failed` (red), inline error below the row |
+| Never published | `[Publish]` (outline primary, small) |
+| Published and current | `[☁ ✅]` (teal icon-only, disabled) |
+| Stale | `[Re-pub]` (outline amber, small) |
+| marina_org not set | Disabled, tooltip: `Set Marina Org on the AWS tab` |
+| MARINA_API_URL not set | Disabled, tooltip: `Deploy Terraform first` |
+| In progress | spinner only (disabled) |
+| Error | `[!]` (red, tooltip shows error) |
 
-Publish is independent of Conform — a project can be published whether or not it is conformed. However, conforming first is recommended so `AGENTS.md` is accurate before it reaches the catalog.
+On click: `POST /api/projects/{id}/publish`. Returns updated row fragment.
 
-## Metrics Bar
+## Rescan Behaviour
 
-Above the table: aggregate counts across all visible projects.
+`POST /api/scan` does the following for every directory under `PROJECTS_DIR`:
+1. Check for `.git/` and a `github.com` remote — exclude if absent
+2. Read `METADATA.md` fields: `display_name`, `status`, `namespace`, `name`
+3. Run `bin/ProjectValidate.sh {path}` — set `conform_status` from exit code
+4. Read `git status --short` — stored in `projects.git_status` (not displayed in V1)
+5. Upsert `projects` table row
 
-| Metric | Content |
-|--------|---------|
-| Total | Count of projects in `PROJECTS_DIR` |
-| Conformed | Projects meeting Marina standards |
-| Needs Update | Projects with `⚠ Needs Update` |
-| Published | Projects with `☁ Published` catalog status |
+Rescan replaces the full table contents via HTMX fragment. Header KPI counts update in the same response.
 
 ## Empty State
 
-If no projects found:
-> *No projects found in `{PROJECTS_DIR}`. Download or clone a project on the Repositories tab.*
+If no qualifying projects found after scan:
+> *No GitHub-enabled projects found in `{PROJECTS_DIR}`.*
 
 If namespace filter yields no results:
 > *No projects in the `{namespace}` namespace.*
@@ -183,20 +163,22 @@ If namespace filter yields no results:
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | GET | `/setup/projects` | — | Full page |
-| POST | `/api/scan` | — | Updated table HTML fragment |
-| POST | `/api/projects/{id}/conform` | — | Updated row fragment (status + button states) |
-| POST | `/api/projects/{id}/publish` | — | Updated row fragment (cloud sync indicator + Publish button state) |
+| POST | `/api/scan` | — | Updated table HTML fragment + header KPI fragment |
+| POST | `/api/projects/{id}/conform` | — | Updated row fragment |
+| POST | `/api/projects/{id}/publish` | — | Updated row fragment |
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `projects` table (all columns) | Project files: `AGENTS.md`, templates, `METADATA.md` (Conform) |
-| `PROJECTS_DIR` (env) | `projects` table (after Rescan or Conform) |
-| `settings.marina_org`, `MARINA_API_URL` (env) | DynamoDB catalog (Publish — via marina library) |
+| `PROJECTS_DIR` filesystem (directory listing) | `projects` table (Rescan) |
+| `METADATA.md` per project | None (Conform writes to project files, not Marina DB) |
+| `git remote get-url origin` per directory | None |
+| `bin/ProjectValidate.sh` exit code | None |
+| `settings.marina_org`, `MARINA_API_URL` | DynamoDB catalog (Publish) |
 
 ## Open Questions
 
-- Should `Conform All` and `Publish All` bulk actions be added? V1: one at a time.
-- Should the Publish action also push heartbeat/event items, or metadata only? V1: metadata + capabilities only. Heartbeats are pushed by the local agent separately.
-- Should a project that fails DynamoDB publish show the specific AWS error (e.g., missing permissions, wrong region)? Yes — surface the error message inline below the row.
+- Should `Conform All` and `Publish All` bulk actions be added? V1: one at a time only.
+- Should git status (clean/dirty/ahead/behind) be shown in the table in V2? V1: read during Rescan but not displayed.
+- Should the table persist sort state in the URL (`?sort=name&dir=asc`)? V1: client-side sort only, no URL persistence.
