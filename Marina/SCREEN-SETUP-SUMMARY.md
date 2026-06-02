@@ -2,109 +2,131 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V2 |
+| Version | 20260602 V3 |
 | Route | `GET /setup/summary`, `GET /setup` (redirect), `GET /` (redirect) |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Summary · default |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | First screen in the Marina setup flow. Configuration checklist with inline-editable fields and live health checks for AWS and GitHub. Default landing screen for the application. |
+| Description | Marina setup overview. One row per tab showing each tab's final acceptance criteria. Default landing screen for the application. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/summary, GET /setup, GET / |
 
 ## Layout
 
-Single-column, max-width 900px, centered. One `mn-card` section: CHECKLIST. SCAN STATUS has moved to the Git Scan tab.
+Single-column, max-width 900px, centered. Page header followed by an optional amber Setup Required Banner, then one `mn-card`: SETUP STATUS.
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  Marina                   Configure Marina before           │
-│  (dark header)            proceeding. (right block)        │
+│  🏠 Marina                    Marina setup overview.        │
+│  (dark header — see UI-GENERAL Page Header)                │
 ├────────────────────────────────────────────────────────────┤
-│  ⚠ Complete setup to activate cloud sync                   │
+│  ⚠ Setup incomplete — configure all items before          │  ← amber, conditional
+│    proceeding to cloud sync.                               │
 ├────────────────────────────────────────────────────────────┤
-│  🟢 CHECKLIST                                              │
+│  SETUP STATUS                                              │
 │  ──────────────────────────────────────────────────────── │
-│  ✅  Application Name     [Marina                        ▏]│
-│  ✅  User Email           [ed@example.com               ▏]│
-│  ⚠️   User Cell Phone     [(not set)                    ▏]│
-│  ✅  AWS Profile          [default                      ▏]│
-│  ✅  AWS Region           us-east-1                       │
-│  ❌  Marina Org           [(not set)                    ▏]│
-│  ✅  AWS IAM Reachable    arn:aws:iam::111:user/ed         │
-│  ❌  GitHub Username      [(not set)                    ▏]│
-│  ❌  GitHub Auth          Not authenticated               │
-│  ❌  GitHub SSH           No key found                    │
-│  ✅  Projects Directory   /home/ed/projects               │
+│  [AWS icon]  ✅  AWS               Identity confirmed      │
+│              → Go to AWS                                   │
+│  [TF icon]   ❌  Terraform         Not deployed            │
+│              AWS environment not yet configured.           │
+│              → Go to Terraform                             │
+│  [GH icon]   ✅  GitHub            Connected               │
+│              → Go to GitHub                                │
+│  [scan icon] ⚠️  Git Scan          Never scanned           │
+│              → Go to Git Scan                              │
+│  [dir icon]  ❌  Projects Dir      Not set                 │
+│              [ /home/ed/projects           ] [Save to .env]│
+│  [KB icon]   ✅  Repositories      12 available            │
+│              → Go to Repositories                          │
+│  [⚙ icon]   ✅  Settings          Configured              │
+│              → Go to Settings                              │
 └────────────────────────────────────────────────────────────┘
 ```
 
 ## Page Header
 
-Standard page header per UI-GENERAL. Title: `Marina` (no sub-page suffix). Description block (right): `Configure Marina before proceeding.` — shown at all times (not conditional on checklist status).
-
-The amber Setup Required Banner renders below the page header when any critical field is ❌.
+Standard page header per UI-GENERAL. Icon: `bi-house-fill`. Title: `Marina` (no sub-page suffix). Description block (right): `Marina setup overview.`
 
 ## Setup Required Banner
 
-Amber banner shown below the sub-bar when any **critical** field is ❌. Critical fields: `marina_org`, `github_username`, GitHub Auth.
+Amber banner shown below the page header when any **critical** row is ❌. Critical rows: AWS, GitHub, Projects Directory. The banner is dismissed automatically when all critical rows reach ✅.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  ⚠  Setup incomplete — AWS sync and GitHub features will not │
-│     function until all critical items are configured.        │
-└──────────────────────────────────────────────────────────────┘
+⚠  Setup incomplete — configure all items to activate cloud sync and GitHub features.
 ```
 
-Banner is dismissed automatically (server fragment update) when all critical fields reach ✅.
+## SETUP STATUS Card
 
-## CHECKLIST Card
+One row per tab (excluding Summary). Table columns: **Icon**, **Status Icon**, **Tab Name**, **Status Text**, **Detail / Action**.
 
-Table columns: **Icon**, **Key**, **Value**, **Description**.
+### Row Definitions
 
-**Editability rule:** Settings-backed fields show an always-visible `<input>`. Env-backed and computed fields are plain text (no input affordance).
+Each row shows the aggregate acceptance criteria for that tab. A row is ✅ only when all its criteria are met; ⚠️ when partially configured; ❌ when the minimum required state is not met.
 
-| # | Item | Key | Editable | Status Logic | Description column |
-|---|------|-----|----------|-------------|-------------------|
-| 1 | Application Name | `app_name` (settings) | Yes | ✅ if non-empty | Name shown in the nav brand |
-| 2 | User Email | `user_email` (settings) | Yes | ✅ if valid email; ⚠️ if empty | Used for alert notifications |
-| 3 | User Cell Phone | `user_cell` (settings) | Yes | ✅ if set; ⚠️ if empty | SMS alerts (optional) |
-| 4 | AWS Profile | `aws_profile` (settings) | Yes | ✅ if non-empty | AWS credentials profile name (default: `default`) |
-| 5 | AWS Region | `AWS_REGION` (env) | No | ✅ if set; ⚠️ if using default | Set `AWS_REGION` in `.env` |
-| 6 | Marina Org | `marina_org` (settings) | Yes | ✅ if non-empty; ❌ if empty | DynamoDB partition key — your organisation slug |
-| 7 | AWS IAM Reachable | runtime check | No | ✅ if `aws sts get-caller-identity` exits 0; ❌ if not | Shows calling ARN on success. Configure on the AWS tab. |
-| 8 | GitHub Username | `github_username` (settings) | Yes | ✅ if non-empty; ❌ if empty | Your GitHub account name |
-| 9 | GitHub Auth | runtime check (`gh auth status`) | No | ✅ if exits 0; ❌ if not | Run `gh auth login` in a terminal. Configure on the GitHub tab. |
-| 10 | GitHub SSH | runtime check (`ssh -T git@github.com`) | No | ✅ if exits 1 (authed); ❌ if exits 255 | Required for private repo cloning. Configure on the GitHub tab. |
-| 11 | Projects Directory | `PROJECTS_DIR` (env) | No | ✅ if path exists; ❌ if missing | Set `PROJECTS_DIR` in `.env` |
+| # | Tab | Icon | Row Label | ✅ when | ⚠️ when | ❌ when |
+|---|-----|------|-----------|---------|---------|--------|
+| 1 | AWS | Simple Icons `amazonaws` | AWS | `platform_stats.python_aws_ok = 1` AND `aws_profile` set | `aws_profile` set but connectivity not tested | `aws_profile` empty or IAM unreachable |
+| 2 | Terraform | Simple Icons `terraform` | Terraform | `MARINA_API_URL` set AND endpoint reachable (200 response) | `MARINA_API_URL` set but endpoint not responding | Not deployed — `MARINA_API_URL` not set |
+| 3 | GitHub | `bi-github` | GitHub | `github_username` set AND `gh auth status` ✅ AND SSH ✅ | `github_username` set but auth or SSH ❌ | `github_username` not set |
+| 4 | Git Scan | `bi-arrow-clockwise` | Git Scan | `platform_stats.last_scan` set AND `github_repo_count > 0` | Scanned but `github_repo_count = 0` | Never scanned |
+| 5 | Projects | `bi-kanban` | Projects Dir | `PROJECTS_DIR` set AND path exists | `PROJECTS_DIR` set but path not found | `PROJECTS_DIR` not set |
+| 6 | Repositories | `bi-folder2-open` | Repositories | ≥1 repo with `is_downloaded = 1` | `github_repos` populated but none downloaded | `github_repos` empty or GitHub not configured |
+| 7 | Settings | `bi-sliders2` | Settings | `app_name` non-empty AND `user_email` non-empty | `app_name` set but `user_email` empty | `app_name` empty |
 
-When GitHub Auth is ❌, inline help: `Run gh auth login in a terminal, then reload this page.`
+### Row Layout
 
-When AWS IAM is ❌, inline help: `Configure AWS credentials — go to the AWS tab.`
+Each row is two lines:
+- **Line 1:** `{icon}  {status-icon}  {Tab Name}    {Status Text}` — right edge: `→ Go to {Tab}` link (navigates to that tab's route)
+- **Line 2:** Detail text (muted, indented). Shown only when ❌ or ⚠️. For Projects Dir: replaces line 2 with the editable field (see below).
 
-When Marina Org is ❌, inline help: `Enter an organisation slug — used as the DynamoDB partition key (e.g. acme).`
+The `→ Go to {Tab}` link is always shown (even ✅ rows) to allow easy navigation.
+
+### Terraform Row — "AWS Environment Configured"
+
+The Terraform row label on the Summary screen is displayed as **"AWS Environment Configured"** to communicate its meaning to a non-technical user. The link still reads `→ Go to Terraform`.
+
+Status text examples:
+- ✅ `Endpoint reachable — https://abc123.execute-api.us-east-1.amazonaws.com`
+- ⚠️ `MARINA_API_URL set but endpoint not responding`
+- ❌ `Not deployed — run Terraform to provision the AWS plane`
+
+### Projects Dir Row — Editable .env Field
+
+The Projects Dir row is the only row with an inline editable field. When PROJECTS_DIR is ❌ or ⚠️:
+
+```
+[icon]  ❌  Projects Dir     Not set
+            [ /home/ed/projects                        ]  [Save to .env]
+            ⚠ Saving writes PROJECTS_DIR to .env — Marina restart required.
+```
+
+`[Save to .env]` button class: `btn-mn-caution` (amber — writes to .env, requires restart).
+
+On save: `POST /api/setup/env` with `key=PROJECTS_DIR&value={path}`. Server writes the value to `.env` and returns a ⚠️ inline notice: `Saved to .env — restart Marina for the change to take effect.`
+
+The field is always shown on this row (not just when ❌) so the user can update PROJECTS_DIR without navigating to another tab.
 
 ## API
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
-| POST | `/api/setup/config` | `key`, `value` | Icon fragment + banner fragment |
-| GET | `/api/setup/health` | — | JSON: `{ aws: bool, github_auth: bool, github_ssh: bool }` |
-
-Allowed `key` values for `/api/setup/config`: `app_name`, `user_email`, `user_cell`, `aws_profile`, `marina_org`, `github_username`. Any other key returns 400.
+| GET | `/api/setup/summary/status` | — | JSON: `{ rows: [{ tab, status, text, detail }] }` |
+| POST | `/api/setup/env` | `key`, `value` | Confirmation fragment with restart notice |
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
-| `settings` table (all config keys) | `settings` table via `/api/setup/config` |
-| `user_profile` table (`email`, `cell_phone`) | `user_profile` table via `/api/setup/config` |
-| `PROJECTS_DIR`, `AWS_REGION` (env) | None |
-| `aws sts get-caller-identity` exit code | None |
-| `gh auth status` exit code | None |
-| `ssh -T git@github.com` exit code | None |
+| `settings` table (`aws_profile`, `github_username`, `app_name`, `marina_org`) | `.env` file via `/api/setup/env` (Projects Dir save only) |
+| `platform_stats` (`python_aws_ok`, `last_scan`, `github_repo_count`) | None |
+| `PROJECTS_DIR`, `MARINA_API_URL` (env) | None |
+| `github_repos` table (`is_downloaded` count) | None |
+| `user_profile` table (`email`) | None |
+| `gh auth status`, `ssh -T git@github.com` exit codes | None |
+| HTTP GET `MARINA_API_URL` (endpoint reachability ping) | None |
 
 ## Open Questions
 
-- Should the checklist run health checks on page load or only when the user clicks Refresh? V1: run on page load; add a Refresh button for manual re-check.
-- Should `user_cell` validation enforce a format (E.164)? V1: store as-entered; validate format at alert send time.
+- Should the summary auto-refresh status rows on a timer, or only on page load? V1: page load only; add a `[↻ Refresh All]` button for manual re-check.
+- Should the Terraform endpoint reachability check have a timeout? V1: 5-second timeout; show ⚠️ `Timeout` if exceeded.

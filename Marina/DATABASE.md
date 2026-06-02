@@ -200,7 +200,18 @@ Aggregate counters updated at startup and after scans.
 | `value` | TEXT | Stat value |
 | `updated_at` | TEXT | ISO-8601 |
 
-Standard keys: `github_repo_count`, `scan_projects_total`, `projects_by_state_{status}`, `catalog_last_published`, `last_scan` (ISO-8601 timestamp of most recent Git Scan — set at startup and after manual scan), `python_aws_ok` (1/0 — result of last boto3 connectivity check from the AWS tab).
+Standard keys:
+
+| Key | Description |
+|-----|-------------|
+| `github_repo_count` | Total repos fetched across all source accounts |
+| `scan_projects_total` | Count of projects found in `PROJECTS_DIR` on last scan |
+| `projects_by_state_{status}` | Count per status value (e.g. `projects_by_state_ACTIVE`) |
+| `catalog_last_published` | ISO-8601 timestamp of last DynamoDB publish |
+| `last_scan` | ISO-8601 timestamp of most recent Git Scan (set at startup and after manual scan) |
+| `python_aws_ok` | `1` / `0` — result of last boto3 connectivity check from the AWS tab |
+| `terraform_deployed` | `1` / `0` — set to `1` after a successful `terraform apply` completes |
+| `endpoint_reachable` | `1` / `0` — result of last HTTP ping to `MARINA_API_URL`; updated by Summary status check |
 
 ---
 
