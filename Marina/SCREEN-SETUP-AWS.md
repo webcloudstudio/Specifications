@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260529 V1 |
+| Version | 20260601 V1 |
 | Route | `GET /setup/aws` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -15,6 +15,25 @@
 ## Layout
 
 Single-column, max-width 900px, centered. Four `mn-card` sections stacked vertically: Identity, Organisation, API Endpoint, IAM Check.
+
+## Collapsible Card Behaviour
+
+Every card is collapsible via Bootstrap 5 collapse. The card header acts as the toggle.
+
+| Rule | Detail |
+|------|--------|
+| Start expanded | Card status is not OK (missing, unconfigured, or check failed) |
+| Start collapsed | Card status is OK |
+| Collapsed header | Must display a `✅ OK` badge so the user can see at a glance the item is configured |
+
+Status criteria per card:
+
+| Card | OK when |
+|------|---------|
+| AWS IDENTITY | `aws sts get-caller-identity` returns a valid ARN |
+| ORGANISATION | `marina_org` setting is non-empty |
+| MARINA API ENDPOINT | `MARINA_API_URL` env var is set |
+| IAM REACHABILITY CHECK | Same result as AWS IDENTITY (shares the same check) |
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -79,6 +98,10 @@ Static guidance block below: instructions for configuring AWS credentials via `a
 ## ORGANISATION Card
 
 Single inline-editable field: Marina Org (`marina_org`, settings-backed).
+
+| Field | Key | Editable | Notes |
+|-------|-----|----------|-------|
+| Marina Org | `marina_org` (settings) | Yes | Default: `Marina`. No additional AWS setup required — the org slug is a DynamoDB partition key only. |
 
 Validation: lowercase alphanumeric plus hyphens only (`^[a-z0-9-]+$`). Server rejects invalid slugs with 400. Client-side warning shown before save.
 
