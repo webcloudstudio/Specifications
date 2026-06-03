@@ -2,14 +2,14 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V4 |
+| Version | 20260603 V5 |
 | Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/repositories` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Repositories |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Unified view of GitHub repositories and local projects across all source accounts. Shows which repos have been downloaded and provides one-click cloning. |
+| Description | Unified view of GitHub repositories across all source accounts. Shows which repos are on disk and provides one-click cloning. Sync is triggered from the Git Scan tab — no Refresh button here. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/repositories |
 
@@ -30,16 +30,16 @@ N = total row count in `github_repos` across all source accounts. If `github_rep
 
 ## Unconfigured State
 
-If `github_username` is not set, or `gh auth status` fails, or `PROJECTS_DIR` is not set, the page shows a full-panel notice instead of the repo table:
+If `gh auth status` fails, no sources are configured, or `PROJECTS_DIR` is not set, the page shows a full-panel notice instead of the repo table:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  ⚠  GitHub not configured                                    │
 │                                                              │
 │  Complete these steps on the GitHub tab:                     │
-│  • Set your GitHub Username                                  │
 │  • Authenticate: run gh auth login in a terminal             │
-│  • Ensure PROJECTS_DIR is set in .env                        │
+│  • Add at least one scan source                              │
+│  • Ensure PROJECTS_DIR is set on the Summary tab             │
 │                                                              │
 │  [→ Go to GitHub Setup]                                      │
 └──────────────────────────────────────────────────────────────┘
@@ -49,19 +49,21 @@ If `github_username` is not set, or `gh auth status` fails, or `PROJECTS_DIR` is
 
 ## Layout
 
-Full-width. Action bar at top, repo table below.
+Full-width. Search bar at top, repo table below. No Refresh button — sync is triggered from the Git Scan tab only.
+
+Navigating to this tab (clicking the sub-tab or any link to `/setup/repositories`) triggers a full page load so the table always reflects the latest `github_repos` state.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  [↻ Refresh]   [🔍 Search repos...]                            │
+│  [🔍 Search repos...]                                          │
 │  ──────────────────────────────────────────────────────────── │
-│  ┌──────────┬──────────────────────┬──────────┬────────┬──────┐ │
-│  │ Status   │ Repository           │ Source   │ Vis    │Action│ │
-│  ├──────────┼──────────────────────┼──────────┼────────┼──────┤ │
-│  │ ✅ Local │ my-app               │ wcs      │Private │[Open]│ │
-│  ├──────────┼──────────────────────┼──────────┼────────┼──────┤ │
-│  │ ☁ Cloud  │ old-experiments      │ wcs      │Private │[↓]   │ │
-│  └──────────┴──────────────────────┴──────────┴────────┴──────┘ │
+│  ┌──────┬──────────────────────┬──────────┬────────┬────────┐  │
+│  │      │ Repository           │ Source   │ Vis    │ Action │  │
+│  ├──────┼──────────────────────┼──────────┼────────┼────────┤  │
+│  │ 💾   │ my-app               │ wcs      │Private │[↗ Open]│  │
+│  ├──────┼──────────────────────┼──────────┼────────┼────────┤  │
+│  │      │ old-experiments      │ wcs      │Private │[⬇ Get] │  │
+│  └──────┴──────────────────────┴──────────┴────────┴────────┘  │
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -69,37 +71,40 @@ Full-width. Action bar at top, repo table below.
 
 | Control | Behavior |
 |---------|----------|
-| `↻ Refresh` (left) | Re-fetches repo list from GitHub API for all source accounts: `POST /api/repositories/sync`. Updates table via HTMX. Spinner while in progress. |
-| Search input (center) | Client-side filter on repo name. Case-insensitive substring. |
+| Search input | Client-side filter on repo name. Case-insensitive substring. Instant — no server call. |
 
 ## Repo Table
 
 One row per GitHub repository across all source accounts. Sorted: downloaded repos first (alphabetically), then not-downloaded (alphabetically).
 
+One row per repo — compact, single line, no description sub-text. Default sort: downloaded first (alphabetical), then not-downloaded (alphabetical).
+
 | Column | Source | Notes |
 |--------|--------|-------|
-| Status | `github_repos.is_downloaded` | `✅ Local` (teal) if downloaded; `☁ Cloud` (muted) if not |
-| Repository | `github_repos.name` | Repo name only — bold, links to `github_repos.html_url` (new tab). No description sub-text. |
-| Source | `github_repos.source_account` | GitHub account/org the repo belongs to. Column omitted entirely if all visible rows share the same source account (single-source installs). |
-| Visibility | `github_repos.private` | `Private` (amber pill) or `Public` (muted pill) |
-| Last pushed | `github_repos.pushed_at` | Relative time (e.g. `3 days ago`) |
+| On Disk | `github_repos.is_downloaded` | 💾 disk icon (teal) if downloaded; blank if not. No text label. |
+| Repository | `github_repos.name` | Repo name — bold, links to `github_repos.html_url` (opens in new browser tab). No description. |
+| Source | `github_repos.source_account` | Column omitted entirely if all visible rows share the same source (single-source installs). |
+| Visibility | `github_repos.private` | `Private` (amber pill, small) or `Public` (muted pill, small) |
+| Last pushed | `github_repos.pushed_at` | Relative time (e.g. `3d ago`) |
 | Action | Derived from `is_downloaded` | See Action Column |
 
 ### Action Column
 
+All buttons are small pill-style (`btn-sm` + `rounded-pill`) with icons. Colors are retained in disabled state at reduced opacity — do not swap to grey.
+
 | `is_downloaded` | Action |
 |-----------------|--------|
-| 1 (downloaded) | `Open ↗` — links to the local directory path. |
-| 0 (not downloaded) | `⬇ Download` button |
+| 1 (downloaded) | `↗ Open` — small teal pill. Opens `github_repos.html_url` in a new browser tab. |
+| 0 (not downloaded) | `⬇ Get` — small primary pill. Clones repo to disk. |
 
-**Download button states:**
+**Download (`⬇ Get`) button states:**
 
 | State | Appearance |
 |-------|-----------|
-| Idle | `⬇ Download` (outline primary) |
-| In progress | Spinner + `Cloning…` (disabled) |
-| Success | `✓ Downloaded` (teal), status badge changes to `✅ Local`, action changes to `Open ↗` — no page reload |
-| Error | `Failed` (red), inline error below the row |
+| Idle | `⬇ Get` (primary pill, small) |
+| In progress | spinner only (disabled, same primary colour) |
+| Success | `💾 ↗ Open` — disk icon appears in On Disk column; action button swaps to `↗ Open` teal pill — no page reload |
+| Error | `!` (red pill), tooltip shows clone error |
 
 Download clones to `{PROJECTS_DIR}/{repo.name}` via SSH, falling back to HTTPS when SSH is unavailable.
 
@@ -112,9 +117,10 @@ If the authenticated user has no GitHub repos:
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
-| POST | `/api/repositories/sync` | — | Updated table HTML fragment |
 | GET | `/api/repositories` | — | Table HTML fragment (all source accounts) |
-| POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url` | Row status fragment (button states) |
+| POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url` | Row status fragment (On Disk icon + button swap) |
+
+`POST /api/repositories/sync` belongs to the Git Scan tab — not called from this screen.
 
 ## Data Flow
 
