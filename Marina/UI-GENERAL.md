@@ -129,8 +129,8 @@ Some tabs may be **disabled** (not hidden) when their prerequisites are unmet.
 | 2 | AWS | `/setup/aws` | Never |
 | 3 | Terraform | `/setup/terraform` | Never |
 | 4 | GitHub | `/setup/github` | Never |
-| 5 | Git Scan | `/setup/scan` | GitHub not configured (auth ❌ or SSH ❌), or no PROJECTS_DIR |
-| 6 | Repositories | `/setup/repositories` | GitHub not configured, or PROJECTS_DIR not set |
+| 5 | Git Scan | `/setup/scan` | GitHub not configured (auth ❌ or SSH ❌ or no sources), or no PROJECTS_DIR |
+| 6 | Repositories | `/setup/repositories` | GitHub header light ❌ or ⚠️ (auth, SSH, or no sources), or PROJECTS_DIR not set |
 | 7 | Projects | `/setup/projects` | PROJECTS_DIR not set |
 | 8 | Settings | `/setup/settings` | Never |
 
