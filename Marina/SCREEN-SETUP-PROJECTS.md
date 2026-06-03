@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V6 |
+| Version | 20260603 V7 |
 | Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/projects` |
 | Parent | — |
@@ -34,10 +34,11 @@ Both counts reflect the active namespace filter and update on Rescan.
 ## What Qualifies as a Project
 
 Only directories that are GitHub-enabled are shown. A directory qualifies if:
-1. It contains a `.git/` folder, AND
-2. `git remote get-url origin` returns a URL containing `github.com`
+1. Its name does **not** start with `.` (hidden directories such as `.git`, `.cache`, `.venv` are always excluded)
+2. It contains a `.git/` folder
+3. `git remote get-url origin` returns a URL containing `github.com`
 
-Directories without a `.git` folder, or with a non-GitHub remote, are silently excluded. The Rescan result always reflects the current disk state.
+All three conditions must be met. Directories failing any condition are silently excluded. The Rescan result always reflects the current disk state.
 
 ## Unconfigured State
 
@@ -63,9 +64,9 @@ Full-width. Namespace filter pills at top, then action bar, then sortable projec
 │  ─────────────────────────────────────────────────────────────────  │
 │  ▲ Name          Conform Status  Status      Namespace   Actions     │
 │  ─────────────────────────────────────────────────────────────────  │
-│    my-app        ✅ Conformed    ACTIVE       dev        [Publish ✅] │
-│    old-tool      ⚠ Needs Update PROTOTYPE    tools      [Conform]   │
-│    scratch       ❓ Unknown      —            —          [Conform]   │
+│    my-app        ✅ Conformed    ACTIVE       dev        [✓]         │
+│    old-tool      ⚠ Needs Update PROTOTYPE    tools      [⚙ Conform] │
+│    scratch       ❓ Unknown      —            —          [⚙ Conform] │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -90,7 +91,7 @@ One row per qualifying project. Default sort: Name ascending. Each column header
 | Conform Status | Single badge — see Conform Status below | Yes |
 | Status | Lifecycle status pill from `status:` in METADATA.md | Yes |
 | Namespace | `namespace:` from METADATA.md; `—` if absent | Yes |
-| Actions | Conform button + Publish button | No |
+| Actions | Conform button only | No |
 
 **One row = one line.** No secondary lines, no expanded detail rows. All information fits inline. Row height matches standard Bootstrap table rows.
 
@@ -112,32 +113,19 @@ Status pill from `status:` in METADATA.md. Valid values and colours per UI-GENER
 
 ## Actions Column
 
-Two buttons per row, rendered compactly inline.
+Single button per row. All buttons are small pill-style (`btn-sm` + `rounded-pill`) with icons. Color is retained at reduced opacity in disabled state — do not swap to grey.
 
 ### Conform Button
 
 | State | Appearance |
 |-------|-----------|
-| Needs conforming / Unknown | `[Conform]` (outline secondary, small) |
-| Already conformed | `[✓]` (muted icon-only, disabled) |
-| In progress | spinner only (disabled) |
-| Error | `[!]` (red, tooltip shows error) |
+| Needs conforming | `⚙ Conform` (amber pill, small) |
+| Unknown (no METADATA.md) | `⚙ Conform` (primary pill, small) |
+| Already conformed | `✓` (teal pill icon-only, disabled) |
+| In progress | spinner (same colour, disabled) |
+| Error | `!` (red pill, tooltip shows error) |
 
 On click: `POST /api/projects/{id}/conform`. Marina invokes `bin/ProjectInitialize.sh {project_path}` (Unknown) or `bin/ProjectUpdate.sh {project_path}` (Needs Update). Returns updated row fragment. No page reload.
-
-### Publish Button
-
-| State | Appearance |
-|-------|-----------|
-| Never published | `[Publish]` (outline primary, small) |
-| Published and current | `[☁ ✅]` (teal icon-only, disabled) |
-| Stale | `[Re-pub]` (outline amber, small) |
-| marina_org not set | Disabled, tooltip: `Set Marina Org on the AWS tab` |
-| MARINA_API_URL not set | Disabled, tooltip: `Deploy Terraform first` |
-| In progress | spinner only (disabled) |
-| Error | `[!]` (red, tooltip shows error) |
-
-On click: `POST /api/projects/{id}/publish`. Returns updated row fragment.
 
 ## Rescan Behaviour
 
@@ -165,7 +153,6 @@ If namespace filter yields no results:
 | GET | `/setup/projects` | — | Full page |
 | POST | `/api/scan` | — | Updated table HTML fragment + header KPI fragment |
 | POST | `/api/projects/{id}/conform` | — | Updated row fragment |
-| POST | `/api/projects/{id}/publish` | — | Updated row fragment |
 
 ## Data Flow
 
@@ -175,10 +162,9 @@ If namespace filter yields no results:
 | `METADATA.md` per project | None (Conform writes to project files, not Marina DB) |
 | `git remote get-url origin` per directory | None |
 | `bin/ProjectValidate.sh` exit code | None |
-| `settings.marina_org`, `MARINA_API_URL` | DynamoDB catalog (Publish) |
 
 ## Open Questions
 
-- Should `Conform All` and `Publish All` bulk actions be added? V1: one at a time only.
+- Should a `Conform All` bulk action be added? V1: one at a time only.
 - Should git status (clean/dirty/ahead/behind) be shown in the table in V2? V1: read during Rescan but not displayed.
 - Should the table persist sort state in the URL (`?sort=name&dir=asc`)? V1: client-side sort only, no URL persistence.
