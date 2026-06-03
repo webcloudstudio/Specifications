@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V5 |
+| Version | 20260603 V6 |
 | Header Background | `mn-hdr-bg--settings` |
+| Header Help Text | Configure application name, user email, and default settings. |
 | Route | `GET /setup/settings` |
 | Parent | — |
 | Main Menu | SETUP |

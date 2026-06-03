@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260603 V6 |
+| Version     | 20260603 V7 |
 | Description | Shared UI patterns and conventions across all Marina screens. |
 
 All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
@@ -81,6 +81,7 @@ CSS variables in `static/style.css`:
 | Sub Menu | {sub-tab label} · default  ← omit "· default" if not the default |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
 | Header Background | `mn-hdr-bg--default`  ← see Header Background Types |
+| Header Help Text | One sentence shown in the right column of the page header. |
 | Description | One-sentence description. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /path |
@@ -167,7 +168,7 @@ The header is a CSS grid: `grid-template-columns: 1fr auto 1fr; align-items: cen
 |--------|------|---------|
 | Left | `1fr` | KPI block. Empty `<div>` when the page has no KPIs — preserves centering of the title. |
 | Center | `auto` | ⚓ icon + `Marina` title. Always present. See Center Column Detail. |
-| Right | `1fr` | Empty spacer — reserved for future use. |
+| Right | `1fr` | Page help text. Short sentence describing what this section is for. Right-aligned, muted (`--mn-hdr-muted`), 0.8rem, max 2 lines. Each SCREEN-*.md declares its `Header Help Text`. Empty `<div>` when no help text is defined. |
 
 ### Center Column Detail
 

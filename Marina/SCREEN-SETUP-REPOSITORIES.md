@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V5 |
+| Version | 20260603 V6 |
 | Header Background | `mn-hdr-bg--git` |
+| Header Help Text | Repositories are the Git Projects you have in your various sources. |
 | Route | `GET /setup/repositories` |
 | Parent | — |
 | Main Menu | SETUP |
@@ -51,7 +52,7 @@ If `gh auth status` fails, no sources are configured, or `PROJECTS_DIR` is not s
 
 Full-width. Search bar at top, repo table below. No Refresh button — sync is triggered from the Git Scan tab only.
 
-Navigating to this tab (clicking the sub-tab or any link to `/setup/repositories`) triggers a full page load so the table always reflects the latest `github_repos` state.
+No pagination — all rows from `github_repos` are rendered on page load regardless of count. Navigating to this tab triggers a full page load so the table always reflects the latest `github_repos` state.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -128,7 +129,7 @@ If the authenticated user has no GitHub repos:
 |-------|--------|
 | `github_repos` table (all columns) | `github_repos` table on Refresh (upsert via sync) |
 | `projects` table (`name`, `path` for `Open` links) | New project directory + minimal `METADATA.md` on Download |
-| `settings.github_username` | `projects` table (after download: registers the new project) |
+| None | `projects` table (after download: registers the new project) |
 | `PROJECTS_DIR` (env) | None |
 
 GitHub API calls are server-side. Results cached in `github_repos` table; Refresh triggers a fresh fetch.

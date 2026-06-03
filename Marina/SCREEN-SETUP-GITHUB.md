@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V7 |
+| Version | 20260603 V8 |
 | Header Background | `mn-hdr-bg--git` |
+| Header Help Text | Register your Scan Sources to share Git Projects. |
 | Route | `GET /setup/github` |
 | Parent | — |
 | Main Menu | SETUP |

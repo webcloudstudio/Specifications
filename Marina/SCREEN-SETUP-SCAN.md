@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V5 |
+| Version | 20260603 V6 |
 | Header Background | `mn-hdr-bg--git` |
+| Header Help Text | Scan Git Sources for Status and New Projects. |
 | Route | `GET /setup/scan` |
 | Parent | — |
 | Main Menu | SETUP |

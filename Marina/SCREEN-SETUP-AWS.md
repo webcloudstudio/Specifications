@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V4 |
+| Version | 20260603 V5 |
 | Header Background | `mn-hdr-bg--cloud` |
+| Header Help Text | AWS is used for Shared Services using Very Low Cost Components. |
 | Route | `GET /setup/aws` |
 | Parent | — |
 | Main Menu | SETUP |

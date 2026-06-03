@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V7 |
+| Version | 20260603 V8 |
 | Header Background | `mn-hdr-bg--git` |
+| Header Help Text | Projects are the Git Repositories downloaded to your projects directory. |
 | Route | `GET /setup/projects` |
 | Parent | — |
 | Main Menu | SETUP |

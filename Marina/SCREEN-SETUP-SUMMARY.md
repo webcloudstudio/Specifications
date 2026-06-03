@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V6 |
+| Version | 20260603 V7 |
 | Header Background | `mn-hdr-bg--summary` |
+| Header Help Text | Marina setup overview. |
 | Route | `GET /setup/summary`, `GET /setup` (redirect), `GET /` (redirect) |
 | Parent | — |
 | Main Menu | SETUP |

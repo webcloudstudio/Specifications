@@ -2,8 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V6 |
+| Version | 20260603 V7 |
 | Header Background | `mn-hdr-bg--cloud` |
+| Header Help Text | Terraform is used to configure the AWS. |
 | Route | `GET /setup/terraform` |
 | Parent | — |
 | Main Menu | SETUP |
