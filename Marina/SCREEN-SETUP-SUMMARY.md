@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V5 |
+| Version | 20260603 V6 |
 | Header Background | `mn-hdr-bg--summary` |
 | Route | `GET /setup/summary`, `GET /setup` (redirect), `GET /` (redirect) |
 | Parent | — |
@@ -75,7 +75,7 @@ Each row shows the aggregate acceptance criteria for that tab. A row is ✅ only
 |---|-----|------|-----------|---------|---------|--------|
 | 1 | AWS | Simple Icons `amazonaws` | AWS | `platform_stats.python_aws_ok = 1` AND `aws_profile` set | `aws_profile` set but connectivity not tested | `aws_profile` empty or IAM unreachable |
 | 2 | Terraform | Simple Icons `terraform` | Terraform | `MARINA_API_URL` set AND endpoint reachable (200 response) | `MARINA_API_URL` set but endpoint not responding | Not deployed — `MARINA_API_URL` not set |
-| 3 | GitHub | `bi-github` | GitHub | `github_username` set AND `gh auth status` ✅ AND SSH ✅ | `github_username` set but auth or SSH ❌ | `github_username` not set |
+| 3 | GitHub | `bi-github` | GitHub | `gh auth status` ✅ AND SSH ✅ AND ≥1 source in `github_sources` | ≥1 source configured but auth ❌ or SSH ❌ | No sources configured or auth missing |
 | 4 | Git Scan | `bi-arrow-clockwise` | Git Scan | `platform_stats.last_scan` set AND `github_repo_count > 0` | Scanned but `github_repo_count = 0` | Never scanned |
 | 5 | Projects | `bi-kanban` | Projects Dir | `PROJECTS_DIR` set AND path exists | `PROJECTS_DIR` set but path not found | `PROJECTS_DIR` not set |
 | 6 | Repositories | `bi-folder2-open` | Repositories | ≥1 repo with `is_downloaded = 1` | `github_repos` populated but none downloaded | `github_repos` empty or GitHub not configured |
@@ -120,7 +120,7 @@ On blur: `POST /api/setup/config` with `key=PROJECTS_DIR&value={path}`. Server w
 
 | Reads | Writes |
 |-------|--------|
-| `settings` table (`aws_profile`, `github_username`, `app_name`, `marina_org`) | `settings` table via `/api/setup/config` (Projects Dir inline save) |
+| `settings` table (`aws_profile`, `app_name`, `marina_org`) | `settings` table via `/api/setup/config` (Projects Dir inline save) |
 | `platform_stats` (`python_aws_ok`, `last_scan`, `github_repo_count`) | None |
 | `PROJECTS_DIR`, `MARINA_API_URL` (env) | None |
 | `github_repos` table (`is_downloaded` count) | None |

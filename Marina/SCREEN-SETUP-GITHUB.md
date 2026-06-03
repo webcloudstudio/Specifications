@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V5 |
+| Version | 20260603 V7 |
 | Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/github` |
 | Parent | — |
@@ -19,9 +19,9 @@ Left column of the page header. Component type: **Status Light** (`mn-hdr-light`
 
 | State | Light | Condition |
 |-------|-------|-----------|
-| ✅ | `mn-hdr-light--ok` (green) | `github_username` set AND `gh auth status` ✅ AND SSH ✅ |
-| ⚠️ | `mn-hdr-light--warn` (amber) | `github_username` set BUT auth ❌ or SSH ❌ |
-| ❌ | `mn-hdr-light--error` (red) | `github_username` not set |
+| ✅ | `mn-hdr-light--ok` (green) | `gh auth status` ✅ AND SSH ✅ AND ≥1 source in `github_sources` |
+| ⚠️ | `mn-hdr-light--warn` (amber) | ≥1 source configured BUT auth ❌ or SSH ❌ |
+| ❌ | `mn-hdr-light--error` (red) | No sources configured OR `gh auth status` completely missing |
 
 ## Unconfigured State
 
@@ -84,6 +84,24 @@ Single-column, max-width 900px, centered. Three `mn-card` sections: Authenticati
 └──────────────────────────────────────────────────────────────┘
 ```
 
+## Collapsible Card Behaviour
+
+Every card is collapsible via Bootstrap 5 collapse. The card header acts as the toggle.
+
+| Rule | Detail |
+|------|--------|
+| Start expanded | Card status is not OK |
+| Start collapsed | Card status is OK |
+| Collapsed header | Shows a `✅ OK` badge so the status is visible without expanding |
+
+Status criteria per card:
+
+| Card | OK when |
+|------|---------|
+| AUTHENTICATION | `gh auth status` exits 0 |
+| SSH KEY | `ssh -T git@github.com` returns `Hi {user}` |
+| SCAN SOURCES | ≥1 source in `github_sources` |
+
 ## AUTHENTICATION Card
 
 Shows the result of `gh auth status` (run server-side). Displays:
@@ -145,7 +163,7 @@ Source rows determine the columns on the Git Scan tab — one column per source,
 | POST | `/api/setup/github/sources` | `source` | Updated source list fragment |
 | DELETE | `/api/setup/github/sources/{id}` | — | Updated source list fragment |
 
-The `github_username` field and `/api/setup/config` endpoint are not used by this screen.
+The `/api/setup/config` endpoint is not used by this screen. `github_username` is not stored or required — authenticated identity is read from `gh auth status` output only.
 
 ## Data Flow
 

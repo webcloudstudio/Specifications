@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260602 V5 |
+| Version     | 20260603 V6 |
 | Description | Shared UI patterns and conventions across all Marina screens. |
 
 All SCREEN-*.md files reference this document for shared elements. Screen specifications define only what is unique to that screen.
@@ -305,22 +305,45 @@ Used on Summary and Terraform. Shows overall system health at a glance.
 
 #### 4. Status Light — `mn-hdr-light`
 
-A solid coloured dot (circle). Used in place of the Status Chip on screens where the KPI is purely a readiness indicator and the label text is not needed. Preferred over Status Chip for Setup screens.
+A vertical traffic light: three stacked circles (red top, amber middle, green bottom) in a dark housing. The active state circle is bright; the other two are dimmed to 15% opacity. Used on setup screens where the KPI is a readiness indicator. Must render as a recognisable traffic light — not a single dot.
 
 ```html
-<div class="mn-hdr-light mn-hdr-light--ok"></div>
-<div class="mn-hdr-light mn-hdr-light--warn"></div>
-<div class="mn-hdr-light mn-hdr-light--error"></div>
+<div class="mn-hdr-light mn-hdr-light--ok">
+  <div class="mn-hdr-light__dot mn-hdr-light__dot--red"></div>
+  <div class="mn-hdr-light__dot mn-hdr-light__dot--amber"></div>
+  <div class="mn-hdr-light__dot mn-hdr-light__dot--green"></div>
+</div>
 ```
 
 ```css
 .mn-hdr-light {
-  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 5px 7px;
+  background: #0a0a0a; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
   flex-shrink: 0;
 }
-.mn-hdr-light--ok    { background: var(--mn-hdr-ok-bg);    box-shadow: 0 0 8px var(--mn-hdr-ok-bg); }
-.mn-hdr-light--warn  { background: var(--mn-hdr-warn-bg);  box-shadow: 0 0 8px var(--mn-hdr-warn-bg); }
-.mn-hdr-light--error { background: var(--mn-hdr-error-bg); box-shadow: 0 0 8px var(--mn-hdr-error-bg); }
+.mn-hdr-light__dot {
+  width: 14px; height: 14px; border-radius: 50%;
+}
+.mn-hdr-light__dot--red   { background: var(--mn-hdr-error-bg); }
+.mn-hdr-light__dot--amber { background: var(--mn-hdr-warn-bg); }
+.mn-hdr-light__dot--green { background: var(--mn-hdr-ok-bg); }
+
+/* OK — green lit, others dim */
+.mn-hdr-light--ok .mn-hdr-light__dot--green { box-shadow: 0 0 6px var(--mn-hdr-ok-bg); }
+.mn-hdr-light--ok .mn-hdr-light__dot--amber,
+.mn-hdr-light--ok .mn-hdr-light__dot--red   { opacity: 0.15; }
+
+/* Warn — amber lit, others dim */
+.mn-hdr-light--warn .mn-hdr-light__dot--amber { box-shadow: 0 0 6px var(--mn-hdr-warn-bg); }
+.mn-hdr-light--warn .mn-hdr-light__dot--green,
+.mn-hdr-light--warn .mn-hdr-light__dot--red   { opacity: 0.15; }
+
+/* Error — red lit, others dim */
+.mn-hdr-light--error .mn-hdr-light__dot--red   { box-shadow: 0 0 6px var(--mn-hdr-error-bg); }
+.mn-hdr-light--error .mn-hdr-light__dot--green,
+.mn-hdr-light--error .mn-hdr-light__dot--amber { opacity: 0.15; }
 ```
 
 ---
@@ -356,7 +379,7 @@ A ghost (outline) button rendered on the dark header surface. Used when the page
 | Summary | All-Good | ✅ "All systems ready" / ⚠️ "N items need attention" | Count of ❌/⚠️ rows in SETUP STATUS card |
 | AWS | Status Light | Green / Amber / Red dot | `python_aws_ok` + `aws_profile` |
 | Terraform | All-Good | ✅ "Deployed" / ❌ "Not deployed" | `MARINA_API_URL` set + `endpoint_reachable` |
-| GitHub | Status Light | Green / Amber / Red dot | `github_username` + auth + SSH |
+| GitHub | Status Light | Green / Amber / Red dot | auth + SSH + ≥1 scan source |
 | Git Scan | Action Button | `[↻ Scan GitHub Now]` | Button triggers `POST /api/repositories/sync` |
 | Repositories | Count Block | `{N}` · `Repos` | `github_repos` count |
 | Projects | Count Blocks (×2) | `{N}` · `Conformed` + `{N}` · `Total` | `projects.is_conformed` aggregates |
