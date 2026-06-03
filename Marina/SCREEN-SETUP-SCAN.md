@@ -2,14 +2,14 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260602 V4 |
+| Version | 20260603 V5 |
 | Header Background | `mn-hdr-bg--git` |
 | Route | `GET /setup/scan` |
 | Parent | — |
 | Main Menu | SETUP |
 | Sub Menu | Git Scan |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Scans all configured GitHub source accounts for repositories and reconciles them with local projects. Displays project counts grouped by source account. Unlocked after GitHub is configured and at least one source account has readable repositories. |
+| Description | Scans configured GitHub source accounts for repositories and reconciles them with PROJECTS_DIR. Results table shows On GitHub, Downloaded, Conformed, and Not Downloaded counts per source — all from the same counting domain so numbers always add up. |
 | Depends On | UI-GENERAL.md, SCREEN-SETUP-GITHUB.md |
 | Provides | GET /setup/scan |
 
@@ -23,92 +23,124 @@ Left column of the page header. Component type: **Header Action Button** (`mn-hd
 </button>
 ```
 
-The button is disabled and shows a spinner while a scan is in progress. No timestamp or text label in the header KPI area — only the action button. The last scan time is displayed in the page body below.
+Disabled with spinner while a scan is in progress. Last scan time is in the page body.
 
 ## Purpose
 
-Fetches the repository list from every source account in `github_sources` and reconciles it against projects on disk in `PROJECTS_DIR`. After a scan, the Repositories and Projects tabs reflect the updated data. This screen is the single entry point for refreshing the GitHub repo list.
+Fetches the repository list from every configured source account and reconciles it against `PROJECTS_DIR`. After a scan, the Repositories and Projects tabs reflect the updated data. This is the only entry point for refreshing the GitHub repo list.
 
 ## Prerequisites
 
-- GitHub must be configured (GitHub Auth ✅ and GitHub SSH ✅).
-- At least one source account must have at least one readable repository (enforced by the tab disable gate in UI-GENERAL).
-- PROJECTS_DIR must be set.
+- GitHub configured (Auth ✅ and ≥1 source in `github_sources`)
+- `PROJECTS_DIR` set
 
-If unconfigured, the tab is disabled (not hidden) — see UI-GENERAL tab gates.
+If unconfigured, the tab is disabled — see UI-GENERAL tab gates.
+
+## Counting Domain
+
+All numeric rows in the results table count from the same domain: **`github_repos` for each source account**. This ensures rows always add up correctly.
+
+| Term | Counts |
+|------|--------|
+| **On GitHub** | Repos returned by the GitHub API for this source — the full set Marina knows about |
+| **Downloaded** | Subset of On GitHub that have a matching directory in `PROJECTS_DIR` |
+| **Not Downloaded** | On GitHub minus Downloaded — repos not yet cloned locally |
+| **Conformed** | Subset of Downloaded that pass `bin/ProjectValidate.sh` |
+
+Invariants that must always hold:
+- `Downloaded + Not Downloaded = On GitHub`
+- `Conformed ≤ Downloaded`
+
+**Other column** is the exception: it counts local projects in `PROJECTS_DIR` whose GitHub remote URL does not match any configured source. For Other, "Downloaded" = total Other projects (all are local by definition); "On GitHub" and "Not Downloaded" are not applicable.
 
 ## Layout
 
-Single-column, max-width 900px, centered. Last scan timestamp, then the results table. The Scan action button lives in the page header KPI (not repeated here).
+Single-column, max-width 900px, centered. Timestamp line, then results table.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  Last scan: 2026-06-01 09:12  (server startup)               │
-│                                                              │
-│  ┌────────────────┬─────────────────┬──────────┬───────────┐ │
-│  │                │ webcloudstudio  │ acme-org │ Other     │ │
-│  ├────────────────┼─────────────────┼──────────┼───────────┤ │
-│  │ Project Count  │       42        │    8     │     5     │ │
-│  │ Git Projects   │       38        │    8     │     0     │ │
-│  │ Conformed      │       21        │    3     │     1     │ │
-│  │ Not Downloaded │       24        │    5     │    n/a    │ │
-│  └────────────────┴─────────────────┴──────────┴───────────┘ │
-└──────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  Last scan: 2026-06-03 09:12  (server startup)                   │
+│                                                                  │
+│  ┌──────────────────────────┬──────────────────┬───────────────┐ │
+│  │                          │ webcloudstudio   │ Other         │ │
+│  ├──────────────────────────┼──────────────────┼───────────────┤ │
+│  │ On GitHub          ℹ️    │        42        │      —        │ │
+│  │ Downloaded         ℹ️    │        18        │       5       │ │
+│  │ Conformed          ℹ️    │        12        │       3       │ │
+│  │ Not Downloaded     ℹ️    │        24        │      —        │ │
+│  │ ──────────────────────── │ ──────────────── │ ───────────── │ │
+│  │ Total Visible      ℹ️    │        18        │       5       │ │
+│  └──────────────────────────┴──────────────────┴───────────────┘ │
+└──────────────────────────────────────────────────────────────────┘
 ```
+
+Numbers in this example: 18 + 24 = 42 ✓. Conformed 12 ≤ Downloaded 18 ✓.
 
 ## Scan Action
 
-The `[Scan GitHub Now]` button lives in the page header KPI (see Header KPIs). The page body shows the last scan timestamp and results only.
+`[Scan GitHub Now]` lives in the page header KPI. On click, HTMX targets both `#scan-timestamp` and `#scan-results` independently.
 
 | Element | Behaviour |
 |---------|-----------|
-| Last scan timestamp | The time of the most recent scan. Initialised at Marina startup. Persisted in `platform_stats.last_scan`. Shown as absolute datetime with relative label (e.g. `2026-06-01 09:12 · server startup`). Element ID `scan-timestamp`. |
-
-When the header button triggers a scan it targets both `#scan-timestamp` and `#scan-results` via HTMX for independent inline updates.
-
-The button is always enabled when the tab is accessible.
+| Timestamp | Absolute datetime + relative label (e.g. `2026-06-03 09:12 · server startup`). Persisted in `platform_stats.last_scan`. Element ID `scan-timestamp`. |
+| No scan yet | Table absent; replaced with: `No scan yet — click Scan GitHub Now to begin.` |
 
 ## Results Table
 
-Displayed after a scan has been run (table is absent before first scan; replaced with "No scan yet — click SCAN GITHUB NOW.").
+One column per entry in `github_sources`, plus **Other** (always last). Columns appear in the order sources were added.
 
-Columns — one per entry in `github_sources`, plus an **Other** column (always last):
+### Row Definitions
 
-| Column | Content |
-|--------|---------|
-| `{source_account}` | Repos fetched from that GitHub account |
-| Other | Projects in `PROJECTS_DIR` whose `git_repo` field is blank, unrecognised, or missing |
+Each row label has a `ℹ️` icon. Hovering the icon shows the tooltip.
 
-Rows — four fixed rows, one per metric:
+| Row | Tooltip | Source query | Other column |
+|-----|---------|-------------|--------------|
+| **On GitHub** | Repos found on GitHub for this source account during the last scan | `COUNT(*) FROM github_repos WHERE source_account = {col}` | `—` (N/A) |
+| **Downloaded** | Repos cloned into PROJECTS_DIR (present on disk) | `COUNT(*) FROM github_repos WHERE source_account = {col} AND is_downloaded = 1` | `COUNT(*) FROM projects WHERE source_account IS NULL` |
+| **Conformed** | Downloaded repos that pass Marina standards (valid METADATA.md) | `COUNT(*) FROM github_repos WHERE source_account = {col} AND is_downloaded = 1 AND is_conformed = 1` | same filter on `projects` |
+| **Not Downloaded** | Repos on GitHub not yet cloned locally (On GitHub − Downloaded) | `COUNT(*) FROM github_repos WHERE source_account = {col} AND is_downloaded = 0` | `—` (N/A) |
+| **Total Visible** | Total projects visible for this source (= Downloaded for named sources) | Same as Downloaded | Same as Downloaded |
 
-| Row | Description | Source |
-|-----|-------------|--------|
-| Project Count | Total repositories known for this source | `github_repos` count WHERE `source_account = {col}` |
-| Git Projects | Count of local projects (in `PROJECTS_DIR`) whose `git_repo` matches a repo from this source | `projects.git_repo` JOIN `github_repos` |
-| Conformed | Count of local projects with a valid `METADATA.md` (conformed to Marina standards) | `projects.is_conformed = 1` |
-| Not Downloaded | Repos in `github_repos` for this source that have no matching directory in `PROJECTS_DIR` | `github_repos.is_downloaded = 0` |
+`Total Visible` is a summary row separated by a thin rule. It equals `Downloaded` for named source columns and `Downloaded` for Other. It exists to make the total clear at a glance.
 
-**Other column:** For the "Other" column, "Project Count" = count of `projects` with no `git_repo` or a `git_repo` not matching any known source. "Git Projects" and "Not Downloaded" are not applicable (show `—`). "Conformed" = count of those projects with `is_conformed = 1`.
+### Other Column
 
-No "Catalog Last Published" row.
+Projects in `PROJECTS_DIR` with a `.git/` folder and a `github.com` remote, but whose remote URL owner does not match any entry in `github_sources`. These are valid GitHub projects Marina can manage but has not scanned from a configured source.
+
+| Row | Value |
+|-----|-------|
+| On GitHub | `—` |
+| Downloaded | Count of `projects` with `source_account IS NULL` |
+| Conformed | Count of those with `is_conformed = 1` |
+| Not Downloaded | `—` |
+| Total Visible | = Downloaded |
+
+### Cell Styling
+
+| Value | Style |
+|-------|-------|
+| Zero in a meaningful row | Amber text (`var(--mn-hdr-warn-bg)`) to signal attention |
+| `—` (N/A) | Muted, centered |
+| Positive number | Normal weight |
+| Conformed = Downloaded (100%) | Teal text |
 
 ## API
 
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
-| POST | `/api/repositories/sync` | — | Updated scan timestamp + results table HTML fragment |
-| GET | `/api/setup/scan/status` | — | JSON: `{ last_scan, sources: [{ account, repo_count, git_project_count, conformed_count, not_downloaded }], other: { project_count, conformed_count } }` |
+| POST | `/api/repositories/sync` | — | Updated `#scan-timestamp` + `#scan-results` HTML fragments |
+| GET | `/api/setup/scan/status` | — | JSON: `{ last_scan, sources: [{ account, on_github, downloaded, conformed, not_downloaded }], other: { downloaded, conformed } }` |
 
 ## Data Flow
 
 | Reads | Writes |
 |-------|--------|
 | `github_sources` table (column headings) | `platform_stats.last_scan` (on sync) |
-| `github_repos` table | `github_repos` table (upsert on sync) |
-| `projects` table (`git_repo`, `is_conformed`) | None |
-| `PROJECTS_DIR` (env) | None |
+| GitHub API `/users/{name}/repos` or `/orgs/{name}/repos` per source | `github_repos` table (upsert on sync) |
+| `projects` table (`source_account`, `is_conformed`) | `github_repos.is_downloaded` (updated if local dir found) |
+| `PROJECTS_DIR` filesystem | None |
 
 ## Open Questions
 
-- Should Marina always run a scan at startup (even if `github_repos` is populated), or only when the table is empty? V1: scan at startup always, persist the startup time as `last_scan`.
-- Should the table show a diff (new/removed repos since last scan)? V2.
+- Should the table show a diff (new / removed repos since last scan)? V2.
+- Should Marina auto-scan at startup if `github_repos` is empty? V1: yes — scan once on startup.
