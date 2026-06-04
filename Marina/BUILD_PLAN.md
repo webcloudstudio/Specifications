@@ -9,7 +9,7 @@
 
 ## 1: Foundation
 
-stack: common.md (7k), python.md (9k)
+stack: common.md (7k), python.md (10k)
 rules: CLAUDE_RULES.md, oneshot_build_rules.md
 specifications: DATABASE.md (10k)
 context: ARCHITECTURE.md, FUNCTIONALITY.md
@@ -17,7 +17,7 @@ instructions: |
   Build the foundation only — do not implement screens or features yet.
   Create the Flask app factory, SQLite schema (from DATABASE.md), bin/start.sh, bin/common.sh.
   Ensure the /health endpoint returns 200.
-# Estimated prompt: ~54KB  (~14k tokens)
+# Estimated prompt: ~56KB  (~14k tokens)
 
 ## 2: Infrastructure
 
@@ -47,7 +47,7 @@ specifications: FEATURE-ACCESS-CONTROL.md (4k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /onboard.
-# Estimated prompt: ~31KB  (~7k tokens)
+# Estimated prompt: ~31KB  (~8k tokens)
 
 ## 5: Asyncqueue
 
@@ -67,7 +67,7 @@ specifications: FEATURE-CATALOG-PUBLISH.md (2k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /catalog.
-# Estimated prompt: ~29KB  (~7k tokens)
+# Estimated prompt: ~30KB  (~7k tokens)
 
 ## 7: Report Ingest
 
@@ -77,7 +77,7 @@ specifications: FEATURE-REPORT-INGEST.md (3k)
 context: ARCHITECTURE.md
 instructions: |
   Implement routes: POST /heartbeat, POST /events, GET /health/{project}.
-# Estimated prompt: ~29KB  (~7k tokens)
+# Estimated prompt: ~30KB  (~7k tokens)
 
 ## 8: S3 Share
 
@@ -102,7 +102,7 @@ instructions: |
 smoke:
   - curl -sf http://localhost:${PORT}/catalog -o /dev/null
   - curl -sf http://localhost:${PORT}/capabilities -o /dev/null
-# Estimated prompt: ~29KB  (~7k tokens)
+# Estimated prompt: ~30KB  (~7k tokens)
 
 ## 10: Project Ops
 
@@ -127,7 +127,7 @@ smoke:
   - curl -sf http://localhost:${PORT}/setup/aws -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/github -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/projects -o /dev/null
-# Estimated prompt: ~87KB  (~22k tokens)
+# Estimated prompt: ~88KB  (~22k tokens)
 
 ## 12: SETUP UI2
 
@@ -151,4 +151,4 @@ specifications: CHANGE_LOG.md (1k)
 context: ARCHITECTURE.md
 instructions: |
   Implement the specification files for: New Specs — place in build order.
-# Estimated prompt: ~22KB  (~5k tokens)
+# Estimated prompt: ~23KB  (~5k tokens)
