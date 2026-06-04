@@ -17,9 +17,19 @@ instructions: |
   Build the foundation only — do not implement screens or features yet.
   Create the Flask app factory, SQLite schema (from DATABASE.md), bin/start.sh, bin/common.sh.
   Ensure the /health endpoint returns 200.
-# Estimated prompt: ~54KB  (~13k tokens)
+# Estimated prompt: ~54KB  (~14k tokens)
 
-## 2: Marina Lib
+## 2: Infrastructure
+
+stack: python_compact.md (5k)
+rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
+specifications: FEATURE-INFRA.md (8k)
+context: ARCHITECTURE.md
+instructions: |
+  Implement routes: —.
+# Estimated prompt: ~35KB  (~9k tokens)
+
+## 3: Marina Lib
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -29,7 +39,7 @@ instructions: |
   Implement routes: —.
 # Estimated prompt: ~30KB  (~7k tokens)
 
-## 3: Access Control
+## 4: Access Control
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -39,7 +49,7 @@ instructions: |
   Implement routes: POST /onboard.
 # Estimated prompt: ~31KB  (~7k tokens)
 
-## 4: Asyncqueue
+## 5: Asyncqueue
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -49,7 +59,7 @@ instructions: |
   Implement routes: POST /queue/{queue}.
 # Estimated prompt: ~30KB  (~7k tokens)
 
-## 5: Catalog Publish
+## 6: Catalog Publish
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -59,7 +69,7 @@ instructions: |
   Implement routes: POST /catalog.
 # Estimated prompt: ~29KB  (~7k tokens)
 
-## 6: Report Ingest
+## 7: Report Ingest
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -69,7 +79,7 @@ instructions: |
   Implement routes: POST /heartbeat, POST /events, GET /health/{project}.
 # Estimated prompt: ~29KB  (~7k tokens)
 
-## 7: S3 Share
+## 8: S3 Share
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -81,7 +91,7 @@ smoke:
   - curl -sf http://localhost:${PORT}/share -o /dev/null
 # Estimated prompt: ~29KB  (~7k tokens)
 
-## 8: Catalog Read
+## 9: Catalog Read
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -94,7 +104,7 @@ smoke:
   - curl -sf http://localhost:${PORT}/capabilities -o /dev/null
 # Estimated prompt: ~29KB  (~7k tokens)
 
-## 9: Project Ops
+## 10: Project Ops
 
 stack: python_compact.md (5k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
@@ -104,11 +114,11 @@ instructions: |
   Implement routes: —.
 # Estimated prompt: ~32KB  (~8k tokens)
 
-## 10: SETUP UI
+## 11: SETUP UI
 
 stack: ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: SCREEN-SETUP-AWS.md (9k), SCREEN-SETUP-GITHUB.md (10k), SCREEN-SETUP-PROJECTS.md (10k), SCREEN-SETUP-REPOSITORIES.md (7k)
+specifications: SCREEN-SETUP-AWS.md (9k), SCREEN-SETUP-GITHUB.md (10k), SCREEN-SETUP-PROJECTS.md (8k), SCREEN-SETUP-REPOSITORIES.md (7k)
 context: ARCHITECTURE.md, UI-GENERAL.md
 instructions: |
   Create routes: GET /setup/aws, GET /setup/github, GET /setup/projects, GET /setup/repositories.
@@ -117,28 +127,28 @@ smoke:
   - curl -sf http://localhost:${PORT}/setup/aws -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/github -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/projects -o /dev/null
-# Estimated prompt: ~84KB  (~21k tokens)
+# Estimated prompt: ~87KB  (~22k tokens)
 
-## 11: SETUP UI2
+## 12: SETUP UI2
 
 stack: ui-flask.bootstrap-client.md (7k)
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: SCREEN-SETUP-SETTINGS.md (5k), SCREEN-SETUP-SUMMARY.md (8k), SCREEN-SETUP-SCAN.md (6k), SCREEN-SETUP-TERRAFORM.md (13k)
-context: ARCHITECTURE.md, UI-GENERAL.md
+specifications: SCREEN-SETUP-SETTINGS.md (8k), SCREEN-SETUP-SUMMARY.md (7k), SCREEN-SETUP-SCAN.md (7k), SCREEN-SETUP-TERRAFORM.md (10k)
+context: ARCHITECTURE.md, UI-GENERAL.md, FEATURE-INFRA.md
 instructions: |
-  Create routes: GET /setup/settings, POST /setup/settings, GET /setup/summary, GET /setup, GET /, GET /setup/scan, GET /setup/terraform.
+  Create routes: GET /setup/settings, GET /setup/summary, GET /setup, GET /, GET /setup/scan, GET /setup/terraform.
   Implement screens using HTMX + Bootstrap 5 patterns from UI-GENERAL.md.
 smoke:
   - curl -sf http://localhost:${PORT}/setup/settings -o /dev/null
   - curl -sf http://localhost:${PORT}/setup/summary -o /dev/null
   - curl -sf http://localhost:${PORT}/setup -o /dev/null
-# Estimated prompt: ~81KB  (~20k tokens)
+# Estimated prompt: ~95KB  (~24k tokens)
 
-## 12: New Specs — place in build order
+## 13: New Specs — place in build order
 
 rules: CLAUDE_RULES_compact.md, oneshot_build_rules_compact.md
-specifications: CHANGE_LOG.md (3k)
+specifications: CHANGE_LOG.md (1k)
 context: ARCHITECTURE.md
 instructions: |
   Implement the specification files for: New Specs — place in build order.
-# Estimated prompt: ~24KB  (~6k tokens)
+# Estimated prompt: ~22KB  (~5k tokens)

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260603 V7 |
+| Version | 20260603 V8 |
 | Header Background | `mn-hdr-bg--cloud` |
 | Header Help Text | Terraform is used to configure the AWS. |
 | Route | `GET /setup/terraform` |
@@ -11,7 +11,7 @@
 | Sub Menu | Terraform |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
 | Description | Terraform reference and verification screen. Shows what Terraform provisions, lists the commands to run, and verifies the Marina API endpoint after deployment. Does not execute Terraform — the user runs commands in a terminal. |
-| Depends On | UI-GENERAL.md, SCREEN-SETUP-AWS.md |
+| Depends On | UI-GENERAL.md, SCREEN-SETUP-AWS.md, FEATURE-INFRA.md |
 | Provides | GET /setup/terraform |
 
 ## Header KPIs
@@ -50,10 +50,11 @@ Single-column, max-width 900px, centered. Three `mn-card` sections: Terraform CL
 │  ▶  COMMANDS TO RUN                             [📋 Copy]    │
 │  ─────────────────────────────────────────────────────────  │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │  cd infra/foundation && terraform init               │   │
-│  │  terraform plan -var="org={marina_org}"              │   │
-│  │  terraform apply -var="org={marina_org}"             │   │
-│  │  terraform output api_url                            │   │
+│  │  cd infra                                            │   │
+│  │  ./bin/tf-init.sh backend  && ./bin/tf-apply.sh ...  │   │
+│  │  ./bin/tf-init.sh foundation && ./bin/tf-apply.sh .. │   │
+│  │  ./bin/tf-init.sh services && ./bin/tf-apply.sh ...  │   │
+│  │  terraform -chdir=services output api_url            │   │
 │  └──────────────────────────────────────────────────────┘   │
 │  ⚠️  Apply creates real AWS resources in your account.       │
 ├──────────────────────────────────────────────────────────────┤
@@ -86,16 +87,19 @@ sudo apt-get update && sudo apt-get install -y terraform
 
 ## COMMANDS TO RUN Card
 
-Read-only reference card. Single dark code block containing all four commands. One `[📋 Copy]` icon button in the top-right corner of the block copies all commands to the clipboard as a single string (newline-separated). The copy icon uses `bi-clipboard` styled as a ghost icon button matching the Re-check (`bi-arrow-clockwise`) button style.
+Read-only reference card. Single dark code block containing the layered apply sequence. One `[📋 Copy]` icon button in the top-right corner of the block copies all commands to the clipboard as a single string (newline-separated). The copy icon uses `bi-clipboard` styled as a ghost icon button matching the Re-check (`bi-arrow-clockwise`) button style.
 
-The `{marina_org}` placeholder is replaced at render time with the live `settings.marina_org` value. If `marina_org` is not set, the placeholder is left as `{marina_org}` and a hint is shown beneath the block: "Set Marina Org on the AWS tab first."
+The commands drive the `infra/bin/` wrappers, which apply each layer in order with `-var-file=../env.tfvars` (the source of `project`/`org`/`region`/`phase` — see `FEATURE-INFRA.md`). The three layers are applied in dependency order: `backend/` (one-time state bootstrap, local state) → `foundation/` (catalog table, queues, buckets, IAM) → `services/` (Lambdas + API Gateway). `api_url` is an output of the **`services/`** layer — never `foundation/`.
 
 ```
-cd infra/foundation && terraform init
-terraform plan -var="org={marina_org}"
-terraform apply -var="org={marina_org}"
-terraform output api_url
+cd infra
+./bin/tf-init.sh backend    && ./bin/tf-apply.sh backend
+./bin/tf-init.sh foundation && ./bin/tf-apply.sh foundation
+./bin/tf-init.sh services   && ./bin/tf-apply.sh services
+terraform -chdir=services output api_url
 ```
+
+Org is not passed on the command line. It is read from `infra/env.tfvars`; Marina writes the live `settings.marina_org` into that file when the operator sets it on the AWS tab. If `marina_org` is not set, a hint is shown beneath the block: "Set Marina Org on the AWS tab first — it is written to infra/env.tfvars."
 
 Static note below the block: `⚠️ Apply creates real AWS resources in your account and may incur costs.`
 
@@ -108,7 +112,7 @@ Inline-editable field for `MARINA_API_URL`. The user pastes the value from `terr
 | Element | Behaviour |
 |---------|-----------|
 | Input field | Inline-editable. Tab-out / blur triggers `POST /api/setup/config` with `key=MARINA_API_URL`. |
-| Auto-set on page load | On page load, if `MARINA_API_URL` is not set, Marina silently runs `terraform output api_url` (subprocess, 5-second timeout). If it returns a valid HTTPS URL, the field is auto-populated, saved via `/api/setup/terraform/auto-read-url`, and a toast confirms "MARINA_API_URL set from Terraform output." No user action required. |
+| Auto-set on page load | On page load, if `MARINA_API_URL` is not set, Marina silently runs `terraform -chdir=infra/services output -raw api_url` (subprocess, 5-second timeout — `api_url` is a `services/` layer output, not `foundation/`). If it returns a valid HTTPS URL, the field is auto-populated, saved via `/api/setup/terraform/auto-read-url`, and a toast confirms "MARINA_API_URL set from Terraform output." No user action required. |
 | `[↻ Verify Endpoint]` | Calls `POST /api/setup/terraform/verify-endpoint`. Marina pings the URL with a 5-second timeout. Returns ✅ reachable or ❌ unreachable with HTTP status or timeout reason. |
 | Status line | Updated by verify: `✅ Endpoint reachable` / `⚠️ Timeout` / `❌ {HTTP error}` |
 
@@ -133,7 +137,7 @@ The old `install`, `init`, `plan`, `apply`, `save-env`, and `logs` endpoints are
 | `settings.marina_org` | `settings` table via `/api/setup/config` or `/api/setup/terraform/auto-read-url` |
 | `MARINA_API_URL` (settings table, `.env` fallback) | `settings` table (`MARINA_API_URL`) |
 | `terraform version` (subprocess, read-only) | None |
-| `terraform output api_url` (subprocess, page load auto-set) | None |
+| `terraform -chdir=infra/services output -raw api_url` (subprocess, page load auto-set) | None |
 | HTTP GET `MARINA_API_URL` (reachability ping only) | None |
 
 ## Open Questions

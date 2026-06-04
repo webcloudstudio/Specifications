@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260528 V1 |
+| Version     | 20260603 V2 |
 | Description | One-paragraph index of Marina features by phase; detail lives in the individual FEATURE-*.md files. |
 
 **Description:** High-level index of Marina's features and their build phase. Implementation detail
@@ -13,6 +13,10 @@ graph and minimal builds target.
 
 ## Phase 1 — Private Read / Ingest / Report Surface
 
+- **Infrastructure (Terraform)** (`FEATURE-INFRA.md`) — the layered `infra/` Terraform tree
+  (`backend/`, `foundation/`, `services/`, `modules/`) that provisions the entire AWS broadcast plane:
+  the DynamoDB catalog table, SQS queues, S3 buckets, IAM/OIDC roles, Lambdas, and the API Gateway whose
+  `api_url` output is `MARINA_API_URL`. Real HCL — every other cloud feature is deployed by it.
 - **Marina Library** (`FEATURE-MARINA-LIB.md`) — the `marina` Python package: the single cloud boundary
   (`catalog`, `report`, `queue`, `share`). Every other feature depends on it. Published in its own git
   repo; consumers add it via `uv`.
