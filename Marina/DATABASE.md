@@ -2,7 +2,7 @@
 
 | Field       | Value |
 |-------------|-------|
-| Version     | 20260602 V3 |
+| Version     | 20260603 V1 |
 | Description | DynamoDB single-table catalog (cloud) and SQLite local database (UI state, settings, user profile, GitHub cache). |
 
 **Description:** The DynamoDB single-table hierarchical schema and the exact access patterns it serves.
@@ -208,7 +208,7 @@ Standard keys:
 | `scan_projects_total` | Count of projects found in `PROJECTS_DIR` on last scan |
 | `projects_by_state_{status}` | Count per status value (e.g. `projects_by_state_ACTIVE`) |
 | `catalog_last_published` | ISO-8601 timestamp of last DynamoDB publish |
-| `last_scan` | ISO-8601 timestamp of most recent Git Scan (set at startup and after manual scan) |
+| `last_scan` | ISO-8601 timestamp with UTC offset of most recent Git Scan (e.g. `2026-06-03T14:50:56+00:00`). Must include offset — never truncate to `HH:MM` or strip timezone. Set at startup and after manual scan. |
 | `python_aws_ok` | `1` / `0` — result of last boto3 connectivity check from the AWS tab |
 | `terraform_deployed` | `1` / `0` — set to `1` after a successful `terraform apply` completes |
 | `endpoint_reachable` | `1` / `0` — result of last HTTP ping to `MARINA_API_URL`; updated by Summary status check |
