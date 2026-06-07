@@ -1,0 +1,28 @@
+{
+  "console": {
+    "name": "Drydock Console",
+    "default_item": "board",
+    "state_db": "data/console_state.sqlite"
+  },
+  "project": {
+    "id": "Drydock",
+    "name": "Drydock",
+    "description": "oneshot build \u2014 board generated from AGILE_PLAN.md by console_sync."
+  },
+  "items": [
+    {
+      "id": "spec",
+      "label": "Specification",
+      "section": "core",
+      "type": "markdown",
+      "path": "specification.md"
+    },
+    {
+      "id": "board",
+      "label": "Sprint Board",
+      "section": "plan",
+      "type": "kanban",
+      "path": "tickets.json"
+    }
+  ]
+}

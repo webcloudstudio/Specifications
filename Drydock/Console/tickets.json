@@ -1,0 +1,95 @@
+{
+  "tickets": [
+    {
+      "id": "story1",
+      "title": "AGENT_RULES rename and constitution export",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "AGENT_RULES.md is the only rules file injected by ProjectUpdate.sh; CLAUDE_RULES.md is no longer written or referenced in any injected project",
+        "BUSINESS_RULES.md \u2192 bin/summarize_rules.sh pipeline produces a valid AGENT_RULES.md with an incremented version after the rename",
+        "constitution.md output contains all nine Spec Kit articles without raw Prototyper-internal content leaking into the article bodies",
+        "bin/ProjectValidate.sh reports no CLAUDE_RULES references in any project that has been updated after story 1 is shipped"
+      ],
+      "body": "Update bin/summarize_rules.sh, bin/ProjectUpdate.sh, bin/ProjectInitialize.sh, bin/project_manager.py, and all AGENTS.md references to use AGENT_RULES.md. The BUSINESS_RULES.md \u2192 summarize \u2192 AGENT_RULES.md pipeline stays as the single source. Add a second output step to bin/summarize_rules.sh that renders AGENT_RULES.md into a Spec Kit nine-article constitution.md shape, writing it alongside AGENT_RULES.md. Syntax-aware marker injection must survive the rename."
+    },
+    {
+      "id": "story2",
+      "title": "speckit_export adapter",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "speckit_export writes constitution.md, spec.md, plan.md, and tasks.md to the output directory without error for a real Prototyper project",
+        "speckit_export is idempotent \u2014 running it twice on the same source produces identical output files"
+      ],
+      "body": "Create bin/speckit_export.sh (with a supporting Python module bin/speckit_export.py) that reads a Prototyper specification directory and writes Spec Kit-compatible output files: constitution.md (from AGENT_RULES.md), spec.md (merged from ARCHITECTURE.md + FUNCTIONALITY.md), plan.md (from BUILD_PLAN.md), and tasks.md (from AGILE_PLAN.md). Output goes to a .speckit/ subdirectory of the target or a path argument. Depends on the adapter direction questionnaire decision."
+    },
+    {
+      "id": "story3",
+      "title": "speckit_import adapter",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "speckit_import produces a spec directory that passes bin/validate.sh for a real Spec Kit project",
+        "speckit_import never overwrites an existing file in the destination without an explicit --force flag"
+      ],
+      "body": "Create bin/speckit_import.sh (with bin/speckit_import.py) that reads a Spec Kit project directory containing constitution.md, spec.md, plan.md, and tasks.md and writes a minimal Prototyper spec directory: AGENT_RULES.md (from constitution.md), ARCHITECTURE.md (from spec.md), AGILE_PLAN.md or BUILD_PLAN.md (from plan.md/tasks.md), and a METADATA.md with fields inferred from spec.md frontmatter. The result must pass bin/validate.sh. Depends on the adapter direction questionnaire decision and story 2 design."
+    },
+    {
+      "id": "story4",
+      "title": "command surface shim",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "each command shim delegates to exactly one existing bin/ script with no logic added in the shim body",
+        "COMMANDS.md documents every exposed command with its delegated script and argument mapping"
+      ],
+      "body": "Create .claude/skills/ entries for each command. Each shim resolves the current project's spec directory from METADATA.md and calls the appropriate bin/ script: /specify \u2192 bin/validate.sh, /plan \u2192 bin/build_plan.sh summary, /tasks \u2192 bin/build_plan.sh --analysis, /implement \u2192 bin/oneshot_phased.sh, /analyze \u2192 bin/spec_iterate.sh, /clarify \u2192 interactive Open Questions prompt. No new logic lives in the shims. Write COMMANDS.md documenting the full surface with argument mapping. Command names are subject to the questionnaire decision."
+    },
+    {
+      "id": "story5",
+      "title": "Console governance over Spec Kit tasks.md",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "Console renders a Spec Kit tasks.md with at least one ticket visible on the board in the correct column",
+        "a Console sign-off on a Spec Kit task is persisted to console_state.sqlite and reflected on board reload"
+      ],
+      "body": "Add a speckit mode to bin/console_sync.py (invoked with a --speckit flag or detected from file presence) that reads a Spec Kit tasks.md markdown task list and writes Console-compatible tickets.json and console.json. Task checkboxes map to ticket state; unchecked \u2192 pending, checked \u2192 done. Wire the call into oneshot.sh for Spec Kit projects, or document the standalone call sequence. The console.json must be re-deliverable into the target directory on build without losing sign-off state."
+    },
+    {
+      "id": "story6",
+      "title": "A/B comparative build harness",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "the two build directories produced by ab_build.sh share no mutable state during or after the run",
+        "ab_build.sh records engine name, wall-clock time, phase count, and exit code in data/ab_runs.jsonl for every run"
+      ],
+      "body": "Create bin/ab_build.sh that accepts ProjectName and TargetDir, clones the target to two sibling directories (TargetDir_openai, TargetDir_claude), and calls bin/oneshot_phased.sh against each using an engine selector (env var or flag). The driver runs both engines to completion, waits, and records engine name, timing, phase count, and exit code per run to data/ab_runs.jsonl. Engines must not share mutable state. Exact engine integration depends on the A/B harness questionnaire decision."
+    },
+    {
+      "id": "story7",
+      "title": "implementation scoring (how_good_is_my_implementation)",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "score_build.sh emits scorecard.json with a pass/fail/skip result for every AC in AGILE_PLAN.md",
+        "score_build.sh never writes to or deletes files in the build directory it is scoring",
+        "comparative scorecard shows AC text and pass/fail per engine side by side when two target directories are supplied"
+      ],
+      "body": "Create bin/score_build.sh that reads AGILE_PLAN.md for AC items, then for each assertion runs the corresponding pytest check and for each guardrail runs an LLM judge against the built code. Writes data/scorecard.json (per-AC pass/fail/skip with reason) and docs/scorecard.html. When called with two target directories, emits a side-by-side comparison table: AC text, pass/fail per engine, phase. The script must never mutate the directories it scores. Depends on story 6 for the two-directory call convention."
+    },
+    {
+      "id": "story8",
+      "title": "white paper and roadmap publication",
+      "kind": "story",
+      "status": "backlog",
+      "ac": [
+        "bin/build_whitepaper.sh renders prototyper.md to HTML and PDF without errors",
+        "roadmap page lists every backlog item with its current AGILE_PLAN.md state; the page rebuilds automatically when the plan changes"
+      ],
+      "body": "Author docs/whitepapers/prototyper.md covering: the framework's differentiators versus Spec Kit/Tessl/Kiro, the Drydock build walkthrough, and the A/B methodology. Run bin/build_whitepaper.sh to produce docs/prototyper.html and docs/prototyper.pdf. Extend bin/build_documentation.sh (or add bin/build_roadmap.sh) to render the Drydock IDEAS.md backlog into docs/roadmap.html with per-item build status derived from AGILE_PLAN.md state. Both artifacts must build without errors."
+    }
+  ]
+}
