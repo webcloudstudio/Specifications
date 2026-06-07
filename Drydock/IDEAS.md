@@ -69,15 +69,15 @@ Wrap the scripts behind one entry point — `drydock <verb>` — in four steps, 
 
 - **Setup** — `drydock new` (scaffold), `decompose` (from code), `analyze` (conform raw notes),
   `validate`.
-- **Build** — `drydock build [--agile]` → one `PLAN.md`.
+- **Build** — `drydock build_plan [--agile]` → one `BUILD_PLAN.md`.
 - **Run** — `drydock run` (dispatches on plan mode), `console`.
 - **Iterate** — `drydock iterate`, `score`.
 
 ## Unify the Plan File
 
-Collapse `BUILD_PLAN.md` and `AGILE_PLAN.md` into a single `PLAN.md` with a `mode: phased | agile`
-header. `drydock build` writes it; `drydock run` reads the header and dispatches. One artifact, one
-run command, one place the state lives.
+Collapse `BUILD_PLAN.md` and `AGILE_PLAN.md` into a single `BUILD_PLAN.md` with a
+`mode: phased | agile` header. `drydock build_plan` writes it; `drydock run` reads the header and
+dispatches. One artifact, one run command, one place the state lives.
 
 ## Questions to Resolve
 
