@@ -52,7 +52,6 @@ Use a standard-library-first implementation:
 | CLI parsing and nested commands | `argparse` |
 | Paths and cross-platform filesystem behavior | `pathlib` |
 | File copying and directory operations | `shutil` |
-| Configuration serialization | `json` |
 | Typed internal contracts | `dataclasses`, `enum`, and type hints |
 | Logging | `logging` |
 | Packaged resource access | `importlib.resources` |
@@ -120,14 +119,19 @@ RulesEngine/stack/         -> Rigging/stack/
 RulesEngine/templates/     -> Rigging/templates/
 ```
 
-The copied Rigging is an intentional seed snapshot. Include generated and compact RulesEngine
-artifacts that are already present, including `CLAUDE_RULES.md`, `CLAUDE_RULES_compact.md`, and
-existing `_compact.md` stack files. Later Drydock workflows may change how these are generated.
+Drydock `Rigging/` is the renamed successor of Prototyper `RulesEngine/`. It is the same subsystem
+carried forward into Drydock, with minor changes made only where required by Drydock paths,
+terminology, packaging, or command contracts.
+
+The copied Rigging is the initial authoritative implementation, not merely reference material.
+Include generated and compact RulesEngine artifacts that are already present, including
+`CLAUDE_RULES.md`, `CLAUDE_RULES_compact.md`, and existing `_compact.md` stack files. Later Drydock
+workflows may change how these are generated.
 
 Within newly created Drydock files, use `Rigging` terminology and paths. Do not create new
-`RulesEngine` references. If copied seed content contains historical `RulesEngine` references,
-change only references that are required for the new Drydock paths to function; report remaining
-terminology debt.
+`RulesEngine` references. Copied Rigging content may retain internal `RulesEngine` wording during
+Lay the Keel where changing it would alter behavior or require broader review. Treat those as
+renaming work within the same subsystem, not uncertainty about Rigging's purpose.
 
 Do not copy Prototyper prompts during Lay the Keel. Create `prompts/README.md` explaining that
 prompts will be ported with the commands that consume them.
@@ -155,6 +159,7 @@ DRYDOCK_TARGET/
   METADATA.md
   README.md
   LICENSE
+  CODE_COVERAGE.md
   pyproject.toml
   .gitignore
   .env.sample
@@ -227,21 +232,40 @@ specification_directory
 target_directory
 ```
 
-Persist them as JSON under the user-specific configuration directory returned by:
+Persist them in a user-scoped `.env` file under the OS-appropriate Drydock configuration directory
+returned by:
 
 ```python
 platformdirs.user_config_path("drydock", appauthor=False)
 ```
 
-Use a file named `config.json`.
+Use this file:
 
-Resolution precedence:
+```text
+<user_config_path>/.env
+```
+
+The file contains:
+
+```dotenv
+SPECIFICATION_DIRECTORY=/absolute/path/to/specifications
+TARGET_DIRECTORY=/absolute/path/to/targets
+```
+
+`drydock config set` creates the configuration directory and writes this `.env` file. Users are not
+required to define system environment variables.
+
+The repository-root `.env.sample` documents these keys for users and tests; it is not the persisted
+global configuration file and the CLI does not read a repository-root `.env`.
+
+Effective-value precedence:
 
 1. Environment variables `SPECIFICATION_DIRECTORY` and `TARGET_DIRECTORY`.
-2. Values in global `config.json`.
+2. Values persisted in the user-scoped Drydock `.env`.
 3. No implicit directory guesses.
 
-Do not read or write `.env` files for global Drydock configuration.
+Use a small internal parser/writer for these two known keys. Preserve unrelated keys and comments if
+the Drydock `.env` file contains them. Do not add `python-dotenv` in Lay the Keel.
 
 Requirements:
 
@@ -251,6 +275,94 @@ Requirements:
 - `config show` prints each effective value and its source.
 - Commands fail with an actionable message when a required path is not configured.
 - Tests isolate configuration from the real user profile.
+- Never read a project-local `.env` for global Drydock configuration.
+
+## Command Readiness Artifact
+
+Create root-level `CODE_COVERAGE.md` as the manual readiness artifact for Drydock. Despite its
+name, this file tracks command implementation and behavioral test coverage, not line coverage.
+
+It is a maintained product artifact:
+
+- Include every documented Drydock command path as its own row.
+- Order rows by the intended delivery sequence below.
+- Update it whenever a command is implemented, changed, tested, or deliberately deferred.
+- Never mark a command `IMPLEMENTED` unless its real behavior exists.
+- Never mark a command `FUNCTIONAL TESTED` unless its real behavior has passed an automated test.
+- A deferred command whose stub behavior is tested is `STUBBED` and `STUB TESTED`, not implemented.
+- Keep a final summary showing implemented and functionally tested commands versus total commands.
+- Drydock is command-complete only when every command row is `IMPLEMENTED` and
+  `FUNCTIONAL TESTED`.
+
+Use this table schema:
+
+```markdown
+| Order | Command | Purpose | Implementation | Test Status | Evidence / Notes |
+|---:|---|---|---|---|---|
+```
+
+Use only these implementation values:
+
+```text
+NOT STARTED
+STUBBED
+IMPLEMENTED
+```
+
+Use only these test-status values:
+
+```text
+UNTESTED
+STUB TESTED
+FUNCTIONAL TESTED
+```
+
+Use this build order:
+
+1. **Foundation and initialization** — `--help`, `--version`, `config show`, both `config set`
+   forms, `init` including `--update` and `--force`, and `validate` including `--verbose`.
+2. **Documentation** — `document generate`, `document assemble`, then the full `document` pipeline.
+   Documentation is intentionally next because the existing Prototyper implementation is largely
+   complete and provides an early end-to-end port.
+3. **Rigging** — `rigging compact`, `rigging update`, and `rigging verify`.
+4. **Planning** — `plan init`, `plan create`, and `plan show`.
+5. **Build orientation and execution** — `build status`, `build`, then `build score`.
+6. **Change and refinement** — `iterate`, then `analyze`.
+7. **Brownfield and compatibility** — `import --format auto|source|speckit`.
+
+Lay the Keel must create `CODE_COVERAGE.md` with foundation commands marked `IMPLEMENTED` and
+`FUNCTIONAL TESTED` only after their tests pass. All deferred commands start as `STUBBED`; mark them
+`STUB TESTED` only when the required no-write and exit-code tests pass.
+
+The initial matrix must include separate rows for:
+
+```text
+drydock --help
+drydock --version
+drydock config show
+drydock config set specification_directory <path>
+drydock config set target_directory <path>
+drydock init <Spec>
+drydock init <Spec> --update
+drydock init <Spec> --force
+drydock validate <Spec>
+drydock validate <Spec> --verbose
+drydock document generate <Spec> <Target>
+drydock document assemble <Spec> <Target>
+drydock document <Spec> <Target>
+drydock rigging compact <Spec>
+drydock rigging update <Target>
+drydock rigging verify <Target>
+drydock plan init <Spec>
+drydock plan create <Spec>
+drydock plan show <Spec>
+drydock build status <Spec> <Target>
+drydock build <Spec> <Target>
+drydock build score <Spec> <Target>
+drydock iterate <Spec> <Target> [BOTH|SPEC|TGT] <Scope> <Change>
+drydock analyze <Spec> [<Target>]
+drydock import <Spec> <Target> --format <auto|source|speckit>
+```
 
 ## Specification Initialization Contract
 
@@ -388,7 +500,9 @@ Required verification:
 
 1. Install the package in an isolated environment.
 2. Run `drydock --help` and confirm every documented top-level command appears.
-3. Set temporary specification and target roots using `drydock config set`.
+3. Set temporary specification and target roots using `drydock config set`; confirm both values are
+   persisted to the isolated user-scoped Drydock `.env` and work without system environment
+   variables.
 4. Run `drydock init ExampleProject`.
 5. Run `drydock validate ExampleProject`.
 6. Run `drydock init ExampleProject --update` and confirm it is non-destructive.
@@ -398,8 +512,10 @@ Required verification:
 9. Confirm root `drydock --help` and `drydock --version` show the copyright notice.
 10. Run representative deferred commands, including all three `rigging` commands and all three
     `document` forms, and confirm exit code `2` with no filesystem changes.
-11. Run the full test suite and Ruff checks.
-12. Confirm `bin/drydock.sh`, `bin/drydock.ps1`, `python -m drydock`, and the installed `drydock`
+11. Verify `CODE_COVERAGE.md` contains every required command row and accurately reflects the
+    automated test results.
+12. Run the full test suite and Ruff checks.
+13. Confirm `bin/drydock.sh`, `bin/drydock.ps1`, `python -m drydock`, and the installed `drydock`
     entry point dispatch to the same Python CLI.
 
 Minimum acceptance commands:
@@ -410,6 +526,7 @@ ruff check .
 ruff format --check .
 drydock --help
 drydock config show
+test -f CODE_COVERAGE.md
 ```
 
 PowerShell behavior may be verified structurally when PowerShell is unavailable in the build
@@ -428,6 +545,8 @@ The build is complete only when:
 - Bash and PowerShell wrappers contain no business logic.
 - No `.bat` interface exists.
 - The proprietary Web Cloud Studio license is present and packaged.
+- `CODE_COVERAGE.md` exists, contains every Drydock command, follows the required build order, and
+  accurately reports implementation and automated-test status.
 - Tests and Ruff checks pass.
 - README documents installation, the working command subset, deferred commands, configuration
   locations, source-tree launchers, packaged Rigging behavior, and proprietary license.
