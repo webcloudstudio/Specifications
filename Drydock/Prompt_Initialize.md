@@ -7,10 +7,14 @@ This is a clean-room target build. Treat Prototyper as a read-only behavioral re
 source. Do not modify, move, rename, or delete any Prototyper or Specifications repository files.
 The target directory may be deleted and rebuilt repeatedly during testing.
 
-The Drydock product contract is defined by the current Drydock Specification and
-`docs/whitepapers/drydock.md` in Prototyper. Where the contract and legacy implementation differ,
-follow the Drydock contract. Record unresolved conflicts rather than silently preserving legacy
-behavior.
+At build time, the current Drydock build specification will be available as
+`<SPECIFICATION_DIRECTORY>/Drydock/drydock.md`. Use this precedence when sources differ:
+
+1. This `Prompt_Initialize.md` controls the scope and acceptance criteria for Lay the Keel.
+2. `Drydock/drydock.md` is the current Drydock product and behavior contract.
+3. Prototyper is the read-only behavioral reference and seed source.
+
+Record unresolved conflicts rather than silently preserving legacy behavior.
 
 ## Build Objective
 
@@ -28,15 +32,14 @@ drydock init <Spec> --update
 drydock init <Spec> --force
 drydock validate <Spec>
 drydock validate <Spec> --verbose
-drydock rigging update <Target>
-drydock rigging verify <Target>
 ```
 
 All other documented Drydock command paths must be present in help and return a clear,
 non-traceback message such as `drydock plan create: not implemented`, with exit code `2`.
 
 The initial build deliberately excludes planning engines, build execution, LLM calls, databases,
-the Console, import translation, scoring, documentation generation, and rigging compaction.
+the QuarterDeck, import translation, scoring, documentation generation, rigging compaction, and
+propagation of Rigging into target projects.
 
 ## Implementation Decisions
 
@@ -53,9 +56,7 @@ Use a standard-library-first implementation:
 | Typed internal contracts | `dataclasses`, `enum`, and type hints |
 | Logging | `logging` |
 | Packaged resource access | `importlib.resources` |
-| Hashing and rigging manifest | `hashlib` |
 | Dates | `datetime` |
-| Process invocation, only where later adapters require it | `subprocess` |
 | OS-appropriate global configuration directory | `platformdirs` |
 | Tests | `pytest` |
 | Linting and formatting | `ruff` |
@@ -74,6 +75,14 @@ drydock = "drydock.cli:main"
 The installed console entry point is the authoritative interface on every platform. Python package
 installation creates the appropriate Windows `drydock.exe` launcher, so do not maintain a `.bat`
 implementation.
+
+`drydock --version` and the root `drydock --help` output must print:
+
+```text
+Copyright (c) 2026 Web Cloud Studio. All rights reserved.
+```
+
+Do not print the copyright notice during every normal subcommand invocation.
 
 Also provide thin source-tree convenience launchers:
 
@@ -95,30 +104,46 @@ Before writing, identify:
 
 Fail before writing if both resolve to the same directory.
 
-Never modify `PROTOTYPER_SOURCE`.
+Never modify `PROTOTYPER_SOURCE`. The agent has full read access to `PROTOTYPER_SOURCE` — read any
+`bin/`, `RulesEngine/`, or `prompts/` file needed to understand the behavior being ported.
 
 Never copy Prototyper's `.git/`, generated documentation, logs, execution data, caches, virtual
 environments, backup files, or legacy Bash command implementations into Drydock.
 
-Use these source mappings:
+Copy the complete Prototyper `RulesEngine/` directory into Drydock as `Rigging/`. Preserve its
+complete directory structure and current contents. This includes all current files under:
 
-| Prototyper source | Drydock target |
-|---|---|
-| `RulesEngine/BUSINESS_RULES.md` | `Rigging/BUSINESS_RULES.md` |
-| `RulesEngine/SPECIFICATION_CONTRACT.md` | `Rigging/SPECIFICATION_CONTRACT.md` |
-| `RulesEngine/stack/` | `Rigging/stack/` |
-| `RulesEngine/spec_template/` | `Rigging/specification_templates/` |
-| `RulesEngine/templates/` | `Rigging/project_templates/` |
-| Relevant reusable prompt files | `prompts/` |
+```text
+RulesEngine/*              -> Rigging/*
+RulesEngine/spec_template/ -> Rigging/spec_template/
+RulesEngine/stack/         -> Rigging/stack/
+RulesEngine/templates/     -> Rigging/templates/
+```
 
-Do not mechanically copy `RulesEngine/CLAUDE_RULES.md`; it is a generated Prototyper artifact.
-Preserve other useful governance or branding files only when they are actively referenced by the
-new Drydock repository.
+The copied Rigging is an intentional seed snapshot. Include generated and compact RulesEngine
+artifacts that are already present, including `CLAUDE_RULES.md`, `CLAUDE_RULES_compact.md`, and
+existing `_compact.md` stack files. Later Drydock workflows may change how these are generated.
 
 Within newly created Drydock files, use `Rigging` terminology and paths. Do not create new
 `RulesEngine` references. If copied seed content contains historical `RulesEngine` references,
 change only references that are required for the new Drydock paths to function; report remaining
 terminology debt.
+
+Do not copy Prototyper prompts during Lay the Keel. Create `prompts/README.md` explaining that
+prompts will be ported with the commands that consume them.
+
+The root-level `Rigging/` directory is the human-editable source of truth. The installed Python
+package must also contain a synchronized read-only copy at `drydock/resources/Rigging/` so
+`drydock init` and `drydock validate` work from an installed wheel outside the source checkout.
+Configure Hatchling to include the root `Rigging/` tree at that package-resource destination.
+
+Implement one Rigging resource resolver:
+
+1. During source-tree execution, use the root-level `Rigging/` directory.
+2. During installed-package execution, use `importlib.resources` to read
+   `drydock/resources/Rigging/`.
+
+The same `init` and `validate` code must use this resolver; do not duplicate command logic.
 
 ## Required Repository Layout
 
@@ -148,26 +173,50 @@ DRYDOCK_TARGET/
       metadata.py
       init_specification.py
       validate_specification.py
-      rigging.py
       stubs.py
+      resources/
+        Rigging/
   Rigging/
-    BUSINESS_RULES.md
-    SPECIFICATION_CONTRACT.md
+    # Complete seeded copy of Prototyper RulesEngine/
+    spec_template/
     stack/
-    specification_templates/
-    project_templates/
+    templates/
   prompts/
+    README.md
   tests/
     conftest.py
     test_cli.py
     test_config.py
     test_init_specification.py
     test_validate_specification.py
-    test_rigging.py
 ```
 
 Keep responsibilities narrow. CLI parsing dispatches to application functions; it does not contain
 filesystem or validation logic.
+
+`bin/test.sh` contains no business logic. Its sole purpose is to activate the project virtual
+environment and run `python -m pytest`. It is the canonical test entry point for platform tooling.
+
+## License Contract
+
+Create `LICENSE` with this exact proprietary license:
+
+```text
+Copyright (c) 2026 Web Cloud Studio. All rights reserved.
+
+This software and its associated documentation are proprietary and confidential property of
+Web Cloud Studio.
+
+No part of this software or documentation may be copied, reproduced, modified, distributed,
+published, transmitted, sublicensed, sold, used, or otherwise exploited, in whole or in part,
+without prior explicit written permission from Web Cloud Studio.
+
+Possession of a copy does not grant any license or right to use the software or documentation.
+Unauthorized use is strictly prohibited.
+```
+
+Set the Python project license metadata to proprietary and include `LICENSE` in source and wheel
+distributions. Do not substitute an open-source license.
 
 ## Configuration Contract
 
@@ -192,6 +241,8 @@ Resolution precedence:
 2. Values in global `config.json`.
 3. No implicit directory guesses.
 
+Do not read or write `.env` files for global Drydock configuration.
+
 Requirements:
 
 - Store normalized absolute paths.
@@ -206,7 +257,7 @@ Requirements:
 Port the useful deterministic behavior of Prototyper `bin/setup.sh` into Python.
 
 `drydock init <Spec>` creates `<specification_directory>/<Spec>/` from
-`Rigging/specification_templates/`.
+the packaged `Rigging/spec_template/` resource.
 
 Requirements:
 
@@ -224,8 +275,25 @@ Requirements:
 - Return `0` on success and `1` on invalid input or filesystem failure.
 - Never invoke an LLM and do not implement legacy `--analyze` in this step.
 
-Seed templates from Prototyper, but conform their names and content to the current Drydock Typed
-Specification contract before treating them as the Drydock templates.
+For Lay the Keel, preserve and use the current Prototyper `RulesEngine/spec_template/` file set:
+
+```text
+ACCEPTANCE_CRITERIA.md
+ARCHITECTURE.md
+DATABASE.md
+FEATURE-Example.md
+HOMEPAGE.md
+IDEAS.md
+INTENT.md
+METADATA.md
+README.md
+SCREEN-Example.md
+UI-Component-Example.md
+UI.md
+```
+
+Do not rename, remove, or redesign these templates during Lay the Keel. They may iterate after the
+initial Drydock framework is operational.
 
 ## Specification Validation Contract
 
@@ -240,7 +308,7 @@ At minimum validate:
 - Specification filenames follow the current Typed Specification contract.
 - Required terminal sections exist where the current contract requires them.
 - Example template files produce warnings.
-- Declared stack components have matching `Rigging/stack/<component>.md` files.
+- Declared stack components have matching packaged `Rigging/stack/<component>.md` files.
 - Generated/process artifacts are distinguished from authored files.
 
 Output requirements:
@@ -255,38 +323,20 @@ Output requirements:
 
 Represent findings using a typed Python model rather than printing directly from each rule.
 
-## Rigging Contract
+Running `drydock validate` immediately after `drydock init` is a valid and expected workflow. All
+template-seeded files are present; unedited stubs produce warnings, not failures. The output shows
+which files have been authored and which remain as unedited templates — this is the intended
+incremental use pattern, not an error condition.
 
-Implement the non-LLM portion of Drydock Rigging.
+## Rigging Seed Contract
 
-### `drydock rigging update <Target>`
+Lay the Keel creates Drydock's own Rigging by copying the complete Prototyper `RulesEngine/` tree as
+defined above. It does not propagate files from Drydock Rigging into target projects.
 
-- Resolve `<Target>` as a name relative to configured `target_directory`.
-- Require the target project directory to exist.
-- Copy the current Drydock project templates and the compact/business-rules artifact selected by
-  the current Drydock contract into the target project.
-- Never overwrite target-owned files unless the Rigging contract explicitly identifies them as
-  managed files.
-- Write a deterministic managed-file manifest containing relative path and SHA-256 hash.
-- Make repeated runs idempotent.
-- Report copied, updated, unchanged, and skipped files.
-
-If the current approved contract does not yet unambiguously define the generated compact business
-rules artifact, install `Rigging/BUSINESS_RULES.md` as the temporary managed source and record that
-choice in README and command output. Do not invent compaction behavior.
-
-### `drydock rigging verify <Target>`
-
-- Read the managed-file manifest.
-- Verify required managed files exist and hashes match.
-- Report missing, modified, and valid files.
-- Exit `0` when compliant and `1` when not compliant.
-- Do not modify the target.
-
-### Deferred Rigging Command
-
-Register `drydock rigging compact <Spec>`, but return the standard not-implemented response and exit
-code `2`.
+Register `drydock rigging compact <Spec>`, `drydock rigging update <Target>`, and
+`drydock rigging verify <Target>`, but return the standard not-implemented response and exit code
+`2`. Target-project propagation and verification will be implemented only after their managed-file
+contract is defined.
 
 ## Deferred Command Surface
 
@@ -303,7 +353,11 @@ drydock iterate <Spec> <Target> [BOTH|SPEC|TGT] <Scope> <Change>
 drydock import <Spec> <Target> --format <auto|source|speckit>
 drydock analyze <Spec> [<Target>]
 drydock rigging compact <Spec>
+drydock rigging update <Target>
+drydock rigging verify <Target>
 drydock document <Spec> <Target>
+drydock document generate <Spec> <Target>
+drydock document assemble <Spec> <Target>
 ```
 
 Every deferred command must:
@@ -339,9 +393,11 @@ Required verification:
 5. Run `drydock validate ExampleProject`.
 6. Run `drydock init ExampleProject --update` and confirm it is non-destructive.
 7. Modify a template-managed test file, run `--force`, and confirm overwrite behavior.
-8. Run `drydock rigging update ExampleTarget` twice and confirm the second run is idempotent.
-9. Modify a managed target file and confirm `drydock rigging verify ExampleTarget` fails.
-10. Run representative deferred commands and confirm exit code `2` with no filesystem changes.
+8. Build and install a wheel, change outside the source checkout, and confirm `drydock init` and
+   `drydock validate` can read the packaged Rigging resources.
+9. Confirm root `drydock --help` and `drydock --version` show the copyright notice.
+10. Run representative deferred commands, including all three `rigging` commands and all three
+    `document` forms, and confirm exit code `2` with no filesystem changes.
 11. Run the full test suite and Ruff checks.
 12. Confirm `bin/drydock.sh`, `bin/drydock.ps1`, `python -m drydock`, and the installed `drydock`
     entry point dispatch to the same Python CLI.
@@ -365,14 +421,16 @@ The build is complete only when:
 
 - A fresh target directory can be built from this prompt without modifying Prototyper.
 - The Python package installs and the `drydock` command works.
-- `config`, `init`, `validate`, `rigging update`, and `rigging verify` are real Python
-  implementations.
+- `config`, `init`, and `validate` are real Python implementations.
+- The complete Prototyper `RulesEngine/` tree is present as Drydock `Rigging/`, and installed wheels
+  contain synchronized packaged Rigging resources.
 - Deferred commands are visible, parse correctly, fail safely, and do not write.
 - Bash and PowerShell wrappers contain no business logic.
 - No `.bat` interface exists.
+- The proprietary Web Cloud Studio license is present and packaged.
 - Tests and Ruff checks pass.
 - README documents installation, the working command subset, deferred commands, configuration
-  locations, source-tree launchers, and the temporary business-rules propagation decision if used.
+  locations, source-tree launchers, packaged Rigging behavior, and proprietary license.
 - The implementation reports any contract conflicts or terminology debt discovered during the port.
 
 Do not proceed into planning, build execution, agent-provider integration, persistence, or Console
