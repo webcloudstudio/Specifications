@@ -10,6 +10,7 @@
 | Tab Order | 1: Summary · 2: GitHub · 3: Projects |
 | Description | Unified view of GitHub repos and local projects. Shows what has been downloaded to disk and provides one-click cloning (Project-Download feature). Supports fetching repos from other GitHub users. |
 | Depends On  | UI-GENERAL.md, FEATURE-Project-Download.md |
+| Provides    | GET /welcome/github |
 
 ## Unconfigured State
 

@@ -1,3 +1,10 @@
+# SPEC: Build_Plan_Intent
+
+| Field       | Value |
+|-------------|-------|
+| Version     | (set version) |
+| Description |  |
+
 # BUILD_PLAN_INTENT.md — GAME
 # Created by: bash bin/build_plan.sh GAME init
 #

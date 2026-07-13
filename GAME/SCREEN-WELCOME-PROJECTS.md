@@ -10,6 +10,7 @@
 | Tab Order | 1: Summary · 2: GitHub · 3: Projects |
 | Description | Lists all projects discovered in PROJECTS_DIR. Shows conformance status from the startup scan. Supports filtering by namespace and conforming individual projects to the latest template. |
 | Depends On  | UI-GENERAL.md, FEATURE-SCANNER.md |
+| Provides    | GET /welcome/projects |
 
 ## Unconfigured State
 

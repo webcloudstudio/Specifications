@@ -10,6 +10,7 @@
 | Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
 | Description | Live log viewer and process control. Shows what is running, what ran, and the output. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /processes |
 
 ## Layout
 

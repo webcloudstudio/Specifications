@@ -10,6 +10,7 @@
 | Tab Order | 1: Workflow · 2: Add Ticket · 3: Manage |
 | Description | Simple form to create a new ticket. New tickets always enter the board at state `idea`. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /workflow/add |
 
 ## Fields
 

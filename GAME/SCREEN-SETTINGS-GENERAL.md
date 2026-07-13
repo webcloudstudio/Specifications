@@ -10,6 +10,7 @@
 | Tab Order | 1: General · 2: Tags · 3: Voice · 4: Voice Docs · 5: Help |
 | Description | Application-level configuration — app name, homepage URL, and theme. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /settings/general, POST /settings/general |
 
 ## Layout
 

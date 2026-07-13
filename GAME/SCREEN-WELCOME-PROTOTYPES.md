@@ -10,6 +10,7 @@
 | Tab Order | Not in primary Welcome flow (Summary → GitHub → Projects). Accessible directly via route. |
 | Description | Read-only searchable list of all known prototypes. No actions — navigation only. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /welcome/prototypes |
 
 ## Layout
 

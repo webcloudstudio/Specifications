@@ -10,6 +10,7 @@
 | Tab Order | 1: Summary · 2: GitHub · 3: Projects |
 | Description | First screen in the new-user onboarding flow. Configure core settings here before using the GitHub or Projects tabs. Inline-editable configuration overview and health check. Default landing screen for the application. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /welcome/summary, GET /welcome |
 
 ## Layout
 

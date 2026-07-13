@@ -10,6 +10,7 @@
 | Tab Order | — |
 | Description | Read-only reference of every project and prototype's callable surface area — scripts, links, REST routes, and MCP tools. |
 | Depends On  | FEATURE-SERVICE-CATALOG.md, UI-GENERAL.md |
+| Provides    | GET /servicecatalog |
 
 ## What the Catalog Tracks
 

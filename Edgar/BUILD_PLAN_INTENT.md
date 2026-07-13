@@ -15,14 +15,8 @@ FEATURE-STEP.2-Validate.md (1k)
 
 ## Step.3 Algorithm
 FEATURE-STEP.3-Algorithm.md (2k)
-
-## Step.4 Analyze
 FEATURE-STEP.4-Analyze.md (3k)
-
-## Step.5 Scoring
 FEATURE-STEP.5-Scoring.md (3k)
-
-## Step.6 Ui
 FEATURE-STEP.6-UI.md (2k)
 
 ## Step.Prereq.1 Librarydiscovery

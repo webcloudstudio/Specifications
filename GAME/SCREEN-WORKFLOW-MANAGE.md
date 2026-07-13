@@ -10,6 +10,7 @@
 | Tab Order | 1: Workflow · 2: Add Ticket · 3: Manage |
 | Description | CRUD management for workflow types and ticket tags/labels. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /workflow/manage |
 
 ## Workflow Types
 

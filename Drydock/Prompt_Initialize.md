@@ -1,3 +1,29 @@
+# FOR PROMPT CLARIFICATION
+
+This prompt initializes the Drydock software project.
+
+THE PROJECT SPECIFICATION DIRECTORY IS:
+`/mnt/c/Users/barlo/projects/Specifications/Drydock`
+
+THE AUTHORITATIVE PRODUCT SPECIFICATION IS:
+`/mnt/c/Users/barlo/projects/Specifications/Drydock/drydock.md`
+
+THE INITIALIZATION PROMPT IS:
+`/mnt/c/Users/barlo/projects/Specifications/Drydock/Prompt_Initialize.md`
+
+THE READ-ONLY PROTOTYPER SOURCE IS:
+`/mnt/c/Users/barlo/projects/Prototyper`
+
+THE NEW SOFTWARE TARGET DIRECTORY IS:
+`/mnt/c/Users/barlo/projects/Drydock`
+
+The target directory does not exist. Create it. Never modify the Specifications or Prototyper repositories. All implementation files, generated build artifacts, environments, tests, and Git commits belong in the new Drydock target directory.
+
+Use uv for environment creation, dependency management, locking, builds, and test
+execution.
+Commit `pyproject.toml` and `uv.lock`. Verify installation from the built wheel using a
+fresh isolated environment. Do not use Poetry, Pipenv, Conda, bare pip dependency management, or `requirements.txt`.
+
 # Lay the Keel: Initialize Drydock
 
 Build the first executable foundation of Drydock in a new target directory by porting the proven

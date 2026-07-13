@@ -10,6 +10,7 @@
 | Tab Order | — |
 | Description | Documentation viewer. Renders `docs/index.html` in-page when available; friendly fallback when not built. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /help |
 
 ## Layout
 

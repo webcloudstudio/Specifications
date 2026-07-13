@@ -10,6 +10,7 @@
 | Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance · 5: Setup |
 | Description | Project list showing maintenance-category operations for each project. Renders SCREEN-DEFAULT with `columns=Maintenance`. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /project-maintenance |
 
 ## Maintenance Column
 

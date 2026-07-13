@@ -10,6 +10,7 @@
 | Tab Order | 1: Monitoring · 2: Scheduler · 3: Processes |
 | Description | Service health dashboard and interleaved event log for all running projects. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /monitoring |
 
 ## Layout
 

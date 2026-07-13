@@ -10,6 +10,7 @@
 | Tab Order | — |
 | Description | Abstract — base layout, not a routed screen. Reusable sortable, filterable project/prototype list. Screens that extend this declare `Parent: SCREEN-DEFAULT` and specify their middle columns. |
 | Depends On  | UI-GENERAL.md |
+| Provides    | GET /default?title=...&columns=...&filter=...&sort=... |
 
 ## Route Parameters
 

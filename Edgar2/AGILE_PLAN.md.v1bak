@@ -1,0 +1,173 @@
+# AGILE_PLAN: Edgar2
+spec:       Edgar2
+target:     /mnt/c/Users/barlo/projects/Edgar2
+plan_hash:  93217ea672dd
+spec_commit: b90dcf1ecaf0165e414123329adba400b4ecddc6
+updated:    2026-05-26T05:39:04
+
+
+## spike 1: Library discovery
+inputs:    SPECIFICATION.md
+spike:     RESOLVED: Use direct EDGAR REST API via `edgar_client.py` (no edgartools). `edgartools` 5.31.5 rejected on dependency hygiene grounds (~15 transitive deps, opaque rate-limiting, no data advantage over direct REST). Note: the previously recorded import failure (`AttributeError` on Python 3.10 + pandas 2.x) did *not* reproduce in Step 1 testing (Python 3.10.12 + pandas 2.3.3) — the rejection reason is dependency hygiene, not import breakage. Direct REST to `data.sec.gov` is equivalent and stable. Rate limit: 0.12 s gap confirmed safe. All 4 Phase 1 CIKs confirmed live. FSCO: zero 10-Q/10-K filings (NPORT-P + N-CSR only) — excluded from standard pipeline.
+evidence:  STEP_1_LIBRARY_DISCOVERY.md
+reconcile: RESOLVED: Use direct EDGAR REST API via `edgar_client.py` (no edgartools). `edgartools` 5.31.5 rejected on dependency hygiene grounds (~15 transitive deps, opaque rate-limiting, no data advantage over direct REST). Note: the previously recorded import failure (`AttributeError` on Python 3.10 + pandas 2.x) did *not* reproduce in Step 1 testing (Python 3.10.12 + pandas 2.3.3) — the rejection reason is dependency hygiene, not import breakage. Direct REST to `data.sec.gov` is equivalent and stable. Rate limit: 0.12 s gap confirmed safe. All 4 Phase 1 CIKs confirmed live. FSCO: zero 10-Q/10-K filings (NPORT-P + N-CSR only) — excluded from standard pipeline.
+state:    awaiting_review
+
+## spike 2: Connectivity and processing validity
+inputs:    SPECIFICATION.md
+spike:     RESOLVED: Yes. Direct REST fetches 10-Q, 10-K, 8-K for ARCC, MFIC, TCPC. XBRL via `companyfacts` endpoint: 185 / 165 / 155 us-gaap concepts for ARCC / MFIC / TCPC. `NetAssetValuePerShare` confirmed 28 / 22 / 25 quarters; `InvestmentCompanySeniorSecurityIndebtednessAssetCoverageRatio` confirmed 14 / 13 quarters for ARCC / MFIC but **NOT FOUND for TCPC** (HTML fallback required); distributions per share — ARCC/TCPC use `CommonStockDividendsPerShareDeclared`, MFIC uses `InvestmentCompanyDistributionToShareholdersPerShare`. Asset coverage stored as pure decimal (1.88 = 188%) — needs ×100. Non-accrual: **NOT in XBRL for any ticker** — HTML-only. Documents: primary iXBRL HTML ~0.9 MB per 10-Q (not ~24 MB); full submission bundle ~3.8 MB. FSCO: 0 × 10-Q. See `evidence/STEP_2_CONNECTIVITY_AND_PROCESSING_VALI.md`.
+evidence:  STEP_2_CONNECTIVITY_AND_PROCESSING_VALI.md
+reconcile: RESOLVED: Yes. Direct REST fetches 10-Q, 10-K, 8-K for ARCC, MFIC, TCPC. XBRL via `companyfacts` endpoint: 185 / 165 / 155 us-gaap concepts for ARCC / MFIC / TCPC. `NetAssetValuePerShare` confirmed 28 / 22 / 25 quarters; `InvestmentCompanySeniorSecurityIndebtednessAssetCoverageRatio` confirmed 14 / 13 quarters for ARCC / MFIC but **NOT FOUND for TCPC** (HTML fallback required); distributions per share — ARCC/TCPC use `CommonStockDividendsPerShareDeclared`, MFIC uses `InvestmentCompanyDistributionToShareholdersPerShare`. Asset coverage stored as pure decimal (1.88 = 188%) — needs ×100. Non-accrual: **NOT in XBRL for any ticker** — HTML-only. Documents: primary iXBRL HTML ~0.9 MB per 10-Q (not ~24 MB); full submission bundle ~3.8 MB. FSCO: 0 × 10-Q. See `evidence/STEP_2_CONNECTIVITY_AND_PROCESSING_VALI.md`.
+state:    awaiting_review
+
+## spike 3: EDGAR client class
+inputs:    SPECIFICATION.md
+spike:     RESOLVED: `edgar_client.py` in build workspace. `get_cik()`, `get_filings()`, `get_document()`, `get_xbrl_facts()`. Rate limit baked in. Only `requests` needed. See `evidence/STEP_3_EDGAR_CLIENT_CLASS.md`.
+evidence:  STEP_3_EDGAR_CLIENT_CLASS.md
+reconcile: RESOLVED: `edgar_client.py` in build workspace. `get_cik()`, `get_filings()`, `get_document()`, `get_xbrl_facts()`. Rate limit baked in. Only `requests` needed. See `evidence/STEP_3_EDGAR_CLIENT_CLASS.md`.
+state:    awaiting_review
+
+## spike 4: Data quality and coverage
+inputs:    SPECIFICATION.md
+spike:     RESOLVED: XBRL is the primary extraction path for NAV per share, PIK income, and unrealized gain/loss. HTML regex is the fallback for non-accrual (all 3 tickers — no XBRL non-accrual concept exists for any of them; company-specific namespaces `arcc:`, `mfic:`, `tcpc:` are absent). Coverage 3 BDCs × 4 quarters: NAV per share 4/4 (`us-gaap:NetAssetValuePerShare`, same concept all tickers); PIK interest income 4/4 (ARCC/MFIC use `InterestIncomeOperatingPaidInKind`; TCPC uses `InterestAndDividendIncomeOperatingPaidInKind` — discover per-ticker, do not hardcode); unrealized gain/loss 4/4 (ARCC/MFIC use `UnrealizedGainLossInvestmentDerivativeAndForeignCurrencyTransactionPriceChangeOperatingAfterTax`; TCPC uses `UnrealizedGainLossOnInvestments` — discover per-ticker); non-accrual 4/4 for all 3 tickers via HTML regex extracting `% of portfolio at cost / fair value` from the MD&A summary paragraph. PIK balance: `us-gaap:PaidInKindInterest` present for ARCC and MFIC; absent for TCPC. No `mfic:PaidInKindBalance` concept exists. See `evidence/STEP_4_DATA_QUALITY_AND_COVERAGE.md`.
+evidence:  STEP_4_DATA_QUALITY_AND_COVERAGE.md
+reconcile: RESOLVED: XBRL is the primary extraction path for NAV per share, PIK income, and unrealized gain/loss. HTML regex is the fallback for non-accrual (all 3 tickers — no XBRL non-accrual concept exists for any of them; company-specific namespaces `arcc:`, `mfic:`, `tcpc:` are absent). Coverage 3 BDCs × 4 quarters: NAV per share 4/4 (`us-gaap:NetAssetValuePerShare`, same concept all tickers); PIK interest income 4/4 (ARCC/MFIC use `InterestIncomeOperatingPaidInKind`; TCPC uses `InterestAndDividendIncomeOperatingPaidInKind` — discover per-ticker, do not hardcode); unrealized gain/loss 4/4 (ARCC/MFIC use `UnrealizedGainLossInvestmentDerivativeAndForeignCurrencyTransactionPriceChangeOperatingAfterTax`; TCPC uses `UnrealizedGainLossOnInvestments` — discover per-ticker); non-accrual 4/4 for all 3 tickers via HTML regex extracting `% of portfolio at cost / fair value` from the MD&A summary paragraph. PIK balance: `us-gaap:PaidInKindInterest` present for ARCC and MFIC; absent for TCPC. No `mfic:PaidInKindBalance` concept exists. See `evidence/STEP_4_DATA_QUALITY_AND_COVERAGE.md`.
+state:    awaiting_review
+
+## spike 5: Database feasibility
+inputs:    SPECIFICATION.md
+spike:     RESOLVED: Six tables: `filings`, `metrics`, `positions`, `filing_flags`, `scores`, `eightk_events`. Six v1 bugs fixed: (1) position dedup key — XBRL SoI produces 3–5 duplicate rows per investee, now blocked by `UNIQUE(filing_id, dedup_key)`; (2) `positions.company_name_raw` preserves the raw concatenated XBRL label; parsed fields (`issuer_name`, `sector`, `instrument_type`) are NULL until a name-parsing pass; (3) `asset_coverage_pct` renamed from `asset_coverage_ratio` — v1 regex returned nonsense values (3.0, 8.0 instead of ~165%); (4) `scores` table separated from `metrics`; (5) `filing_flags` table replaces packed `extraction_notes` strings; (6) `realized_gain_loss` separated from `unrealized_depreciation` — v1 stored same value for both due to a shared XBRL concept. Schema loads and passes FK integrity. New findings from Step 5 spike: (a) ARCC unrealized gain/loss observations are absent from step4_raw.json — concept name confirmed in Step 4 but observations not saved; extractor step must re-fetch; (b) MFIC unrealized data is 2022-vintage only (2 rows) in step4_raw.json; same re-fetch needed; (c) XBRL companyfacts can have multiple observations for the same `(period, form_type)` pair — extractor must select latest `filed` date to avoid NAV value drift. Schema: `evidence/edgar2_spike.db`; load script: `build_schema.py` in build workspace. See `evidence/STEP_5_DATABASE_FEASIBILITY.md`.
+evidence:  STEP_5_DATABASE_FEASIBILITY.md
+reconcile: RESOLVED: Six tables: `filings`, `metrics`, `positions`, `filing_flags`, `scores`, `eightk_events`. Six v1 bugs fixed: (1) position dedup key — XBRL SoI produces 3–5 duplicate rows per investee, now blocked by `UNIQUE(filing_id, dedup_key)`; (2) `positions.company_name_raw` preserves the raw concatenated XBRL label; parsed fields (`issuer_name`, `sector`, `instrument_type`) are NULL until a name-parsing pass; (3) `asset_coverage_pct` renamed from `asset_coverage_ratio` — v1 regex returned nonsense values (3.0, 8.0 instead of ~165%); (4) `scores` table separated from `metrics`; (5) `filing_flags` table replaces packed `extraction_notes` strings; (6) `realized_gain_loss` separated from `unrealized_depreciation` — v1 stored same value for both due to a shared XBRL concept. Schema loads and passes FK integrity. New findings from Step 5 spike: (a) ARCC unrealized gain/loss observations are absent from step4_raw.json — concept name confirmed in Step 4 but observations not saved; extractor step must re-fetch; (b) MFIC unrealized data is 2022-vintage only (2 rows) in step4_raw.json; same re-fetch needed; (c) XBRL companyfacts can have multiple observations for the same `(period, form_type)` pair — extractor must select latest `filed` date to avoid NAV value drift. Schema: `evidence/edgar2_spike.db`; load script: `build_schema.py` in build workspace. See `evidence/STEP_5_DATABASE_FEASIBILITY.md`.
+state:    awaiting_review
+
+## spike 6: Signal feasibility and scale direction
+inputs:    SPECIFICATION.md
+spike:     RESOLVED pending PO confirmation of 7 open questions (thresholds, score direction, top-15 scope). Tested against TCPC (3 quarters v1 DB + live XBRL for Q1 2026). **All 11 signals are extractable** — prior "2 not computable" claim is corrected. **5 signals working:** PIK % of investment income (XBRL), PIK % QoQ change (derived), weighted avg portfolio mark (XBRL SOI totals), unrealized change (XBRL, Q1 2026 only — earlier quarters require v1 bug #6 fix), unrealized depreciation streak (derived). **4 broken but fixable:** (a) NAV per share — XBRL concept `NetAssetValuePerShare` confirmed present (TCPC: $6.72 Mar-26, $7.07 Dec-25), v1 extractor searched wrong label; (b) asset coverage ratio — v1 HTML regex captured "3" from "168.3%", real TCPC value confirmed as 168.3% in filing text, fix is updated regex; (c) top-15 position marks — per-position cost (638 XBRL rows) and FV (726 rows) both present in SOI, extractor does not pair them; (d) fee waiver — v1 detected text presence rather than current-period amount, causing false positives (TCPC Q1 2026 fee waiver amount = $0; Q1 2025 comparative = $1,827,948). **2 previously "not computable" — now confirmed extractable:** non-accrual % at cost — HTML prose regex confirmed working (Step 4 + Step 6 re-verified; TCPC Q1 2026: 7.6% at cost, 2.8% at FV); v1 extractor searched for table structure instead of prose; NII distribution coverage — XBRL concepts confirmed (`InvestmentCompanyInvestmentIncomeLossPerShare` + `CommonStockDividendsPerShareDeclared`; TCPC Q1 2026 coverage = 1.29x); v1 used `EarningsPerShareBasic` (wrong — includes unrealized). TCPC Q1 2026 theoretical score: 7 points (High band) on corrected data; 9 if unrealized streak; 14+ if DOJ 8-K flagged. Scale directions and thresholds pending PO confirmation — see `evidence/STEP_6_SIGNAL_FEASIBILITY_AND_SCALE_DIR.md`.
+evidence:  STEP_6_SIGNAL_FEASIBILITY_AND_SCALE_DIR.md
+reconcile: RESOLVED pending PO confirmation of 7 open questions (thresholds, score direction, top-15 scope). Tested against TCPC (3 quarters v1 DB + live XBRL for Q1 2026). **All 11 signals are extractable** — prior "2 not computable" claim is corrected. **5 signals working:** PIK % of investment income (XBRL), PIK % QoQ change (derived), weighted avg portfolio mark (XBRL SOI totals), unrealized change (XBRL, Q1 2026 only — earlier quarters require v1 bug #6 fix), unrealized depreciation streak (derived). **4 broken but fixable:** (a) NAV per share — XBRL concept `NetAssetValuePerShare` confirmed present (TCPC: $6.72 Mar-26, $7.07 Dec-25), v1 extractor searched wrong label; (b) asset coverage ratio — v1 HTML regex captured "3" from "168.3%", real TCPC value confirmed as 168.3% in filing text, fix is updated regex; (c) top-15 position marks — per-position cost (638 XBRL rows) and FV (726 rows) both present in SOI, extractor does not pair them; (d) fee waiver — v1 detected text presence rather than current-period amount, causing false positives (TCPC Q1 2026 fee waiver amount = $0; Q1 2025 comparative = $1,827,948). **2 previously "not computable" — now confirmed extractable:** non-accrual % at cost — HTML prose regex confirmed working (Step 4 + Step 6 re-verified; TCPC Q1 2026: 7.6% at cost, 2.8% at FV); v1 extractor searched for table structure instead of prose; NII distribution coverage — XBRL concepts confirmed (`InvestmentCompanyInvestmentIncomeLossPerShare` + `CommonStockDividendsPerShareDeclared`; TCPC Q1 2026 coverage = 1.29x); v1 used `EarningsPerShareBasic` (wrong — includes unrealized). TCPC Q1 2026 theoretical score: 7 points (High band) on corrected data; 9 if unrealized streak; 14+ if DOJ 8-K flagged. Scale directions and thresholds pending PO confirmation — see `evidence/STEP_6_SIGNAL_FEASIBILITY_AND_SCALE_DIR.md`.
+state:    awaiting_review
+
+## spike 7: Business thesis
+inputs:    SPECIFICATION.md
+spike:     RESOLVED: GO. Bloomberg/Calcbench/Sentieo deliver raw data or analyst workflow tools; none compute a longitudinal, BDC-specific stress-signal scoreboard. The edge is zero ongoing cost, BDC-calibrated signals (NAV compression, PIK %, non-accrual creep, distribution coverage), and automated quarterly monitoring that beats a retail investor who does not read filings. The bar is "beats not reading filings at all," not "beats Millennium." Phase 1 scope confirmed as written — no changes required.
+evidence:  STEP_7_BUSINESS_THESIS.md
+reconcile: RESOLVED: GO. Bloomberg/Calcbench/Sentieo deliver raw data or analyst workflow tools; none compute a longitudinal, BDC-specific stress-signal scoreboard. The edge is zero ongoing cost, BDC-calibrated signals (NAV compression, PIK %, non-accrual creep, distribution coverage), and automated quarterly monitoring that beats a retail investor who does not read filings. The bar is "beats not reading filings at all," not "beats Millennium." Phase 1 scope confirmed as written — no changes required.
+state:    awaiting_review
+
+## story 1: edgar_client module
+inputs:    SPECIFICATION.md, STEP_3_EDGAR_CLIENT_CLASS.md
+scope:     Build edgar_client.py with get_cik(), get_filings(), get_document(), get_xbrl_facts(), 0.12 s rate-limit gap, and SEC-compliant User-Agent header.
+kind:      python
+ac:        -
+evidence:  STEP_S1_EDGAR_CLIENT.md
+state:     pending
+
+## story 2: database schema
+inputs:    SPECIFICATION.md, STEP_5_DATABASE_FEASIBILITY.md
+scope:     Create build_schema.py that initialises the SQLite database with all six tables (filings, metrics, positions, filing_flags, scores, eightk_events) including the positions UNIQUE(filing_id, dedup_key) constraint and asset_coverage_pct column naming.
+kind:      python
+ac:        -
+evidence:  STEP_S2_DATABASE_SCHEMA.md
+state:     pending
+
+## story 3: metric extractor
+inputs:    SPECIFICATION.md, STEP_2_CONNECTIVITY_AND_PROCESSING_VALI.md, STEP_4_DATA_QUALITY_AND_COVERAGE.md, STEP_S1_EDGAR_CLIENT.md, STEP_S2_DATABASE_SCHEMA.md
+scope:     Build extract_metrics.py that fetches XBRL companyfacts and iXBRL HTML for each filing, discovers per-ticker XBRL concepts at runtime for PIK income and unrealized G/L, extracts non-accrual via HTML prose regex, deduplicates XBRL observations by latest filed date, and writes rows to metrics, positions, and filing_flags.
+kind:      python
+ac:        -
+evidence:  STEP_S3_METRIC_EXTRACTOR.md
+state:     pending
+
+## story 4: signal scorer
+inputs:    SPECIFICATION.md, STEP_6_SIGNAL_FEASIBILITY_AND_SCALE_DIR.md, STEP_S3_METRIC_EXTRACTOR.md
+scope:     Build score.py that reads the metrics table, computes all 11 stress signals with confirmed scale directions and thresholds, and writes per-ticker per-quarter rows to the scores table.
+kind:      python
+ac:        -
+evidence:  STEP_S4_SIGNAL_SCORER.md
+state:     pending
+
+## story 5: filing pipeline and scoreboard CLI
+inputs:    SPECIFICATION.md, STEP_7_BUSINESS_THESIS.md, STEP_S1_EDGAR_CLIENT.md, STEP_S2_DATABASE_SCHEMA.md, STEP_S3_METRIC_EXTRACTOR.md, STEP_S4_SIGNAL_SCORER.md
+scope:     Build run_pipeline.py, a CLI entry point that fetches 10-Q and 10-K filings for ARCC, MFIC, and TCPC, orchestrates extraction and scoring, and prints a terminal/markdown scoreboard of per-ticker stress scores over time.
+kind:      python
+ac:        -
+evidence:  STEP_S5_PIPELINE_SCOREBOARD.md
+state:     pending
+
+## ac 1: client never hardcodes CIK
+parent:    story 1
+kind:      guardrail
+state:     open
+
+## ac 2: rate gap enforced between every request
+parent:    story 1
+kind:      guardrail
+state:     open
+
+## ac 3: get_cik resolves all three phase-1 tickers live
+parent:    story 1
+kind:      assertion
+state:     open
+
+## ac 4: all six tables present with correct column names
+parent:    story 2
+kind:      assertion
+state:     open
+
+## ac 5: positions table rejects duplicate filing_id plus dedup_key pairs
+parent:    story 2
+kind:      guardrail
+state:     open
+
+## ac 6: asset coverage column named asset_coverage_pct not ratio
+parent:    story 2
+kind:      guardrail
+state:     open
+
+## ac 7: non-accrual extracted via HTML regex not XBRL for all three tickers
+parent:    story 3
+kind:      guardrail
+state:     open
+
+## ac 8: PIK and unrealized XBRL concepts discovered per ticker at runtime
+parent:    story 3
+kind:      guardrail
+state:     open
+
+## ac 9: duplicate XBRL observations resolved by latest filed date
+parent:    story 3
+kind:      guardrail
+state:     open
+
+## ac 10: asset coverage value stored as percentage not pure decimal
+parent:    story 3
+kind:      assertion
+state:     open
+
+## ac 11: fee waiver signal measures current-period dollar amount
+parent:    story 4
+kind:      guardrail
+state:     open
+
+## ac 12: NII coverage uses InvestmentCompanyInvestmentIncomeLossPerShare not EarningsPerShareBasic
+parent:    story 4
+kind:      guardrail
+state:     open
+
+## ac 13: all 11 signals produce a non-null value for TCPC Q1 2026
+parent:    story 4
+kind:      assertion
+state:     open
+
+## ac 14: scoreboard shows per-ticker scores across multiple quarters
+parent:    story 5
+kind:      assertion
+state:     open
+
+## ac 15: FSCO is excluded from the pipeline run
+parent:    story 5
+kind:      guardrail
+state:     open
+
+----------- REQUEST COMPLETED -----------
