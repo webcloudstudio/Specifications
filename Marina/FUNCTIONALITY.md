@@ -5,18 +5,19 @@
 | Version     | 20260603 V2 |
 | Description | One-paragraph index of Marina features by phase; detail lives in the individual FEATURE-*.md files. |
 
-**Description:** High-level index of Marina's product capabilities. The local control plane is the
-primary product; the private AWS plane is an optional integration surface for catalog, reports, queues,
-and sharing.
+**Description:** High-level index of Marina's product capabilities. The initial build is deliberately
+small: welcome and registration, capability discovery and storage, and the project explorer. The local
+control plane is primary; the private AWS plane is a later integration surface.
 
 ## Product Capability Ownership
 
 | Capability | Home | Primary screens/features |
 |------------|------|--------------------------|
-| Onboarding and repository acquisition | SETUP | `SCREEN-SETUP-*`, `FEATURE-SCANNER.md` |
-| Project registry and organization | PROJECTS | `SCREEN-PROJECTS-*`, `FEATURE-PROJECT-ORGANIZATION.md` |
-| Standards and conformance | PROJECTS / Validation | `SCREEN-PROJECTS-VALIDATION.md`, service catalog |
-| Capabilities and exposed services | PROJECTS / Detail | `SCREEN-PROJECTS-DETAIL.md`, `FEATURE-SERVICE-CATALOG.md` |
+| Welcome and repository registration | SETUP | `SCREEN-SETUP-SUMMARY.md`, `SCREEN-SETUP-REPOSITORIES.md`, `FEATURE-PROJECT-REGISTRATION.md` |
+| Project identity and organization | PROJECTS | `SCREEN-PROJECTS-DASHBOARD.md`, `SCREEN-PROJECTS-DETAIL.md`, `FEATURE-PROJECT-ORGANIZATION.md` |
+| Capability discovery and storage | Scanner/catalog | `FEATURE-CAPABILITY-DISCOVERY.md`, `FEATURE-SCANNER.md`, `DATABASE.md` |
+| Capability exploration | PROJECTS | `SCREEN-PROJECTS-CAPABILITIES.md`, `FEATURE-SERVICE-CATALOG.md` |
+| Standards and conformance | PROJECTS / Validation | Deferred after initial explorer slice |
 | Project workflow | PROJECTS / Workflow | `SCREEN-PROJECTS-WORKFLOW.md` |
 | Runs, logs, health, schedules, and events | MONITORING | `SCREEN-MONITORING-*`, batch runner, health check |
 | AWS integration and private publication | Integration features | `FEATURE-CATALOG-*.md`, `FEATURE-REPORT-INGEST.md`, `FEATURE-S3-SHARE.md` |
@@ -45,6 +46,19 @@ Monitoring consumes that registry; it does not create a second project list.
   access; the shared gate every read/invoke path calls.
 
 ## Local Control Plane — Product Scope
+
+## Initial Build
+
+The initial build includes only these end-to-end slices:
+
+1. **Welcome and Registration:** configure the projects directory, discover local repositories, clone
+   repositories from configured sources, preview identity/provenance, and explicitly register projects.
+2. **Capability Discovery and Storage:** parse `METADATA.md`, `AGENTS.md`/`CLAUDE.md`, `bin/` CommandCenter
+   headers, and MCP declarations; persist normalized records, evidence, hashes, warnings, and scan history.
+3. **Project Explorer:** browse registered projects and their discovered metadata, git state, capabilities,
+   warnings, and provenance.
+
+The initial build does not invoke, expose, publish, schedule, or remotely share capabilities.
 
 - **Project Organization** (`FEATURE-PROJECT-ORGANIZATION.md`) — the registry and user-managed grouping,
   tagging, workflow, and lifecycle model.

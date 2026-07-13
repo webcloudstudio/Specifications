@@ -33,7 +33,7 @@ catalog existing. Pricing is usage-based and must be confirmed before committing
 
 ## Deferred — Browser UI / Screens
 
-No screens are built in Phase 1/2 — features are verified via test scripts and CloudWatch. A later UI
+The initial build includes local registration and exploration screens. Later UI work
 phase reuses the GAME `SCREEN-*` designs: three colour-coded, left-to-right experiences (Welcome/Onboard,
 Operations, Prototyper), feature-forward, with a "live (local) vs last-known (cloud)" badge so cloud
 reads never masquerade as live.

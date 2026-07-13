@@ -12,10 +12,10 @@ infrastructure layout for Phase 1 and Phase 2.
 
 ## Two Planes
 
-### Plane A — Local Control Plane (out of scope for this build, summarised)
-Runs on the developer's machine: scanner, process engine, log ingestor, scheduler. It is **outbound
-only** — it opens no public listener. It publishes catalog/metadata and reports heartbeats/events to the
-cloud, and drains the SQS queue when alive. Built later, reusing GAME modules.
+### Plane A — Local Control Plane (initial build)
+Runs on the developer's machine: welcome/registration, repository scanner, capability discovery, local
+SQLite registry, and Project Explorer. It is **outbound only** — it opens no public listener. Process
+execution, scheduler, log ingestor, and cloud publication are later consumers of the same registry.
 
 ### Plane B — Cloud Broadcast Plane (this specification)
 Serverless, scales to zero, private:
@@ -113,7 +113,8 @@ backend, naming (`marina-{project}-{resource}`), tag set, and bash wrappers.
 
 ## Observability Without Screens
 
-Marina ships no UI in Phase 1/2. Every feature is verified through (a) a callable `bin/test_*.sh`
+Marina's initial build includes a local UI for registration and exploration. Every feature is verified
+through (a) a callable `bin/test_*.sh`
 script that exercises it via the `marina` library or AWS CLI, and (b) the CloudWatch log group / metric
 the feature emits to. Each `FEATURE-*.md` names its test script and its CloudWatch log group.
 

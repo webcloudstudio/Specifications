@@ -24,9 +24,10 @@ in the prototyper project's Marina architecture notes.
 
 ## Scope
 
-This specification covers onboarding, project organization, conformance, capability exposure, and local
-operations/monitoring. The AWS broadcast plane, durable ingest, and company share are integration
-capabilities. Dockerization, Fargate, AgentCore, and Prototyper remain outside Marina's core scope.
+This initial specification covers welcome/registration, repository identity, capability discovery and
+storage, and the local Project Explorer. Project organization, conformance, invocation, monitoring, the
+AWS broadcast plane, durable ingest, and company share consume this foundation in later increments.
+Dockerization, Fargate, AgentCore, and Prototyper remain outside Marina's core scope.
 
 ## Specification Map
 

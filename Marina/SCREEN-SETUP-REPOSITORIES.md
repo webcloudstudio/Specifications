@@ -11,7 +11,7 @@
 | Sub Menu | Repositories |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
 | Description | Repository acquisition queue across configured sources. Shows which repositories are available, imported, or already managed, and provides one-click clone/import. |
-| Depends On | UI-GENERAL.md |
+| Depends On | UI-GENERAL.md, FEATURE-PROJECT-REGISTRATION.md |
 | Provides | GET /setup/repositories |
 
 ## Header KPIs
@@ -110,8 +110,9 @@ All buttons are small pill-style (`btn-sm` + `rounded-pill`) with icons. Colors 
 | Error | `!` (red pill), tooltip shows clone error |
 
 Clone uses SSH, falling back to HTTPS when SSH is unavailable. The destination is validated as a new
-child of `PROJECTS_DIR`; Marina never overwrites an existing directory. After cloning, Marina reads or
-creates identity, assigns the selected namespace/tags, scans the repository, and hands it to PROJECTS.
+child of `PROJECTS_DIR`; Marina never overwrites an existing directory. After cloning, Marina scans the
+repository and opens a registration preview. The user confirms identity, namespace, tags, and managed
+state before it enters PROJECTS.
 
 ## Empty State
 
@@ -123,7 +124,8 @@ If the authenticated user has no GitHub repos:
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | GET | `/api/repositories` | — | Table HTML fragment (all source accounts) |
-| POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url`, `namespace`, `tags[]` | Clone/import status fragment |
+| POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url` | Clone status and registration preview |
+| POST | `/api/projects/{id}/register` | `namespace`, `tags[]`, `status` | Managed project row |
 
 `POST /api/repositories/sync` belongs to the Git Scan tab — not called from this screen.
 

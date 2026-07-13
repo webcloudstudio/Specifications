@@ -119,7 +119,7 @@ organised into visual groups separated by a 1px `var(--mn-border)` vertical divi
 | Group | Tabs | Purpose |
 |-------|------|---------|
 | SETUP | Summary · AWS · Terraform · GitHub · Git Scan · Repositories · Projects · Settings | Onboarding and integration setup |
-| PROJECTS | Dashboard · Workflow · Configuration · Validation · Maintenance | Registry, organization, standards, and project work |
+| PROJECTS | Dashboard · Capabilities · Workflow · Configuration · Validation · Maintenance | Registry, discovery, organization, standards, and project work |
 | MONITORING | Health · Scheduler · Processes | Command center and operations |
 
 A 1px `var(--mn-muted)` vertical divider is rendered between each group (not before the first, not after the last). Group separators are purely visual — they do not affect tab behaviour, routing, or ARIA roles.
@@ -136,6 +136,17 @@ Some tabs may be **disabled** (not hidden) when their prerequisites are unmet.
 | 6 | Repositories | `/setup/repositories` | GitHub header light ❌ or ⚠️ (auth, SSH, or no sources), or PROJECTS_DIR not set |
 | 7 | Projects | `/setup/projects` | PROJECTS_DIR not set |
 | 8 | Settings | `/setup/settings` | Never |
+
+PROJECTS sub-tabs:
+
+| Sub-tab | Route | Disabled when |
+|---------|-------|---------------|
+| Dashboard | `/projects` | Never |
+| Capabilities | `/projects/capabilities` | Never; empty state if no discovery data |
+| Workflow | `/projects/workflow` | Deferred from the initial build |
+| Configuration | `/projects/configuration` | Never |
+| Validation | `/projects/validation` | Deferred from the initial build |
+| Maintenance | `/projects/maintenance` | Deferred from the initial build |
 
 **Disabled tab appearance:** muted text (`--mn-muted`), no pointer cursor, `aria-disabled="true"`. Clicking a disabled tab shows a tooltip: `Complete {prerequisite} first.` Do not navigate.
 

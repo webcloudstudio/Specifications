@@ -10,7 +10,7 @@
 | Main Menu | SETUP |
 | Sub Menu | Summary · default |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Marina setup overview. One row per tab showing each tab's final acceptance criteria. Default landing screen for the application. |
+| Description | Marina welcome and registration overview. Guides the user from local directory setup through repository discovery and project registration. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/summary, GET /setup, GET / |
 
@@ -23,22 +23,31 @@ Single-column, max-width 900px, centered. Page header followed by an optional am
 │  [KPI left]          ⚓  Marina          [spacer right]    │
 │  (dark header — see UI-GENERAL Page Header)                │
 ├────────────────────────────────────────────────────────────┤
-│  ⚠ Setup incomplete — configure all items before          │  ← amber, conditional
-│    proceeding to cloud sync.                               │
+│  Welcome to Marina — register repositories, discover their │
+│  capabilities, and explore your projects.                 │
 ├────────────────────────────────────────────────────────────┤
-│  SETUP STATUS                                              │
+│  GET STARTED                                               │
 │  ──────────────────────────────────────────────────────── │
-│  [AWS icon]  ✅  AWS               Identity confirmed      │
-│  [TF icon]   ❌  Terraform         Not deployed            │
-│              Not deployed — run Terraform to provision.    │
-│  [GH icon]   ✅  GitHub            Connected               │
-│  [scan icon] ⚠️  Git Scan          Never scanned           │
-│  [dir icon]  ❌  Projects Dir      Not set                 │
-│              [ /home/ed/projects                        ]  │
-│  [KB icon]   ✅  Repositories      12 available            │
-│  [⚙ icon]   ✅  Settings          Configured              │
+│  1  Projects Directory       [ Configure ]                │
+│  2  Discover Local Projects  [ Discover ]                 │
+│  3  Repository Sources       [ Configure ]                │
+│  4  Available Repositories   [ View ]                     │
+│  5  Managed Projects         [ Explore ]                  │
+│  6  Capabilities             [ Explore ]                  │
 └────────────────────────────────────────────────────────────┘
 ```
+
+## Welcome State
+
+The first visit explains Marina in one sentence and presents the shortest useful path:
+
+1. Set or confirm `PROJECTS_DIR`.
+2. Discover existing local git repositories.
+3. Optionally configure GitHub sources and clone repositories.
+4. Review repository identity and register selected projects.
+5. Open the Project Explorer and capability catalog.
+
+Cloud/AWS setup is secondary and must not block local registration, discovery, or exploration.
 
 ## Header KPIs
 
@@ -46,9 +55,9 @@ Left column of the page header. Component type: **All-Good Indicator** (`mn-hdr-
 
 | State | Display | Condition |
 |-------|---------|-----------|
-| ✅ | `bi-check-circle-fill` + "All systems ready" (teal) | All 7 tab rows are ✅ |
-| ⚠️ | `bi-exclamation-triangle-fill` + "N items need attention" (amber) | Any row is ⚠️ but none are ❌ |
-| ❌ | `bi-exclamation-triangle-fill` + "N items need attention" (red) | Any row is ❌ |
+| ✅ | `bi-check-circle-fill` + "Projects ready" (teal) | Directory configured and at least one managed project |
+| ⚠️ | `bi-exclamation-triangle-fill` + "Registration in progress" (amber) | Candidates exist but registration is incomplete |
+| ❌ | `bi-exclamation-triangle-fill` + "Start by choosing Projects Directory" (red) | Directory is not configured |
 
 N = count of rows that are ❌ or ⚠️. Updated via HTMX on page load and on `[↻ Refresh All]`.
 
@@ -64,23 +73,22 @@ Amber banner shown below the page header when any **critical** row is ❌. Criti
 ⚠  Setup incomplete — configure all items to activate cloud sync and GitHub features.
 ```
 
-## SETUP STATUS Card
+## GET STARTED Card
 
 One row per tab (excluding Summary). Table columns: **Icon**, **Status Icon**, **Tab Name**, **Status Text**, **Detail / Action**.
 
 ### Row Definitions
 
-Each row shows the aggregate acceptance criteria for that tab. A row is ✅ only when all its criteria are met; ⚠️ when partially configured; ❌ when the minimum required state is not met.
+Each row is an onboarding action or project capability. Cloud and Terraform status may be shown in a
+secondary Integration Status card but do not gate the initial local product.
 
-| # | Tab | Icon | Row Label | ✅ when | ⚠️ when | ❌ when |
+| # | Step | Row Label | ✅ when | ⚠️ when | ❌ when |
 |---|-----|------|-----------|---------|---------|--------|
-| 1 | AWS | Simple Icons `amazonaws` | AWS | `platform_stats.python_aws_ok = 1` AND `aws_profile` set | `aws_profile` set but connectivity not tested | `aws_profile` empty or IAM unreachable |
-| 2 | Terraform | Simple Icons `terraform` | Terraform | `MARINA_API_URL` set AND endpoint reachable (200 response) | `MARINA_API_URL` set but endpoint not responding | Not deployed — `MARINA_API_URL` not set |
-| 3 | GitHub | `bi-github` | GitHub | `gh auth status` ✅ AND SSH ✅ AND ≥1 source in `github_sources` | ≥1 source configured but auth ❌ or SSH ❌ | No sources configured or auth missing |
-| 4 | Git Scan | `bi-arrow-clockwise` | Git Scan | `platform_stats.last_scan` set AND `github_repo_count > 0` | Scanned but `github_repo_count = 0` | Never scanned |
-| 5 | Projects | `bi-kanban` | Projects Dir | `PROJECTS_DIR` set AND path exists | `PROJECTS_DIR` set but path not found | `PROJECTS_DIR` not set |
-| 6 | Repositories | `bi-folder2-open` | Repositories | ≥1 repo with `is_downloaded = 1` | `github_repos` populated but none downloaded | `github_repos` empty or GitHub not configured |
-| 7 | Settings | `bi-sliders2` | Settings | `app_name` non-empty AND `user_email` non-empty | `app_name` set but `user_email` empty | `app_name` empty |
+| 1 | Projects Directory | `PROJECTS_DIR` exists and is readable | Path configured but unreadable | Not configured |
+| 2 | Local Discovery | At least one repository candidate scanned | Scan complete with zero candidates | Never scanned or scan failed |
+| 3 | Repository Sources | GitHub/source configuration is available | Sources configured but unavailable | No source configured; local discovery remains available |
+| 4 | Registration | At least one project is managed | Candidates await registration | No candidates |
+| 5 | Explorer | Project Explorer has current discovery data | Data is stale or warnings exist | No managed projects |
 
 ### Row Layout
 
@@ -121,8 +129,8 @@ On blur: `POST /api/setup/config` with `key=PROJECTS_DIR&value={path}`. Server w
 
 | Reads | Writes |
 |-------|--------|
-| `settings` table (`aws_profile`, `app_name`, `marina_org`) | `settings` table via `/api/setup/config` (Projects Dir inline save) |
-| `platform_stats` (`python_aws_ok`, `last_scan`, `github_repo_count`) | None |
+| `settings` table (`app_name`, `marina_org`) | `settings` table via `/api/setup/config` (Projects Dir inline save) |
+| `platform_stats` (`last_scan`, `github_repo_count`) | None |
 | `PROJECTS_DIR`, `MARINA_API_URL` (env) | None |
 | `github_repos` table (`is_downloaded` count) | None |
 | `user_profile` table (`email`) | None |

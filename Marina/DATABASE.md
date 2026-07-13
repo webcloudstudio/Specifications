@@ -3,7 +3,7 @@
 | Field       | Value |
 |-------------|-------|
 | Version     | 20260603 V1 |
-| Description | DynamoDB single-table catalog (cloud) and SQLite local database (UI state, settings, user profile, GitHub cache). |
+| Description | DynamoDB broadcast catalog and SQLite local registry, repository provenance, discovery projection, and project explorer state. |
 
 **Description:** The DynamoDB single-table hierarchical schema and the exact access patterns it serves.
 See `stack/aws-dynamodb.md` for the rules this design follows.
@@ -182,6 +182,9 @@ Local project registry. Populated by the startup scan of `PROJECTS_DIR`.
 | `display_name` | TEXT | From `METADATA.md` |
 | `short_description` | TEXT | From `METADATA.md` |
 | `status` | TEXT | From `METADATA.md` (PROTOTYPE, ACTIVE, etc.) |
+| `declared_author` | TEXT | From `METADATA.md` |
+| `declared_owner` | TEXT | From `METADATA.md` |
+| `metadata_updated` | TEXT | From `METADATA.md` |
 | `namespace` | TEXT | From `METADATA.md` |
 | `path` | TEXT | Absolute filesystem path |
 | `git_repo` | TEXT | From `METADATA.md → git_repo` |
@@ -189,6 +192,110 @@ Local project registry. Populated by the startup scan of `PROJECTS_DIR`.
 | `is_published` | INTEGER | 0/1 — published to Marina DynamoDB catalog |
 | `published_at` | TEXT | ISO-8601 time of last publish |
 | `scan_at` | TEXT | ISO-8601 time of last scan |
+| `canonical_path` | TEXT NOT NULL | Normalized local repository path; registration identity |
+| `source_type` | TEXT | local / cloned / imported |
+| `source_url` | TEXT | Original clone or download URL |
+| `remote_url` | TEXT | Current normalized git remote |
+| `remote_host` | TEXT | Git host, e.g. github.com |
+| `remote_owner` | TEXT | Repository owner or organization |
+| `remote_name` | TEXT | Repository name from remote |
+| `default_branch` | TEXT | Current remote/default branch when available |
+| `current_branch` | TEXT | Checked-out branch |
+| `head_commit` | TEXT | Current commit SHA |
+| `head_subject` | TEXT | Current commit subject |
+| `head_author_name` | TEXT | Current commit author |
+| `head_author_email` | TEXT | Current commit author email |
+| `head_author_at` | TEXT | Current commit author timestamp |
+| `last_commit_at` | TEXT | Current commit committer timestamp |
+| `working_tree_status` | TEXT | CLEAN / DIRTY / UNKNOWN |
+| `staged_count` | INTEGER | Staged changed paths |
+| `unstaged_count` | INTEGER | Unstaged changed paths |
+| `untracked_count` | INTEGER | Untracked paths |
+| `ahead_count` | INTEGER | Commits ahead of upstream |
+| `behind_count` | INTEGER | Commits behind upstream |
+| `remote_last_push_at` | TEXT | Latest known remote push timestamp |
+| `is_registered` | INTEGER | 0/1; explicit user registration state |
+| `registered_at` | TEXT | ISO-8601 |
+| `metadata_extra_json` | TEXT | Unknown METADATA.md fields |
+| `last_discovery_id` | TEXT | Most recent discovery run |
+
+Repository-owned fields are refreshed by discovery. User-owned organization fields are not overwritten by
+rediscovery unless the user explicitly chooses to synchronize them.
+
+#### `project_sources`
+
+Repository provenance and remote identities. A project may have multiple historical sources but one current
+canonical remote.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `project_id` | INTEGER | Project reference |
+| `source_type` | TEXT | local / clone / import / github_cache |
+| `source_url` | TEXT | Original URL or source reference |
+| `normalized_url` | TEXT | Comparison form |
+| `is_current` | INTEGER | 0/1 |
+| `discovered_at` | TEXT | ISO-8601 |
+
+#### `project_discovery_runs`
+
+One record per scan of one repository.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | TEXT PRIMARY KEY | Discovery run identifier |
+| `project_id` | INTEGER | Project reference; nullable for candidate scans |
+| `scanner_version` | TEXT | Scanner contract version |
+| `started_at` | TEXT | ISO-8601 |
+| `finished_at` | TEXT | ISO-8601 |
+| `status` | TEXT | RUNNING / COMPLETE / ERROR |
+| `files_scanned` | INTEGER | |
+| `capabilities_found` | INTEGER | |
+| `warnings_count` | INTEGER | |
+
+#### `project_capabilities`
+
+Normalized capability catalog. This is the local source for the Project Explorer and later publication.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `project_id` | INTEGER | Project reference |
+| `capability_key` | TEXT NOT NULL | Stable key within project |
+| `name` | TEXT | Human-readable name |
+| `kind` | TEXT | operation / endpoint / mcp_tool / service / data / shared_resource |
+| `category` | TEXT | Operations / Workflow / Global / documented |
+| `description` | TEXT | |
+| `transport` | TEXT | local_process / http / mcp / documentation |
+| `source_path` | TEXT | Relative repository path |
+| `source_locator` | TEXT | Header, section, or JSON/YAML path |
+| `input_schema_json` | TEXT | Args or declared schema |
+| `port` | INTEGER | Nullable |
+| `schedule` | TEXT | Nullable |
+| `is_valid` | INTEGER | 0/1 |
+| `is_current` | INTEGER | 0/1 |
+| `first_seen_at` | TEXT | ISO-8601 |
+| `last_seen_at` | TEXT | ISO-8601 |
+| `content_hash` | TEXT | Source content/header hash |
+| `discovery_run_id` | TEXT | Evidence run |
+
+Unique identity: `(project_id, capability_key)`.
+
+#### `project_discovery_warnings`
+
+Warnings and invalid declarations retained for the explorer and remediation workflow.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `project_id` | INTEGER | Project reference |
+| `discovery_run_id` | TEXT | Evidence run |
+| `source_path` | TEXT | Relative repository path |
+| `severity` | TEXT | INFO / WARN / ERROR |
+| `code` | TEXT | Stable warning code |
+| `message` | TEXT | Human-readable explanation |
+| `is_resolved` | INTEGER | 0/1 |
+| `created_at` | TEXT | ISO-8601 |
 
 #### `tags`
 

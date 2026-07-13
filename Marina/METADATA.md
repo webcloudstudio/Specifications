@@ -19,4 +19,4 @@ specification_directory: ../Specifications
 
 ## Agent Instructions
 
-When working on this specification, add unresolved questions to the `## Open Questions` section at the bottom of the relevant spec file. Marina is built in minimal, dependency-ordered phases — build only the features for the phase being worked. Phase 3 (Dockerization/Fargate) and later (AgentCore, browser UI) are documented in IDEAS.md and must not be built in Phase 1/2.
+When working on this specification, add unresolved questions to the `## Open Questions` section at the bottom of the relevant specification file. Marina is built in minimal, dependency-ordered phases. The initial build is the local welcome/registration, capability discovery/storage, and Project Explorer slices. Invocation, exposure, cloud publication, Dockerization/Fargate, and AgentCore are later phases.
