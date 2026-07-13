@@ -1,153 +1,373 @@
-# ARCHITECTURE: Marina
+# Architecture: Marina
 
-| Field       | Value |
-|-------------|-------|
-| Version     | 20260528 V1 |
-| Description | Two-plane hybrid: a local control plane and a private AWS broadcast plane, with all cloud access behind the `marina` library and all infrastructure in layered Terraform. |
+| Field | Value |
+|-------|-------|
+| Version | 20260713 V2 |
+| Description | Local-first Flask web application for registering projects, discovering capabilities, and exploring a shared project catalog, with one Marina library interface for local and AWS backends. |
 
-**Description:** Module layout, the `marina` library boundary, the AWS broadcast plane, and the Terraform
-infrastructure layout for Phase 1 and Phase 2.
+Marina is a local web application first. It runs on the user's machine, reads and organizes Git projects,
+and stores its working catalog locally. AWS is an optional second backend for selected catalog, health,
+queue, and sharing data.
 
----
+The architecture has four boundaries:
 
-## Two Planes
+1. **Web server** — presents the UI and HTTP API.
+2. **Application services** — implement registration, discovery, and exploration.
+3. **Storage interfaces** — hide SQLite, filesystem, and AWS details.
+4. **Marina library** — provides one stable client interface over local and AWS implementations.
 
-### Plane A — Local Control Plane (initial build)
-Runs on the developer's machine: welcome/registration, repository scanner, capability discovery, local
-SQLite registry, and Project Explorer. It is **outbound only** — it opens no public listener. Process
-execution, scheduler, log ingestor, and cloud publication are later consumers of the same registry.
+## Initial Build
 
-### Plane B — Cloud Broadcast Plane (this specification)
-Serverless, scales to zero, private:
-- **DynamoDB** — single-table hierarchical catalog/state (see `DATABASE.md`).
-- **API Gateway (HTTP API) + Lambda** — IAM/SigV4-authorised read and ingest endpoints. No anonymous
-  access, no public IP on the caller side.
-- **SQS** — durable store-and-forward queue (Phase 2).
-- **S3** — VoiceForward audio blobs and the per-user company share (Phase 2).
+The initial build implements:
 
+- Welcome and project registration
+- Local repository scanning
+- Project metadata and Git state discovery
+- Capability discovery and storage
+- Project Explorer
+
+The initial build does not execute discovered operations, expose them to other users, run schedules, or
+publish to AWS. Those features consume the same stored project and capability model later.
+
+## Runtime Shape
+
+```text
+Browser
+   │ HTML pages, HTMX fragments, JSON API
+   ▼
+Flask web server
+   │ routes contain HTTP concerns only
+   ▼
+Application services
+   ├── registration service
+   ├── discovery service
+   ├── project explorer service
+   └── future operation/monitoring services
+   │
+   ▼
+Marina library interfaces
+   ├── Local backend  ── SQLite + local filesystem + Git
+   └── AWS backend    ── signed Marina API ── API Gateway/Lambda ── AWS services
 ```
-[ local agent ] --SigV4--> [ API Gateway ] --> [ Lambda ] --> [ DynamoDB ]
-[ producers   ] ------------------------------> [ SQS ] <--drain-- [ local agent ]
-[ members     ] --marina lib / AWS CLI (SigV4)--> [ API Gateway ] (read 24x7)
-[ blobs/share ] -------------------------------> [ S3 ]
+
+The browser never reads project files directly. Route handlers call application services. Application
+services call the Marina library and discovery adapters. Only the discovery adapters read repository
+files and execute read-only Git commands.
+
+## Web Server
+
+### Server Choice
+
+- Python
+- Flask application factory
+- Jinja templates
+- HTMX for partial page updates
+- Bootstrap and Marina CSS for shared presentation
+- SQLite for the local registry
+
+The server listens on localhost by default. It does not require a public IP or public inbound connection.
+Remote access is a later, explicitly secured capability.
+
+### Application Factory
+
+`create_app()` performs only application setup:
+
+1. Load environment configuration.
+2. Resolve the Marina data directory.
+3. Create or migrate the local SQLite database.
+4. Configure logging.
+5. Construct the selected Marina backend.
+6. Register route blueprints.
+7. Register error handlers and health checks.
+
+Application startup must not silently clone repositories, modify projects, or run project operations.
+Discovery occurs on an explicit user action or an explicit post-clone registration flow.
+
+### Route Boundaries
+
+Routes are grouped by product area:
+
+| Blueprint | Responsibility |
+|-----------|----------------|
+| `setup` | Welcome, configuration, repository sources, discovery candidates, registration |
+| `projects` | Project Explorer, project identity, organization, capabilities, evidence |
+| `api` | JSON endpoints used by the Marina library and external clients |
+| `health` | Local process health endpoint for Marina itself |
+
+Routes may return full HTML pages, HTMX fragments, or JSON. They must not contain discovery logic, SQL,
+Git command construction, or AWS calls.
+
+## Application Services
+
+Application services own product behavior and are testable without Flask.
+
+| Service | Responsibility |
+|---------|----------------|
+| `registration_service` | Candidate review, clone handoff, explicit registration, identity conflicts |
+| `scanner_service` | Repository enumeration, Git evidence, scan lifecycle, reconciliation |
+| `discovery_service` | Parse metadata, documentation, operation headers, and MCP declarations |
+| `catalog_service` | Query current capability and warning projections for the Explorer |
+| `project_service` | Project identity, organization fields, namespaces, and tags |
+| `evidence_service` | Source locations, hashes, raw headers, discovery history, and warnings |
+| `backend_service` | Select local or AWS backend and expose backend health |
+
+Services return domain records and result objects. They do not return HTML.
+
+## Discovery Adapters
+
+Discovery is read-only and divided by source type:
+
+| Adapter | Reads |
+|---------|-------|
+| `git_adapter` | Repository root, remotes, branches, commits, authors, status, upstream divergence |
+| `metadata_adapter` | `METADATA.md` key/value fields and unknown fields |
+| `documentation_adapter` | `AGENTS.md` / `CLAUDE.md` structured sections |
+| `operation_adapter` | `bin/*` CommandCenter headers within the first 20 lines |
+| `mcp_adapter` | `.mcp.json` and `mcp/*.service.yaml` |
+| `source_adapter` | GitHub/source cache and remote provenance |
+
+An adapter produces normalized records plus evidence and warnings. It must not write to the repository or
+execute a discovered operation.
+
+## Marina Library: One Interface, Two Backends
+
+`marina-lib` is the common client library used by the web application, future local agents, conformed
+projects, and AWS-facing code. Consumers use the library interface and do not import `boto3`, construct
+AWS URLs, or duplicate backend selection logic.
+
+### Public Library Areas
+
+| Area | Responsibility |
+|------|----------------|
+| `marina.projects` | Register and read project identity and organization |
+| `marina.discovery` | Start scans and read discovery results |
+| `marina.catalog` | Read projects, capabilities, evidence, and warnings |
+| `marina.report` | Write/read health and events; later phase |
+| `marina.queue` | Submit durable work; later phase |
+| `marina.share` | Store and read shared objects; later phase |
+
+### Backend Contract
+
+The public methods have the same meaning in both modes:
+
+```text
+Local mode
+  marina.catalog.projects()
+      → LocalBackend → SQLite projection
+
+AWS mode
+  marina.catalog.projects()
+      → AwsBackend → signed Marina API → API Gateway/Lambda → DynamoDB projection
 ```
 
-## The `marina` Library Boundary
+Backend selection is configuration, not application logic:
 
-All cloud access — from the local agent, from Lambdas' callers, and from any conformed project — goes
-through the `marina` Python library (`stack/marina-library.md`). Project code never imports boto3.
-Resource groups: `marina.catalog`, `marina.report`, `marina.queue`, `marina.share`. The library resolves
-identity (AWS profile), the org, and the API endpoint from the environment and signs every call with
-SigV4. It is the swap layer that keeps Marina from being welded to AWS.
+| Mode | Use |
+|------|-----|
+| `local` | Initial build; SQLite and local filesystem |
+| `aws` | Private remote catalog and reporting |
+| `dual` | Local writes with selected catalog/report publication to AWS |
 
-## Lambda Modules (Plane B compute)
+The local backend remains authoritative for repository files and registration. AWS receives selected
+projections, never direct access to the user's filesystem.
 
-| Module | Route | Purpose | Phase |
-|--------|-------|---------|-------|
-| `catalog_publish` | `POST /catalog` | Upsert a project's metadata + capabilities into DynamoDB | 1 |
-| `catalog_read` | `GET /catalog`, `GET /catalog/{project}` | Read the org tree or one project subtree | 1 |
-| `capabilities_read` | `GET /capabilities` | List capabilities, filterable by tag | 1 |
-| `report_ingest` | `POST /heartbeat`, `POST /events` | Append heartbeat/event items | 1 |
-| `health_read` | `GET /health/{project}` | Aggregate last-known health for one project | 1 |
-| `queue_submit` | `POST /queue/{queue}` | Enqueue a message to SQS | 2 |
-| `share_index` | `GET /share`, `POST /share` | List/register company-share objects (bytes go direct to S3) | 2 |
+### Library Rules
 
-Each Lambda is thin (validate → one storage op → respond) per `stack/aws-lambda.md`. Authorisation
-(repo→capability gate) is enforced in a shared module described in `FEATURE-ACCESS-CONTROL.md`.
-
-**Local-plane operations (Plane A).** Capabilities that touch the filesystem run on the user's machine
-through the controlled runner. They are discovered from each project's service catalog, allow-listed,
-logged, and reported as events. Marina's standards adapter is replaceable; no external project-builder
-or prototype tool is a product dependency.
+- Keep the public library methods backend-neutral.
+- Return domain records, not SQLite rows or AWS response shapes.
+- Keep retries, signing, serialization, and backend errors inside the library.
+- Make reporting best-effort where the feature contract says reporting must not break a local operation.
+- Do not add a raw AWS escape hatch.
+- Use explicit capability/version fields when a local and AWS projection may differ.
 
 ## Directory Layout
 
-The build produces two artifacts: the Lambda/source tree and the Terraform tree. (The `marina` library
-lives in its own repository — see `stack/marina-library.md`.)
+Marina's repository contains code, templates, migrations, tests, and documentation. Runtime state lives
+under `data/` and is gitignored. Managed projects live outside Marina under `PROJECTS_DIR`.
 
-```
+```text
 Marina/
-  src/                         # Lambda handlers (one package per function)
-    catalog_publish/handler.py
-    catalog_read/handler.py
-    capabilities_read/handler.py
-    report_ingest/handler.py
-    health_read/handler.py
-    queue_submit/handler.py     # Phase 2
-    share_index/handler.py      # Phase 2
-    common/                     # shared: auth gate, response helper, dynamo key builders
-  infra/                        # Terraform (see Terraform Layout below)
-    backend/                    # one-shot bootstrap: S3 state bucket + DynamoDB lock table
-    foundation/                 # rare: DynamoDB catalog table, IAM/OIDC roles, SQS, S3 buckets
-    services/                   # rerun-anytime: Lambdas, API Gateway, integrations
-    modules/                    # reusable: lambda_fn, http_route
-    bin/                        # tf-init.sh / tf-plan.sh / tf-apply.sh <layer>
-    env.tfvars                  # project/org/region/phase variables (no secrets)
-  bin/                          # test scripts (one per feature) + common.sh/common.py
-    test_catalog_publish.sh
-    test_catalog_read.sh
-    test_report_ingest.sh
-    test_access_control.sh
-    test_asyncqueue.sh          # Phase 2
-    test_voice_capture.sh       # Phase 2
-    test_s3_share.sh            # Phase 2
-  tests/                        # pytest suites for Lambda handlers (moto-backed)
-  .github/workflows/            # ci.yml, deploy.yml (OIDC; see stack/github-actions.md)
-  pyproject.toml                # uv-managed; ruff configured
-  uv.lock
-  METADATA.md  AGENTS.md  CLAUDE.md  .env.sample  docs/
+├── app.py                         # Flask entry point and application factory
+├── config.py                      # Environment-backed configuration
+├── src/
+│   └── marina_app/
+│       ├── routes/                # HTTP and HTMX route blueprints
+│       ├── services/              # Application services
+│       ├── discovery/             # Git, metadata, docs, operation, MCP adapters
+│       ├── storage/               # SQLite repositories and migrations
+│       ├── domain/                # Domain records and result types
+│       └── web/                   # template context and presentation helpers
+├── templates/                     # Jinja page templates and fragments
+│   ├── base.html
+│   ├── setup/
+│   └── projects/
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── migrations/                    # Ordered SQLite schema migrations
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── fixtures/
+├── bin/
+│   ├── start.sh                   # Start the local web server
+│   ├── test.sh                    # Lint, format, and test
+│   ├── scan.sh                    # Optional CLI scan wrapper
+│   └── ...                        # CommandCenter operations
+├── data/                          # Gitignored runtime state
+│   ├── marina.db                  # Local SQLite registry
+│   ├── logs/                      # Application and operation logs
+│   ├── runs/                      # Run metadata and captured output; later phase
+│   ├── discovery/                 # Optional raw scan snapshots and exports
+│   ├── cache/                     # GitHub and remote-source cache
+│   ├── queues/                    # Local durable queue; later phase
+│   ├── backups/                   # Database and catalog backups
+│   └── uploads/                   # Local user uploads; later phase
+├── infra/                         # Optional AWS Terraform
+├── pyproject.toml                 # Python dependencies and tool configuration
+├── uv.lock                        # Reproducible dependency lockfile
+├── .env.example                   # Documented configuration template
+├── .gitignore                     # Excludes secrets and runtime state
+├── METADATA.md
+├── AGENTS.md
+└── README.md
 ```
 
-## Terraform Layout (folded from the infra plan)
+### Storage Rules
 
-Infrastructure is layered so routine code deploys (`services/`) never risk the foundation
-(`foundation/`), and the remote backend bootstrap (`backend/`) is run once. State lives in **S3**;
-locking uses **DynamoDB** — state is never local beyond `backend/`. See `stack/terraform.md` for the
-backend, naming (`marina-{project}-{resource}`), tag set, and bash wrappers.
+- `data/` is runtime state and is never committed.
+- `migrations/` is committed and ordered; do not recreate the database by deleting it.
+- Discovery projections and evidence live in SQLite. Raw snapshots in `data/discovery/` are optional and
+  may be rotated; they are not the source of truth.
+- Marina does not copy whole repositories into its own data directory.
+- Marina does not write into a managed repository during discovery or registration unless a separate,
+  explicit metadata-edit action is requested.
+- Logs, runs, queues, and uploads have separate directories and retention policies.
 
-| Layer | Cadence | Contents |
-|-------|---------|----------|
-| `backend/` | one-shot | S3 state bucket, DynamoDB lock table (local state, applied once) |
-| `foundation/` | rare, gated apply | DynamoDB catalog table, IAM/OIDC roles, SQS queues, S3 buckets |
-| `services/` | every deploy | Lambdas, API Gateway HTTP API, routes, integrations |
+## AWS Boundary
 
-## Observability Without Screens
+AWS is a backend and publication plane, not the local application's primary database.
 
-Marina's initial build includes a local UI for registration and exploration. Every feature is verified
-through (a) a callable `bin/test_*.sh`
-script that exercises it via the `marina` library or AWS CLI, and (b) the CloudWatch log group / metric
-the feature emits to. Each `FEATURE-*.md` names its test script and its CloudWatch log group.
+```text
+Local web server
+    ↓ marina-lib
+AwsBackend
+    ↓ SigV4
+API Gateway
+    ↓
+Lambda handlers
+    ↓
+DynamoDB / SQS / S3
+```
+
+The AWS plane is private and outbound-oriented:
+
+- IAM/SigV4 authorization only
+- No anonymous API access
+- No inbound listener on the user's local machine
+- No secrets in Terraform, source code, or catalog records
+- Organization and project access checked at the AWS boundary
+- Thin Lambda handlers: validate, authorize, perform one storage operation, return a domain response
+
+Terraform is divided into:
+
+| Layer | Purpose |
+|-------|---------|
+| `infra/backend` | One-time remote state bootstrap |
+| `infra/foundation` | Tables, buckets, queues, and IAM foundations |
+| `infra/services` | Lambda functions, API routes, and integrations |
+| `infra/modules` | Reusable Terraform modules |
+
+AWS features are added only after the equivalent local domain contract exists.
+
+## Build Rules
+
+These rules guide the code generator and implementation. They are intentionally small.
+
+### Rule 1 — Build from the domain boundary
+
+Implement the domain record and application service before adding a screen or API route. A screen is a
+view of a service result, not the owner of business logic.
+
+### Rule 2 — Keep the local path complete
+
+Every capability must work locally before it is given an AWS backend. Local mode is the development and
+failure-tolerant default.
+
+### Rule 3 — One source of truth per concern
+
+- Repository files own project-declared metadata and capability declarations.
+- Git owns repository state and provenance.
+- SQLite owns Marina's local projection, organization, and discovery history.
+- AWS owns only explicitly published projections and remote operational state.
+
+### Rule 4 — Discovery is safe
+
+Discovery may read files and run read-only Git commands. It must not execute project scripts, modify
+repositories, clone over existing directories, or expose capabilities.
+
+### Rule 5 — Preserve evidence
+
+Every normalized record must identify its source path, locator, timestamp, validity, and content hash.
+Warnings are stored, not discarded.
+
+### Rule 6 — Use standard project structure
+
+Python projects use `uv`, `pyproject.toml`, `uv.lock`, `ruff`, and `pytest`. Operations live in `bin/`
+and use the CommandCenter header convention. Runtime state lives in gitignored `data/` directories.
+
+### Rule 7 — Keep HTTP thin
+
+Routes validate HTTP input, call an application service, and render a result. No SQL, Git commands,
+filesystem traversal, subprocess execution, or AWS SDK calls belong in route handlers.
+
+### Rule 8 — Test the boundaries
+
+Tests cover discovery fixtures, registration conflicts, SQLite migrations, local backend behavior, API
+responses, and the same service contract against a fake AWS backend. Tests must not require live AWS.
+
+### Rule 9 — Make changes observable
+
+Registration, discovery changes, warnings, backend changes, and future operations produce structured
+events with project identity and timestamps.
+
+### Rule 10 — Add infrastructure last
+
+Do not add Terraform, Lambda, queues, or buckets until the local feature has a stable domain contract,
+local storage behavior, and tests.
 
 ## Configuration
 
-Local clients read `MARINA_ORG`, `MARINA_ENDPOINT`, `MARINA_PROJECT`, and the AWS profile from the
-environment (see `stack/marina-library.md`). Lambdas read `TABLE_NAME`, `QUEUE_URL`, `SHARE_BUCKET`, and
-`LOG_LEVEL` from Terraform-set environment variables (no `.env` in Lambda).
+Configuration comes from environment variables or `.env` in local development. Secrets remain outside Git.
 
-## Authorisation Gate Caching
+| Variable | Purpose |
+|----------|---------|
+| `PROJECTS_DIR` | Root directory containing managed repositories |
+| `MARINA_MODE` | `local`, `aws`, or `dual` |
+| `MARINA_DATA_DIR` | Runtime data directory; default `data/` |
+| `MARINA_DB_PATH` | SQLite path; default `data/marina.db` |
+| `MARINA_HOST` | Local bind host; default `127.0.0.1` |
+| `MARINA_PORT` | Local web port |
+| `MARINA_ORG` | AWS organization/catalog namespace |
+| `MARINA_ENDPOINT` | Private Marina API endpoint for AWS mode |
+| `AWS_PROFILE` | Local AWS credential profile when AWS mode is enabled |
+| `AWS_REGION` | AWS region when AWS mode is enabled |
 
-The shared gate caches each ACL grant **in-process per warm Lambda with a 5-minute TTL** (keyed by
-`org, project, principal`), falling back to a DynamoDB `GetItem` on miss. At PAY_PER_REQUEST a grant
-read costs a fraction of a cent, so the cache is purely a latency optimisation (a cold `GetItem` adds
-2–8 ms). The 5-minute window bounds staleness: a revoked grant stops working within five minutes, which
-is acceptable because onboarding is admin-controlled and revocations are deliberate and infrequent.
+## Verification
 
-## Startup Gate
+The minimum initial-build verification is:
 
-Marina (local Flask app) refuses to start if the working directory is not a git repository with an upstream remote configured. On startup:
-1. Verify `git rev-parse --git-dir` exits 0 — abort with a clear error if not.
-2. Read `git remote get-url origin` — abort if no remote is set.
-3. Extract GitHub username from the remote URL and store in `settings.github_username` if not already set.
-
-This ensures the local control plane is always associated with a real repository, and the GitHub username seed is always available without user intervention.
-
-## Health Aggregation
-
-`health_read` computes aggregate health **in the Lambda at read time** from the latest heartbeat and
-recent event items — it does **not** store a precomputed aggregate. Read-time compute keeps the write
-path (heartbeat/event ingest) a single point write, and lets the aggregation rule change without a data
-migration. The read cost is trivial (a small `Query` per project), so the flexibility is free.
+1. Start the Flask application with an empty data directory.
+2. Configure `PROJECTS_DIR` through the Welcome screen.
+3. Discover repositories without modifying them.
+4. Register a repository with and without `METADATA.md`.
+5. Verify Git remote, branch, author, working-tree, and commit data.
+6. Verify operation headers, endpoints, links, MCP declarations, warnings, and evidence are stored.
+7. Rediscover after changing a declaration and confirm drift is visible.
+8. Browse the same records through the Project Explorer and JSON API.
+9. Run the test suite using an isolated temporary SQLite database.
 
 ## Open Questions
 
-- None open.
+- None.
