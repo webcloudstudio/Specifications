@@ -100,7 +100,7 @@ Fixed. Present on all screens. Background: `--mn-nav-bg`.
 | Element | Position | Behavior |
 |---------|----------|----------|
 | **Brand** | Far left | `⚓ Marina` text. Click → `/`. |
-| **Left tabs** | Left group | SETUP — the only top-level tab in Phase 1. |
+| **Left tabs** | Left group | SETUP, PROJECTS, and MONITORING. |
 | **Right area** | Far right | Reserved for future tabs. |
 
 ### Tab Definitions
@@ -108,17 +108,19 @@ Fixed. Present on all screens. Background: `--mn-nav-bg`.
 | Tab Label | Routes | Default Sub-tab |
 |-----------|--------|----------------|
 | `SETUP` | `/setup/*` | `/setup/summary` |
+| `PROJECTS` | `/projects/*` | `/projects` |
+| `MONITORING` | `/monitoring/*` | `/monitoring` |
 
 ### Sub-Navigation Bar — Tab Groups
 
-Shown for the SETUP tab. Background: `--mn-subnav-bg`. Eight tabs always rendered, organised into three visual groups separated by a 1px `var(--mn-border)` vertical divider.
+Shown for the active tab. Background: `--mn-subnav-bg`. Tabs are always rendered for the active section and
+organised into visual groups separated by a 1px `var(--mn-border)` vertical divider.
 
 | Group | Tabs | Purpose |
 |-------|------|---------|
-| 1 | Summary | Overview — standalone landing |
-| 2 | AWS · Terraform | Cloud infrastructure setup |
-| 3 | GitHub · Git Scan · Repositories · Projects | Source control and projects |
-| 4 | Settings | Application settings |
+| SETUP | Summary · AWS · Terraform · GitHub · Git Scan · Repositories · Projects · Settings | Onboarding and integration setup |
+| PROJECTS | Dashboard · Workflow · Configuration · Validation · Maintenance | Registry, organization, standards, and project work |
+| MONITORING | Health · Scheduler · Processes | Command center and operations |
 
 A 1px `var(--mn-muted)` vertical divider is rendered between each group (not before the first, not after the last). Group separators are purely visual — they do not affect tab behaviour, routing, or ARIA roles.
 

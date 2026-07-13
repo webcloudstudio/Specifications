@@ -2,58 +2,54 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260707 V1 |
+| Version | 20260713 V2 |
 | Route | `GET /projects/validation` |
-| Parent | — |
+| Parent | PROJECTS |
 | Main Menu | PROJECTS |
 | Sub Menu | Validation |
-| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance |
+| Tab Order | 1: Dashboard · 2: Workflow · 3: Configuration · 4: Validation · 5: Maintenance |
 | Header Background | `mn-hdr-bg--git` |
-| Header Help Text | Validate project conformance and report results into Marina. |
-| Description | Project validation dashboard for Prototyper conformance checks and Marina publish readiness. |
-| Depends On | UI-GENERAL.md, FEATURE-PROJECT-OPS.md, FEATURE-SCANNER.md |
+| Header Help Text | Apply the selected Marina standard and prepare projects for safe exposure. |
+| Description | Standards and conformance dashboard for all managed projects; it is independent of any particular build tool. |
+| Depends On | UI-GENERAL.md, FEATURE-PROJECT-ORGANIZATION.md, FEATURE-SERVICE-CATALOG.md |
 | Provides | GET /projects/validation |
 
 ## Header KPIs
 
-Left column uses three `mn-hdr-count` blocks:
-
-| Count | Source |
-|-------|--------|
-| Passing | Latest validation state OK |
-| Warning | Latest validation state WARN |
-| Failing | Latest validation state ERROR |
+Passing, Warning, Failing, and Not Evaluated counts for the active filters.
 
 ## Layout
 
-Full-width table. Action bar: `Validate Visible`, `Show failing only`, project search.
+Project table with standard-profile filter, result filter, project/namespace/tag filters, and validation
+actions. Expand a row to show checks and remediation guidance.
 
-## Columns
+## Check Groups
 
-| Column | Source | Interaction |
-|--------|--------|-------------|
-| Project | `projects.display_name` | Link to detail |
-| Conformance | latest validation result | Badge |
-| Checks | validation result summary | Expand row |
-| Last Run | validation event timestamp | Link to process/event detail |
-| Action | — | `Validate` button |
+| Group | Examples |
+|-------|----------|
+| Identity | Required project metadata, repository identity, lifecycle state |
+| Repository | Git repository, upstream, readable path, working-tree policy |
+| Documentation | Required project documentation and callable-surface catalog |
+| Security | Secret/configuration hygiene, allow-listed operations, exposure policy |
+| Operations | Health metadata, logs, schedules, and run configuration |
+| Publication | Capability payload is complete and only approved capabilities are exposed |
 
-## Validation Action
+## Interactions
 
 | Action | Trigger | Result |
 |--------|---------|--------|
-| Validate one | Button click | Queue `project-ops.validate`, refresh row when result is reported |
-| Validate visible | Button click | Queue one validation job per visible project |
-| Expand checks | Row click | Show check list and last output tail |
+| Validate one | Button click | Run selected standard profile and update the row |
+| Validate visible | Button click | Queue one controlled validation run per visible project |
+| Review result | Row expand | Show checks, evidence, output tail, and remediation |
+| Accept exception | Exception action | Record owner, reason, expiry, and affected check |
+| Recheck | Button click | Run the failed checks again |
 
-## Result Groups
+## Guardrails
 
-| Group | Checks |
-|-------|--------|
-| Metadata | Required `METADATA.md` fields, status value, git repo |
-| Repository | Git repo present, upstream remote, clean readable path |
-| Project Standard | AGENTS.md, bin helpers, docs, tests, health metadata |
-| Marina Publish | Catalog payload can be built and signed |
+- A project is Conformed only when all required checks pass or have active approved exceptions.
+- Validation is read-only by default; remediation is a separate explicit operation.
+- The implementation may use any configured standards adapter. Marina does not depend on Prototyper.
 
 ## Open Questions
+
 - None.

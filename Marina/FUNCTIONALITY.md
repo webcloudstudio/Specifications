@@ -5,9 +5,24 @@
 | Version     | 20260603 V2 |
 | Description | One-paragraph index of Marina features by phase; detail lives in the individual FEATURE-*.md files. |
 
-**Description:** High-level index of Marina's features and their build phase. Implementation detail
-(triggers, sequences, reads/writes, tests) lives in the per-feature files, which is what the dependency
-graph and minimal builds target.
+**Description:** High-level index of Marina's product capabilities. The local control plane is the
+primary product; the private AWS plane is an optional integration surface for catalog, reports, queues,
+and sharing.
+
+## Product Capability Ownership
+
+| Capability | Home | Primary screens/features |
+|------------|------|--------------------------|
+| Onboarding and repository acquisition | SETUP | `SCREEN-SETUP-*`, `FEATURE-SCANNER.md` |
+| Project registry and organization | PROJECTS | `SCREEN-PROJECTS-*`, `FEATURE-PROJECT-ORGANIZATION.md` |
+| Standards and conformance | PROJECTS / Validation | `SCREEN-PROJECTS-VALIDATION.md`, service catalog |
+| Capabilities and exposed services | PROJECTS / Detail | `SCREEN-PROJECTS-DETAIL.md`, `FEATURE-SERVICE-CATALOG.md` |
+| Project workflow | PROJECTS / Workflow | `SCREEN-PROJECTS-WORKFLOW.md` |
+| Runs, logs, health, schedules, and events | MONITORING | `SCREEN-MONITORING-*`, batch runner, health check |
+| AWS integration and private publication | Integration features | `FEATURE-CATALOG-*.md`, `FEATURE-REPORT-INGEST.md`, `FEATURE-S3-SHARE.md` |
+
+Project organization is the source of truth for namespace, tags, lifecycle, and workflow assignment.
+Monitoring consumes that registry; it does not create a second project list.
 
 ---
 
@@ -28,6 +43,19 @@ graph and minimal builds target.
   `POST /events`) plus per-project health aggregation (`GET /health/{project}`).
 - **Access Control** (`FEATURE-ACCESS-CONTROL.md`) — Org-identity authorisation that mirrors git-repo
   access; the shared gate every read/invoke path calls.
+
+## Local Control Plane — Product Scope
+
+- **Project Organization** (`FEATURE-PROJECT-ORGANIZATION.md`) — the registry and user-managed grouping,
+  tagging, workflow, and lifecycle model.
+- **Scanner** (`FEATURE-SCANNER.md`) — discovery and reconciliation of repositories obtained during setup
+  or found in the projects directory.
+- **Service Catalog** (`FEATURE-SERVICE-CATALOG.md`) — project capabilities, operations, links, and
+  schedules discovered from conformed project documentation.
+- **Batch Runner** (`FEATURE-BATCH-RUNNER.md`) — controlled local execution with run state and logs.
+- **Health Check** (`FEATURE-HEALTHCHECK.md`) — health polling and state-change events.
+- **Workflow Service** (`FEATURE-WORKFLOW-SERVICE.md`) — project-scoped tickets and transitions; its UI
+  is owned by `SCREEN-PROJECTS-WORKFLOW.md`.
 
 ## Phase 2 — Durable Ingest and Company Share
 

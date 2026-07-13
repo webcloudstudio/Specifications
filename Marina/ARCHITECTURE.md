@@ -55,11 +55,10 @@ SigV4. It is the swap layer that keeps Marina from being welded to AWS.
 Each Lambda is thin (validate → one storage op → respond) per `stack/aws-lambda.md`. Authorisation
 (repo→capability gate) is enforced in a shared module described in `FEATURE-ACCESS-CONTROL.md`.
 
-**Local-plane queue handlers (Plane A).** Some capabilities run only on the box (they touch the
-filesystem) and are dispatched by draining the SQS queue, not by a cloud Lambda. The first is
-`prototyper` — exposing Prototyper's conformance scripts (`ProjectValidate/Update/Initialize/Document`)
-through the AsyncQueue, allow-listed and reported as events (see `FEATURE-PROJECT-OPS.md`). The cloud
-carries only the job request and the result report; no project code runs in the cloud.
+**Local-plane operations (Plane A).** Capabilities that touch the filesystem run on the user's machine
+through the controlled runner. They are discovered from each project's service catalog, allow-listed,
+logged, and reported as events. Marina's standards adapter is replaceable; no external project-builder
+or prototype tool is a product dependency.
 
 ## Directory Layout
 

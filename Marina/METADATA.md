@@ -16,7 +16,6 @@ tags: framework, cloud, control-plane, aws
 namespace: development
 desired_state: on-demand
 specification_directory: ../Specifications
-prototyper_directory: ../Prototyper
 
 ## Agent Instructions
 

@@ -46,7 +46,7 @@ All numeric rows in the results table count from the same domain: **`github_repo
 | **On GitHub** | Repos returned by the GitHub API for this source — the full set Marina knows about |
 | **Downloaded** | Subset of On GitHub that have a matching directory in `PROJECTS_DIR` |
 | **Not Downloaded** | On GitHub minus Downloaded — repos not yet cloned locally |
-| **Conformed** | Subset of Downloaded that pass `bin/ProjectValidate.sh` |
+| **Conformed** | Subset of Downloaded that pass the selected Marina standard profile |
 
 Invariants that must always hold:
 - `Downloaded + Not Downloaded = On GitHub`

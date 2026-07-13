@@ -3,25 +3,25 @@
 | Field       | Value |
 |-------------|-------|
 | Version     | 20260707 V1 |
-| Description | Generic workflow ticket service for project work, screen work, feature work, patches, and acceptance criteria. |
+| Description | Project-scoped workflow ticket service for work, conformance, maintenance, and incidents. |
 | Depends On  | DATABASE.md, FEATURE-SCANNER.md |
 | Provides    | GET /api/workflow/tickets, POST /api/workflow/tickets, PATCH /api/workflow/tickets/{id}, POST /api/workflow/tickets/{id}/transition |
 
-**Description:** Stores and transitions project work tickets through Marina's board, add-ticket, and
-workflow-management screens.
+**Description:** Stores and transitions tickets through the Projects → Workflow board. Tickets belong to
+a project or are explicitly platform-level; workflow is not a separate product area.
 
 ## Trigger
 
-- Workflow Board load.
-- Add Ticket form submit.
+- Projects → Workflow board load.
+- Add-ticket action.
 - Ticket drag/drop transition.
-- Manage screen changes to workflow types and labels.
+- Projects → Configuration changes to workflow types and labels.
 
 ## Sequence
 
-1. Load active projects and workflow types.
+1. Load visible projects and each project's effective workflow configuration.
 2. Create tickets in `idea`.
-3. Enforce configured state transitions.
+3. Enforce project-specific transitions, falling back to the global default.
 4. Persist edits to title, body, priority, tags, type, and state.
 5. Emit event rows for create, edit, and transition actions.
 

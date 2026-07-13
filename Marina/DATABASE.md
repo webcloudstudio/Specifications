@@ -190,6 +190,90 @@ Local project registry. Populated by the startup scan of `PROJECTS_DIR`.
 | `published_at` | TEXT | ISO-8601 time of last publish |
 | `scan_at` | TEXT | ISO-8601 time of last scan |
 
+#### `tags`
+
+User-managed reusable labels. Archived tags remain available to historical records.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `name` | TEXT NOT NULL UNIQUE | Display label |
+| `description` | TEXT | |
+| `color` | TEXT | UI colour token |
+| `is_archived` | INTEGER | 0/1 |
+| `created_at` | TEXT | ISO-8601 |
+| `updated_at` | TEXT | ISO-8601 |
+
+#### `project_tags`
+
+Many-to-many assignment of tags to registered projects.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `project_id` | INTEGER | Project reference |
+| `tag_id` | INTEGER | Tag reference |
+| `created_at` | TEXT | ISO-8601 |
+
+#### `workflow_configs`
+
+Global and project-specific workflow states and transitions.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `project_id` | INTEGER | Empty for global default |
+| `name` | TEXT | Configuration name |
+| `states_json` | TEXT | Ordered state definitions |
+| `transitions_json` | TEXT | Allowed transitions |
+| `updated_at` | TEXT | ISO-8601 |
+
+#### `workflow_tickets`
+
+Project work items shown by Projects → Workflow.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `project_id` | INTEGER | Project reference; nullable for platform work |
+| `title` | TEXT NOT NULL | |
+| `body` | TEXT | |
+| `type` | TEXT | task/feature/maintenance/conformance/incident |
+| `state` | TEXT | State in effective workflow |
+| `priority` | TEXT | low/medium/high/critical |
+| `tags_json` | TEXT | Ticket labels |
+| `created_at` | TEXT | ISO-8601 |
+| `updated_at` | TEXT | ISO-8601 |
+
+#### `op_runs`
+
+Local command runs and their links to projects, tickets, and logs.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | TEXT PRIMARY KEY | Run identifier |
+| `project_id` | INTEGER | Project reference |
+| `operation` | TEXT | Service-catalog operation |
+| `ticket_id` | INTEGER | Optional workflow ticket |
+| `status` | TEXT | STARTING/RUNNING/DONE/ERROR/STOPPED |
+| `started_at` | TEXT | ISO-8601 |
+| `finished_at` | TEXT | ISO-8601 |
+| `log_path` | TEXT | Local log path |
+| `exit_code` | INTEGER | Process exit code |
+
+#### `project_events`
+
+Local operational, organization, validation, and alert history.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | INTEGER PRIMARY KEY | |
+| `project_id` | INTEGER | Project reference |
+| `source` | TEXT | health/run/scheduler/organization/cloud |
+| `severity` | TEXT | INFO/WARN/ERROR/CRITICAL |
+| `message` | TEXT | |
+| `acknowledged_at` | TEXT | ISO-8601, nullable |
+| `created_at` | TEXT | ISO-8601 |
+
 #### `platform_stats`
 
 Aggregate counters updated at startup and after scans.

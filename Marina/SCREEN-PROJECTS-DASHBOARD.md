@@ -2,61 +2,63 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260707 V1 |
-| Route | `GET /projects/dashboard`, `GET /projects` |
-| Parent | — |
+| Version | 20260713 V2 |
+| Route | `GET /projects`, `GET /projects/dashboard` |
+| Parent | PROJECTS |
 | Main Menu | PROJECTS |
 | Sub Menu | Dashboard · default |
-| Tab Order | 1: Dashboard · 2: Configuration · 3: Validation · 4: Maintenance |
+| Tab Order | 1: Dashboard · 2: Workflow · 3: Configuration · 4: Validation · 5: Maintenance |
 | Header Background | `mn-hdr-bg--git` |
-| Header Help Text | Local projects discovered from PROJECTS_DIR and their published Marina state. |
-| Description | Project list with status, conformance, catalog publish state, operations, links, and detail navigation. |
-| Depends On | UI-GENERAL.md, FEATURE-SCANNER.md, FEATURE-SERVICE-CATALOG.md |
-| Provides | GET /projects/dashboard, GET /projects |
+| Header Help Text | Organize, expose, and operate the projects Marina manages. |
+| Description | Primary project registry with namespace/tag filters, lifecycle state, conformance, capabilities, and recent operations. |
+| Depends On | UI-GENERAL.md, FEATURE-PROJECT-ORGANIZATION.md, FEATURE-SCANNER.md, FEATURE-SERVICE-CATALOG.md |
+| Provides | GET /projects, GET /projects/dashboard |
 
 ## Header KPIs
 
-Left column uses three `mn-hdr-count` blocks:
-
-| Count | Source |
-|-------|--------|
-| Total | `projects` row count |
-| Conformed | `projects.is_conformed = 1` |
-| Published | `projects.is_published = 1` |
-
-## Navigation
-
-Top tabs: SETUP · PROJECTS · WORKFLOW · MONITORING. PROJECTS sub-tabs: Dashboard, Configuration, Validation, Maintenance.
+Total visible, Conformed, Running, and Attention Required. Counts follow the active namespace, tag, and
+status filters.
 
 ## Layout
 
-Full-width list. Action bar above table: search, status filter, namespace filter, `Rescan Projects`.
+Action bar, active filter summary, and one row per registered project. The dashboard is the canonical
+entry point for project management; setup screens hand projects to this registry after import.
 
-## Columns
+## Filters
+
+Search name/description, namespace, one or more tags, lifecycle status, conformance state, and source
+(created locally, cloned, or imported). Filters are combinable and persist in the URL.
+
+## Project Table
 
 | Column | Source | Interaction |
 |--------|--------|-------------|
-| Status | `projects.status` | Badge |
-| Namespace | `projects.namespace` | Hidden when empty |
-| Project | `projects.display_name`, `projects.name` | Link to `/projects/{id}` |
-| Conformed | `projects.is_conformed` | Check / warning icon |
-| Published | `projects.is_published`, `projects.published_at` | Check / warning icon |
-| Operations | service catalog | Non-maintenance operation buttons |
-| Links | project metadata links | Open in new tab |
-| Detail | — | Cog icon -> `/projects/{id}` |
+| Project | display name and repository name | Open Detail |
+| Namespace | project organization | Filter |
+| Tags | project tags | Filter or edit from row |
+| Lifecycle | project status | Filter; edit from row |
+| Conformance | current standard result | Open Validation |
+| Capabilities | service catalog count and exposure state | Open Detail |
+| Health | latest local/cloud health | Open Monitoring |
+| Last Activity | latest run/event timestamp | Open activity |
+| Actions | project operations | Run an allow-listed operation |
 
 ## Interactions
 
 | Action | Trigger | Result |
 |--------|---------|--------|
-| Rescan Projects | Button click | POST /api/projects/scan, reload table |
-| Publish Project | Row action | POST /api/catalog/publish/{project}, update Published column |
-| Run operation | Operation button | POST /api/projects/{project}/run/{operation}, show run state |
-| Open detail | Project name or cog | GET /projects/{id} |
+| Rescan | Button click | Reconcile local repositories and refresh organization/catalog projections |
+| Create namespace | Filter/action menu | Add a user-defined namespace and optionally assign visible projects |
+| Manage tags | Tag action | Create, rename, merge, or assign reusable tags |
+| Run operation | Operation action | Start a controlled run and link it to Monitoring |
+| Publish | Project action | Publish the project capability projection when AWS integration is configured |
+| Open project | Name or row | GET `/projects/{id}` |
 
 ## Empty State
 
-If PROJECTS_DIR is unset or empty, show a single `mn-card` explaining that setup is incomplete and link to `/setup/projects`.
+If no projects are registered, explain that projects are added from Setup → Repositories or by placing a
+git repository under `PROJECTS_DIR`, then offer links to those screens.
 
 ## Open Questions
+
 - None.

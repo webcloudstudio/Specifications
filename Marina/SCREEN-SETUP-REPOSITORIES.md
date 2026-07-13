@@ -10,7 +10,7 @@
 | Main Menu | SETUP |
 | Sub Menu | Repositories |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Unified view of GitHub repositories across all source accounts. Shows which repos are on disk and provides one-click cloning. Sync is triggered from the Git Scan tab — no Refresh button here. |
+| Description | Repository acquisition queue across configured sources. Shows which repositories are available, imported, or already managed, and provides one-click clone/import. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/repositories |
 
@@ -73,6 +73,8 @@ No pagination — all rows from `github_repos` are rendered on page load regardl
 | Control | Behavior |
 |---------|----------|
 | Search input | Client-side filter on repo name. Case-insensitive substring. Instant — no server call. |
+| Namespace selector | Choose the namespace assigned to a newly cloned repository. |
+| Tags selector | Assign initial tags to a newly cloned repository. |
 
 ## Repo Table
 
@@ -96,18 +98,20 @@ All buttons are small pill-style (`btn-sm` + `rounded-pill`) with icons. Colors 
 | `is_downloaded` | Action |
 |-----------------|--------|
 | 1 (downloaded) | `↗ Open` — small teal pill. Opens `github_repos.html_url` in a new browser tab. |
-| 0 (not downloaded) | `⬇ Get` — small primary pill. Clones repo to disk. |
+| 0 (not downloaded) | `⬇ Clone` — small primary pill. Clones repo to disk and opens the import confirmation. |
 
-**Download (`⬇ Get`) button states:**
+**Clone (`⬇ Clone`) button states:**
 
 | State | Appearance |
 |-------|-----------|
-| Idle | `⬇ Get` (primary pill, small) |
+| Idle | `⬇ Clone` (primary pill, small) |
 | In progress | spinner only (disabled, same primary colour) |
 | Success | `💾 ↗ Open` — disk icon appears in On Disk column; action button swaps to `↗ Open` teal pill — no page reload |
 | Error | `!` (red pill), tooltip shows clone error |
 
-Download clones to `{PROJECTS_DIR}/{repo.name}` via SSH, falling back to HTTPS when SSH is unavailable.
+Clone uses SSH, falling back to HTTPS when SSH is unavailable. The destination is validated as a new
+child of `PROJECTS_DIR`; Marina never overwrites an existing directory. After cloning, Marina reads or
+creates identity, assigns the selected namespace/tags, scans the repository, and hands it to PROJECTS.
 
 ## Empty State
 
@@ -119,7 +123,7 @@ If the authenticated user has no GitHub repos:
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | GET | `/api/repositories` | — | Table HTML fragment (all source accounts) |
-| POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url` | Row status fragment (On Disk icon + button swap) |
+| POST | `/api/repositories/download` | `repo_name`, `clone_url`, `ssh_url`, `namespace`, `tags[]` | Clone/import status fragment |
 
 `POST /api/repositories/sync` belongs to the Git Scan tab — not called from this screen.
 
@@ -128,7 +132,7 @@ If the authenticated user has no GitHub repos:
 | Reads | Writes |
 |-------|--------|
 | `github_repos` table (all columns) | `github_repos` table on Refresh (upsert via sync) |
-| `projects` table (`name`, `path` for `Open` links) | New project directory + minimal `METADATA.md` on Download |
+| `projects` table (`name`, `path` for `Open` links) | New project directory; `METADATA.md` only when absent |
 | None | `projects` table (after download: registers the new project) |
 | `PROJECTS_DIR` (env) | None |
 
@@ -138,4 +142,4 @@ GitHub API calls are server-side. Results cached in `github_repos` table; Refres
 
 - Should the table support multi-select + bulk download? V1: single download only.
 - Should repos missing from GitHub but present on disk appear in this table? V1: no — disk-only projects appear on the Projects tab.
-- Should Download also publish the project to the Marina DynamoDB catalog immediately? V1: no — publish happens via the Projects tab Conform action.
+- Should Clone support a path outside `PROJECTS_DIR`? V1: no — managed projects remain beneath the configured directory.

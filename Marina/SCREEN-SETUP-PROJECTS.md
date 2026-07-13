@@ -10,7 +10,7 @@
 | Main Menu | SETUP |
 | Sub Menu | Projects |
 | Tab Order | 1: Summary · 2: AWS · 3: Terraform · 4: GitHub · 5: Git Scan · 6: Repositories · 7: Projects · 8: Settings |
-| Description | Sortable dashboard of GitHub-enabled project directories. One row per project showing name, conform status from METADATA.md, lifecycle status, and actions. Namespace filter at top. Rescan reads METADATA.md and git status from disk. |
+| Description | Onboarding handoff view of repositories under `PROJECTS_DIR`; discovery happens here and ongoing organization belongs to PROJECTS. |
 | Depends On | UI-GENERAL.md |
 | Provides | GET /setup/projects |
 
@@ -80,7 +80,8 @@ Toggle pills immediately above the action bar. Derived from distinct `namespace`
 | Control | Behaviour |
 |---------|-----------|
 | Search input (left) | Client-side filter on project name. Instant — no server call. |
-| `↻ Rescan` (right) | `POST /api/scan` — re-reads METADATA.md and git status for every qualifying directory. Returns updated table fragment via HTMX. |
+| `↻ Discover` (right) | `POST /api/projects/scan` — discovers repositories and refreshes the handoff table. |
+| `＋ Add to Projects` | Registers a selected repository without changing its files. |
 
 ## Project Table
 
@@ -96,17 +97,17 @@ One row per qualifying project. Default sort: Name ascending. Each column header
 
 **One row = one line.** No secondary lines, no expanded detail rows. All information fits inline. Row height matches standard Bootstrap table rows.
 
-## Conform Status
+## Discovery Status
 
-Single badge derived from Prototyper validation output. Stored in `projects.conform_status` after each Rescan.
+Single badge derived from Marina's configured standards adapter. Discovery does not run validation.
 
 | Badge | CSS | Meaning |
 |-------|-----|---------|
-| `✅ Conformed` | `mn-badge--ok` (teal) | `bin/ProjectValidate.sh` exits 0 |
-| `⚠ Needs Update` | `mn-badge--warn` (amber) | `bin/ProjectValidate.sh` exits non-0 |
-| `❓ Unknown` | `mn-badge--muted` | No `METADATA.md` in directory |
+| `✅ Managed` | `mn-badge--ok` (teal) | Registered in the Projects registry |
+| `⚠ Discovered` | `mn-badge--warn` (amber) | Found on disk but not registered |
+| `❓ Identity Conflict` | `mn-badge--muted` | Missing or conflicting repository identity |
 
-Rescan re-runs `bin/ProjectValidate.sh` for each project and updates this badge. The badge does not persist between Marina restarts — Rescan is always required on first load.
+Discovery refreshes this badge. Validation and conformance state are owned by Projects → Validation.
 
 ## Lifecycle Status
 
@@ -116,26 +117,25 @@ Status pill from `status:` in METADATA.md. Valid values and colours per UI-GENER
 
 Single button per row. All buttons are small pill-style (`btn-sm` + `rounded-pill`) with icons. Color is retained at reduced opacity in disabled state — do not swap to grey.
 
-### Conform Button
+### Registration Action
 
 | State | Appearance |
 |-------|-----------|
-| Needs conforming | `⚙ Conform` (amber pill, small) |
-| Unknown (no METADATA.md) | `⚙ Conform` (primary pill, small) |
-| Already conformed | `✓` (teal pill icon-only, disabled) |
-| In progress | spinner (same colour, disabled) |
-| Error | `!` (red pill, tooltip shows error) |
+| Discovered | `＋ Add to Projects` (primary pill, small) |
+| Registered | `✓ Managed` (teal pill, disabled) |
+| Identity conflict | `! Resolve` (red pill, opens detail) |
 
-On click: `POST /api/projects/{id}/conform`. Marina invokes `bin/ProjectInitialize.sh {project_path}` (Unknown) or `bin/ProjectUpdate.sh {project_path}` (Needs Update). Returns updated row fragment. No page reload.
+On click: `POST /api/projects/{id}/register`. Marina creates the local registry projection and leaves the
+repository unchanged. Conformance and remediation are performed from Projects → Validation.
 
 ## Rescan Behaviour
 
 `POST /api/scan` does the following for every directory under `PROJECTS_DIR`:
 1. Check for `.git/` and a `github.com` remote — exclude if absent
 2. Read `METADATA.md` fields: `display_name`, `status`, `namespace`, `name`
-3. Run `bin/ProjectValidate.sh {path}` — set `conform_status` from exit code
-4. Read `git status --short` — stored in `projects.git_status` (not displayed in V1)
-5. Upsert `projects` table row
+3. Read available metadata and service-catalog files; no external tool is required for discovery.
+4. Read `git status --short` and remote identity.
+5. Upsert the discovered-project handoff row; registration is explicit.
 
 Rescan replaces the full table contents via HTMX fragment. Header KPI counts update in the same response.
 
@@ -153,7 +153,7 @@ If namespace filter yields no results:
 |--------|------|------|---------|
 | GET | `/setup/projects` | — | Full page |
 | POST | `/api/scan` | — | Updated table HTML fragment + header KPI fragment |
-| POST | `/api/projects/{id}/conform` | — | Updated row fragment |
+| POST | `/api/projects/{id}/register` | — | Updated row fragment |
 
 ## Data Flow
 
@@ -162,10 +162,10 @@ If namespace filter yields no results:
 | `PROJECTS_DIR` filesystem (directory listing) | `projects` table (Rescan) |
 | `METADATA.md` per project | None (Conform writes to project files, not Marina DB) |
 | `git remote get-url origin` per directory | None |
-| `bin/ProjectValidate.sh` exit code | None |
+| Repository identity and standard metadata | None |
 
 ## Open Questions
 
-- Should a `Conform All` bulk action be added? V1: one at a time only.
+- Should a bulk registration action be added? V1: one at a time only.
 - Should git status (clean/dirty/ahead/behind) be shown in the table in V2? V1: read during Rescan but not displayed.
 - Should the table persist sort state in the URL (`?sort=name&dir=asc`)? V1: client-side sort only, no URL persistence.

@@ -2,66 +2,57 @@
 
 | Field | Value |
 |-------|-------|
-| Version | 20260707 V1 |
+| Version | 20260713 V2 |
 | Route | `GET /projects/{id}` |
 | Parent | PROJECTS |
 | Main Menu | PROJECTS |
 | Sub Menu | — |
 | Tab Order | — |
 | Header Background | `mn-hdr-bg--git` |
-| Header Help Text | Project metadata, operations, publish state, and recent activity. |
-| Description | Single-project view with editable metadata, operations, links, validation, and Marina catalog state. |
-| Depends On | UI-GENERAL.md, FEATURE-SCANNER.md, FEATURE-SERVICE-CATALOG.md, FEATURE-PROJECT-OPS.md |
+| Header Help Text | Project identity, organization, capabilities, standards, and operations. |
+| Description | Single-project command surface for the project's metadata, grouping, conformance, exposed capabilities, workflow, and activity. |
+| Depends On | UI-GENERAL.md, FEATURE-PROJECT-ORGANIZATION.md, FEATURE-SERVICE-CATALOG.md, FEATURE-BATCH-RUNNER.md |
 | Provides | GET /projects/{id} |
-
-## Header KPIs
-
-Left column uses status lights:
-
-| Light | Source |
-|-------|--------|
-| Conformed | `projects.is_conformed` |
-| Published | `projects.is_published` |
 
 ## Layout
 
-Two columns. Left: identity and metadata. Right: operations, publish state, recent activity.
+Header identity and health summary, followed by tabs: Overview, Organization, Capabilities, Standards,
+Workflow, Operations, and Activity.
 
-## Project Navigation
+## Overview
 
-Header row provides Previous, Back to Dashboard, and Next buttons. Previous and Next follow the current dashboard sort order.
+Show display name, repository path/remote/branch, lifecycle status, namespace, tags, stack, health,
+conformance state, and last activity. Provide links to the repository, documentation, logs, and
+Monitoring.
 
-## Metadata Sections
+## Capabilities
 
-| Section | Fields |
-|---------|--------|
-| Identity | name, display_name, short_description, status, namespace |
-| Repository | path, git_repo, upstream remote, branch |
-| Runtime | stack, health endpoint, port if present |
-| Marina | is_conformed, is_published, published_at, catalog errors |
-| Discovered Fields | Any `METADATA.md` keys not known to Marina |
+List discovered services, data resources, shared resources, endpoints, links, and operations from the
+service catalog. Each capability shows its source, standard status, and exposure state. Provide explicit
+actions to expose or hide a capability.
 
-Known fields save on blur. Discovered fields are shown with a warning style and remain editable without being discarded.
+## Standards
 
-## Right Panels
+Show the selected standard profile, checks, latest result, exceptions, and validation history. A failed
+check blocks the Conformed state and explains the remediation.
 
-| Panel | Content |
-|-------|---------|
-| Operations | All service catalog operations for the project |
-| Validation | Last validation result and `Validate` action |
-| Publish | `Publish to Catalog` action and last publish time |
-| Recent Activity | Last 20 Marina events for the project |
-| Links | Git repo, local docs, service catalog, logs |
+## Operations and Activity
+
+Operations are allow-listed service-catalog entries with Run, Schedule, and View Log actions. Activity
+combines organization changes, validation results, runs, health changes, publish events, and alerts in
+reverse chronological order.
 
 ## Interactions
 
 | Action | Trigger | Result |
 |--------|---------|--------|
-| Edit metadata | Blur / Enter | POST /api/projects/{id}/metadata |
-| Validate | Button click | Queue `project-ops.validate` |
-| Publish | Button click | POST /api/catalog/publish/{project} |
-| Run operation | Button click | POST /api/projects/{project}/run/{operation} |
-| View log | Run link | GET /monitoring/processes?run_id={run_id} |
+| Edit organization | Field/tag/namespace change | Update project organization and dashboard filters |
+| Validate | Button click | Run the configured standard profile and refresh result |
+| Expose capability | Explicit toggle | Persist visibility after confirmation and audit the change |
+| Run operation | Operation button | Start controlled run; link to `/monitoring/processes?run_id={run_id}` |
+| Create ticket | Workflow action | Create project-scoped ticket |
+| Publish | Catalog action | Publish only explicitly exposed capabilities and project metadata |
 
 ## Open Questions
+
 - None.
